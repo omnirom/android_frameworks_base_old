@@ -62,6 +62,7 @@ void SkiaRecordingCanvas::drawRoundRect(uirenderer::CanvasPropertyPrimitive* lef
         uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,
         uirenderer::CanvasPropertyPrimitive* bottom, uirenderer::CanvasPropertyPrimitive* rx,
         uirenderer::CanvasPropertyPrimitive* ry, uirenderer::CanvasPropertyPaint* paint) {
+    // Destructor of drawables created with allocateDrawable, will be invoked by ~LinearAllocator.
     drawDrawable(mDisplayList->allocateDrawable<AnimatedRoundRect>(left, top, right, bottom,
             rx, ry, paint));
 }
@@ -92,13 +93,14 @@ void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
 void SkiaRecordingCanvas::drawLayer(uirenderer::DeferredLayerUpdater* layerUpdater) {
     if (layerUpdater != nullptr && layerUpdater->backingLayer() != nullptr) {
         uirenderer::Layer* layer = layerUpdater->backingLayer();
+        // Create a ref-counted drawable, which is kept alive by sk_sp in SkLiteDL.
         sk_sp<SkDrawable> drawable(new LayerDrawable(layer));
         drawDrawable(drawable.get());
     }
 }
 
 void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
-    // record the child node
+    // Record the child node. Drawable dtor will be invoked when mChildNodes deque is cleared.
     mDisplayList->mChildNodes.emplace_back(renderNode, asSkCanvas(), true, mCurrentBarrier);
     auto& renderNodeDrawable = mDisplayList->mChildNodes.back();
     drawDrawable(&renderNodeDrawable);
@@ -113,6 +115,7 @@ void SkiaRecordingCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
 
 void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
         uirenderer::GlFunctorLifecycleListener* listener) {
+    // Drawable dtor will be invoked when mChildFunctors deque is cleared.
     mDisplayList->mChildFunctors.emplace_back(functor, listener, asSkCanvas());
     drawDrawable(&mDisplayList->mChildFunctors.back());
 }
@@ -126,22 +129,7 @@ class VectorDrawable : public SkDrawable {
          return SkRect::MakeLargest();
      }
      virtual void onDraw(SkCanvas* canvas) override {
-         Bitmap& hwuiBitmap = mRoot->getBitmapUpdateIfDirty();
-         SkBitmap bitmap;
-         hwuiBitmap.getSkBitmap(&bitmap);
-         SkPaint* paint = mRoot->getPaint();
-         canvas->drawBitmapRect(bitmap, mRoot->mutateProperties()->getBounds(), paint);
-         /*
-          * TODO we can draw this directly but need to address the following...
-          *
-          * 1) Add drawDirect(SkCanvas*) to VectorDrawableRoot
-          * 2) fix VectorDrawable.cpp's Path::draw to not make a temporary path
-          *    so that we don't break caching
-          * 3) figure out how to set path's as volatile during animation
-          * 4) if mRoot->getPaint() != null either promote to layer (during
-          *    animation) or cache in SkSurface (for static content)
-          *
-          */
+         mRoot->draw(canvas);
      }
 
  private:
@@ -168,53 +156,47 @@ inline static const SkPaint* nonAAPaint(const SkPaint* origPaint, SkPaint* tmpPa
 }
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
-    SkBitmap skBitmap;
-    bitmap.getSkBitmap(&skBitmap);
-
-    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(skBitmap, kNever_SkCopyPixelsMode);
-    if (!skBitmap.isImmutable()) {
-        mDisplayList->mMutableImages.push_back(image.get());
-    }
+    sk_sp<SkImage> image = bitmap.makeImage();
     SkPaint tmpPaint;
     mRecorder.drawImage(image, left, top, nonAAPaint(paint, &tmpPaint));
+    // if image->unique() is true, then mRecorder.drawImage failed for some reason. It also means
+    // it is not safe to store a raw SkImage pointer, because the image object will be destroyed
+    // when this function ends.
+    if (!bitmap.isImmutable() && image.get() && !image->unique()) {
+        mDisplayList->mMutableImages.push_back(image.get());
+    }
 }
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, const SkMatrix& matrix,
         const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
     SkAutoCanvasRestore acr(&mRecorder, true);
     concat(matrix);
-    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
-    if (!bitmap.isImmutable()) {
-        mDisplayList->mMutableImages.push_back(image.get());
-    }
+    sk_sp<SkImage> image = hwuiBitmap.makeImage();
     SkPaint tmpPaint;
     mRecorder.drawImage(image, 0, 0, nonAAPaint(paint, &tmpPaint));
+    if (!hwuiBitmap.isImmutable() && image.get() && !image->unique()) {
+        mDisplayList->mMutableImages.push_back(image.get());
+    }
 }
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop,
         float srcRight, float srcBottom, float dstLeft, float dstTop, float dstRight,
         float dstBottom, const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
-    if (!bitmap.isImmutable()) {
-        mDisplayList->mMutableImages.push_back(image.get());
-    }
+    sk_sp<SkImage> image = hwuiBitmap.makeImage();
     SkPaint tmpPaint;
     mRecorder.drawImageRect(image, srcRect, dstRect, nonAAPaint(paint, &tmpPaint));
+    if (!hwuiBitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty()
+            && !dstRect.isEmpty()) {
+        mDisplayList->mMutableImages.push_back(image.get());
+    }
 }
 
 void SkiaRecordingCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
         float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
-
     SkCanvas::Lattice lattice;
-    NinePatchUtils::SetLatticeDivs(&lattice, chunk, bitmap.width(), bitmap.height());
+    NinePatchUtils::SetLatticeDivs(&lattice, chunk, hwuiBitmap.width(), hwuiBitmap.height());
 
     lattice.fFlags = nullptr;
     int numFlags = 0;
@@ -231,13 +213,13 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch
 
     lattice.fBounds = nullptr;
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
-    if (!bitmap.isImmutable()) {
-        mDisplayList->mMutableImages.push_back(image.get());
-    }
+    sk_sp<SkImage> image = hwuiBitmap.makeImage();
 
     SkPaint tmpPaint;
     mRecorder.drawImageLattice(image.get(), lattice, dst, nonAAPaint(paint, &tmpPaint));
+    if (!hwuiBitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
+        mDisplayList->mMutableImages.push_back(image.get());
+    }
 }
 
 }; // namespace skiapipeline

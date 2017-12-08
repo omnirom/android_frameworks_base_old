@@ -39,21 +39,23 @@ public:
     void unpinImages() override;
 
     void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-            LayerUpdateQueue* layerUpdateQueue, bool opaque,
+            LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
             const BakedOpRenderer::LightInfo& lightInfo) override;
 
     bool createOrUpdateLayer(RenderNode* node,
-            const DamageAccumulator& damageAccumulator) override;
+            const DamageAccumulator& damageAccumulator, bool wideColorGamut) override;
 
     void renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
-            const std::vector< sp<RenderNode> >& nodes, bool opaque, const Rect &contentDrawBounds,
-            sk_sp<SkSurface> surface);
+            const std::vector< sp<RenderNode> >& nodes, bool opaque, bool wideColorGamut,
+            const Rect &contentDrawBounds, sk_sp<SkSurface> surface);
+
+    std::vector<VectorDrawableRoot*>* getVectorDrawables() { return &mVectorDrawables; }
 
     static void destroyLayer(RenderNode* node);
 
     static void prepareToDraw(const renderthread::RenderThread& thread, Bitmap* bitmap);
 
-    static void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque);
+    static void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque, bool wideColorGamut);
 
     static bool skpCaptureEnabled() { return false; }
 
@@ -108,8 +110,8 @@ protected:
 
 private:
     void renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
-            const std::vector< sp<RenderNode> >& nodes, bool opaque, const Rect &contentDrawBounds,
-            SkCanvas* canvas);
+            const std::vector< sp<RenderNode> >& nodes, bool opaque, bool wideColorGamut,
+            const Rect &contentDrawBounds, SkCanvas* canvas);
 
     /**
      *  Debugging feature.  Draws a semi-transparent overlay on each pixel, indicating
@@ -119,8 +121,18 @@ private:
             const std::vector< sp<RenderNode> >& nodes, const Rect &contentDrawBounds,
             sk_sp<SkSurface>);
 
+    /**
+     *  Render mVectorDrawables into offscreen buffers.
+     */
+    void renderVectorDrawableCache();
+
     TaskManager mTaskManager;
     std::vector<sk_sp<SkImage>> mPinnedImages;
+
+    /**
+     *  populated by prepareTree with dirty VDs
+     */
+    std::vector<VectorDrawableRoot*> mVectorDrawables;
     static float mLightRadius;
     static uint8_t mAmbientShadowAlpha;
     static uint8_t mSpotShadowAlpha;

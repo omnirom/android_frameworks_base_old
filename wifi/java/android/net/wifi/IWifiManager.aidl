@@ -19,6 +19,7 @@ package android.net.wifi;
 
 import android.content.pm.ParceledListSlice;
 
+import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 
 import android.net.wifi.WifiConfiguration;
@@ -61,6 +62,8 @@ interface IWifiManager
 
     WifiConfiguration getMatchingWifiConfig(in ScanResult scanResult);
 
+    List<OsuProvider> getMatchingOsuProviders(in ScanResult scanResult);
+
     int addOrUpdateNetwork(in WifiConfiguration config);
 
     boolean addOrUpdatePasspointConfiguration(in PasspointConfiguration config);
@@ -91,7 +94,7 @@ interface IWifiManager
 
     void reassociate();
 
-    WifiInfo getConnectionInfo();
+    WifiInfo getConnectionInfo(String callingPackage);
 
     boolean setWifiEnabled(String packageName, boolean enable);
 

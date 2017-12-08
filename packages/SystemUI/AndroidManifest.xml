@@ -22,6 +22,11 @@
         android:sharedUserId="android.uid.systemui"
         coreApp="true">
 
+    <!-- SysUI must be the one to define this permission; its name is
+         referenced by the core OS. -->
+    <permission android:name="android.permission.systemui.IDENTITY"
+        android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -103,6 +108,7 @@
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
     <!-- Keyguard -->
+    <uses-permission android:name="com.android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
     <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -196,6 +202,9 @@
     <!-- OmniJaws -->
     <uses-permission android:name="org.omnirom.omnijaws.READ_WEATHER" />
 
+    <!-- to change themes - light or dark -->
+    <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
@@ -206,7 +215,7 @@
         android:icon="@drawable/icon"
         android:process="com.android.systemui"
         android:supportsRtl="true"
-        android:theme="@style/systemui_theme"
+        android:theme="@style/Theme.SystemUI"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
@@ -271,24 +280,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.category"
-                    android:value="com.android.settings.category.system" />
+                    android:value="com.android.settings.category.ia.system" />
             <meta-data android:name="com.android.settings.summary"
                        android:resource="@string/summary_empty"/>
         </activity>
-
-        <activity-alias android:name=".tuner.TunerSettingLink"
-                        android:targetActivity=".tuner.TunerActivity"
-                        android:enabled="true"
-                        android:process=":tuner">
-            <intent-filter android:priority="1">
-                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data android:name="com.android.settings.category"
-                       android:value="com.android.settings.category.ia.system" />
-            <meta-data android:name="com.android.settings.summary"
-                       android:resource="@string/summary_empty"/>
-        </activity-alias>
 
         <activity-alias android:name=".DemoMode"
                   android:targetActivity=".tuner.TunerActivity"
@@ -333,15 +328,20 @@
             android:exported="false">
         </activity>
 
+        <!-- Springboard for launching the share activity -->
+        <receiver android:name=".screenshot.GlobalScreenshot$ShareReceiver"
+            android:process=":screenshot"
+            android:exported="false" />
+
         <!-- Callback for dismissing screenshot notification after a share target is picked -->
         <receiver android:name=".screenshot.GlobalScreenshot$TargetChosenReceiver"
-                  android:process=":screenshot"
-                  android:exported="false" />
+            android:process=":screenshot"
+            android:exported="false" />
 
         <!-- Callback for deleting screenshot notification -->
         <receiver android:name=".screenshot.GlobalScreenshot$DeleteScreenshotReceiver"
-                  android:process=":screenshot"
-                  android:exported="false" />
+            android:process=":screenshot"
+            android:exported="false" />
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"
@@ -415,7 +415,8 @@
         <!-- started from PipUI -->
         <activity
             android:name=".pip.tv.PipMenuActivity"
-            android:exported="true"
+            android:permission="com.android.systemui.permission.SELF"
+            android:exported="false"
             android:theme="@style/PipTheme"
             android:launchMode="singleTop"
             android:taskAffinity=""
@@ -424,24 +425,10 @@
             android:supportsPictureInPicture="true"
             androidprv:alwaysFocusable="true"
             android:excludeFromRecents="true" />
-        <activity
-            android:name=".pip.tv.PipOverlayActivity"
-            android:exported="true"
-            android:theme="@style/PipTheme"
-            android:taskAffinity=""
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|locale|layoutDirection"
-            android:resizeableActivity="true"
-            android:supportsPictureInPicture="true"
-            android:excludeFromRecents="true" />
-        <activity
-            android:name=".pip.tv.PipOnboardingActivity"
-            android:exported="true"
-            android:theme="@style/PipTheme"
-            android:launchMode="singleTop"
-            android:excludeFromRecents="true" />
 
         <activity
             android:name=".pip.phone.PipMenuActivity"
+            android:permission="com.android.systemui.permission.SELF"
             android:theme="@style/PipPhoneOverlayControlTheme"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
             android:excludeFromRecents="true"
@@ -459,7 +446,6 @@
             android:exported="true"
             android:label="@string/dessert_case"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
-            android:hardwareAccelerated="true"
             android:launchMode="singleInstance"
             android:screenOrientation="locked"
             android:process=":sweetsweetdesserts"
@@ -475,7 +461,6 @@
                   android:exported="true"
                   android:icon="@drawable/icon"
                   android:label="@string/mland"
-                  android:hardwareAccelerated="true"
                   android:launchMode="singleInstance"
                   android:screenOrientation="locked"
                   android:process=":sweetsweetdesserts"

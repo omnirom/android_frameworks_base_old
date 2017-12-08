@@ -19,10 +19,12 @@ import static android.app.Notification.GROUP_ALERT_ALL;
 import static android.app.Notification.GROUP_ALERT_CHILDREN;
 import static android.app.Notification.GROUP_ALERT_SUMMARY;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.IMPORTANCE_MIN;
 
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -56,7 +58,13 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Slog;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.IAccessibilityManager;
+import android.view.accessibility.IAccessibilityManagerClient;
 
+import com.android.internal.util.IntPair;
 import com.android.server.lights.Light;
 
 import org.junit.Before;
@@ -66,6 +74,8 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -75,7 +85,12 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
     @Mock Vibrator mVibrator;
     @Mock android.media.IRingtonePlayer mRingtonePlayer;
     @Mock Light mLight;
-    @Mock Handler mHandler;
+    @Mock
+    NotificationManagerService.WorkerHandler mHandler;
+    @Mock
+    NotificationUsageStats mUsageStats;
+    @Mock
+    IAccessibilityManager mAccessibilityService;
 
     private NotificationManagerService mService;
     private String mPkg = "com.android.server.notification";
@@ -107,15 +122,25 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
     private static final int MAX_VIBRATION_DELAY = 1000;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         when(mAudioManager.isAudioFocusExclusive()).thenReturn(false);
         when(mAudioManager.getRingtonePlayer()).thenReturn(mRingtonePlayer);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
+        when(mUsageStats.isAlertRateLimited(any())).thenReturn(false);
 
-        mService = new NotificationManagerService(getContext());
+        long serviceReturnValue = IntPair.of(
+                AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED,
+                AccessibilityEvent.TYPES_ALL_MASK);
+        when(mAccessibilityService.addClient(any(), anyInt())).thenReturn(serviceReturnValue);
+        AccessibilityManager accessibilityManager =
+                new AccessibilityManager(Handler.getMain(), mAccessibilityService, 0);
+        verify(mAccessibilityService).addClient(any(IAccessibilityManagerClient.class), anyInt());
+        assertTrue(accessibilityManager.isEnabled());
+
+        mService = spy(new NotificationManagerService(getContext()));
         mService.setAudioManager(mAudioManager);
         mService.setVibrator(mVibrator);
         mService.setSystemReady(true);
@@ -123,6 +148,8 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
         mService.setLights(mLight);
         mService.setScreenOn(false);
         mService.setFallbackVibrationPattern(FALLBACK_VIBRATION_PATTERN);
+        mService.setUsageStats(mUsageStats);
+        mService.setAccessibilityManager(accessibilityManager);
     }
 
     //
@@ -374,6 +401,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         verifyBeepLooped();
         verifyNeverVibrate();
+        verify(mAccessibilityService, times(1)).sendAccessibilityEvent(any(), anyInt());
     }
 
     @Test
@@ -428,6 +456,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
         r.isUpdate = true;
         mService.buzzBeepBlinkLocked(r);
         verifyBeepLooped();
+        verify(mAccessibilityService, times(2)).sendAccessibilityEvent(any(), anyInt());
     }
 
     @Test
@@ -443,6 +472,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
         // update should not beep
         mService.buzzBeepBlinkLocked(s);
         verifyNeverBeep();
+        verify(mAccessibilityService, times(1)).sendAccessibilityEvent(any(), anyInt());
     }
 
     @Test
@@ -530,12 +560,28 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
     }
 
     @Test
+    public void testInCallNotification() throws Exception {
+        NotificationRecord r = getBeepyNotification();
+
+        // set up internal state
+        mService.buzzBeepBlinkLocked(r);
+        Mockito.reset(mRingtonePlayer);
+
+        mService.mInCall = true;
+        mService.buzzBeepBlinkLocked(r);
+
+        verify(mService, times(1)).playInCallNotification();
+        verifyNeverBeep(); // doesn't play normal beep
+    }
+
+    @Test
     public void testNoDemoteSoundToVibrateIfVibrateGiven() throws Exception {
         NotificationRecord r = getBuzzyBeepyNotification();
         assertTrue(r.getSound() != null);
 
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -546,6 +592,22 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
     }
 
     @Test
+    public void testNoDemoteSoundToVibrateIfNonNotificationStream() throws Exception {
+        NotificationRecord r = getBeepyNotification();
+        assertTrue(r.getSound() != null);
+        assertNull(r.getVibration());
+
+        // the phone is quiet
+        when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.getStreamVolume(anyInt())).thenReturn(1);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyNeverVibrate();
+        verifyBeepLooped();
+    }
+
+    @Test
     public void testDemoteSoundToVibrate() throws Exception {
         NotificationRecord r = getBeepyNotification();
         assertTrue(r.getSound() != null);
@@ -553,6 +615,7 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
 
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -802,8 +865,73 @@ public class BuzzBeepBlinkTest extends NotificationTestCase {
         mService.addNotification(r);
 
         mService.buzzBeepBlinkLocked(r);
-
         verifyNeverBeep();
+    }
+
+    @Test
+    public void testRepeatedSoundOverLimitMuted() throws Exception {
+        when(mUsageStats.isAlertRateLimited(any())).thenReturn(true);
+
+        NotificationRecord r = getBeepyNotification();
+
+        mService.buzzBeepBlinkLocked(r);
+        verifyNeverBeep();
+    }
+
+    @Test
+    public void testPostingSilentNotificationDoesNotAffectRateLimiting() throws Exception {
+        NotificationRecord r = getQuietNotification();
+        mService.buzzBeepBlinkLocked(r);
+
+        verify(mUsageStats, never()).isAlertRateLimited(any());
+    }
+
+    @Test
+    public void testPostingGroupSuppressedDoesNotAffectRateLimiting() throws Exception {
+        NotificationRecord summary = getBeepyNotificationRecord("a", GROUP_ALERT_CHILDREN);
+        summary.getNotification().flags |= Notification.FLAG_GROUP_SUMMARY;
+
+        mService.buzzBeepBlinkLocked(summary);
+        verify(mUsageStats, never()).isAlertRateLimited(any());
+    }
+
+    @Test
+    public void testCrossUserSoundMuted() throws Exception {
+        final Notification n = new Builder(getContext(), "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon).build();
+
+        int userId = mUser.getIdentifier() + 1;
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 0, mTag, mUid,
+                mPid, n, UserHandle.of(userId), null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn,
+                new NotificationChannel("test", "test", IMPORTANCE_HIGH));
+
+        mService.buzzBeepBlinkLocked(r);
+        verifyNeverBeep();
+    }
+
+    @Test
+    public void testA11yMinInitialPost() throws Exception {
+        NotificationRecord r = getQuietNotification();
+        r.setImportance(IMPORTANCE_MIN, "");
+        mService.buzzBeepBlinkLocked(r);
+        verify(mAccessibilityService, never()).sendAccessibilityEvent(any(), anyInt());
+    }
+
+    @Test
+    public void testA11yQuietInitialPost() throws Exception {
+        NotificationRecord r = getQuietNotification();
+        mService.buzzBeepBlinkLocked(r);
+        verify(mAccessibilityService, times(1)).sendAccessibilityEvent(any(), anyInt());
+    }
+
+    @Test
+    public void testA11yQuietUpdate() throws Exception {
+        NotificationRecord r = getQuietNotification();
+        mService.buzzBeepBlinkLocked(r);
+        r.isUpdate = true;
+        mService.buzzBeepBlinkLocked(r);
+        verify(mAccessibilityService, times(1)).sendAccessibilityEvent(any(), anyInt());
     }
 
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {

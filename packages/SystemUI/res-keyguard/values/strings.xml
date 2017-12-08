@@ -99,12 +99,12 @@
     <string name="keyguard_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
 
     <!-- Time format strings for fall-back clock widget -->
-    <string name="keyguard_widget_12_hours_format" translatable="false">h\uee01mm</string>
+    <string name="keyguard_widget_12_hours_format" translatable="false">h:mm</string>
     <!-- Time format strings for fall-back clock widget -->
-    <string name="keyguard_widget_24_hours_format" translatable="false">kk\uee01mm</string>
+    <string name="keyguard_widget_24_hours_format" translatable="false">kk:mm</string>
     <!-- The character used in keyguard_widget_12_hours_format and keyguard_widget_24_hours_format
          to represent a ":". -->
-    <string name="keyguard_fancy_colon" translatable="false">\uee01</string>
+    <string name="keyguard_fancy_colon" translatable="false"></string>
 
     <!-- Accessibility description of the PIN password view. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pin_area">PIN area</string>
@@ -119,6 +119,8 @@
     <!-- KeyguardPinView - accessibility support --><skip />
     <!-- Description of the Delete button in a KeyboardView. [CHAR LIMIT=NONE] -->
     <string name="keyboardview_keycode_delete">Delete</string>
+    <!-- Description of the button used to disable current carrier when the device supported embedded SIM. [CHAR LIMIT=30] -->
+    <string name="disable_carrier_button_text">Disable eSIM</string>
     <!-- Description of the Enter button in a KeyboardView. [CHAR LIMIT=NONE] -->
     <string name="keyboardview_keycode_enter">Enter</string>
 
@@ -135,9 +137,11 @@
     <!-- Instructions for using the pattern unlock screen -->
     <string name="kg_pattern_instructions">Draw your pattern</string>
     <!-- Instructions for using the SIM PIN unlock screen -->
-    <string name="kg_sim_pin_instructions">Enter SIM PIN</string>
+    <string name="kg_sim_pin_instructions">Enter SIM PIN.</string>
     <!-- Instructions for using the SIM PIN unlock screen when there's more than one SIM -->
-    <string name="kg_sim_pin_instructions_multi">Enter SIM PIN for \"<xliff:g id="carrier" example="CARD 1">%1$s</xliff:g>\"</string>
+    <string name="kg_sim_pin_instructions_multi">Enter SIM PIN for \"<xliff:g id="carrier" example="CARD 1">%1$s</xliff:g>\".</string>
+    <!-- Instructions for disabling eSIM carrier to unlock the phone with embedded SIM -->
+    <string name="kg_sim_lock_instructions_esim">Disable eSIM to use device without mobile service.</string>
     <!-- Instructions for using the PIN unlock screen -->
     <string name="kg_pin_instructions">Enter PIN</string>
     <!-- Instructions for using the password unlock screen -->

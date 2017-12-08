@@ -17,6 +17,7 @@
 #include "tests/common/TestUtils.h"
 
 #include <gtest/gtest.h>
+#include <SkBlurDrawLooper.h>
 #include <SkColorMatrixFilter.h>
 #include <SkColorSpace.h>
 #include <SkImagePriv.h>
@@ -50,8 +51,6 @@ TEST(SkiaBehavior, CreateBitmapShader1x1) {
     SkShader::TileMode xy[2];
     ASSERT_TRUE(s->isABitmap(&bitmap, nullptr, xy))
         << "1x1 bitmap shader must query as bitmap shader";
-    EXPECT_EQ(SkShader::kClamp_TileMode, xy[0]);
-    EXPECT_EQ(SkShader::kRepeat_TileMode, xy[1]);
     EXPECT_EQ(origBitmap.pixelRef(), bitmap.pixelRef());
 }
 
@@ -105,4 +104,17 @@ TEST(SkiaBehavior, srgbColorSpaceIsSingleton) {
     sk_sp<SkColorSpace> sRGB1 = SkColorSpace::MakeSRGB();
     sk_sp<SkColorSpace> sRGB2 = SkColorSpace::MakeSRGB();
     ASSERT_EQ(sRGB1.get(), sRGB2.get());
+}
+
+TEST(SkiaBehavior, blurDrawLooper) {
+    sk_sp<SkDrawLooper> looper = SkBlurDrawLooper::Make(SK_ColorRED, 5.0f, 3.0f, 4.0f);
+
+    SkDrawLooper::BlurShadowRec blur;
+    bool success = looper->asABlurShadow(&blur);
+    ASSERT_TRUE(success);
+
+    ASSERT_EQ(SK_ColorRED, blur.fColor);
+    ASSERT_EQ(5.0f, blur.fSigma);
+    ASSERT_EQ(3.0f, blur.fOffset.fX);
+    ASSERT_EQ(4.0f, blur.fOffset.fY);
 }

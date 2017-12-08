@@ -16,14 +16,23 @@
 
 package com.android.server.am;
 
+import static android.view.WindowManagerPolicy.NAV_BAR_BOTTOM;
+import static android.view.WindowManagerPolicy.NAV_BAR_LEFT;
+import static android.view.WindowManagerPolicy.NAV_BAR_RIGHT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import android.view.Display;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 
@@ -41,6 +50,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     private final ComponentName testActivityComponent =
             ComponentName.unflattenFromString("com.foo/.BarActivity");
+    private final ComponentName secondaryActivityComponent =
+            ComponentName.unflattenFromString("com.foo/.BarActivity2");
     @Test
     public void testStackCleanupOnClearingTask() throws Exception {
         final ActivityManagerService service = createActivityManagerService();
@@ -93,5 +104,78 @@ public class ActivityRecordTests extends ActivityTestsBase {
         }
 
         return -1;
+    }
+
+    @Test
+    public void testPositionLimitedAspectRatioNavBarBottom() throws Exception {
+        verifyPositionWithLimitedAspectRatio(NAV_BAR_BOTTOM, new Rect(0, 0, 1000, 2000), 1.5f,
+                new Rect(0, 0, 1000, 1500));
+    }
+
+    @Test
+    public void testPositionLimitedAspectRatioNavBarLeft() throws Exception {
+        verifyPositionWithLimitedAspectRatio(NAV_BAR_LEFT, new Rect(0, 0, 2000, 1000), 1.5f,
+                new Rect(500, 0, 2000, 1000));
+    }
+
+    @Test
+    public void testPositionLimitedAspectRatioNavBarRight() throws Exception {
+        verifyPositionWithLimitedAspectRatio(NAV_BAR_RIGHT, new Rect(0, 0, 2000, 1000), 1.5f,
+                new Rect(0, 0, 1500, 1000));
+    }
+
+    private void verifyPositionWithLimitedAspectRatio(int navBarPosition, Rect taskBounds,
+            float aspectRatio, Rect expectedActivityBounds) {
+        final ActivityManagerService service = createActivityManagerService();
+        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
+        final ActivityRecord record = createActivity(service, testActivityComponent, task);
+
+        // Verify with nav bar on the right.
+        when(service.mWindowManager.getNavBarPosition()).thenReturn(navBarPosition);
+        task.getConfiguration().setAppBounds(taskBounds);
+        record.info.maxAspectRatio = aspectRatio;
+        record.ensureActivityConfigurationLocked(0 /* globalChanges */, false /* preserveWindow */);
+        assertEquals(expectedActivityBounds, record.getBounds());
+    }
+
+
+    @Test
+    public void testCanBeLaunchedOnDisplay() throws Exception {
+        testSupportsLaunchingResizeable(false /*taskPresent*/, true /*taskResizeable*/,
+                true /*activityResizeable*/, true /*expected*/);
+
+        testSupportsLaunchingResizeable(false /*taskPresent*/, true /*taskResizeable*/,
+                false /*activityResizeable*/, false /*expected*/);
+
+        testSupportsLaunchingResizeable(true /*taskPresent*/, false /*taskResizeable*/,
+                true /*activityResizeable*/, false /*expected*/);
+
+        testSupportsLaunchingResizeable(true /*taskPresent*/, true /*taskResizeable*/,
+                false /*activityResizeable*/, true /*expected*/);
+    }
+
+    private void testSupportsLaunchingResizeable(boolean taskPresent, boolean taskResizeable,
+            boolean activityResizeable, boolean expected) {
+        final ActivityManagerService service = createActivityManagerService();
+        service.mSupportsMultiWindow = true;
+
+
+        final TaskRecord task = taskPresent
+                ? createTask(service, testActivityComponent, TEST_STACK_ID) : null;
+
+        if (task != null) {
+            task.setResizeMode(taskResizeable ? ActivityInfo.RESIZE_MODE_RESIZEABLE
+                    : ActivityInfo.RESIZE_MODE_UNRESIZEABLE);
+        }
+
+        final ActivityRecord record = createActivity(service, secondaryActivityComponent,
+                task);
+        record.info.resizeMode = activityResizeable ? ActivityInfo.RESIZE_MODE_RESIZEABLE
+                : ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+
+        record.canBeLaunchedOnDisplay(Display.DEFAULT_DISPLAY);
+
+        assertEquals(((TestActivityStackSupervisor) service.mStackSupervisor)
+                .getLastResizeableFromCanPlaceEntityOnDisplay(), expected);
     }
 }

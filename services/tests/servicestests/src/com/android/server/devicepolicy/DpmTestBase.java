@@ -16,6 +16,14 @@
 
 package com.android.server.devicepolicy;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,20 +36,14 @@ import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
 import android.test.AndroidTestCase;
 
-import java.io.File;
 import java.util.List;
-
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
 
 public abstract class DpmTestBase extends AndroidTestCase {
     public static final String TAG = "DpmTest";
 
     protected Context mRealTestContext;
     protected DpmMockContext mMockContext;
-
-    public File dataDir;
+    private MockSystemServices mServices;
 
     public ComponentName admin1;
     public ComponentName admin2;
@@ -55,8 +57,8 @@ public abstract class DpmTestBase extends AndroidTestCase {
 
         mRealTestContext = super.getContext();
 
-        mMockContext = new DpmMockContext(
-                mRealTestContext, new File(mRealTestContext.getCacheDir(), "test-data"));
+        mServices = new MockSystemServices(mRealTestContext, "test-data");
+        mMockContext = new DpmMockContext(mServices, mRealTestContext);
 
         admin1 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin1.class);
         admin2 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin2.class);
@@ -64,6 +66,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
         adminAnotherPackage = new ComponentName(DpmMockContext.ANOTHER_PACKAGE_NAME,
                 "whatever.random.class");
         adminNoPerm = new ComponentName(mRealTestContext, DummyDeviceAdmins.AdminNoPerm.class);
+        mockSystemPropertiesToReturnDefault();
     }
 
     @Override
@@ -71,12 +74,16 @@ public abstract class DpmTestBase extends AndroidTestCase {
         return mMockContext;
     }
 
+    public MockSystemServices getServices() {
+        return mServices;
+    }
+
     protected interface DpmRunnable {
-        public void run(DevicePolicyManager dpm) throws Exception;
+        void run(DevicePolicyManager dpm) throws Exception;
     }
 
     /**
-     * Simulate an RPC from {@param caller} to the service context ({@link #mContext}).
+     * Simulate an RPC from {@param caller} to the service context ({@link #mMockContext}).
      *
      * The caller sees its own context. The server also sees its own separate context, with the
      * appropriate calling UID and calling permissions fields already set up.
@@ -85,12 +92,15 @@ public abstract class DpmTestBase extends AndroidTestCase {
             DpmRunnable action) {
         final DpmMockContext serviceContext = mMockContext;
 
+        // Save calling UID and PID before clearing identity so we don't run into aliasing issues.
+        final int callingUid = caller.binder.callingUid;
+        final int callingPid = caller.binder.callingPid;
+
         final long origId = serviceContext.binder.clearCallingIdentity();
         try {
-            serviceContext.binder.callingUid = caller.binder.callingUid;
-            serviceContext.binder.callingPid = caller.binder.callingPid;
-            serviceContext.binder.callingPermissions.put(caller.binder.callingUid,
-                    caller.permissions);
+            serviceContext.binder.callingUid = callingUid;
+            serviceContext.binder.callingPid = callingPid;
+            serviceContext.binder.callingPermissions.put(callingUid, caller.permissions);
             action.run(new DevicePolicyManagerTestable(caller, dpms));
         } catch (Exception e) {
             throw new AssertionError(e);
@@ -99,7 +109,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
         }
     }
 
-    protected void markPackageAsInstalled(String packageName, ApplicationInfo ai, int userId)
+    private void markPackageAsInstalled(String packageName, ApplicationInfo ai, int userId)
             throws Exception {
         final PackageInfo pi = DpmTestUtils.cloneParcelable(
                 mRealTestContext.getPackageManager().getPackageInfo(
@@ -110,12 +120,12 @@ public abstract class DpmTestBase extends AndroidTestCase {
             pi.applicationInfo = ai;
         }
 
-        doReturn(pi).when(mMockContext.ipackageManager).getPackageInfo(
+        doReturn(pi).when(mServices.ipackageManager).getPackageInfo(
                 eq(packageName),
                 eq(0),
                 eq(userId));
 
-        doReturn(ai.uid).when(mMockContext.packageManager).getPackageUidAsUser(
+        doReturn(ai.uid).when(mServices.packageManager).getPackageUidAsUser(
                 eq(packageName),
                 eq(userId));
     }
@@ -151,7 +161,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
      * @param copyFromAdmin package information for {@code admin} will be built based on this
      *    component's information.
      */
-    protected void setUpPackageManagerForFakeAdmin(ComponentName admin, int packageUid,
+    private void setUpPackageManagerForFakeAdmin(ComponentName admin, int packageUid,
             Integer enabledSetting, Integer appTargetSdk, ComponentName copyFromAdmin)
             throws Exception {
 
@@ -171,7 +181,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
         ai.packageName = admin.getPackageName();
         ai.name = admin.getClassName();
 
-        doReturn(ai).when(mMockContext.ipackageManager).getApplicationInfo(
+        doReturn(ai).when(mServices.ipackageManager).getApplicationInfo(
                 eq(admin.getPackageName()),
                 anyInt(),
                 eq(UserHandle.getUserId(packageUid)));
@@ -198,14 +208,35 @@ public abstract class DpmTestBase extends AndroidTestCase {
 
         // Note we don't set up queryBroadcastReceivers.  We don't use it in DPMS.
 
-        doReturn(aci).when(mMockContext.ipackageManager).getReceiverInfo(
+        doReturn(aci).when(mServices.ipackageManager).getReceiverInfo(
                 eq(admin),
                 anyInt(),
                 eq(UserHandle.getUserId(packageUid)));
 
-        doReturn(new String[] {admin.getPackageName()}).when(mMockContext.ipackageManager)
+        doReturn(new String[] {admin.getPackageName()}).when(mServices.ipackageManager)
             .getPackagesForUid(eq(packageUid));
         // Set up getPackageInfo().
         markPackageAsInstalled(admin.getPackageName(), ai, UserHandle.getUserId(packageUid));
+    }
+
+    /**
+     * By default, system properties are mocked to return default value. Override the mock if you
+     * want a specific value.
+     */
+    private void mockSystemPropertiesToReturnDefault() {
+        when(getServices().systemProperties.get(
+                anyString(), anyString())).thenAnswer(
+                invocation -> invocation.getArguments()[1]
+        );
+
+        when(getServices().systemProperties.getBoolean(
+                anyString(), anyBoolean())).thenAnswer(
+                invocation -> invocation.getArguments()[1]
+        );
+
+        when(getServices().systemProperties.getLong(
+                anyString(), anyLong())).thenAnswer(
+                invocation -> invocation.getArguments()[1]
+        );
     }
 }

@@ -14,6 +14,7 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.content.Context;
 import android.testing.LeakCheck;
 import android.testing.LeakCheck.Tracker;
 
@@ -75,6 +76,16 @@ public class FakeExtensionController implements ExtensionController {
         }
 
         @Override
+        public ExtensionBuilder<T> withUiMode(int mode, Supplier<T> def) {
+            return null;
+        }
+
+        @Override
+        public ExtensionBuilder<T> withFeature(String feature, Supplier<T> def) {
+            return null;
+        }
+
+        @Override
         public Extension build() {
             return new FakeExtension(mAllocation);
         }
@@ -94,11 +105,24 @@ public class FakeExtensionController implements ExtensionController {
         }
 
         @Override
+        public void clearItem(boolean isDestroyed) {
+
+        }
+
+        @Override
+        public Context getContext() {
+            return null;
+        }
+
+        @Override
         public void destroy() {
             mTracker.getLeakInfo(mAllocation).clearAllocations();
         }
 
         @Override
+        public void addCallback(Consumer<T> callback) {
+        }
+
         public T reload() {
             return null;
         }

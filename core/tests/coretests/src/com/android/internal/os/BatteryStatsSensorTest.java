@@ -18,6 +18,7 @@ package com.android.internal.os;
 import android.app.ActivityManager;
 import android.os.BatteryStats;
 import android.support.test.filters.SmallTest;
+import android.view.Display;
 
 import junit.framework.TestCase;
 
@@ -74,7 +75,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Plugged-in (battery=off, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(false, false, curr, curr);
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, curr, curr);
 
 
         // Start sensor (battery=off, sensor=on)
@@ -110,7 +111,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Unplugged (battery=on, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(true, false, curr, curr);
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr);
 
         // Start sensor (battery=on, sensor=on)
         curr = 1000 * (clocks.realtime = clocks.uptime = 200);
@@ -145,7 +146,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // On battery (battery=on, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(true, false, curr, curr);
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
 
         // Start sensor (battery=on, sensor=on)
@@ -154,7 +155,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Off battery (battery=off, sensor=on)
         curr = 1000 * (clocks.realtime = clocks.uptime = 305);
-        bi.updateTimeBasesLocked(false, false, curr, curr);
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, curr, curr);
 
         // Stop sensor while off battery (battery=off, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 409);
@@ -191,7 +192,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Plugged-in (battery=off, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(false, false, curr, curr);
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, curr, curr);
 
         // Start sensor (battery=off, sensor=on)
         curr = 1000 * (clocks.realtime = clocks.uptime = 200);
@@ -209,7 +210,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Unplug (battery=on, sensor=on)
         curr = 1000 * (clocks.realtime = clocks.uptime = 305);
-        bi.updateTimeBasesLocked(true, false, curr, curr);
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr);
 
         //Test situation
         curr = 1000 * (clocks.realtime = clocks.uptime = 410);
@@ -243,7 +244,7 @@ public class BatteryStatsSensorTest extends TestCase {
         long curr = 0; // realtime in us
         // Entire test is on-battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 1000);
-        bi.updateTimeBasesLocked(true, false, curr, curr);
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr);
 
         // See below for a diagram of events.
 
@@ -400,7 +401,7 @@ public class BatteryStatsSensorTest extends TestCase {
         assertNotNull(sensor.getSensorBackgroundTime());
 
         // Reset the stats. Since the sensor is still running, we should still see the timer
-        bi.getUidStatsLocked(UID).reset();
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
 
         sensor = uid.getSensorStats().get(SENSOR_ID);
         assertNotNull(sensor);
@@ -410,9 +411,111 @@ public class BatteryStatsSensorTest extends TestCase {
         bi.noteStopSensorLocked(UID, SENSOR_ID);
 
         // Now the sensor timer has stopped so this reset should also take out the sensor.
-        bi.getUidStatsLocked(UID).reset();
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
 
         sensor = uid.getSensorStats().get(SENSOR_ID);
         assertNull(sensor);
+    }
+
+    @SmallTest
+    public void testSensorResetTimes() throws Exception {
+        final MockClocks clocks = new MockClocks();
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        final int which = BatteryStats.STATS_SINCE_CHARGED;
+        bi.mForceOnBattery = true;
+        clocks.realtime = 100; // in ms
+        clocks.uptime = 100; // in ms
+
+        // TimeBases are on for some time.
+        BatteryStatsImpl.TimeBase timeBase = bi.getOnBatteryTimeBase();
+        BatteryStatsImpl.TimeBase bgTimeBase = bi.getOnBatteryBackgroundTimeBase(UID);
+        timeBase.setRunning(true, clocks.uptime * 1000, clocks.realtime * 1000);
+        bgTimeBase.setRunning(true, clocks.uptime * 1000, clocks.realtime * 1000);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+
+        clocks.realtime += 100;
+        clocks.uptime += 100;
+
+        // TimeBases are turned off
+        timeBase.setRunning(false, clocks.uptime * 1000, clocks.realtime * 1000);
+        bgTimeBase.setRunning(false, clocks.uptime * 1000, clocks.realtime * 1000);
+
+        clocks.realtime += 100;
+        clocks.uptime += 100;
+
+        // Timer is turned on
+        bi.noteStartSensorLocked(UID, SENSOR_ID);
+
+        clocks.realtime += 100;
+        clocks.uptime += 100;
+
+        // Timebase was off so times are all 0.
+        BatteryStats.Uid.Sensor sensor = bi.getUidStats().get(UID).getSensorStats().get(SENSOR_ID);
+        BatteryStats.Timer timer = sensor.getSensorTime();
+        BatteryStats.Timer bgTimer = sensor.getSensorBackgroundTime();
+        assertEquals(0, timer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(0, timer.getTotalDurationMsLocked(clocks.realtime));
+        assertEquals(0, bgTimer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(0, bgTimer.getTotalDurationMsLocked(clocks.realtime));
+
+        clocks.realtime += 100;
+        clocks.uptime += 100;
+
+        // Reset the stats. Since the sensor is still running, we should still see the timer
+        // but still with 0 times.
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
+        assertEquals(0, timer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(0, timer.getTotalDurationMsLocked(clocks.realtime));
+        assertEquals(0, bgTimer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(0, bgTimer.getTotalDurationMsLocked(clocks.realtime));
+
+        clocks.realtime += 100;
+        clocks.uptime += 100;
+
+        // Now stop the timer. The times should still be 0.
+        bi.noteStopSensorLocked(UID, SENSOR_ID);
+        assertEquals(0, timer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(0, timer.getTotalDurationMsLocked(clocks.realtime));
+        assertEquals(0, bgTimer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(0, bgTimer.getTotalDurationMsLocked(clocks.realtime));
+
+        // Now repeat with the TimeBases turned on the entire time.
+        timeBase.setRunning(true, clocks.uptime * 1000, clocks.realtime * 1000);
+        bgTimeBase.setRunning(true, clocks.uptime * 1000, clocks.realtime * 1000);
+        clocks.realtime += 100;
+        clocks.uptime += 100;
+
+        // Timer is turned on
+        bi.noteStartSensorLocked(UID, SENSOR_ID);
+
+        clocks.realtime += 111;
+        clocks.uptime += 111;
+
+        // Timebase and timer was on so times have increased.
+        assertEquals(111_000, timer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(111, timer.getTotalDurationMsLocked(clocks.realtime));
+        assertEquals(111_000, bgTimer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(111, bgTimer.getTotalDurationMsLocked(clocks.realtime));
+
+        clocks.realtime += 100;
+        clocks.uptime += 100;
+
+        // Reset the stats. Since the sensor is still running, we should still see the timer
+        // but with 0 times.
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
+        assertEquals(0, timer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(0, timer.getTotalDurationMsLocked(clocks.realtime));
+        assertEquals(0, bgTimer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(0, bgTimer.getTotalDurationMsLocked(clocks.realtime));
+
+        clocks.realtime += 112;
+        clocks.uptime += 112;
+
+        // Now stop the timer. The times should have increased since the timebase was on.
+        bi.noteStopSensorLocked(UID, SENSOR_ID);
+        assertEquals(112_000, timer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(112, timer.getTotalDurationMsLocked(clocks.realtime));
+        assertEquals(112_000, bgTimer.getTotalTimeLocked(1000*clocks.realtime, which));
+        assertEquals(112, bgTimer.getTotalDurationMsLocked(clocks.realtime));
     }
 }

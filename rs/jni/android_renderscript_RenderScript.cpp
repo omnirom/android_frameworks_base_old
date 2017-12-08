@@ -27,9 +27,10 @@
 #include <androidfw/Asset.h>
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
+#include <android-base/macros.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/android_util_AssetManager.h"
@@ -1324,12 +1325,10 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong type, 
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
 
-    bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCreateFromBitmap((RsContext)con,
                                                   (RsType)type, (RsAllocationMipmapControl)mip,
                                                   ptr, bitmap.getSize(), usage);
-    bitmap.unlockPixels();
     return id;
 }
 
@@ -1340,12 +1339,10 @@ nAllocationCreateBitmapBackedAllocation(JNIEnv *_env, jobject _this, jlong con, 
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
 
-    bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCreateTyped((RsContext)con,
                                             (RsType)type, (RsAllocationMipmapControl)mip,
                                             (uint32_t)usage, (uintptr_t)ptr);
-    bitmap.unlockPixels();
     return id;
 }
 
@@ -1356,12 +1353,10 @@ nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong ty
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
 
-    bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCubeCreateFromBitmap((RsContext)con,
                                                       (RsType)type, (RsAllocationMipmapControl)mip,
                                                       ptr, bitmap.getSize(), usage);
-    bitmap.unlockPixels();
     return id;
 }
 
@@ -1373,12 +1368,10 @@ nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, j
     int w = bitmap.width();
     int h = bitmap.height();
 
-    bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
     rsAllocation2DData((RsContext)con, (RsAllocation)alloc, 0, 0,
                        0, RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X,
                        w, h, ptr, bitmap.getSize(), 0);
-    bitmap.unlockPixels();
 }
 
 static void
@@ -1387,10 +1380,8 @@ nAllocationCopyToBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, job
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
 
-    bitmap.lockPixels();
     void* ptr = bitmap.getPixels();
     rsAllocationCopyToBitmap((RsContext)con, (RsAllocation)alloc, ptr, bitmap.getSize());
-    bitmap.unlockPixels();
     bitmap.notifyPixelsChanged();
 }
 

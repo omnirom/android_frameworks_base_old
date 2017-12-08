@@ -18,16 +18,10 @@
     android:id="@+id/quick_settings_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/colorPrimaryDark"
+    android:background="@drawable/qs_background_primary"
+    android:elevation="4dp"
     android:clipToPadding="false"
     android:clipChildren="false">
-
-    <View
-        android:id="@+id/qs_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/qs_background_primary"
-        android:elevation="4dp" />
 
     <com.android.systemui.qs.QSPanel
         android:id="@+id/quick_settings_panel"
@@ -40,8 +34,7 @@
 
     <include layout="@layout/quick_status_bar_expanded_header" />
 
-    <include android:id="@+id/qs_footer"
-        layout="@layout/qs_footer" />
+    <include layout="@layout/qs_footer_impl" />
 
     <include android:id="@+id/qs_detail" layout="@layout/qs_detail" />
 

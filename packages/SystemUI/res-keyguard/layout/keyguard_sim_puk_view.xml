@@ -43,9 +43,16 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="vertical"
+            android:gravity="center"
             android:layout_weight="1"
             android:layoutDirection="ltr"
             >
+        <include layout="@layout/keyguard_esim_area"
+            android:id="@+id/keyguard_esim_area"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/eca_overlap" />
+
         <RelativeLayout
                 android:id="@+id/row0"
                 android:layout_width="match_parent"
@@ -60,7 +67,8 @@
                     android:gravity="center"
                     android:layout_centerHorizontal="true"
                     android:layout_marginRight="72dp"
-                    androidprv:scaledTextSize="28"
+                    androidprv:scaledTextSize="@integer/scaled_password_text_size"
+                    android:textColor="?attr/wallpaperTextColor"
                     android:contentDescription="@string/keyguard_accessibility_sim_puk_area"
                     />
             <ImageButton
@@ -68,23 +76,25 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:src="@drawable/ic_backspace_24dp"
+                    android:src="@drawable/ic_backspace_black_24dp"
                     android:clickable="true"
                     android:paddingTop="8dip"
                     android:paddingBottom="8dip"
-                    android:paddingRight="8dp"
+                    android:paddingRight="0dp"
                     android:paddingLeft="24dp"
                     android:background="@drawable/ripple_drawable"
                     android:contentDescription="@string/keyboardview_keycode_delete"
                     android:layout_alignEnd="@+id/pinEntry"
                     android:layout_alignParentRight="true"
+                    android:tint="@color/pin_delete_color"
+                    android:tintMode="src_in"
                     />
             <View
                     android:id="@+id/divider"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_alignParentBottom="true"
-                    android:background="#28FFFFFF"
+                    android:background="@drawable/pin_divider"
                     />
         </RelativeLayout>
         <LinearLayout
@@ -205,7 +215,8 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:paddingBottom="11sp"
-                    android:src="@drawable/ic_done_wht"
+                    android:src="@drawable/ic_done_black_24dp"
+                    style="@style/Keyguard.ImageButton.NumPadEnter"
                     android:background="@drawable/ripple_drawable"
                     android:contentDescription="@string/keyboardview_keycode_enter"
                     />

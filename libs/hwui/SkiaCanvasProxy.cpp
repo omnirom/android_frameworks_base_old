@@ -151,7 +151,8 @@ void SkiaCanvasProxy::onDrawBitmapNine(const SkBitmap& bitmap, const SkIRect& ce
 void SkiaCanvasProxy::onDrawImage(const SkImage* image, SkScalar left, SkScalar top,
         const SkPaint* paint) {
     SkBitmap skiaBitmap;
-    if (image->asLegacyBitmap(&skiaBitmap, SkImage::kRO_LegacyBitmapMode)) {
+    SkPixmap pixmap;
+    if (image->peekPixels(&pixmap) && skiaBitmap.installPixels(pixmap)) {
         onDrawBitmap(skiaBitmap, left, top, paint);
     }
 }
@@ -159,7 +160,8 @@ void SkiaCanvasProxy::onDrawImage(const SkImage* image, SkScalar left, SkScalar 
 void SkiaCanvasProxy::onDrawImageRect(const SkImage* image, const SkRect* srcPtr, const SkRect& dst,
         const SkPaint* paint, SrcRectConstraint constraint) {
     SkBitmap skiaBitmap;
-    if (image->asLegacyBitmap(&skiaBitmap, SkImage::kRO_LegacyBitmapMode)) {
+    SkPixmap pixmap;
+    if (image->peekPixels(&pixmap) && skiaBitmap.installPixels(pixmap)) {
         sk_sp<Bitmap> bitmap = Bitmap::createFrom(skiaBitmap.info(), *skiaBitmap.pixelRef());
         SkRect src = (srcPtr) ? *srcPtr : SkRect::MakeWH(image->width(), image->height());
         mCanvas->drawBitmap(*bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
@@ -183,18 +185,10 @@ void SkiaCanvasProxy::onDrawImageLattice(const SkImage* image, const Lattice& la
 
 void SkiaCanvasProxy::onDrawVerticesObject(const SkVertices* vertices, SkBlendMode bmode,
         const SkPaint& paint) {
-    // TODO: should we pass through blendmode
     if (mFilterHwuiCalls) {
         return;
     }
-    // convert the SkPoints into floats
-    static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
-    const int floatCount = vertices->vertexCount() << 1;
-    const float* vArray = (const float*)vertices->positions();
-    const float* tArray = (const float*)vertices->texCoords();
-    const int* cArray = (const int*)vertices->colors();
-    mCanvas->drawVertices(vertices->mode(), floatCount, vArray, tArray, cArray,
-            vertices->indices(), vertices->indexCount(), paint);
+    mCanvas->drawVertices(vertices, bmode, paint);
 }
 
 sk_sp<SkSurface> SkiaCanvasProxy::onNewSurface(const SkImageInfo&, const SkSurfaceProps&) {
@@ -286,7 +280,6 @@ void SkiaCanvasProxy::onDrawText(const void* text, size_t byteLength, SkScalar x
     GlyphIDConverter glyphs(text, byteLength, origPaint);
 
     // compute the glyph positions
-    std::unique_ptr<SkPoint[]> pointStorage(new SkPoint[glyphs.count]);
     std::unique_ptr<SkScalar[]> glyphWidths(new SkScalar[glyphs.count]);
     glyphs.paint.getTextWidths(glyphs.glyphIDs, glyphs.count << 1, glyphWidths.get());
 
@@ -320,22 +313,33 @@ void SkiaCanvasProxy::onDrawText(const void* text, size_t byteLength, SkScalar x
         xBaseline = x;
         yBaseline = y;
     }
-    pointStorage[0].set(xBaseline, yBaseline);
-
-    // setup the remaining glyph positions
-    if (glyphs.paint.isVerticalText()) {
-        for (int i = 1; i < glyphs.count; i++) {
-            pointStorage[i].set(xBaseline, glyphWidths[i-1] + pointStorage[i-1].fY);
-        }
-    } else {
-        for (int i = 1; i < glyphs.count; i++) {
-            pointStorage[i].set(glyphWidths[i-1] + pointStorage[i-1].fX, yBaseline);
-        }
-    }
 
     static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
-    mCanvas->drawGlyphs(glyphs.glyphIDs, &pointStorage[0].fX, glyphs.count, glyphs.paint,
-                      x, y, bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, 0);
+    auto glyphFunc = [&] (uint16_t* text, float* positions) {
+        memcpy(text, glyphs.glyphIDs, glyphs.count*sizeof(uint16_t));
+        size_t posIndex = 0;
+        // setup the first glyph position
+        positions[posIndex++] = xBaseline;
+        positions[posIndex++] = yBaseline;
+        // setup the remaining glyph positions
+        if (glyphs.paint.isVerticalText()) {
+            float yPosition = yBaseline;
+            for (int i = 1; i < glyphs.count; i++) {
+                positions[posIndex++] = xBaseline;
+                yPosition += glyphWidths[i-1];
+                positions[posIndex++] = yPosition;
+            }
+        } else {
+            float xPosition = xBaseline;
+            for (int i = 1; i < glyphs.count; i++) {
+                xPosition += glyphWidths[i-1];
+                positions[posIndex++] = xPosition;
+                positions[posIndex++] = yBaseline;
+            }
+        }
+    };
+    mCanvas->drawGlyphs(glyphFunc, glyphs.count, glyphs.paint, x, y, bounds.fLeft, bounds.fTop,
+            bounds.fRight, bounds.fBottom, 0);
 }
 
 void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const SkPoint pos[],
@@ -345,21 +349,12 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
 
     // convert to relative positions if necessary
     int x, y;
-    const SkPoint* posArray;
-    std::unique_ptr<SkPoint[]> pointStorage;
     if (mCanvas->drawTextAbsolutePos()) {
         x = 0;
         y = 0;
-        posArray = pos;
     } else {
         x = pos[0].fX;
         y = pos[0].fY;
-        pointStorage.reset(new SkPoint[glyphs.count]);
-        for (int i = 0; i < glyphs.count; i++) {
-            pointStorage[i].fX = pos[i].fX - x;
-            pointStorage[i].fY = pos[i].fY - y;
-        }
-        posArray = pointStorage.get();
     }
 
     // Compute conservative bounds.  If the content has already been processed
@@ -375,8 +370,19 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
     }
 
     static_assert(sizeof(SkPoint) == sizeof(float)*2, "SkPoint is no longer two floats");
-    mCanvas->drawGlyphs(glyphs.glyphIDs, &posArray[0].fX, glyphs.count, glyphs.paint, x, y,
-                      bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom, 0);
+    auto glyphFunc = [&] (uint16_t* text, float* positions) {
+        memcpy(text, glyphs.glyphIDs, glyphs.count*sizeof(uint16_t));
+        if (mCanvas->drawTextAbsolutePos()) {
+            memcpy(positions, pos, 2*glyphs.count*sizeof(float));
+        } else {
+            for (int i = 0, posIndex = 0; i < glyphs.count; i++) {
+                positions[posIndex++] = pos[i].fX - x;
+                positions[posIndex++] = pos[i].fY - y;
+            }
+        }
+    };
+    mCanvas->drawGlyphs(glyphFunc, glyphs.count, glyphs.paint, x, y, bounds.fLeft, bounds.fTop,
+            bounds.fRight, bounds.fBottom, 0);
 }
 
 void SkiaCanvasProxy::onDrawPosTextH(const void* text, size_t byteLength, const SkScalar xpos[],
@@ -456,19 +462,13 @@ void SkiaCanvasProxy::onDrawPatch(const SkPoint cubics[12], const SkColor colors
     if (mFilterHwuiCalls) {
         return;
     }
-    SkPatchUtils::VertexData data;
-
     SkMatrix matrix;
     mCanvas->getMatrix(&matrix);
     SkISize lod = SkPatchUtils::GetLevelOfDetail(cubics, &matrix);
 
-    // It automatically adjusts lodX and lodY in case it exceeds the number of indices.
-    // If it fails to generate the vertices, then we do not draw.
-    if (SkPatchUtils::getVertexData(&data, cubics, colors, texCoords, lod.width(), lod.height())) {
-        this->drawVertices(SkCanvas::kTriangles_VertexMode, data.fVertexCount, data.fPoints,
-                           data.fTexCoords, data.fColors, bmode, data.fIndices, data.fIndexCount,
-                           paint);
-    }
+    mCanvas->drawVertices(SkPatchUtils::MakeVertices(cubics, colors, texCoords,
+                                                     lod.width(), lod.height()).get(),
+                          bmode, paint);
 }
 
 void SkiaCanvasProxy::onClipRect(const SkRect& rect, SkClipOp op, ClipEdgeStyle) {

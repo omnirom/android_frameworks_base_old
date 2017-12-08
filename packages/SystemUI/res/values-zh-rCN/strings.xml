@@ -60,11 +60,11 @@
     <string name="label_view" msgid="6304565553218192990">"查看"</string>
     <string name="always_use_device" msgid="1450287437017315906">"默认情况下用于该USB设备"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"默认情况下用于该USB配件"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"允许USB调试吗？"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"允许 USB 调试吗？"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"这台计算机的 RSA 密钥指纹如下：\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"一律允许使用这台计算机进行调试"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"不允许使用 USB 调试功能"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"当前登录了此设备的用户无法开启 USB 调试功能。要使用此功能，请切换为管理员用户。"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"目前已登录此设备的用户无法开启 USB 调试功能。要使用此功能，请切换为主要用户的帐号。"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"缩放以填满屏幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"拉伸以填满屏幕"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在保存屏幕截图..."</string>
@@ -240,9 +240,9 @@
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"正在充电"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G 数据网络已暂停使用"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 数据网络已暂停使用"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"移动数据已暂停使用"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"已暂停使用移动数据网络"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"数据网络已暂停使用"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"您的数据用量已达到所设置的用量上限，因此系统已停用移动数据。\n\n如果您要继续使用移动数据，则可能需要支付相应的数据流量费用。"</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"您的数据流量消耗已达到所设置的上限，因此已停用移动数据网络。\n\n如果您要继续使用移动数据网络，则可能需要支付相应的流量费用。"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"恢复"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"未连接互联网"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"已连接到WLAN网络"</string>
@@ -310,6 +310,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"更多设置"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"完成"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"已连接"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"已连接，电池电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"正在连接…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"网络共享"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"热点"</string>
@@ -352,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"搜索"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"向上滑动以<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"向左滑动以<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"您将不会受到声音和振动的打扰（闹钟、提醒、活动和所指定来电者的相关提示音除外）。您依然可以听到您选择播放的任何内容（包括音乐、视频和游戏）的相关音效。"</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"您将不会受到声音和振动的打扰（闹钟提示音除外）。您依然可以听到您选择播放的任何内容（包括音乐、视频和游戏）的相关音效。"</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"您将不会受到声音和振动的打扰（闹钟、提醒、活动和所指定来电者的相关提示音除外）。您依然可以听到您选择播放的任何内容（包括音乐、视频和游戏）的相关音效。"</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"您将不会受到声音和振动的打扰（闹钟提示音除外）。您依然可以听到您选择播放的任何内容（包括音乐、视频和游戏）的相关音效。"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"自定义"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"这会阻止所有声音和振动（包括闹钟、音乐、视频和游戏）打扰您。您仍然可以拨打电话。"</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"这会阻止所有声音和振动（包括闹钟、音乐、视频和游戏）打扰您。您仍然可以拨打电话。"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"这会阻止所有声音和振动（包括闹钟、音乐、视频和游戏）打扰您。"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太紧急的通知会显示在下方"</string>
@@ -455,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"了解详情"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"您已连接到<xliff:g id="VPN_APP">%1$s</xliff:g>，该应用可以监控您的网络活动，包括收发电子邮件、使用应用和浏览网站。"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"打开 VPN 设置"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"打开 VPN 设置"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"打开可信凭据列表"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"您的管理员已开启网络日志功能，该功能会监控您设备上的流量。\n\n如需更多信息，请与您的管理员联系。"</string>
@@ -467,6 +468,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"您已连接到<xliff:g id="APPLICATION">%1$s</xliff:g>，该应用可以监控您的个人网络活动，包括收发电子邮件、使用应用和浏览网站。"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"您的工作资料由“<xliff:g id="ORGANIZATION">%1$s</xliff:g>”负责管理，且已连接到“<xliff:g id="APPLICATION">%2$s</xliff:g>”（该应用能够监控您的工作网络活动，其中包括收发电子邮件、使用应用和浏览网站）。\n\n如需更多信息，请与您的管理员联系。"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"您的工作资料由“<xliff:g id="ORGANIZATION">%1$s</xliff:g>”负责管理，且已连接到“<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>”（该应用能够监控您的工作网络活动，其中包括收发电子邮件、使用应用和浏览网站）。\n\n此外，您还连接到了“<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>”（该应用能够监控您的个人网络活动）。"</string>
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"已为<xliff:g id="USER_NAME">%1$s</xliff:g>解锁"</string>
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"“<xliff:g id="TRUST_AGENT">%1$s</xliff:g>”正在运行"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"在您手动解锁之前，设备会保持锁定状态"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"更快捷地查看通知"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"无需解锁即可查看通知"</string>
@@ -548,12 +551,13 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"关闭"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"利用高级通知设置，您可以为应用通知设置从 0 级到 5 级的重要程度等级。\n\n"<b>"5 级"</b>" \n- 在通知列表顶部显示 \n- 允许全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"4 级"</b>" \n- 禁止全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"3 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n\n"<b>"2 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n\n"<b>"1 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n- 不在锁定屏幕和状态栏中显示 \n- 在通知列表底部显示 \n\n"<b>"0 级"</b>" \n- 屏蔽应用的所有通知"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"您将不会再收到这类通知。"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"您将不会再收到这类通知"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> 个通知类别"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"此应用没有通知类别"</string>
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"无法关闭来自此应用的通知"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">此应用指定的 1 个通知类别（共 <xliff:g id="NUMBER_1">%d</xliff:g> 个）</item>
-      <item quantity="one">此应用指定的 1 个通知类别（共 <xliff:g id="NUMBER_0">%d</xliff:g> 个）</item>
+      <item quantity="other">此应用指定的 1 个通知类别（共 <xliff:g id="NUMBER_1">%s</xliff:g> 个）</item>
+      <item quantity="one">此应用指定的 1 个通知类别（共 <xliff:g id="NUMBER_0">%s</xliff:g> 个）</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -570,15 +574,19 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g><xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"通知设置"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"通知延后选项"</string>
-    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 分钟"</string>
-    <string name="snooze_option_30_min" msgid="867081342535195788">"30 分钟"</string>
-    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 小时"</string>
-    <string name="snooze_option_2_hour" msgid="8332218255658969475">"2 小时"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"撤消"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"已延后 <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d 小时</item>
+      <item quantity="one">%d 小时</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d 分钟</item>
+      <item quantity="one">%d 分钟</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"电池使用情况"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充电过程中无法使用省电模式"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"省电模式"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"充电过程中无法使用省电模式"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"省电模式"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"降低性能并限制后台流量"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g>按钮"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -718,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"最小化"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"关闭"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"向下拖动即可关闭"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"画中画菜单"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"菜单"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>目前位于“画中画”中"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"如果您不想让<xliff:g id="NAME">%s</xliff:g>使用此功能，请点按以打开设置，然后关闭此功能。"</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"如果您不想让“<xliff:g id="NAME">%s</xliff:g>”使用此功能，请点按以打开设置，然后关闭此功能。"</string>
     <string name="pip_play" msgid="1417176722760265888">"播放"</string>
     <string name="pip_pause" msgid="8881063404466476571">"暂停"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"跳到下一个"</string>
@@ -746,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"菜单"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g>应用"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"提醒"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"电池"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"屏幕截图"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"常规消息"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"存储空间"</string>
@@ -765,4 +774,6 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"替换"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"在后台运行的应用"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"点按即可详细了解电量和流量消耗情况"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"要关闭移动数据网络吗？"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"由于某个应用遮挡了权限请求界面，因此“设置”应用无法验证您的回应。"</string>
 </resources>

@@ -4,17 +4,22 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
 
-# Note we statically link SettingsState to do some unit tests.  It's not accessible otherwise
+# Note we statically link several classes to do some unit tests.  It's not accessible otherwise
 # because this test is not an instrumentation test. (because the target runs in the system process.)
 LOCAL_SRC_FILES := $(call all-subdir-java-files) \
-    ../src/com/android/providers/settings/SettingsState.java
+    ../src/com/android/providers/settings/SettingsState.java \
+    ../src/com/android/providers/settings/SettingsHelper.java
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-test legacy-android-test
+LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
+
+LOCAL_JAVA_LIBRARIES := legacy-android-test
 
 LOCAL_PACKAGE_NAME := SettingsProviderTest
 
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_CERTIFICATE := platform
+
+LOCAL_COMPATIBILITY_SUITE := device-tests
 
 include $(BUILD_PACKAGE)

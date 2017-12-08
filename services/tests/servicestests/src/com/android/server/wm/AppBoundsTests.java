@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.app.ActivityManager;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.view.DisplayInfo;
@@ -27,6 +28,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -45,6 +47,20 @@ public class AppBoundsTests extends WindowTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         mParentBounds = new Rect(10 /*left*/, 30 /*top*/, 80 /*right*/, 60 /*bottom*/);
+    }
+
+    /**
+     * Ensures that appBounds causes {@link android.content.pm.ActivityInfo.CONFIG_APP_BOUNDS} diff.
+     */
+    @Test
+    public void testAppBoundsConfigurationDiff() {
+        final Configuration config = new Configuration();
+        final Configuration config2 = new Configuration();
+        config.appBounds = new Rect(0, 1, 1, 0);
+        config2.appBounds = new Rect(1, 2, 2, 1);
+
+        assertEquals(ActivityInfo.CONFIG_SCREEN_SIZE, config.diff(config2));
+        assertEquals(0, config.diffPublicOnly(config2));
     }
 
     /**
@@ -121,7 +137,6 @@ public class AppBoundsTests extends WindowTestsBase {
                 mParentBounds);
     }
 
-
     private void testStackBoundsConfiguration(Integer stackId, Rect parentBounds, Rect bounds,
             Rect expectedConfigBounds) {
         final StackWindowController stackController = stackId != null ?
@@ -139,5 +154,30 @@ public class AppBoundsTests extends WindowTestsBase {
 
         assertTrue((expectedConfigBounds == null && config.appBounds == null)
                 || expectedConfigBounds.equals(config.appBounds));
+    }
+
+    /**
+     * Ensures appBounds are considered in {@link Configuration#compareTo(Configuration)}.
+     */
+    @Test
+    public void testConfigurationCompareTo() throws Exception {
+        final Configuration blankConfig = new Configuration();
+
+        final Configuration config1 = new Configuration();
+        config1.appBounds = new Rect(1, 2, 3, 4);
+
+        final Configuration config2 = new Configuration(config1);
+
+        assertEquals(config1.compareTo(config2), 0);
+
+        config2.appBounds.left = 0;
+
+        // Different bounds
+        assertNotEquals(config1.compareTo(config2), 0);
+
+        // No bounds
+        assertEquals(config1.compareTo(blankConfig), -1);
+        assertEquals(blankConfig.compareTo(config1), 1);
+
     }
 }

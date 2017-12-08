@@ -32,6 +32,7 @@ import com.android.systemui.Gefingerpoken;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
  * A utility class to enable the downward swipe on the lockscreen to go to the full shade and expand
@@ -184,6 +185,9 @@ public class DragDownHelper implements Gefingerpoken {
     }
 
     private boolean isFalseTouch() {
+        if (!mDragDownCallback.isFalsingCheckNeeded()) {
+            return false;
+        }
         return mFalsingManager.isFalseTouch() || !mDraggedFarEnough;
     }
 
@@ -284,6 +288,7 @@ public class DragDownHelper implements Gefingerpoken {
         void onCrossedThreshold(boolean above);
         void onTouchSlopExceeded();
         void setEmptyDragAmount(float amount);
+        boolean isFalsingCheckNeeded();
     }
 
     public void updateDoubleTapToSleep(boolean updateDoubleTapToSleep) {

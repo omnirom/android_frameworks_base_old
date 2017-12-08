@@ -16,6 +16,11 @@
 
 package com.android.server.connectivity;
 
+import static android.hardware.usb.UsbManager.USB_CONFIGURED;
+import static android.hardware.usb.UsbManager.USB_CONNECTED;
+import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
+import static android.net.ConnectivityManager.TETHERING_WIFI;
+import static android.net.ConnectivityManager.TETHERING_USB;
 import static android.net.wifi.WifiManager.IFACE_IP_MODE_LOCAL_ONLY;
 import static android.net.wifi.WifiManager.IFACE_IP_MODE_TETHERED;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
@@ -37,10 +42,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
@@ -49,6 +56,7 @@ import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.net.NetworkRequest;
+import android.net.util.SharedLog;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -57,11 +65,16 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.CarrierConfigManager;
+import android.test.mock.MockContentResolver;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.server.connectivity.tethering.OffloadHardwareInterface;
+import com.android.server.connectivity.tethering.TetheringDependencies;
 
 import org.junit.After;
 import org.junit.Before;
@@ -78,13 +91,16 @@ import java.util.Vector;
 public class TetheringTest {
     private static final String[] PROVISIONING_APP_NAME = {"some", "app"};
 
+    @Mock private ApplicationInfo mApplicationInfo;
     @Mock private Context mContext;
     @Mock private ConnectivityManager mConnectivityManager;
     @Mock private INetworkManagementService mNMService;
     @Mock private INetworkStatsService mStatsService;
     @Mock private INetworkPolicyManager mPolicyManager;
     @Mock private MockableSystemProperties mSystemProperties;
+    @Mock private OffloadHardwareInterface mOffloadHardwareInterface;
     @Mock private Resources mResources;
+    @Mock private TetheringDependencies mTetheringDependencies;
     @Mock private UsbManager mUsbManager;
     @Mock private WifiManager mWifiManager;
     @Mock private CarrierConfigManager mCarrierConfigManager;
@@ -97,6 +113,7 @@ public class TetheringTest {
 
     private Vector<Intent> mIntents;
     private BroadcastInterceptingContext mServiceContext;
+    private MockContentResolver mContentResolver;
     private BroadcastReceiver mBroadcastReceiver;
     private Tethering mTethering;
 
@@ -106,12 +123,22 @@ public class TetheringTest {
         }
 
         @Override
+        public ApplicationInfo getApplicationInfo() { return mApplicationInfo; }
+
+        @Override
+        public ContentResolver getContentResolver() { return mContentResolver; }
+
+        @Override
+        public String getPackageName() { return "TetheringTest"; }
+
+        @Override
         public Resources getResources() { return mResources; }
 
         @Override
         public Object getSystemService(String name) {
             if (Context.CONNECTIVITY_SERVICE.equals(name)) return mConnectivityManager;
             if (Context.WIFI_SERVICE.equals(name)) return mWifiManager;
+            if (Context.USB_SERVICE.equals(name)) return mUsbManager;
             return super.getSystemService(name);
         }
     }
@@ -124,7 +151,7 @@ public class TetheringTest {
         when(mResources.getStringArray(com.android.internal.R.array.config_tether_usb_regexs))
                 .thenReturn(new String[0]);
         when(mResources.getStringArray(com.android.internal.R.array.config_tether_wifi_regexs))
-                .thenReturn(new String[]{ "test_wlan\\d" });
+                .thenReturn(new String[]{ "test_wlan\\d", "test_rndis\\d" });
         when(mResources.getStringArray(com.android.internal.R.array.config_tether_bluetooth_regexs))
                 .thenReturn(new String[0]);
         when(mResources.getIntArray(com.android.internal.R.array.config_tether_upstream_types))
@@ -135,6 +162,8 @@ public class TetheringTest {
                 .thenReturn(new InterfaceConfiguration());
 
         mServiceContext = new MockContext(mContext);
+        mContentResolver = new MockContentResolver(mServiceContext);
+        mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         mIntents = new Vector<>();
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -144,8 +173,12 @@ public class TetheringTest {
         };
         mServiceContext.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED));
+        when(mTetheringDependencies.getOffloadHardwareInterface(
+                any(Handler.class), any(SharedLog.class))).thenReturn(mOffloadHardwareInterface);
         mTethering = new Tethering(mServiceContext, mNMService, mStatsService, mPolicyManager,
-                                   mLooper.getLooper(), mSystemProperties);
+                                   mLooper.getLooper(), mSystemProperties,
+                                   mTetheringDependencies);
+        verify(mNMService).registerTetheringStatsProvider(any(), anyString());
     }
 
     @After
@@ -219,6 +252,14 @@ public class TetheringTest {
         mServiceContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
+    private void sendUsbBroadcast(boolean connected, boolean configured, boolean rndisFunction) {
+        final Intent intent = new Intent(UsbManager.ACTION_USB_STATE);
+        intent.putExtra(USB_CONNECTED, connected);
+        intent.putExtra(USB_CONFIGURED, configured);
+        intent.putExtra(USB_FUNCTION_RNDIS, rndisFunction);
+        mServiceContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+    }
+
     private void verifyInterfaceServingModeStarted() throws Exception {
         verify(mNMService, times(1)).getInterfaceConfig(mTestIfname);
         verify(mNMService, times(1))
@@ -258,6 +299,32 @@ public class TetheringTest {
         verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
         verifyNoMoreInteractions(mWifiManager);
+    }
+
+    @Test
+    public void testUsbConfiguredBroadcastStartsTethering() throws Exception {
+        when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
+
+        // Emulate pressing the USB tethering button in Settings UI.
+        mTethering.startTethering(TETHERING_USB, null, false);
+        mLooper.dispatchAll();
+        verify(mUsbManager, times(1)).setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS, false);
+
+        // Pretend we receive a USB connected broadcast. Here we also pretend
+        // that the RNDIS function is somehow enabled, so that we see if we
+        // might trip ourselves up.
+        sendUsbBroadcast(true, false, true);
+        mLooper.dispatchAll();
+        // This should produce no activity of any kind.
+        verifyNoMoreInteractions(mConnectivityManager);
+        verifyNoMoreInteractions(mNMService);
+
+        // Pretend we then receive USB configured broadcast.
+        sendUsbBroadcast(true, true, true);
+        mLooper.dispatchAll();
+        // Now we should see the start of tethering mechanics (in this case:
+        // tetherMatchingInterfaces() which starts by fetching all interfaces).
+        verify(mNMService, times(1)).listInterfaces();
     }
 
     @Test
@@ -340,7 +407,7 @@ public class TetheringTest {
         when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
 
         // Emulate pressing the WiFi tethering button.
-        mTethering.startTethering(ConnectivityManager.TETHERING_WIFI, null, false);
+        mTethering.startTethering(TETHERING_WIFI, null, false);
         mLooper.dispatchAll();
         verify(mWifiManager, times(1)).startSoftAp(null);
         verifyNoMoreInteractions(mWifiManager);
@@ -368,7 +435,7 @@ public class TetheringTest {
         when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
 
         // Emulate pressing the WiFi tethering button.
-        mTethering.startTethering(ConnectivityManager.TETHERING_WIFI, null, false);
+        mTethering.startTethering(TETHERING_WIFI, null, false);
         mLooper.dispatchAll();
         verify(mWifiManager, times(1)).startSoftAp(null);
         verifyNoMoreInteractions(mWifiManager);
@@ -399,7 +466,6 @@ public class TetheringTest {
                 any(NetworkCallback.class), any(Handler.class));
         // In tethering mode, in the default configuration, an explicit request
         // for a mobile network is also made.
-        verify(mConnectivityManager, atLeastOnce()).getNetworkInfo(anyInt());
         verify(mConnectivityManager, times(1)).requestNetwork(
                 any(NetworkRequest.class), any(NetworkCallback.class), eq(0), anyInt(),
                 any(Handler.class));
@@ -415,7 +481,7 @@ public class TetheringTest {
         /////
 
         // Emulate pressing the WiFi tethering button.
-        mTethering.stopTethering(ConnectivityManager.TETHERING_WIFI);
+        mTethering.stopTethering(TETHERING_WIFI);
         mLooper.dispatchAll();
         verify(mWifiManager, times(1)).stopSoftAp();
         verifyNoMoreInteractions(mWifiManager);
@@ -451,7 +517,7 @@ public class TetheringTest {
         doThrow(new RemoteException()).when(mNMService).setIpForwardingEnabled(true);
 
         // Emulate pressing the WiFi tethering button.
-        mTethering.startTethering(ConnectivityManager.TETHERING_WIFI, null, false);
+        mTethering.startTethering(TETHERING_WIFI, null, false);
         mLooper.dispatchAll();
         verify(mWifiManager, times(1)).startSoftAp(null);
         verifyNoMoreInteractions(mWifiManager);

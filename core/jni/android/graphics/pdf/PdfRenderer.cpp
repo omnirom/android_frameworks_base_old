@@ -17,7 +17,7 @@
 #include "PdfUtils.h"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "GraphicsJNI.h"
 #include "SkBitmap.h"
 #include "SkMatrix.h"
@@ -82,8 +82,6 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
 
     SkBitmap skBitmap;
     GraphicsJNI::getSkBitmap(env, jbitmap, &skBitmap);
-
-    SkAutoLockPixels alp(skBitmap);
 
     const int stride = skBitmap.width() * 4;
 

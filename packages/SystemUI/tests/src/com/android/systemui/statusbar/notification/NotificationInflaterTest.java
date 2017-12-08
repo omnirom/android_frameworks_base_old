@@ -28,7 +28,6 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
@@ -40,9 +39,9 @@ import android.widget.RemoteViews;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationTestHelper;
-import com.android.systemui.statusbar.InflationTask;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -56,6 +55,7 @@ import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@FlakyTest
 public class NotificationInflaterTest extends SysuiTestCase {
 
     private NotificationInflater mNotificationInflater;
@@ -149,6 +149,7 @@ public class NotificationInflaterTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore
     public void testInflationIsRetriedIfAsyncFails() throws Exception {
         NotificationInflater.InflationProgress result =
                 new NotificationInflater.InflationProgress();
@@ -184,7 +185,9 @@ public class NotificationInflaterTest extends SysuiTestCase {
         countDownLatch.await();
     }
 
+    /* Cancelling requires us to be on the UI thread otherwise we might have a race */
     @Test
+    @UiThreadTest
     public void testSupersedesExistingTask() throws Exception {
         mNotificationInflater.inflateNotificationViews();
         mNotificationInflater.setIsLowPriority(true);
@@ -196,6 +199,18 @@ public class NotificationInflaterTest extends SysuiTestCase {
                 asyncInflationTask.getReInflateFlags(),
                 NotificationInflater.FLAG_REINFLATE_ALL);
         runningTask.abort();
+    }
+
+    @Test
+    public void doesntReapplyDisallowedRemoteView() throws Exception {
+        mBuilder.setStyle(new Notification.MediaStyle());
+        RemoteViews mediaView = mBuilder.createContentView();
+        mBuilder.setStyle(new Notification.DecoratedCustomViewStyle());
+        mBuilder.setCustomContentView(new RemoteViews(getContext().getPackageName(),
+                R.layout.custom_view_dark));
+        RemoteViews decoratedMediaView = mBuilder.createContentView();
+        Assert.assertFalse("The decorated media style doesn't allow a view to be reapplied!",
+                NotificationInflater.canReapplyRemoteView(mediaView, decoratedMediaView));
     }
 
     public static void runThenWaitForInflation(Runnable block,

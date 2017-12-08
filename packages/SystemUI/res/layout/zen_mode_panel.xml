@@ -59,8 +59,7 @@
                 android:clickable="true"
                 android:contentDescription="@string/accessibility_desc_close"
                 android:scaleType="center"
-                android:src="@drawable/ic_close"
-                android:tint="@android:color/white" />
+                android:src="@drawable/ic_close_white_rounded" />
 
             <TextView
                 android:id="@+id/zen_introduction_message"
@@ -94,7 +93,7 @@
 
         </RelativeLayout>
 
-        <LinearLayout
+        <com.android.systemui.volume.ZenRadioLayout
             android:id="@+id/zen_conditions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -112,7 +111,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:orientation="vertical"/>
-        </LinearLayout>
+        </com.android.systemui.volume.ZenRadioLayout>
 
         <TextView
             android:id="@+id/zen_alarm_warning"

@@ -44,14 +44,14 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.internal.util.omni.DeviceUtils;
+import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
 
-public class ScreenPinningRequest implements View.OnClickListener {
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 
-    private static final int ROTATION_NONE = 0;
-    private static final int ROTATION_LANDSCAPE = 1;
-    private static final int ROTATION_SEASCAPE = 2;
+public class ScreenPinningRequest implements View.OnClickListener {
 
     private final Context mContext;
 
@@ -108,11 +108,8 @@ public class ScreenPinningRequest implements View.OnClickListener {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-                0
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-                ,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
         lp.token = new Binder();
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
@@ -161,7 +158,7 @@ public class ScreenPinningRequest implements View.OnClickListener {
             DisplayMetrics metrics = new DisplayMetrics();
             mWindowManager.getDefaultDisplay().getMetrics(metrics);
             float density = metrics.density;
-            int rotation = getRotation(mContext);
+            int rotation = RotationUtils.getRotation(mContext);
 
             inflateView(rotation);
             int bgColor = mContext.getColor(
@@ -201,19 +198,6 @@ public class ScreenPinningRequest implements View.OnClickListener {
             filter.addAction(Intent.ACTION_USER_SWITCHED);
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             mContext.registerReceiver(mReceiver, filter);
-        }
-
-        private int getRotation(Context context) {
-            Configuration config = mContext.getResources().getConfiguration();
-            int rot = context.getDisplay().getRotation();
-            if (config.smallestScreenWidthDp < 600) {
-                if (rot == Surface.ROTATION_90) {
-                    return ROTATION_LANDSCAPE;
-                } else if (rot == Surface.ROTATION_270) {
-                    return ROTATION_SEASCAPE;
-                }
-            }
-            return ROTATION_NONE;
         }
 
         private void inflateView(int rotation) {
@@ -304,14 +288,14 @@ public class ScreenPinningRequest implements View.OnClickListener {
 
         protected void onConfigurationChanged() {
             removeAllViews();
-            inflateView(getRotation(mContext));
+            inflateView(RotationUtils.getRotation(mContext));
         }
 
         private final Runnable mUpdateLayoutRunnable = new Runnable() {
             @Override
             public void run() {
                 if (mLayout != null && mLayout.getParent() != null) {
-                    mLayout.setLayoutParams(getRequestLayoutParams(getRotation(mContext)));
+                    mLayout.setLayoutParams(getRequestLayoutParams(RotationUtils.getRotation(mContext)));
                 }
             }
         };

@@ -150,6 +150,10 @@ class ShortcutPackage extends ShortcutPackageItem {
                 getPackageName(), getPackageUserId());
     }
 
+    public int getShortcutCount() {
+        return mShortcuts.size();
+    }
+
     @Override
     protected void onRestoreBlocked() {
         // Can't restore due to version/signature mismatch.  Remove all shortcuts.
@@ -607,7 +611,8 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             checked.add(activity);
 
-            if (!s.injectIsActivityEnabledAndExported(activity, getOwnerUserId())) {
+            if ((activity != null)
+                    && !s.injectIsActivityEnabledAndExported(activity, getOwnerUserId())) {
                 return false;
             }
         }

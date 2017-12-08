@@ -32,7 +32,6 @@
     <color name="qs_detail_button">@*android:color/quaternary_device_default_settings</color>
     <color name="qs_detail_button_white">#B3FFFFFF</color><!-- 70% white -->
     <color name="qs_detail_transition">#66FFFFFF</color>
-    <color name="scrim_behind_color">@android:color/black</color>
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <color name="qs_user_detail_icon_muted">#FFFFFFFF</color> <!-- not so muted after all -->
     <color name="qs_tile_disabled_color">#9E9E9E</color> <!-- 38% black -->
@@ -61,6 +60,11 @@
     <!-- The background color for the freeform workspace. -->
     <color name="recents_freeform_workspace_bg_color">#33FFFFFF</color>
 
+    <!-- The background color for clear all button on light backgrounds if not transparent. -->
+    <color name="recents_clear_all_button_bg_light_color">#CCFFFFFF</color>
+    <!-- The background color for clear all button on dark backgrounds if not transparent. -->
+    <color name="recents_clear_all_button_bg_dark_color">#CC000000</color>
+
     <color name="keyguard_affordance">#ffffffff</color>
 
     <!-- The color of the legacy notification background -->
@@ -77,6 +81,9 @@
 
     <!-- The color of the material notification background when low priority -->
     <color name="notification_material_background_low_priority_color">#fff5f5f5</color>
+
+    <!-- The color of the dividing line between grouped notifications. -->
+    <color name="notification_divider_color">#FF616161</color>
 
     <!-- The background color of the notification shade -->
     <color name="notification_shade_background_color">#ffeeeeee</color>
@@ -143,5 +150,7 @@
     <color name="ksh_key_item_background">@color/material_grey_100</color>
 
     <color name="instant_apps_color">#ff4d5a64</color>
+
+    <color name="zen_introduction">#ffffffff</color>
 
 </resources>

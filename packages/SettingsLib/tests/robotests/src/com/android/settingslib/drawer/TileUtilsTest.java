@@ -16,11 +16,24 @@
 
 package com.android.settingslib.drawer;
 
-import android.app.ActivityManager;
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import android.content.IContentProvider;
+import static org.mockito.Mockito.when;
+import static org.robolectric.RuntimeEnvironment.application;
+
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -37,40 +50,33 @@ import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Pair;
+import android.widget.RemoteViews;
 
-import com.android.settingslib.SuggestionParser;
+import com.android.settingslib.R;
 import com.android.settingslib.TestConfig;
-import com.android.settingslib.drawer.TileUtilsTest;
-import static org.mockito.Mockito.atLeastOnce;
+import com.android.settingslib.suggestions.SuggestionParser;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.internal.ShadowExtractor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import org.mockito.ArgumentCaptor;
-
-
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+@Config(manifest = TestConfig.MANIFEST_PATH,
+        sdk = TestConfig.SDK_VERSION,
+        shadows = {TileUtilsTest.TileUtilsShadowRemoteViews.class})
 public class TileUtilsTest {
 
     @Mock
@@ -94,8 +100,12 @@ public class TileUtilsTest {
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getResourcesForApplication(anyString())).thenReturn(mResources);
-        mContentResolver = spy(RuntimeEnvironment.application.getContentResolver());
+        when(mPackageManager.getResourcesForApplication((String) isNull())).thenReturn(mResources);
+        when(mPackageManager.getApplicationInfo(eq("abc"), anyInt()))
+                .thenReturn(application.getApplicationInfo());
+        mContentResolver = spy(application.getContentResolver());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
+        when(mContext.getPackageName()).thenReturn("com.android.settings");
     }
 
     @Test
@@ -106,13 +116,12 @@ public class TileUtilsTest {
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
         info.add(newInfo(true, testCategory));
-        Map<Pair<String, String>, Tile> cache = new ArrayMap<>();
         when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
                 .thenReturn(info);
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */);
+                false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).category).isEqualTo(testCategory);
@@ -133,7 +142,7 @@ public class TileUtilsTest {
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */);
+                false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).key).isEqualTo(keyHint);
@@ -153,14 +162,13 @@ public class TileUtilsTest {
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */);
+                false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.isEmpty()).isTrue();
     }
 
     @Test
     public void getTilesForIntent_shouldSkipFilteredApps() {
-        final String testCategory = "category1";
         Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
@@ -176,10 +184,14 @@ public class TileUtilsTest {
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */);
+                false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.size()).isEqualTo(1);
-        SuggestionParser parser = new SuggestionParser(mContext, null);
+        SuggestionParser parser = new SuggestionParser(
+                mContext,
+                null,
+                Collections.emptyList(),
+                "0,10");
         parser.filterSuggestions(outTiles, 0, false);
         assertThat(outTiles.size()).isEqualTo(0);
     }
@@ -197,15 +209,13 @@ public class TileUtilsTest {
         userHandleList.add(UserHandle.CURRENT);
         when(mUserManager.getUserProfiles()).thenReturn(userHandleList);
 
-        when(mPackageManager.queryIntentActivitiesAsUser(argThat(new ArgumentMatcher<Intent>() {
-            public boolean matches(Object event) {
-                return testAction.equals(((Intent) event).getAction());
-            }
-        }), anyInt(), anyInt())).thenReturn(info);
+        when(mPackageManager.queryIntentActivitiesAsUser(argThat(
+                event -> testAction.equals(event.getAction())), anyInt(), anyInt()))
+                .thenReturn(info);
 
         List<DashboardCategory> categoryList = TileUtils.getCategories(
-            mContext, cache, false /* categoryDefinedInManifest */, testAction,
-            TileUtils.SETTING_PKG);
+                mContext, cache, false /* categoryDefinedInManifest */, testAction,
+                TileUtils.SETTING_PKG);
         assertThat(categoryList.get(0).tiles.get(0).category).isEqualTo(testCategory);
     }
 
@@ -221,13 +231,13 @@ public class TileUtilsTest {
         when(mUserManager.getUserProfiles()).thenReturn(userHandleList);
 
         TileUtils.getCategories(
-            mContext, cache, false /* categoryDefinedInManifest */, null /* action */,
-            TileUtils.SETTING_PKG);
+                mContext, cache, false /* categoryDefinedInManifest */, null /* action */,
+                TileUtils.SETTING_PKG);
         verify(mPackageManager, atLeastOnce()).queryIntentActivitiesAsUser(
-            intentCaptor.capture(), anyInt(), anyInt());
+                intentCaptor.capture(), anyInt(), anyInt());
 
         assertThat(intentCaptor.getAllValues().get(0).getPackage())
-            .isEqualTo(TileUtils.SETTING_PKG);
+                .isEqualTo(TileUtils.SETTING_PKG);
     }
 
     @Test
@@ -245,7 +255,7 @@ public class TileUtilsTest {
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */);
+                false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).title).isEqualTo("my title");
@@ -269,10 +279,60 @@ public class TileUtilsTest {
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */);
+                false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).title).isEqualTo("my localized title");
+
+        // Icon should be tintable because the tile is not from settings package, and
+        // "forceTintExternalIcon" is set
+        assertThat(outTiles.get(0).isIconTintable).isTrue();
+    }
+
+    @Test
+    public void getTilesForIntent_shouldNotTintIconIfInSettingsPackage() {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
+                URI_GET_SUMMARY, null, 123);
+        resolveInfo.activityInfo.packageName = "com.android.settings";
+        resolveInfo.activityInfo.applicationInfo.packageName = "com.android.settings";
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */, true /* forceTintExternalIcon */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        assertThat(outTiles.get(0).isIconTintable).isFalse();
+    }
+
+    @Test
+    public void getTilesForIntent_shouldMarkIconTintableIfMetadataSet() {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
+                URI_GET_SUMMARY, null, 123);
+        resolveInfo.activityInfo.metaData
+                .putBoolean(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE, true);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */, false /* forceTintExternalIcon */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        assertThat(outTiles.get(0).isIconTintable).isTrue();
     }
 
     @Test
@@ -291,7 +351,7 @@ public class TileUtilsTest {
         // Case 1: No provider associated with the uri specified.
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */);
+                false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).icon.getResId()).isEqualTo(314159);
@@ -309,7 +369,7 @@ public class TileUtilsTest {
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */);
+                false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.size()).isEqualTo(1);
         assertThat(outTiles.get(0).icon.getResId()).isEqualTo(314159);
@@ -331,9 +391,113 @@ public class TileUtilsTest {
 
         TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */);
+                false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void getTilesForIntent_shouldShowRemoteViewIfSpecified() {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */);
+        resolveInfo.activityInfo.metaData.putInt("com.android.settings.custom_view",
+                R.layout.user_preference);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */, true /* forceTintExternalIcon */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        Tile tile = outTiles.get(0);
+        assertThat(tile.remoteViews).isNotNull();
+        assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
+    }
+
+    @Test
+    public void getTilesForIntent_summaryUriSpecified_shouldOverrideRemoteViewSummary()
+            throws RemoteException {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null,
+                null, URI_GET_SUMMARY);
+        resolveInfo.activityInfo.metaData.putInt("com.android.settings.custom_view",
+                R.layout.user_preference);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        // Mock the content provider interaction.
+        Bundle bundle = new Bundle();
+        bundle.putString(TileUtils.META_DATA_PREFERENCE_SUMMARY, "new summary text");
+        when(mIContentProvider.call(anyString(),
+                eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_SUMMARY))), eq(URI_GET_SUMMARY),
+                any())).thenReturn(bundle);
+        when(mContentResolver.acquireUnstableProvider(anyString()))
+                .thenReturn(mIContentProvider);
+        when(mContentResolver.acquireUnstableProvider(any(Uri.class)))
+                .thenReturn(mIContentProvider);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */, true /* forceTintExternalIcon */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        Tile tile = outTiles.get(0);
+        assertThat(tile.remoteViews).isNotNull();
+        assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
+        // Make sure the summary TextView got a new text string.
+        TileUtilsShadowRemoteViews shadowRemoteViews =
+                (TileUtilsShadowRemoteViews) ShadowExtractor.extract(tile.remoteViews);
+        assertThat(shadowRemoteViews.overrideViewId).isEqualTo(android.R.id.summary);
+        assertThat(shadowRemoteViews.overrideText).isEqualTo("new summary text");
+    }
+
+    @Test
+    public void getTilesForIntent_providerUnavailable_shouldNotOverrideRemoteViewSummary()
+            throws RemoteException {
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null,
+                null, URI_GET_SUMMARY);
+        resolveInfo.activityInfo.metaData.putInt("com.android.settings.custom_view",
+                R.layout.user_preference);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        // Mock the content provider interaction.
+        Bundle bundle = new Bundle();
+        bundle.putString(TileUtils.META_DATA_PREFERENCE_SUMMARY, "new summary text");
+        when(mIContentProvider.call(anyString(),
+                eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_SUMMARY))), eq(URI_GET_SUMMARY),
+                any())).thenReturn(bundle);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */, true /* forceTintExternalIcon */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        Tile tile = outTiles.get(0);
+        assertThat(tile.remoteViews).isNotNull();
+        assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
+        // Make sure the summary TextView didn't get any text view updates.
+        TileUtilsShadowRemoteViews shadowRemoteViews =
+                (TileUtilsShadowRemoteViews) ShadowExtractor.extract(tile.remoteViews);
+        assertThat(shadowRemoteViews.overrideViewId).isNull();
+        assertThat(shadowRemoteViews.overrideText).isNull();
     }
 
     public static ResolveInfo newInfo(boolean systemApp, String category) {
@@ -370,7 +534,9 @@ public class TileUtilsTest {
         if (summaryUri != null) {
             info.activityInfo.metaData.putString("com.android.settings.summary_uri", summaryUri);
         }
-        if (title != null) {
+        if (titleResId != 0) {
+            info.activityInfo.metaData.putString(TileUtils.META_DATA_PREFERENCE_TITLE, title);
+        } else if (title != null) {
             info.activityInfo.metaData.putString(TileUtils.META_DATA_PREFERENCE_TITLE, title);
         }
         if (titleResId != 0) {
@@ -393,6 +559,19 @@ public class TileUtilsTest {
                 info.activityInfo.metaData = new Bundle();
             }
             info.activityInfo.metaData.putString(key, value);
+        }
+    }
+
+    @Implements(RemoteViews.class)
+    public static class TileUtilsShadowRemoteViews {
+
+        private Integer overrideViewId;
+        private CharSequence overrideText;
+
+        @Implementation
+        public void setTextViewText(int viewId, CharSequence text) {
+            overrideViewId = viewId;
+            overrideText = text;
         }
     }
 }

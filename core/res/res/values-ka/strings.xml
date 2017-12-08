@@ -21,24 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"ბაიტი"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"კბაიტი"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"მბაიტი"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"გბაიტი"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"ტბაიტი"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> დღე"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> დღე <xliff:g id="HOURS">%2$d</xliff:g> სთ"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> დღე <xliff:g id="HOURS">%2$d</xliff:g> სთ"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> სთ"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> სთ <xliff:g id="MINUTES">%2$d</xliff:g> წთ"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> სთ <xliff:g id="MINUTES">%2$d</xliff:g> წთ"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> წთ"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> წთ"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> წთ <xliff:g id="SECONDS">%2$d</xliff:g> წმ"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> წთ <xliff:g id="SECONDS">%2$d</xliff:g> წმ"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> წმ"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> წმ"</string>
     <string name="untitled" msgid="4638956954852782576">"უსათაურო"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ტელეფონის ნომრის გარეშე)"</string>
     <string name="unknownName" msgid="6867811765370350269">"უცნობი"</string>
@@ -95,11 +79,13 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ხმოვანი/გადაუდებელი ზარების სერვისი არ არის"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"დროებით არ არის შემოთავაზებული მობილური ქსელის მიერ თქვენს მდებარეობაზე"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ქსელთან დაკავშირება ვერ ხერხდება"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"მიღების გასაუმჯობესებლად ცადეთ არჩეული ტიპის შეცვლა აქ: სისტემა &gt; ქსელი და ინტერნეტი &gt; მობილური ქსელები &gt; ქსელის სასურველი ტიპი."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"მიღების გასაუმჯობესებლად ცადეთ არჩეული ტიპის შეცვლა აქ: პარამეტრები &gt; ქსელი და ინტერნეტი &gt; მობილური ქსელები &gt; ქსელის სასურველი ტიპი."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"აქტიურია Wi‑Fi დარეკვა"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"გადაუდებელი ზარები საჭიროებს მობილურ ქსელს."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"გაფრთხილებები"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ზარის გადამისამართება"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"გადაუდებელი გადმორეკვის რეჟიმი"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"მობილური ინტერნეტის შეტყობინებები"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"მობილური ინტერნეტის სტატუსი"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS შეტყობინებები"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ხმოვანი ფოსტის შეტყობინებები"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"დარეკვა Wi-Fi-ს მეშვეობით"</string>
@@ -131,10 +117,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"სერვისის ძიება"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"დარეკვა Wi-Fi-ს მეშვეობით"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Wi-Fi-ს მეშვეობით ზარების განხორციელების ან შეტყობინების გაგზავნისათვის, პირველ რიგში დაეკითხეთ თქვენს ოპერატორს აღნიშნულ მომსახურებაზე. შემდეგ ხელახლა ჩართეთ Wi-Fi ზარები პარამეტრებიდან."</item>
+    <item msgid="3910386316304772394">"Wi-Fi-ს მეშვეობით ზარების განსახორციელებლად ან შეტყობინებების გასაგზავნად, პირველ რიგში, ამ სერვისის გააქტიურება თქვენს ოპერატორს უნდა თხოვოთ. შემდეგ კი ხელახლა ჩართეთ Wi-Fi დარეკვა პარამეტრებიდან. (შეცდომის კოდი: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"დაარეგისტრირეთ თქვენი ოპერატორი"</item>
+    <item msgid="7472393097168811593">"თქვენს ოპერატორთან რეგისტრირება (შეცდომის კოდი: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -246,8 +232,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ხმოვანი ასისტ."</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ახლა ჩაკეტვა"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"შიგთავსი დამალულია"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"შიგთავსი დამალულია წესების შესაბამისად"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"ახალი შეტყობინება"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"ვირტუალური კლავიატურა"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"ფიზიკური კლავიატურა"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"უსაფრთხოება"</string>
@@ -263,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"გაფრთხილებები"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"დემო-რეჟიმი საცალო მოვაჭრეებისთვის"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB კავშირი"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"ფონურ რეჟიმში გაშვებული აპები"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> გაშვებულია ფონურ რეჟიმში"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"ფონურ რეჟიმში გაშვებულია <xliff:g id="NUMBER">%1$d</xliff:g> აპი"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"ბატარეის მხარჯავი აპები"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> იყენებს ბატარეას"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"ბატარეას <xliff:g id="NUMBER">%1$d</xliff:g> აპი იყენებს"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"შეეხეთ ბატარეისა და მონაცემების მოხმარების შესახებ დეტალური ინფორმაციისთვის"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"უსაფრთხო რეჟიმი"</string>
@@ -1106,6 +1091,13 @@
       <item quantity="other">ხელმისაწვდომია ღია Wi-Fi ქსელები</item>
       <item quantity="one">ხელმისაწვდომია ღია Wi-Fi ქსელი</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"დაუკავშირდით ღია Wi‑Fi ქსელს"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"მიმდინარეობს ღია Wi‑Fi ქსელთან დაკავშირება"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi ქსელთან დაკავშირება წარმატებით მოხერხდა"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi ქსელთან დაკავშირება ვერ მოხერხდა"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"შეეხეთ ყველა ქსელის სანახავად"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"დაკავშირება"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"ყველა ქსელი"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ქსელთან დაკავშირება"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ქსელში შესვლა"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1185,6 +1177,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB MIDI-სთვის"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"დაკავშირებულია USB აქსესუართან"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"შეეხეთ დამატებითი ვარიანტების სანახავად."</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"აღმოჩენილია ანალოგური აუდიო აქსესუარი"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"მიერთებული მოწყობილობა არაა თავსებადი ამ ტელეფონთან. მეტის გასაგებად, შეეხეთ."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB გამართვა შეერთებულია"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"შეეხეთ USB-გამართვის გასათიშად."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"მონიშნეთ რათა შეწყვიტოთ USB-ის გამართვა"</string>
@@ -1299,7 +1293,7 @@
     <string name="submit" msgid="1602335572089911941">"გაგზავნა"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"მანქანის რეჟიმი ჩართულია"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"შეეხეთ მანქანის რეჟიმიდან გამოსასვლელად."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"ინტერნეტის მიერთება ან უსადენო ქსელი აქტიურია."</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"ტეტერინგი ან უსადენო ქსელი აქტიურია"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"შეეხეთ დასაყენებლად."</string>
     <string name="back_button_label" msgid="2300470004503343439">"უკან"</string>
     <string name="next_button_label" msgid="1080555104677992408">"მომდევნო"</string>
@@ -1621,7 +1615,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"დაინსტალირებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"წაიშალა თქვენი ადმინისტრატორის მიერ"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"ელემენტის მოქმედების ვადის გაუმჯობესებისათვის, ელემენტის დამზოგი ამცირებს თქვენი მოწყობილობის ფუნქციონალობას და ზღუდავს ვიბრაციას, ადგილმდებარეობის სერვისებს და ძირითად ფონურ მონაცემებს. ელფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპების განახლება არ მოხდება მათ გახსნამდე.\n\nელემენტის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"ბატარეის მოქმედების ვადის გაუმჯობესებისათვის, ბატარეის დამზოგი ამცირებს თქვენი მოწყობილობის ფუნქციონალობას და ზღუდავს ვიბრაციას, ადგილმდებარეობის სერვისებს და ძირითად ფონურ მონაცემებს. ელფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპების განახლება არ მოხდება მათ გახსნამდე.\n\nბატარეის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ჩართვა"</string>
@@ -1721,14 +1715,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"ჩამაგრების მოხსნა"</string>
     <string name="app_info" msgid="6856026610594615344">"აპის შესახებ"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"გსურთ მოწყობილობის გადაყენება?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"შეეხეთ მოწყობილობის გადასაყენებლად"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"მიმდინარეობს დემონსტრაციის დაწყება…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"მიმდინარეობს მოწყობილობის გადაყენება…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"გსურთ მოწყობილობის გადაყენება?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"შეტანილი ცვლილებები დაიკარგება, ხოლო დემონსტრაცია ხელახლა <xliff:g id="TIMEOUT">%1$s</xliff:g> წამში დაიწყება…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"გაუქმება"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ახლავე გადაყენება"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"გათიშული <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"საკონფერენციო ზარი"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"მინიშნება"</string>
@@ -1772,9 +1760,11 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"დაუყოვნებლივ გადაინაცვლეთ სანაპირო რეგიონებიდან და მდინარისპირა ტერიტორიებიდან უსაფრთხო ადგილზე (მაგალითად, შემაღლებულ ადგილზე)."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"შეინარჩუნეთ სიმშვიდე და იპოვეთ ახლომდებარე თავშესაფარი."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"სატესტო საგანგებო შეტყობინება"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"პასუხი"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM ბარათი დაუშვებელია"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM ბარათი უზრუნველყოფილი არ არის"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM ბარათი დაუშვებელია"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"ტელეფონი დაუშვებელია"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"ამომხტარი ფანჯარა"</string>
 </resources>

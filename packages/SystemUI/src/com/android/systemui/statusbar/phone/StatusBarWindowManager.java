@@ -33,6 +33,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.keyguard.R;
 import com.android.systemui.Dumpable;
@@ -61,7 +62,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     private boolean mHasTopUiChanged;
     private int mBarHeight;
     private boolean mKeyguardScreenRotation;
-    private final float mScreenBrightnessDoze;
+    private float mScreenBrightnessDoze;
     private final State mCurrentState = new State();
     private OtherwisedCollapsedListener mListener;
 
@@ -110,7 +111,6 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
                         | WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 PixelFormat.TRANSLUCENT);
         mLp.token = new Binder();
-        mLp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         mLp.gravity = Gravity.TOP;
         mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         mLp.setTitle("StatusBar");
@@ -120,6 +120,22 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         mWindowManager.addView(mStatusBarView, mLp);
         mLpChanged = new WindowManager.LayoutParams();
         mLpChanged.copyFrom(mLp);
+    }
+
+    public void setDozeScreenBrightness(int value) {
+        mScreenBrightnessDoze = value / 255f;
+    }
+
+    public void setKeyguardDark(boolean dark) {
+        int vis = mStatusBarView.getSystemUiVisibility();
+        if (dark) {
+            vis = vis | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            vis = vis | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        } else {
+            vis = vis & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            vis = vis & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        }
+        mStatusBarView.setSystemUiVisibility(vis);
     }
 
     private void applyKeyguardFlags(State state) {
@@ -137,7 +153,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     }
 
     private void adjustScreenOrientation(State state) {
-        if (state.isKeyguardShowingAndNotOccluded()) {
+        if (state.isKeyguardShowingAndNotOccluded() || state.dozing) {
             if (mKeyguardScreenRotation) {
                 mLpChanged.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
             } else {
@@ -181,7 +197,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     private boolean isExpanded(State state) {
         return !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
-                || state.headsUpShowing);
+                || state.headsUpShowing || state.scrimsVisible);
     }
 
     private void applyFitsSystemWindows(State state) {
@@ -226,6 +242,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         applyModalFlag(state);
         applyBrightness(state);
         applyHasTopUi(state);
+        applySleepToken(state);
         if (mLp.copyFrom(mLpChanged) != 0) {
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
         }
@@ -267,6 +284,14 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
 
     private void applyHasTopUi(State state) {
         mHasTopUiChanged = isExpanded(state);
+    }
+
+    private void applySleepToken(State state) {
+        if (state.dozing) {
+            mLpChanged.privateFlags |= LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
+        } else {
+            mLpChanged.privateFlags &= ~LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
+        }
     }
 
     public void setKeyguardShowing(boolean showing) {
@@ -317,6 +342,11 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
 
     public void setForceUserActivity(boolean forceUserActivity) {
         mCurrentState.forceUserActivity = forceUserActivity;
+        apply(mCurrentState);
+    }
+
+    public void setScrimsVisible(boolean scrimsVisible) {
+        mCurrentState.scrimsVisible = scrimsVisible;
         apply(mCurrentState);
     }
 
@@ -421,6 +451,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         boolean remoteInputActive;
         boolean forcePluginOpen;
         boolean dozing;
+        boolean scrimsVisible;
 
         private boolean isKeyguardShowingAndNotOccluded() {
             return keyguardShowing && !keyguardOccluded;

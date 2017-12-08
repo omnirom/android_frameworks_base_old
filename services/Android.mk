@@ -7,7 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := services
 LOCAL_DEX_PREOPT_APP_IMAGE := true
 LOCAL_DEX_PREOPT_GENERATE_PROFILE := true
-LOCAL_DEX_PREOPT_PROFILE_CLASS_LISTING := $(LOCAL_PATH)/profile-classes
+LOCAL_DEX_PREOPT_PROFILE_CLASS_LISTING := $(LOCAL_PATH)/art-profile
 
 LOCAL_SRC_FILES := $(call all-java-files-under,java)
 
@@ -34,7 +34,6 @@ services := \
     net \
     print \
     restrictions \
-    retaildemo \
     usage \
     usb \
     voiceinteraction
@@ -43,6 +42,9 @@ services := \
 LOCAL_STATIC_JAVA_LIBRARIES := $(addprefix services.,$(services)) \
     android.hidl.base-V1.0-java-static \
     android.hardware.biometrics.fingerprint-V2.1-java-static
+
+LOCAL_JAVA_LIBRARIES := \
+    android.hidl.manager-V1.0-java
 
 ifeq ($(EMMA_INSTRUMENT_FRAMEWORK),true)
 LOCAL_EMMA_INSTRUMENT := true

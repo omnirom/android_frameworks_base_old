@@ -53,6 +53,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -76,11 +77,12 @@ import android.widget.TextView;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.plugins.VolumeDialogController.StreamState;
-import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerZenModePanel;
@@ -106,7 +108,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
 
     private final Context mContext;
     private final H mHandler = new H();
-    private VolumeDialogController mController;
+    private final VolumeDialogController mController;
 
     private Window mWindow;
     private CustomDialog mDialog;
@@ -135,6 +137,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     private boolean mShowA11yStream;
 
     private int mActiveStream;
+    private int mPrevActiveStream;
     private boolean mAutomute = VolumePrefs.DEFAULT_ENABLE_AUTOMUTE;
     private boolean mSilentMode = VolumePrefs.DEFAULT_ENABLE_SILENT_MODE;
     private State mState;
@@ -155,7 +158,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     private boolean mShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
 
     public VolumeDialogImpl(Context context) {
-        mContext = context;
+        mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mZenModeController = Dependency.get(ZenModeController.class);
         mController = Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
@@ -187,7 +190,13 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
 
     @Override
     public void destroy() {
+        mAccessibility.destroy();
         mController.removeCallback(mControllerCallbackH);
+        if (mZenFooter != null) {
+            mZenFooter.cleanup();
+        }
+        Dependency.get(TunerService.class).removeTunable(this);
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     private void initDialog() {
@@ -231,6 +240,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                 return true;
             }
         });
+
         mDialogContentView = (ViewGroup) mDialog.findViewById(R.id.volume_dialog_content);
         mDialogRowsView = (ViewGroup) mDialogContentView.findViewById(R.id.volume_dialog_rows);
         mDummyHeaderTextView = mDialogView.findViewById(R.id.volume_row_header_dummy);
@@ -525,6 +535,9 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         if (mSafetyWarning != null) return 5000;
         if (mExpanded || mExpandButtonAnimationRunning) return 5000;
         if (mActiveStream == AudioManager.STREAM_MUSIC) return 1500;
+        if (mZenFooter.shouldShowIntroduction()) {
+            return 6000;
+        }
         return 3000;
     }
 
@@ -596,7 +609,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         final VolumeRow activeRow = getActiveRow();
         if (!dismissing) {
             mWindow.setLayout(mWindow.getAttributes().width, ViewGroup.LayoutParams.MATCH_PARENT);
-            TransitionManager.beginDelayedTransition(mDialogView, getTransistion());
+            TransitionManager.beginDelayedTransition(mDialogView, getTransition());
         }
         updateRowsH(activeRow);
         rescheduleTimeoutH();
@@ -638,16 +651,26 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         }
     }
 
-    private boolean shouldBeVisibleH(VolumeRow row, boolean isActive) {
+    private boolean shouldBeVisibleH(VolumeRow row, VolumeRow activeRow) {
+        boolean isActive = row == activeRow;
         final boolean linkNotificationWithVolume = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
         final boolean isNotificationStream = row.stream == AudioManager.STREAM_NOTIFICATION;
         if (linkNotificationWithVolume && isNotificationStream) {
             return false;
         }
+
         if (row.stream == AudioSystem.STREAM_ACCESSIBILITY) {
             return mShowA11yStream;
         }
+
+        // if the active row is accessibility, then continue to display previous
+        // active row since accessibility is dispalyed under it
+        if (activeRow.stream == AudioSystem.STREAM_ACCESSIBILITY &&
+                row.stream == mPrevActiveStream) {
+            return true;
+        }
+
         return mExpanded && row.view.getVisibility() == View.VISIBLE
                 || (mExpanded && (row.important || isActive))
                 || !mExpanded && isActive;
@@ -661,7 +684,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         // apply changes to all rows
         for (final VolumeRow row : mRows) {
             final boolean isActive = row == activeRow;
-            final boolean shouldBeVisible = shouldBeVisibleH(row, isActive);
+            final boolean shouldBeVisible = shouldBeVisibleH(row, activeRow);
             Util.setVisOrGone(row.view, shouldBeVisible);
             Util.setVisOrGone(row.header, shouldBeVisible && mShowHeaders);
             if (row.view.isShown()) {
@@ -705,6 +728,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         }
 
         if (mActiveStream != state.activeStream) {
+            mPrevActiveStream = mActiveStream;
             mActiveStream = state.activeStream;
             updateRowsH(getActiveRow());
             rescheduleTimeoutH();
@@ -722,10 +746,13 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                 && (mAudioManager.isStreamAffectedByRingerMode(mActiveStream) || mExpanded)
                 && !mZenPanel.isEditing();
 
-        if (wasVisible != visible) {
-            mZenFooter.update();
-            Util.setVisOrGone(mZenFooter, visible);
+        TransitionManager.endTransitions(mDialogView);
+        TransitionManager.beginDelayedTransition(mDialogView, getTransition());
+        if (wasVisible != visible && !visible) {
+            prepareForCollapse();
         }
+        Util.setVisOrGone(mZenFooter, visible);
+        mZenFooter.update();
 
         final boolean fullWasVisible = mZenPanel.getVisibility() == View.VISIBLE;
         final boolean fullVisible = mShowFullZen && !visible;
@@ -782,6 +809,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
 
         // update header text
         Util.setText(row.header, getStreamLabelH(ss));
+        row.slider.setContentDescription(row.header.getText());
         mConfigurableTexts.add(row.header, ss.name);
 
         // update icon
@@ -850,11 +878,17 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             row.icon.setContentDescription(getStreamLabelH(ss));
         }
 
+        // ensure tracking is disabled if zenMuted
+        if (zenMuted) {
+            row.tracking = false;
+        }
+
         // notification slider is disabled when vibrate or silent - only ringer slider can be used
         final boolean enableSlider = isNotificationStream ? (!zenMuted && !isRingVibrate && !isRingSilent && !isNotificationSilent) : !zenMuted;
         // update slider value - 0 if silent or vibrate
         final int vlevel = row.ss.muted && (isRingSilent || isNotificationSilent || isRingVibrate && !zenMuted) ? 0
                 : row.ss.level;
+
         updateVolumeRowSliderH(row, enableSlider, vlevel);
     }
 
@@ -979,7 +1013,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         }
     }
 
-    private AutoTransition getTransistion() {
+    private AutoTransition getTransition() {
         AutoTransition transition = new AutoTransition();
         transition.setDuration(mExpandButtonAnimationDuration);
         transition.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
@@ -1081,7 +1115,12 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         public void onAccessibilityModeChanged(Boolean showA11yStream) {
             boolean show = showA11yStream == null ? false : showA11yStream;
             mShowA11yStream = show;
-            updateRowsH(getActiveRow());
+            VolumeRow activeRow = getActiveRow();
+            if (!mShowA11yStream && AudioManager.STREAM_ACCESSIBILITY == activeRow.stream) {
+                dismissH(Events.DISMISS_STREAM_GONE);
+            } else {
+                updateRowsH(activeRow);
+            }
 
         }
 
@@ -1158,6 +1197,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     private final class CustomDialog extends Dialog {
         public CustomDialog(Context context) {
             super(context);
+            //super(new ContextThemeWrapper(context, R.style.systemui_theme));
         }
 
         @Override
@@ -1281,14 +1321,12 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                 }
             });
             mDialogView.setAccessibilityDelegate(this);
-            mAccessibilityMgr.addAccessibilityStateChangeListener(
-                    new AccessibilityStateChangeListener() {
-                        @Override
-                        public void onAccessibilityStateChanged(boolean enabled) {
-                            updateFeedbackEnabled();
-                        }
-                    });
+            mAccessibilityMgr.addAccessibilityStateChangeListener(mListener);
             updateFeedbackEnabled();
+        }
+
+        public void destroy() {
+            mAccessibilityMgr.removeAccessibilityStateChangeListener(mListener);
         }
 
         @Override
@@ -1313,6 +1351,9 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             }
             return false;
         }
+
+        private final AccessibilityStateChangeListener mListener =
+                enabled -> updateFeedbackEnabled();
     }
 
     private static class VolumeRow {

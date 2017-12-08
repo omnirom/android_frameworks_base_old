@@ -69,17 +69,18 @@ interface IConnectivityManager
 
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
 
-    int tether(String iface);
+    int tether(String iface, String callerPkg);
 
-    int untether(String iface);
+    int untether(String iface, String callerPkg);
 
     int getLastTetherError(String iface);
 
-    boolean isTetheringSupported();
+    boolean isTetheringSupported(String callerPkg);
 
-    void startTethering(int type, in ResultReceiver receiver, boolean showProvisioningUi);
+    void startTethering(int type, in ResultReceiver receiver, boolean showProvisioningUi,
+            String callerPkg);
 
-    void stopTethering(int type);
+    void stopTethering(int type, String callerPkg);
 
     String[] getTetherableIfaces();
 
@@ -95,7 +96,7 @@ interface IConnectivityManager
 
     String[] getTetherableBluetoothRegexs();
 
-    int setUsbTethering(boolean enable);
+    int setUsbTethering(boolean enable, String callerPkg);
 
     void reportInetCondition(int networkType, int percentage);
 
@@ -122,6 +123,7 @@ interface IConnectivityManager
     VpnInfo[] getAllVpnInfo();
 
     boolean updateLockdownVpn();
+    boolean isAlwaysOnVpnPackageSupported(int userId, String packageName);
     boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown);
     String getAlwaysOnVpnPackage(int userId);
 

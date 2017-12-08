@@ -28,6 +28,9 @@
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"ບໍ່ໄດ້ເຊື່ອມຕໍ່ເນື່ອງຈາກຄຸນນະພາບເຄືອຂ່າຍຕໍ່າ"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"​ການ​ເຊື່ອມ​ຕໍ່ WiFi ລົ້ມ​ເຫຼວ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ບັນຫາການພິສູດຢືນຢັນ"</string>
+    <string name="wifi_cant_connect" msgid="5410016875644565884">"ບໍ່ສາມາດເຊື່ອມຕໍ່ໄດ້"</string>
+    <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາ \'<xliff:g id="AP_NAME">%1$s</xliff:g>\' ໄດ້"</string>
+    <string name="wifi_check_password_try_again" msgid="516958988102584767">"ກະລຸນາກວດສອບລະຫັດຜ່ານແລ້ວລອງໃໝ່ອີກຄັ້ງ"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"ບໍ່ຢູ່ໃນໄລຍະທີ່ເຊື່ອມຕໍ່ໄດ້"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"ຈະບໍ່ເຊື່ອມຕໍ່ອັດຕະໂນມັດ"</string>
     <string name="wifi_no_internet" msgid="3880396223819116454">"ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
@@ -37,6 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"​ເຊື່ອມຕໍ່​ຜ່ານ %1$s ​ແລ້ວ"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"ມີ​ໃຫ້​ຜ່ານ %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"​ເຊື່ອມ​ຕໍ່​ແລ້ວ,​ ບໍ່​ມີ​ອິນ​ເຕີ​ເນັດ"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ຈຸດການເຂົ້າເຖິງເຕັມຊົ່ວຄາວ"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"ເຊື່ອມຕໍ່ຜ່ານ %1$s ແລ້ວ"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"ໃຊ້ໄດ້ຜ່ານ %1$s"</string>
+    <string name="speed_label_very_slow" msgid="1867055264243608530">"ຊ້າຫຼາຍ"</string>
+    <string name="speed_label_slow" msgid="813109590815810235">"ຊ້າ"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"ຕົກລົງ"</string>
+    <string name="speed_label_medium" msgid="3175763313268941953">"ປານກາງ"</string>
+    <string name="speed_label_fast" msgid="7715732164050975057">"ໄວ"</string>
+    <string name="speed_label_very_fast" msgid="2265363430784523409">"ໄວຫຼາຍ"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"ຕັດການເຊື່ອມຕໍ່ແລ້ວ"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"ກຳລັງຢຸດການເຊື່ອມຕໍ່..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"ກຳລັງເຊື່ອມຕໍ່..."</string>
@@ -46,18 +59,22 @@
     <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີສື່)"</string>
     <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"ເຊື່ອມຕໍ່ (ບໍ່ມີການເຂົ້າເຖິງຂໍ້ຄວາມ)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີໂທລະສັບ ຫຼືສື່)"</string>
+    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"ເຊື່ອມຕໍ່ແລ້ວ, ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີໂທລະສັບ), ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີມີເດຍ), ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີໂທລະສັບ ຫຼື ມີເດຍ), ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"ສຽງ"</string>
-    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"ສຽງໂທລະສັບ"</string>
+    <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ການໂທ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ການໂອນຍ້າຍໄຟລ໌"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ອຸປະກອນປ້ອນຂໍ້ມູນ"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ການເຂົ້າເຖິງອິນເຕີເນັດ"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ່​ຕິດ​ຕໍ່"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"​ໃຊ້​ສຳ​ລັບການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ່​ຕິດ​ຕໍ່"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ການແບ່ງປັນການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
-    <string name="bluetooth_profile_map" msgid="5465271250454324383">"ການ​ເຂົ້າ​ເຖິງ​ຂໍ້​ຄວາມ"</string>
+    <string name="bluetooth_profile_map" msgid="1019763341565580450">"ຂໍ້ຄວາມ"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"ການ​ເຂົ້າ​ເຖິງ SIM"</string>
-    <string name="bluetooth_profile_a2dp_high_quality" msgid="2221025895896419505">"ໃຊ້ສຽງຄຸນນະພາບສູງ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
-    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="5860996587596508755">"ໃຊ້ສຽງຄຸນນະພາບສູງ"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"ສຽງ HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"ສຽງ HD"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"ເຊື່ອມຕໍ່ກັບສື່ດ້ານສຽງແລ້ວ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ເຊື່ອມຕໍ່ກັບສຽງໂທລະສັບແລ້ວ"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ເຊື່ອມຕໍ່ກັບເຊີບເວີໂອນຍ້າຍໄຟລ໌ແລ້ວ"</string>
@@ -88,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"ສັນຍານ Wi-Fi ສອງຂີດ."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wifi ສາມຂີດ."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"ສັນຍານ Wi-Fi ເຕັມ"</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"ເຄືອຂ່າຍເປີດ"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"ເຄືອຂ່າຍເຂົ້າລະຫັດ"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ແອັບຯທີ່ຖືກລຶບອອກແລ້ວ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ລຶບແອັບຯ ແລະຜູ່ໃຊ້ແລ້ວ"</string>
@@ -173,6 +192,8 @@
     <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ສະຫຼັບເປັນ Wi-Fi ເມື່ອມືຖືສັນຍານອ່ອນ"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ອະ​ນຸ​ຍາດ​ການ​ສະ​ແກນ​ການ​ໂຣມ Wi‑Fi ​ສະ​ເໝີ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ເປີດໃຊ້ອິນເຕີເນັດມືຖືຕະຫຼອດເວລາ"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວ"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ສະແດງອຸປະກອນ Bluetooth ທີ່ບໍ່ມີຊື່"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ປິດໃຊ້ລະດັບສຽງສົມບູນ"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ເປີດສຽງເຕືອນແບບອິນແບນ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ເວີຊັນ Bluetooth AVRCP"</string>
@@ -204,6 +225,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ອະນຸຍາດໃຫ້ຈຳລອງຕຳແໜ່ງ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ເປີດ​ນຳ​ໃຊ້​ການກວດ​ສອບ​ຄຸນ​ສົມ​ບັດ​ມຸມມອງ"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ໃຫ້​ຂໍ້​ມູນ​ມື​ຖື​ເປີດ​ຢູ່​ສະ​ເໝີ, ແມ້​ແຕ່​ເມື່ອ Wi‑Fi ເປີດ​ຢູ່ (ສຳ​ລັບ​ການ​ສະ​ຫຼັບ​ເຄືອ​ຂ່າຍ​ໄວ)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວຫາກວ່າສາມາດໃຊ້ໄດ້"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"ອະນຸຍາດໃຫ້ດີບັ໊ກຜ່ານ USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"ການດີບັ໊ກຜ່ານ USB ແມ່ນມີຈຸດປະສົງເພື່ອການພັດທະນາເທົ່ານັ້ນ. ມັນສາມາດໃຊ້ເພື່ອສຳເນົາຂໍ້ມູນລະຫວ່າງຄອມພິວເຕີ ແລະອຸປະກອນຂອງທ່ານ, ຕິດຕັ້ງແອັບຯໂດຍບໍ່ຜ່ານການແຈ້ງເຕືອນ ແລະອ່ານຂໍ້ມູນການບັນທຶກ."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ຖອດຖອນການເຂົ້າເຖິງການດີບັ໊ກຜ່ານ USB ຈາກຄອມພິວເຕີທຸກເຄື່ອງ ທີ່ທ່ານເຄີຍອະນຸຍາດກ່ອນໜ້ານີ້?"</string>
@@ -211,6 +233,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ການ​ຕັ້ງຄ່າ​ເຫຼົ່ານີ້​ແມ່ນ​ມີ​ຈຸດປະສົງ​ເພື່ອ​ການ​ພັດທະນາ​ເທົ່ານັ້ນ. ພວກ​ມັນ​ສາມາດ​ເຮັດ​ໃຫ້​ອຸປະກອນ ແລະ​ແອັບພລິເຄຊັນ​ຂອງ​ທ່ານ​ຢຸດ​ເຮັດ​ວຽກ ຫຼື​ເຮັດ​ວຽກ​ຜິດປົກກະຕິ​ໄດ້."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ຢືນຢັນແອັບຯຜ່ານທາງ USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ກວດສອບແອັບຯທີ່ຕິດຕັ້ງແລ້ວຜ່ານທາງ ADB/ADT ເພື່ອກວດຫາພຶດຕິກຳທີ່ເປັນອັນຕະລາຍ."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"ຈະສະແດງອຸປະກອນ Bluetooth ທີ່ບໍ່ມີຊື່ (ທີ່ຢູ່ MAC ເທົ່ານັ້ນ)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ປິດໃຊ້ຄຸນສົມບັດລະດັບສຽງສົມບູນຂອງ Bluetooth ໃນກໍລະນີເກີດບັນຫາລະດັບສຽງສົມບູນກັບອຸປະກອນທາງໄກ ເຊັ່ນວ່າ ລະດັບສຽງດັງເກີນຍອມຮັບໄດ້ ຫຼື ຄວບຄຸມບໍ່ໄດ້."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ເປີດໃຫ້ສຽງຣິງໂທນຢູ່ໂທລະສັບດັງໃນຫູຟັງ Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal ໃນໂຕເຄື່ອງ"</string>
@@ -320,19 +343,21 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ການ​ປັບ​ແຕ່ງ​ສີ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"​ຄຸນ​ສົມ​ບັດ​ນີ້​ກຳ​ລັງ​ຢູ່​ໃນ​ການ​ທົດ​ລອງ​ແລະ​ອາດ​ມີ​ຜົນ​ຕໍ່​ປະ​ສິດ​ທິ​ພາບ."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"ຖືກແທນໂດຍ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"ອີກປະມານ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> ຈົນກວ່າຈະສາກເຕັມ"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"ຍັງເຫຼືອ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">%1$s</xliff:g> - ຍັງເຫຼືອປະມານ <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> - ຍັງເຫຼືອ <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"ອີກປະມານ <xliff:g id="TIME">^1</xliff:g>"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"ເຫຼືອອີກປະມານ <xliff:g id="TIME">^1</xliff:g> ໂດຍອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">^1</xliff:g> ຈົນກວ່າຈະສາກເຕັມ"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"ຍັງເຫຼືອ <xliff:g id="TIME">^1</xliff:g>"</string>
+    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"ເຫຼືອອີກ <xliff:g id="TIME">^1</xliff:g> ໂດຍອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ"</string>
+    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> - ຍັງເຫຼືອປະມານ <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> - ເຫຼືອອີກປະມານ <xliff:g id="TIME">^2</xliff:g> ໂດຍອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - ຍັງເຫຼືອ <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ຈົນກວ່າຈະສາກເຕັມ"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> ຈົນກວ່າຈະສາກເຕັມ"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"ບໍ່ຮູ້ຈັກ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ກຳລັງສາກໄຟ"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ກຳລັງສາກໄຟ"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ບໍ່ໄດ້ສາກໄຟ"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ບໍ່ໄດ້ສາກໄຟ"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"ສຽບສາຍແລ້ວ, ບໍ່ສາມາດສາກໄດ້ໃນຕອນນີ້"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ເຕັມ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"ຄວບຄຸມໂດຍຜູ້ເບິ່ງແຍງ"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"ຜູ້ເບິ່ງແຍງລະບົບເປີດໃຫ້ໃຊ້ແລ້ວ"</string>
@@ -357,7 +382,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ປັບແຕ່ງເອງ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"ຊ່ວຍເຫຼືອ &amp; ຄຳຕິຊົມ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"ເມນູ"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Enter password to perform factory reset in demo mode"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"ຕໍ່ໄປ"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"​ຕ້ອງ​ໃສ່​ລະ​ຫັດ​ຜ່ານ"</string>

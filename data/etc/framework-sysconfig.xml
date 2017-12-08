@@ -22,10 +22,14 @@
     <allow-implicit-broadcast action="android.intent.action.SIM_STATE_CHANGED" />
     <allow-implicit-broadcast action="android.intent.action.PACKAGE_CHANGED" />
     <allow-implicit-broadcast action="android.intent.action.MEDIA_SCANNER_SCAN_FILE" />
+    <allow-implicit-broadcast action="android.media.action.OPEN_AUDIO_EFFECT_CONTROL_SESSION" />
+    <allow-implicit-broadcast action="android.media.action.CLOSE_AUDIO_EFFECT_CONTROL_SESSION" />
 
     <!-- Whitelist of what components are permitted as backup data transports.  The
          'service' attribute here is a flattened ComponentName string. -->
     <backup-transport-whitelisted-service
         service="android/com.android.internal.backup.LocalTransportService" />
 
+    <!-- Whitelist of bundled applications which all handle URLs to their websites by default -->
+    <app-link package="com.android.carrierdefaultapp" />
 </config>

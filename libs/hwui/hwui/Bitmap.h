@@ -17,11 +17,12 @@
 
 #include <SkBitmap.h>
 #include <SkColorSpace.h>
-#include <SkColorTable.h>
+#include <SkImage.h>
 #include <SkImageInfo.h>
 #include <SkPixelRef.h>
 #include <cutils/compiler.h>
 #include <ui/GraphicBuffer.h>
+#include <SkImage.h>
 
 namespace android {
 
@@ -44,53 +45,36 @@ typedef void (*FreeFunc)(void* addr, void* context);
 
 class ANDROID_API Bitmap : public SkPixelRef {
 public:
-    static sk_sp<Bitmap> allocateHeapBitmap(SkBitmap* bitmap, SkColorTable* ctable);
+    static sk_sp<Bitmap> allocateHeapBitmap(SkBitmap* bitmap);
     static sk_sp<Bitmap> allocateHeapBitmap(const SkImageInfo& info);
 
     static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
 
-    static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap, SkColorTable* ctable);
+    static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap);
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t allocSize, const SkImageInfo& info,
-        size_t rowBytes, SkColorTable* ctable);
+        size_t rowBytes);
 
     static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer);
 
     static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
 
-    static sk_sp<Bitmap> allocateHardwareBitmap(uirenderer::renderthread::RenderThread&,
-            SkBitmap& bitmap);
-
-    Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
-            SkColorTable* ctable);
+    Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes);
     Bitmap(void* address, void* context, FreeFunc freeFunc,
-            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
+            const SkImageInfo& info, size_t rowBytes);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
-            size_t rowBytes, SkColorTable* ctable);
-
-    int width() const { return info().width(); }
-    int height() const { return info().height(); }
-
-    // Can't mark as override since SkPixelRef::rowBytes isn't virtual
-    // but that's OK since we just want Bitmap to be able to rely
-    // on calling rowBytes() on an unlocked pixelref, which it will be
-    // doing on a Bitmap type, not a SkPixelRef, so static
-    // dispatching will do what we want.
-    size_t rowBytes() const { return mRowBytes; }
+            size_t rowBytes);
+    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
 
     int rowBytesAsPixels() const {
-        return mRowBytes >> info().shiftPerPixel();
+        return rowBytes() >> SkColorTypeShiftPerPixel(mInfo.colorType());
     }
 
-    void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
+    void reconfigure(const SkImageInfo& info, size_t rowBytes);
     void reconfigure(const SkImageInfo& info);
     void setColorSpace(sk_sp<SkColorSpace> colorSpace);
     void setAlphaType(SkAlphaType alphaType);
 
     void getSkBitmap(SkBitmap* outBitmap);
-
-    // Ugly hack: in case of hardware bitmaps, it sets nullptr as pixels pointer
-    // so it would crash if anyone tries to render this bitmap.
-    void getSkBitmapForShaders(SkBitmap* outBitmap);
 
     int getAshmemFd() const;
     size_t getAllocationByteCount() const;
@@ -98,32 +82,31 @@ public:
     void setHasHardwareMipMap(bool hasMipMap);
     bool hasHardwareMipMap() const;
 
-    bool isOpaque() const {return info().isOpaque(); }
-    SkColorType colorType() const { return info().colorType(); }
-    void getBounds(SkRect* bounds) const;
-
-    bool readyToDraw() const {
-        return this->colorType() != kIndex_8_SkColorType || mColorTable;
+    bool isOpaque() const { return mInfo.isOpaque(); }
+    SkColorType colorType() const { return mInfo.colorType(); }
+    const SkImageInfo& info() const {
+        return mInfo;
     }
+
+    void getBounds(SkRect* bounds) const;
 
     bool isHardware() const {
         return mPixelStorageType == PixelStorageType::Hardware;
     }
 
     GraphicBuffer* graphicBuffer();
-protected:
-    virtual bool onNewLockPixels(LockRec* rec) override;
-    virtual void onUnlockPixels() override { };
-    virtual size_t getAllocatedSizeInBytes() const override;
+
+    // makeImage creates or returns a cached SkImage. Can be invoked from UI or render thread.
+    // Caching is supported only for HW Bitmaps with skia pipeline.
+    sk_sp<SkImage> makeImage();
 private:
-    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
     virtual ~Bitmap();
     void* getStorage() const;
 
-    PixelStorageType mPixelStorageType;
+    SkImageInfo mInfo;
 
-    size_t mRowBytes = 0;
-    sk_sp<SkColorTable> mColorTable;
+    const PixelStorageType mPixelStorageType;
+
     bool mHasHardwareMipMap = false;
 
     union {
@@ -145,6 +128,8 @@ private:
             GraphicBuffer* buffer;
         } hardware;
     } mPixelStorage;
+
+    sk_sp<SkImage> mImage; // Cache is used only for HW Bitmaps with Skia pipeline.
 };
 
 } //namespace android

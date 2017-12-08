@@ -27,4 +27,7 @@ interface IOemLockService {
 
     void setOemUnlockAllowedByUser(boolean allowed);
     boolean isOemUnlockAllowedByUser();
+
+    boolean isOemUnlockAllowed();
+    boolean isDeviceOemUnlocked();
 }

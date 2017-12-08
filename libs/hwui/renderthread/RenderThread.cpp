@@ -16,8 +16,12 @@
 
 #include "RenderThread.h"
 
-#include "../renderstate/RenderState.h"
-#include "../pipeline/skia/SkiaOpenGLReadback.h"
+#include "hwui/Bitmap.h"
+#include "renderstate/RenderState.h"
+#include "renderthread/OpenGLPipeline.h"
+#include "pipeline/skia/SkiaOpenGLReadback.h"
+#include "pipeline/skia/SkiaOpenGLPipeline.h"
+#include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "CanvasContext.h"
 #include "EglManager.h"
 #include "OpenGLReadback.h"
@@ -196,8 +200,46 @@ void RenderThread::initThreadLocals() {
     initializeDisplayEventReceiver();
     mEglManager = new EglManager(*this);
     mRenderState = new RenderState(*this);
-    mJankTracker = new JankTracker(mDisplayInfo);
     mVkManager = new VulkanManager(*this);
+    mCacheManager = new CacheManager(mDisplayInfo);
+}
+
+void RenderThread::dumpGraphicsMemory(int fd) {
+    globalProfileData()->dump(fd);
+
+    String8 cachesOutput;
+    String8 pipeline;
+    auto renderType = Properties::getRenderPipelineType();
+    switch (renderType) {
+        case RenderPipelineType::OpenGL: {
+            if (Caches::hasInstance()) {
+                cachesOutput.appendFormat("Caches:\n");
+                Caches::getInstance().dumpMemoryUsage(cachesOutput);
+            } else {
+                cachesOutput.appendFormat("No caches instance.");
+            }
+            pipeline.appendFormat("FrameBuilder");
+            break;
+        }
+        case RenderPipelineType::SkiaGL: {
+            mCacheManager->dumpMemoryUsage(cachesOutput, mRenderState);
+            pipeline.appendFormat("Skia (OpenGL)");
+            break;
+        }
+        case RenderPipelineType::SkiaVulkan: {
+            mCacheManager->dumpMemoryUsage(cachesOutput, mRenderState);
+            pipeline.appendFormat("Skia (Vulkan)");
+            break;
+        }
+        default:
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            break;
+    }
+
+    FILE *file = fdopen(fd, "a");
+    fprintf(file, "\n%s\n", cachesOutput.string());
+    fprintf(file, "\nPipeline=%s\n", pipeline.string());
+    fflush(file);
 }
 
 Readback& RenderThread::readback() {
@@ -222,6 +264,14 @@ Readback& RenderThread::readback() {
     }
 
     return *mReadback;
+}
+
+void RenderThread::setGrContext(GrContext* context) {
+    mCacheManager->reset(context);
+    if (mGrContext.get()) {
+        mGrContext->releaseResourcesAndAbandonContext();
+    }
+    mGrContext.reset(context);
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {
@@ -431,6 +481,22 @@ RenderTask* RenderThread::nextTask(nsecs_t* nextWakeup) {
         *nextWakeup = mNextWakeup;
     }
     return next;
+}
+
+sk_sp<Bitmap> RenderThread::allocateHardwareBitmap(SkBitmap& skBitmap) {
+    auto renderType = Properties::getRenderPipelineType();
+    switch (renderType) {
+        case RenderPipelineType::OpenGL:
+            return OpenGLPipeline::allocateHardwareBitmap(*this, skBitmap);
+        case RenderPipelineType::SkiaGL:
+            return skiapipeline::SkiaOpenGLPipeline::allocateHardwareBitmap(*this, skBitmap);
+        case RenderPipelineType::SkiaVulkan:
+            return skiapipeline::SkiaVulkanPipeline::allocateHardwareBitmap(*this, skBitmap);
+        default:
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            break;
+    }
+    return nullptr;
 }
 
 } /* namespace renderthread */

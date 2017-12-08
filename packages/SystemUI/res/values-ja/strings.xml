@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"このパソコンのRSAキーのフィンガープリント:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"このパソコンからのUSBデバッグを常に許可する"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USBデバッグは許可されていません"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"この端末に現在ログインしているユーザーはUSBデバッグをONにすることはできません。この機能を使用するには管理者ユーザーに切り替えてください。"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"この端末に現在ログインしているユーザーでは、USB デバッグを ON にすることはできません。この機能を使用するには、メインユーザーに切り替えてください。"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"画面サイズに合わせて拡大"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"画面サイズに合わせて拡大"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"スクリーンショットを保存中..."</string>
@@ -312,6 +312,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"詳細設定"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"完了"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"接続済み"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"接続済み、電池 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"接続しています..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"テザリング"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"アクセスポイント"</string>
@@ -354,10 +355,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"検索します"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"上にスライドして<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>を行います。"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"左にスライドして<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>を行います。"</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"アラーム、リマインダー、予定、指定した人からの着信以外の音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"アラーム以外の音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"アラーム、リマインダー、予定、指定した人からの着信以外の音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"アラーム以外の音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"カスタマイズ"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"アラーム、音楽、動画、ゲームを含むすべての音とバイブレーションがブロックされます。電話をかけることはできます。"</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"アラーム、音楽、動画、ゲームを含むすべての音とバイブレーションがブロックされます。電話をかけることはできます。"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"アラーム、音楽、動画、ゲームを含むすべての音とバイブレーションがブロックされます。"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"緊急度の低い通知を下に表示"</string>
@@ -457,7 +458,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"詳細"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"「<xliff:g id="VPN_APP">%1$s</xliff:g>」に接続しています。このアプリはあなたのネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN 設定を開く"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN 設定を開く"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"信頼できる認証情報を開く"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"管理者がネットワーク ログを有効にしているため、この端末のトラフィックは監視されています。\n\n詳しくは管理者にお問い合わせください。"</string>
@@ -469,6 +470,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"「<xliff:g id="APPLICATION">%1$s</xliff:g>」に接続しています。このアプリはあなたの個人のネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"この仕事用プロファイルは<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理され、<xliff:g id="APPLICATION">%2$s</xliff:g> に接続しています。このアプリはあなたの仕事のネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n詳しくは管理者にお問い合わせください。"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"この仕事用プロファイルは<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理され、<xliff:g id="APPLICATION_WORK">%2$s</xliff:g> に接続しています。このアプリはあなたの仕事のネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を管理できます。\n\nまた、<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> にも接続しているため、あなたの個人のネットワーク アクティビティも監視できます。"</string>
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> さんのロックを解除しました"</string>
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> を実行しています"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"手動でロックを解除するまでロックされたままとなります"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"通知をすばやく確認できます"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ロックを解除する前にご確認ください"</string>
@@ -550,12 +553,13 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"OFF"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"電源通知管理では、アプリの通知の重要度をレベル 0～5 で設定できます。\n\n"<b>"レベル 5"</b>" \n- 通知リストの一番上に表示する \n- 全画面表示を許可する \n- 常にポップアップする \n\n"<b>"レベル 4"</b>" \n- 全画面表示しない \n- 常にポップアップする \n\n"<b>"レベル 3"</b>" \n- 全画面表示しない \n- ポップアップしない \n\n"<b>"レベル 2"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n\n"<b>"レベル 1"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n- ロック画面やステータスバーに表示しない \n- 通知リストの一番下に表示する \n\n"<b>"レベル 0"</b>" \n- アプリからのすべての通知をブロックする"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"今後、この通知は配信されません。"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"今後、この通知は配信されません"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> 個の通知カテゴリ"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"このアプリでは通知カテゴリが設定されていません"</string>
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"このアプリの通知を OFF にすることはできません"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">このアプリの通知カテゴリ <xliff:g id="NUMBER_1">%d</xliff:g> 件中 1 件</item>
-      <item quantity="one">このアプリの通知カテゴリ <xliff:g id="NUMBER_0">%d</xliff:g> 件中 1 件</item>
+      <item quantity="other">このアプリの通知カテゴリ <xliff:g id="NUMBER_1">%s</xliff:g> 件中 1 件</item>
+      <item quantity="one">このアプリの通知カテゴリ <xliff:g id="NUMBER_0">%s</xliff:g> 件中 1 件</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -572,15 +576,19 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"通知管理"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"通知スヌーズ設定"</string>
-    <string name="snooze_option_15_min" msgid="1068727451405610715">"15分"</string>
-    <string name="snooze_option_30_min" msgid="867081342535195788">"30分"</string>
-    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1時間"</string>
-    <string name="snooze_option_2_hour" msgid="8332218255658969475">"2時間"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"元に戻す"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"スヌーズ: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="other">%d時間</item>
+      <item quantity="one">%d時間</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="other">%d分</item>
+      <item quantity="one">%d分</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"電池の使用状況"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充電中はバッテリー セーバーは利用できません"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"バッテリー セーバー"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"充電中はバッテリー セーバーは利用できません"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"バッテリー セーバー"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"パフォーマンスとバックグラウンド データを制限します"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> ボタン"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -720,9 +728,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"最小化"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"閉じる"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"下にドラッグして閉じる"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"PIP メニュー"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>は PIP 表示中です"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g>でこの機能を使用しない場合は、タップして設定を開いて OFF にしてください。"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"メニュー"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>はピクチャー イン ピクチャーで表示中です"</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g>でこの機能を使用しない場合は、タップして設定を開いて OFF にしてください。"</string>
     <string name="pip_play" msgid="1417176722760265888">"再生"</string>
     <string name="pip_pause" msgid="8881063404466476571">"一時停止"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"次へスキップ"</string>
@@ -748,6 +756,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"メニュー"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> アプリ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"通知"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"電池"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"スクリーンショット"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"一般メッセージ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ストレージ"</string>
@@ -767,4 +776,6 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"設定を変更"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"バックグラウンドで実行中のアプリ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"タップして電池やデータの使用量を確認"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"モバイルデータを OFF にしますか？"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"アプリが許可リクエストを隠しているため、設定側でユーザーの応答を確認できません。"</string>
 </resources>

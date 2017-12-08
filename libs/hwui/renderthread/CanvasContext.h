@@ -29,7 +29,6 @@
 #include "RenderNode.h"
 #include "thread/Task.h"
 #include "thread/TaskProcessor.h"
-#include "utils/RingBuffer.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
 
@@ -76,7 +75,7 @@ public:
      *  @return true if the layer has been created or updated
      */
     bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& dmgAccumulator) {
-        return mRenderPipeline->createOrUpdateLayer(node, dmgAccumulator);
+        return mRenderPipeline->createOrUpdateLayer(node, dmgAccumulator, mWideColorGamut);
     }
 
     /**
@@ -128,6 +127,7 @@ public:
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightCenter(const Vector3& lightCenter);
     void setOpaque(bool opaque);
+    void setWideGamut(bool wideGamut);
     bool makeCurrent();
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
             int64_t syncQueued, RenderNode* target);
@@ -162,8 +162,8 @@ public:
     void addRenderNode(RenderNode* node, bool placeFront);
     void removeRenderNode(RenderNode* node);
 
-    void setContentDrawBounds(int left, int top, int right, int bottom) {
-        mContentDrawBounds.set(left, top, right, bottom);
+    void setContentDrawBounds(const Rect& bounds) {
+        mContentDrawBounds = bounds;
     }
 
     RenderState& getRenderState() {
@@ -193,6 +193,8 @@ public:
     ANDROID_API int64_t getFrameNumber();
 
     void waitOnFences();
+
+    IRenderPipeline* getRenderPipeline() { return mRenderPipeline.get(); }
 
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
@@ -238,6 +240,7 @@ private:
     nsecs_t mLastDropVsync = 0;
 
     bool mOpaque;
+    bool mWideColorGamut = false;
     BakedOpRenderer::LightInfo mLightInfo;
     FrameBuilder::LightGeometry mLightGeometry = { {0, 0, 0}, 0 };
 
@@ -249,8 +252,6 @@ private:
     std::vector< sp<RenderNode> > mRenderNodes;
 
     FrameInfo* mCurrentFrameInfo = nullptr;
-    // Ring buffer large enough for 2 seconds worth of frames
-    RingBuffer<FrameInfo, 120> mFrames;
     std::string mName;
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;

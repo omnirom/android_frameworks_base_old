@@ -21,24 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> hari"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> hari <xliff:g id="HOURS">%2$d</xliff:g> jam"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> hari <xliff:g id="HOURS">%2$d</xliff:g> jam"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> jam"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> jam <xliff:g id="MINUTES">%2$d</xliff:g> mnt"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> jam <xliff:g id="MINUTES">%2$d</xliff:g> mnt"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> mnt"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> menit"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> mnt <xliff:g id="SECONDS">%2$d</xliff:g> dtk"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> mnt <xliff:g id="SECONDS">%2$d</xliff:g> dtk"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> dtk"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> dtk"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Tanpa judul&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Tidak ada nomor telepon)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Tidak diketahui"</string>
@@ -95,11 +79,13 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Tidak ada layanan panggilan suara/darurat"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Untuk sementara tidak ditawarkan oleh jaringan seluler di lokasi Anda"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Tidak dapat menjangkau jaringan"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Untuk meningkatkan penerimaan sinyal, coba ubah jenis yang dipilih di Sistem &gt; Jaringan &amp; Internet &gt; Jaringan seluler &gt; Jenis jaringan pilihan."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Untuk menyempurnakan penerimaan sinyal, coba ubah jenis yang dipilih di Setelan &gt; Jaringan &amp; Internet &gt; Jaringan seluler &gt; Jenis jaringan pilihan."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Panggilan Wi‑Fi aktif"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Panggilan darurat memerlukan jaringan seluler."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Notifikasi"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Penerusan panggilan"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Mode panggilan balik darurat"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Notifikasi data seluler"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status data seluler"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Pesan SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Notifikasi pesan suara"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Panggilan Wi-Fi"</string>
@@ -131,10 +117,10 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Mencari layanan"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Panggilan Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Untuk melakukan panggilan telepon dan mengirim pesan melalui Wi-Fi, terlebih dahulu minta operator untuk menyiapkan layanan ini. Lalu, aktifkan lagi panggilan telepon Wi-Fi dari Setelan."</item>
+    <item msgid="3910386316304772394">"Untuk menelepon dan mengirim pesan melalui Wi-Fi, tanyalah ke operator Anda terlebih dahulu untuk menyiapkan layanan ini. Kemudian, aktifkan kembali panggilan Wi-Fi dari Setelan. (Kode error: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"Harap daftarkan ke operator"</item>
+    <item msgid="7472393097168811593">"Daftarkan ke operator (Kode error: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -163,7 +149,7 @@
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Laman ini berisi terlalu banyak pengalihan server."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Protokol tidak didukung."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Tidak dapat membuat sambungan aman."</string>
-    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Tidak dapat membuka laman karena URL tidak valid."</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Tidak dapat membuka halaman karena URL tidak valid."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"Tidak dapat mengakses file."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Tidak dapat menemukan file yang diminta."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Terlalu banyak permintaan yang diproses. Coba lagi nanti."</string>
@@ -198,7 +184,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"Hidupkan nirkabel"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Matikan nirkabel"</string>
     <string name="screen_lock" msgid="799094655496098153">"Kunci layar"</string>
-    <string name="power_off" msgid="4266614107412865048">"Matikan daya"</string>
+    <string name="power_off" msgid="4266614107412865048">"Matikan perangkat"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Pendering mati"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Pendering bergetar"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Pendering nyala"</string>
@@ -222,7 +208,7 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"Opsi TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opsi telepon"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Kunci layar"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"Matikan daya"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"Matikan perangkat"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Darurat"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Laporan bug"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Ambil laporan bug"</string>
@@ -246,8 +232,7 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Bantuan Suara"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Kunci sekarang"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Konten tersembunyi"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Konten disembunyikan menurut kebijakan"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Notifikasi baru"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Keyboard virtual"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Keyboard fisik"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Keamanan"</string>
@@ -263,9 +248,9 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Notifikasi"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo promo"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Sambungan USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Aplikasi yang sedang berjalan di latar belakang"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang berjalan di latar belakang"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"<xliff:g id="NUMBER">%1$d</xliff:g> aplikasi sedang berjalan di latar belakang"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplikasi yang menggunakan baterai"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang menggunakan baterai"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> aplikasi sedang meggunakan baterai"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Tap untuk melihat detail penggunaan baterai dan data"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode aman"</string>
@@ -811,7 +796,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Konfirmasi Navigasi"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Keluar dari Laman ini"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Tetap di Laman ini"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nYakin ingin beranjak dari laman ini?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nYakin ingin beranjak dari halaman ini?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Konfirmasi"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Kiat: Ketuk dua kali untuk memperbesar dan memperkecil."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"IsiOtomatis"</string>
@@ -848,7 +833,7 @@
     <string name="save_password_notnow" msgid="6389675316706699758">"Tidak sekarang"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Jangan"</string>
-    <string name="open_permission_deny" msgid="7374036708316629800">"Anda tidak memiliki izin untuk membuka laman ini."</string>
+    <string name="open_permission_deny" msgid="7374036708316629800">"Anda tidak memiliki izin untuk membuka halaman ini."</string>
     <string name="text_copied" msgid="4985729524670131385">"Teks disalin ke papan klip."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Lainnya"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
@@ -1106,6 +1091,13 @@
       <item quantity="other">Jaringan Wi-Fi terbuka tersedia</item>
       <item quantity="one">Jaringan Wi-Fi terbuka tersedia</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Hubungkan ke jaringan Wi-Fi terbuka"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Menghubungkan ke jaringan Wi-Fi terbuka"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Terhubung ke jaringan Wi-Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Tidak dapat menghubungkan ke jaringan Wi‑Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tap untuk melihat semua jaringan"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Hubungkan"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Semua Jaringan"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Masuk ke jaringan Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Masuk ke jaringan"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1185,8 +1177,10 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB untuk MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Tersambung ke aksesori USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Ketuk untuk opsi lainnya."</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Aksesori audio analog terdeteksi"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Perangkat yang terpasang tidak kompatibel dengan ponsel ini. Tap untuk mempelajari lebih lanjut."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debugging USB terhubung"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Ketuk untuk menonaktifkan debug USB."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Tap untuk menonaktifkan debug USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Pilih untuk menonaktifkan debugging USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Mengambil laporan bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Bagikan laporan bug?"</string>
@@ -1305,7 +1299,7 @@
     <string name="next_button_label" msgid="1080555104677992408">"Selanjutnya"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Lewati"</string>
     <string name="no_matches" msgid="8129421908915840737">"Tidak ada kecocokan"</string>
-    <string name="find_on_page" msgid="1946799233822820384">"Temukan pada laman"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Temukan pada halaman"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> dari <xliff:g id="TOTAL">%d</xliff:g></item>
       <item quantity="one">1 kecocokan</item>
@@ -1431,7 +1425,7 @@
     <string name="media_route_status_available" msgid="6983258067194649391">"Tersedia"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Tidak tersedia"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"Sedang digunakan"</string>
-    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Layar Bawaan"</string>
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Layar Built-In"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Layar HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Hamparan #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
@@ -1598,7 +1592,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Coba lagi nanti"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Melihat layar penuh"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"Untuk keluar, gesek ke bawah dari atas."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Untuk keluar, geser layar ke bawah dari atas."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Mengerti"</string>
     <string name="done_label" msgid="2093726099505892398">"Selesai"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Penggeser putar jam"</string>
@@ -1721,14 +1715,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Lepas pin"</string>
     <string name="app_info" msgid="6856026610594615344">"Info aplikasi"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Setel ulang perangkat?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Ketuk untuk menyetel ulang perangkat"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Memulai demo..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Menyetel ulang perangkat..."</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Setel ulang perangkat?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Perubahan yang dibuat akan hilang dan demo akan dimulai lagi dalam <xliff:g id="TIMEOUT">%1$s</xliff:g> detik…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Batal"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Setel ulang sekarang"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> dinonaktifkan"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferensi Telepon"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Keterangan alat"</string>
@@ -1772,9 +1760,11 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Evakuasi segera dari daerah pesisir dan area tepi sungai ke tempat yang lebih aman seperti dataran tinggi."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Tetap tenang dan cari tempat berlindung terdekat."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Tes pesan darurat"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Balas"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM tidak diizinkan"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM tidak di-provisioning"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM tidak diizinkan"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Ponsel tidak diizinkan"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"Jendela Pop-up"</string>
 </resources>

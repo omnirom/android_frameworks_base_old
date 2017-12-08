@@ -24,8 +24,9 @@
 #include "android/graphics/Region.h"
 #include "core_jni_helpers.h"
 
-#include <JNIHelp.h>
-#include <ScopedUtfChars.h>
+#include <android-base/chrono_utils.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
 #include <gui/Surface.h>
@@ -166,7 +167,7 @@ static jobject nativeScreenshotToBuffer(JNIEnv* env, jclass clazz,
             buffer->getWidth(),
             buffer->getHeight(),
             buffer->getPixelFormat(),
-            buffer->getUsage(),
+            (jint)buffer->getUsage(),
             (jlong)buffer.get());
 }
 
@@ -221,11 +222,20 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
             return NULL;
         }
     }
+
+    sk_sp<SkColorSpace> colorSpace;
+    if (screenshot->getDataSpace() == HAL_DATASPACE_DISPLAY_P3) {
+        colorSpace = SkColorSpace::MakeRGB(
+                SkColorSpace::kSRGB_RenderTargetGamma, SkColorSpace::kDCIP3_D65_Gamut);
+    } else {
+        colorSpace = SkColorSpace::MakeSRGB();
+    }
+
     SkImageInfo screenshotInfo = SkImageInfo::Make(screenshot->getWidth(),
                                                    screenshot->getHeight(),
                                                    colorType,
                                                    alphaType,
-                                                   GraphicsJNI::defaultColorSpace());
+                                                   colorSpace);
 
     const size_t rowBytes =
             screenshot->getStride() * android::bytesPerPixel(screenshot->getFormat());
@@ -236,7 +246,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
 
     auto bitmap = new Bitmap(
             (void*) screenshot->getPixels(), (void*) screenshot.get(), DeleteScreenshot,
-            screenshotInfo, rowBytes, nullptr);
+            screenshotInfo, rowBytes);
     screenshot.release();
     bitmap->setImmutable();
     return bitmap::createBitmap(env, bitmap,
@@ -552,8 +562,9 @@ static void nativeSetDisplayPowerMode(JNIEnv* env, jclass clazz, jobject tokenOb
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return;
 
-    ALOGD_IF_SLOW(100, "Excessive delay in setPowerMode()");
+    android::base::Timer t;
     SurfaceComposerClient::setDisplayPowerMode(token, mode);
+    if (t.duration() > 100ms) ALOGD("Excessive delay in setPowerMode()");
 }
 
 static jboolean nativeClearContentFrameStats(JNIEnv* env, jclass clazz, jlong nativeObject) {

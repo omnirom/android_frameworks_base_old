@@ -71,7 +71,7 @@ option java_package com.android.server
 # when a notification action button has been clicked
 27521 notification_action_clicked (key|3),(action_index|1),(lifespan|1),(freshness|1),(exposure|1)
 # when a notification has been canceled
-27530 notification_canceled (key|3),(reason|1),(lifespan|1),(freshness|1),(exposure|1)
+27530 notification_canceled (key|3),(reason|1),(lifespan|1),(freshness|1),(exposure|1),(listener|3)
 # replaces 27510 with a row per notification
 27531 notification_visibility (key|3),(visibile|1),(lifespan|1),(freshness|1),(exposure|1),(rank|1)
 # a notification emited noise, vibration, or light
@@ -268,3 +268,16 @@ option java_package com.android.server
 # GestureLauncherService.java
 # ---------------------------
 40100 camera_gesture_triggered (gesture_on_time|2|3), (sensor1_on_time|2|3), (sensor2_on_time|2|3), (event_extra|1|1)
+
+# ---------------------------
+# timezone/RulesManagerService.java
+# ---------------------------
+51600 timezone_trigger_check (token|3)
+51610 timezone_request_install (token|3)
+51611 timezone_install_started (token|3)
+51612 timezone_install_complete (token|3), (result|1)
+51620 timezone_request_uninstall (token|3)
+51621 timezone_uninstall_started (token|3)
+51622 timezone_uninstall_complete (token|3), (result|1)
+51630 timezone_request_nothing (token|3)
+51631 timezone_nothing_complete (token|3)

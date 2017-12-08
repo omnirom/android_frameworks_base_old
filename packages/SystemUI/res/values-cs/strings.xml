@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"UI systému"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Vymazat"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Odebrat ze seznamu"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informace o aplikaci"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"O aplikaci"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Zde budou zobrazeny vaše poslední obrazovky"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Zavřít nové aplikace"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -66,7 +66,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Digitální otisk RSA počítače je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vždy povolit z tohoto počítače"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ladění USB není povoleno"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění USB. Chcete-li tuto funkci používat, přepněte na uživatele s oprávněním administrátora."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění USB. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Přiblížit na celou obrazovku"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celou obrazovku"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Ukládání snímku obrazovky..."</string>
@@ -316,6 +316,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Další nastavení"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Hotovo"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Připojeno"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Připojeno, baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Připojování..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Sdílené připojení"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
@@ -358,10 +359,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Vyhledávání"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Přejeďte prstem nahoru: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Přejeďte prstem doleva: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Nebudou vás rušit zvuky ani vibrace s výjimkou budíků, upozornění, událostí a vybraných volajících. Nadále uslyšíte veškerý obsah, který si sami pustíte (např. hudba, videa nebo hry)."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Nebudou vás rušit zvuky ani vibrace s výjimkou budíků. Nadále uslyšíte veškerý obsah, který si sami pustíte (např. hudba, videa nebo hry)."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Nebudou vás rušit zvuky ani vibrace s výjimkou budíků, upozornění, událostí a volajících, které zadáte. Nadále uslyšíte veškerý obsah, který si sami pustíte (např. hudba, videa nebo hry)."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Nebudou vás rušit zvuky ani vibrace s výjimkou budíků. Nadále uslyšíte veškerý obsah, který si sami pustíte (např. hudba, videa nebo hry)."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Přizpůsobit"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"V tomto režimu budou blokovány VŠECHNY zvuky a vibrace, včetně těch z budíků, hudby, videí a her. Telefonovat budete moci i nadále."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"V tomto režimu budou blokovány VŠECHNY zvuky a vibrace, včetně těch z budíků, hudby, videí a her. Telefonovat budete moci i nadále."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"V tomto režimu budou blokovány VŠECHNY zvuky a vibrace, včetně těch z budíků, hudby, videí a her."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Méně urgentní oznámení níže"</string>
@@ -461,7 +462,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Další informace"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Jste připojeni k aplikaci <xliff:g id="VPN_APP">%1$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Otevřít nastavení VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Otevřít nastavení VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Otevřít důvěryhodná oprávnění"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Administrátor zapnul protokolování sítě, které monitoruje síťový provoz v zařízení.\n\nDalší informace vám poskytne administrátor."</string>
@@ -473,6 +474,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Jste připojeni k aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je připojen k aplikaci <xliff:g id="APPLICATION">%2$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nDalší informace vám poskytne administrátor."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je připojen k aplikaci <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nTaké jste připojeni k aplikaci <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti."</string>
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Odemknuto pro uživatele <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> běží"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Zařízení zůstane uzamčeno, dokud je ručně neodemknete"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Čtěte si oznámení rychleji"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Můžete si je přečíst před odemčením obrazovky."</string>
@@ -554,14 +557,15 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Vypnuto"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Rozšířené ovládací prvky oznámení umožňují nastavit úroveň důležitosti oznámení aplikace od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazit na začátku seznamu oznámení \n– Povolit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 4"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 3"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n\n"<b>"Úroveň 2"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat žádný zvukový signál ani nevibrovat \n\n"<b>"Úroveň 1"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat zvukový signál ani nevibrovat \n– Skrýt z obrazovky uzamčení a stavového řádku \n– Zobrazovat na konci seznamu oznámení \n\n"<b>";Úroveň 0"</b>" \n– Blokovat všechna oznámení z aplikace"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Oznámení"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"Tato oznámení již nebudete dostávat."</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"Tato oznámení již nebudete dostávat"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Kategorie oznámení: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Tato aplikace nemá kategorie oznámení"</string>
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Oznámení této aplikace nelze vypnout"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="few">1 ze <xliff:g id="NUMBER_1">%d</xliff:g> kategorií oznámení z této aplikace</item>
-      <item quantity="many">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorie oznámení z této aplikace</item>
-      <item quantity="other">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorií oznámení z této aplikace</item>
-      <item quantity="one">1 z <xliff:g id="NUMBER_0">%d</xliff:g> kategorie oznámení z této aplikace</item>
+      <item quantity="few">1 ze <xliff:g id="NUMBER_1">%s</xliff:g> kategorií oznámení z této aplikace</item>
+      <item quantity="many">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategorie oznámení z této aplikace</item>
+      <item quantity="other">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategorií oznámení z této aplikace</item>
+      <item quantity="one">1 z <xliff:g id="NUMBER_0">%s</xliff:g> kategorie oznámení z této aplikace</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -580,15 +584,23 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"Nastavení oznámení"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"Možnosti odložení oznámení"</string>
-    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 minut"</string>
-    <string name="snooze_option_30_min" msgid="867081342535195788">"30 minut"</string>
-    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 hodina"</string>
-    <string name="snooze_option_2_hour" msgid="8332218255658969475">"2 hodiny"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"VRÁTIT ZPĚT"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Odloženo o <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="few">%d hodiny</item>
+      <item quantity="many">%d hodiny</item>
+      <item quantity="other">%d hodin</item>
+      <item quantity="one">%d hodina</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="few">%d minuty</item>
+      <item quantity="many">%d minuty</item>
+      <item quantity="other">%d minut</item>
+      <item quantity="one">%d minuta</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Využití baterie"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Spořič baterie při nabíjení není k dispozici."</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Spořič baterie"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Spořič baterie při nabíjení není k dispozici"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Spořič baterie"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Omezuje výkon a data na pozadí"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Tlačítko <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -728,9 +740,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalizovat"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zavřít"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Nápovědu zavřete přetažením dolů"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Nabídka typu obraz v obraze"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"Aplikace <xliff:g id="NAME">%s</xliff:g> je v zobrazení obraz v obraze"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Pokud nechcete, aby aplikace <xliff:g id="NAME">%s</xliff:g> tuto funkci používala, klepnutím otevřete nastavení a funkci vypněte."</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Nabídka"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"Aplikace <xliff:g id="NAME">%s</xliff:g> je v režimu obraz v obraze"</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Pokud nechcete, aby aplikace <xliff:g id="NAME">%s</xliff:g> tuto funkci používala, klepnutím otevřete nastavení a funkci vypněte."</string>
     <string name="pip_play" msgid="1417176722760265888">"Přehrát"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pozastavit"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Přeskočit na další"</string>
@@ -746,7 +758,7 @@
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Zkratka vlevo také odemyká"</string>
     <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Zkratka vpravo také odemyká"</string>
     <string name="lockscreen_none" msgid="4783896034844841821">"Žádné"</string>
-    <string name="tuner_launch_app" msgid="1527264114781925348">"Spustit aplikaci <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Do aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="tuner_other_apps" msgid="4726596850501162493">"Další aplikace"</string>
     <string name="tuner_circle" msgid="2340998864056901350">"Kruh"</string>
     <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>
@@ -756,12 +768,13 @@
     <string name="tuner_menu" msgid="191640047241552081">"Nabídka"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozornění"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Baterie"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Snímky obrazovek"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Všeobecné zprávy"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Úložiště"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Okamžité aplikace"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Okamžité aplikace není třeba instalovat."</string>
-    <string name="app_info" msgid="6856026610594615344">"Informace o aplikaci"</string>
+    <string name="app_info" msgid="6856026610594615344">"O aplikaci"</string>
     <string name="go_to_web" msgid="1106022723459948514">"Přejít na web"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobilní data"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi je vypnuta"</string>
@@ -775,4 +788,6 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Nahradit"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikace běžící na pozadí"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Klepnutím zobrazíte podrobnosti o využití baterie a dat"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Vypnout mobilní data?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Žádost o oprávnění je blokována jinou aplikací. Nastavení proto vaši odpověď nemůže ověřit."</string>
 </resources>

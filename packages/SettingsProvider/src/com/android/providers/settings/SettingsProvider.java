@@ -32,8 +32,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -61,7 +59,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
-import android.service.notification.NotificationListenerService;
+import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -82,7 +80,6 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -2597,7 +2594,7 @@ public class SettingsProvider extends ContentProvider {
             synchronized (mLock) {
                 final int key = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
                 File globalFile = getSettingsFile(key);
-                if (globalFile.exists()) {
+                if (SettingsState.stateFileExists(globalFile)) {
                     return;
                 }
 
@@ -2634,7 +2631,7 @@ public class SettingsProvider extends ContentProvider {
             // Every user has secure settings and if no file we need to migrate.
             final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
             File secureFile = getSettingsFile(secureKey);
-            if (secureFile.exists()) {
+            if (SettingsState.stateFileExists(secureFile)) {
                 return;
             }
 
@@ -2881,7 +2878,11 @@ public class SettingsProvider extends ContentProvider {
                     case MSG_NOTIFY_URI_CHANGED: {
                         final int userId = msg.arg1;
                         Uri uri = (Uri) msg.obj;
-                        getContext().getContentResolver().notifyChange(uri, null, true, userId);
+                        try {
+                            getContext().getContentResolver().notifyChange(uri, null, true, userId);
+                        } catch (SecurityException e) {
+                            Slog.w(LOG_TAG, "Failed to notify for " + userId + ": " + uri, e);
+                        }
                         if (DEBUG) {
                             Slog.v(LOG_TAG, "Notifying for " + userId + ": " + uri);
                         }
@@ -2895,7 +2896,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 146;
+            private static final int SETTINGS_VERSION = 148;
 
             private final int mUserId;
 
@@ -3166,33 +3167,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 128) {
-                    // Version 128: Allow OEMs to grant DND access to default apps. Note that
-                    // the new apps are appended to the list of already approved apps.
-                    final SettingsState systemSecureSettings =
-                            getSecureSettingsLocked(userId);
-
-                    final Setting policyAccess = systemSecureSettings.getSettingLocked(
-                            Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES);
-                    String defaultPolicyAccess = getContext().getResources().getString(
-                            com.android.internal.R.string.config_defaultDndAccessPackages);
-                    if (!TextUtils.isEmpty(defaultPolicyAccess)) {
-                        if (policyAccess.isNull()) {
-                            systemSecureSettings.insertSettingLocked(
-                                    Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
-                                    defaultPolicyAccess, null, true,
-                                    SettingsState.SYSTEM_PACKAGE_NAME);
-                        } else {
-                            StringBuilder currentSetting =
-                                    new StringBuilder(policyAccess.getValue());
-                            currentSetting.append(":");
-                            currentSetting.append(defaultPolicyAccess);
-                            systemSecureSettings.updateSettingLocked(
-                                    Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
-                                    currentSetting.toString(), null, true,
-                                    SettingsState.SYSTEM_PACKAGE_NAME);
-                        }
-                    }
-
+                    // Version 128: Removed
                     currentVersion = 129;
                 }
 
@@ -3365,58 +3340,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 140) {
-                    // Version 141: One-time grant of notification listener privileges
-                    // to packages specified in overlay.
-                    String defaultListenerAccess = getContext().getResources().getString(
-                            com.android.internal.R.string.config_defaultListenerAccessPackages);
-                    if (defaultListenerAccess != null) {
-                        StringBuffer newListeners = new StringBuffer();
-                        for (String whitelistPkg : defaultListenerAccess.split(":")) {
-                            // Gather all notification listener components for candidate pkgs.
-                            Intent serviceIntent =
-                                    new Intent(NotificationListenerService.SERVICE_INTERFACE)
-                                            .setPackage(whitelistPkg);
-                            List<ResolveInfo> installedServices =
-                                    getContext().getPackageManager().queryIntentServicesAsUser(
-                                            serviceIntent,
-                                            PackageManager.GET_SERVICES
-                                                    | PackageManager.GET_META_DATA
-                                                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                                            userId);
-
-                            for (int i = 0, count = installedServices.size(); i < count; i++) {
-                                ResolveInfo resolveInfo = installedServices.get(i);
-                                ServiceInfo info = resolveInfo.serviceInfo;
-                                if (!android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE
-                                        .equals(info.permission)) {
-                                    continue;
-                                }
-                                newListeners.append(":")
-                                        .append(info.getComponentName().flattenToString());
-                            }
-                        }
-
-                        if (newListeners.length() > 0) {
-                            final SettingsState secureSetting = getSecureSettingsLocked(userId);
-                            final Setting existingSetting = secureSetting.getSettingLocked(
-                                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
-                            if (existingSetting.isNull()) {
-                                secureSetting.insertSettingLocked(
-                                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                                        newListeners.toString(), null, true,
-                                        SettingsState.SYSTEM_PACKAGE_NAME);
-                            } else {
-                                StringBuilder currentSetting =
-                                        new StringBuilder(existingSetting.getValue());
-                                currentSetting.append(newListeners.toString());
-                                secureSetting.updateSettingLocked(
-                                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                                        currentSetting.toString(), null, true,
-                                        SettingsState.SYSTEM_PACKAGE_NAME);
-                            }
-                        }
-                    }
+                    // Version 141: Removed
                     currentVersion = 141;
                 }
 
@@ -3467,12 +3391,42 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 144) {
-                    // Version 145: Set the default value for WIFI_WAKEUP_AVAILABLE.
+                    // Version 145: Removed
+                    currentVersion = 145;
+                }
+
+                if (currentVersion == 145) {
+                    // Version 146: In step 142 we had a bug where incorrectly
+                    // some settings were considered system set and as a result
+                    // made the default and marked as the default being set by
+                    // the system. Here reevaluate the default and default system
+                    // set flags. This would both fix corruption by the old impl
+                    // of step 142 and also properly handle devices which never
+                    // run 142.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        SettingsState globalSettings = getGlobalSettingsLocked();
+                        ensureLegacyDefaultValueAndSystemSetUpdatedLocked(globalSettings, userId);
+                        globalSettings.persistSyncLocked();
+                    }
+
+                    SettingsState secureSettings = getSecureSettingsLocked(mUserId);
+                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(secureSettings, userId);
+                    secureSettings.persistSyncLocked();
+
+                    SettingsState systemSettings = getSystemSettingsLocked(mUserId);
+                    ensureLegacyDefaultValueAndSystemSetUpdatedLocked(systemSettings, userId);
+                    systemSettings.persistSyncLocked();
+
+                    currentVersion = 146;
+                }
+
+                if (currentVersion == 146) {
+                    // Version 147: Set the default value for WIFI_WAKEUP_AVAILABLE.
                     if (userId == UserHandle.USER_SYSTEM) {
                         final SettingsState globalSettings = getGlobalSettingsLocked();
                         final Setting currentSetting = globalSettings.getSettingLocked(
                                 Settings.Global.WIFI_WAKEUP_AVAILABLE);
-                        if (currentSetting.isNull()) {
+                        if (currentSetting.getValue() == null) {
                             final int defaultValue = getContext().getResources().getInteger(
                                     com.android.internal.R.integer.config_wifi_wakeup_available);
                             globalSettings.insertSettingLocked(
@@ -3482,7 +3436,24 @@ public class SettingsProvider extends ContentProvider {
                         }
                     }
 
-                    currentVersion = 145;
+                    currentVersion = 147;
+                }
+
+                if (currentVersion == 147) {
+                    // Version 148: Set the default value for DEFAULT_RESTRICT_BACKGROUND_DATA.
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        final SettingsState globalSettings = getGlobalSettingsLocked();
+                        final Setting currentSetting = globalSettings.getSettingLocked(
+                                Global.DEFAULT_RESTRICT_BACKGROUND_DATA);
+                        if (currentSetting.isNull()) {
+                            globalSettings.insertSettingLocked(
+                                    Global.DEFAULT_RESTRICT_BACKGROUND_DATA,
+                                    getContext().getResources().getBoolean(
+                                            R.bool.def_restrict_background_data) ? "1" : "0",
+                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+                    currentVersion = 148;
                 }
 
                 if (currentVersion == 145) {

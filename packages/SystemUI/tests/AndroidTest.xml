@@ -19,8 +19,9 @@
     </target_preparer>
 
     <option name="test-suite-tag" value="apct" />
+    <option name="test-suite-tag" value="framework-base-presubmit" />
     <option name="test-tag" value="SystemUITests" />
-    <test class="com.android.tradefed.testtype.InstrumentationTest" >
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.systemui.tests" />
         <option name="runner" value="android.support.test.runner.AndroidJUnitRunner" />
     </test>

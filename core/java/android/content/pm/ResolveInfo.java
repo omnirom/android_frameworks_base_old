@@ -222,6 +222,40 @@ public class ResolveInfo implements Parcelable {
     }
 
     /**
+     * @return The resource that would be used when loading
+     * the label for this resolve info.
+     *
+     * @hide
+     */
+    public int resolveLabelResId() {
+        if (labelRes != 0) {
+            return labelRes;
+        }
+        final ComponentInfo componentInfo = getComponentInfo();
+        if (componentInfo.labelRes != 0) {
+            return componentInfo.labelRes;
+        }
+        return componentInfo.applicationInfo.labelRes;
+    }
+
+    /**
+     * @return The resource that would be used when loading
+     * the icon for this resolve info.
+     *
+     * @hide
+     */
+    public int resolveIconResId() {
+        if (icon != 0) {
+            return icon;
+        }
+        final ComponentInfo componentInfo = getComponentInfo();
+        if (componentInfo.icon != 0) {
+            return componentInfo.icon;
+        }
+        return componentInfo.applicationInfo.icon;
+    }
+
+    /**
      * Retrieve the current graphical icon associated with this resolution.  This
      * will call back on the given PackageManager to load the icon from
      * the application.
@@ -282,7 +316,7 @@ public class ResolveInfo implements Parcelable {
     }
 
     /** @hide */
-    public void dump(Printer pw, String prefix, int flags) {
+    public void dump(Printer pw, String prefix, int dumpFlags) {
         if (filter != null) {
             pw.println(prefix + "Filter:");
             filter.dump(pw, prefix + "  ");
@@ -302,13 +336,13 @@ public class ResolveInfo implements Parcelable {
         }
         if (activityInfo != null) {
             pw.println(prefix + "ActivityInfo:");
-            activityInfo.dump(pw, prefix + "  ", flags);
+            activityInfo.dump(pw, prefix + "  ", dumpFlags);
         } else if (serviceInfo != null) {
             pw.println(prefix + "ServiceInfo:");
-            serviceInfo.dump(pw, prefix + "  ", flags);
+            serviceInfo.dump(pw, prefix + "  ", dumpFlags);
         } else if (providerInfo != null) {
             pw.println(prefix + "ProviderInfo:");
-            providerInfo.dump(pw, prefix + "  ", flags);
+            providerInfo.dump(pw, prefix + "  ", dumpFlags);
         }
     }
 

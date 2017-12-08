@@ -24,12 +24,14 @@ interface IMidiDeviceServer
     FileDescriptor openInputPort(IBinder token, int portNumber);
     FileDescriptor openOutputPort(IBinder token, int portNumber);
     void closePort(IBinder token);
-    void closeDevice();
+    oneway void closeDevice();
 
     // connects the input port pfd to the specified output port
     // Returns the PID of the called process.
     int connectPorts(IBinder token, in FileDescriptor fd, int outputPortNumber);
 
     MidiDeviceInfo getDeviceInfo();
-    void setDeviceInfo(in MidiDeviceInfo deviceInfo);
+
+    // For use by MidiService.
+    oneway void setDeviceInfo(in MidiDeviceInfo deviceInfo);
 }

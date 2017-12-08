@@ -16,21 +16,23 @@
 
 package android.transition;
 
+import android.animation.Animator;
 import android.animation.AnimatorSetActivity;
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.transition.Transition.TransitionListener;
-import android.transition.TransitionListenerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.android.frameworks.coretests.R;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import static android.support.test.espresso.Espresso.onView;
 
 public class FadeTransitionTest extends ActivityInstrumentationTestCase2<AnimatorSetActivity> {
     Activity mActivity;
@@ -48,23 +50,23 @@ public class FadeTransitionTest extends ActivityInstrumentationTestCase2<Animato
         View square1 = mActivity.findViewById(R.id.square1);
         Fade fadeOut = new Fade(Fade.MODE_OUT);
         TransitionLatch latch = setVisibilityInTransition(fadeOut, R.id.square1, View.INVISIBLE);
-        assertTrue(latch.startLatch.await(200, TimeUnit.MILLISECONDS));
+        assertTrue(latch.startLatch.await(400, TimeUnit.MILLISECONDS));
         assertEquals(View.VISIBLE, square1.getVisibility());
         waitForAnimation();
         assertFalse(square1.getTransitionAlpha() == 0 || square1.getTransitionAlpha() == 1);
-        assertTrue(latch.endLatch.await(400, TimeUnit.MILLISECONDS));
+        assertTrue(latch.endLatch.await(800, TimeUnit.MILLISECONDS));
         assertEquals(1.0f, square1.getTransitionAlpha());
         assertEquals(View.INVISIBLE, square1.getVisibility());
 
         Fade fadeIn = new Fade(Fade.MODE_IN);
         latch = setVisibilityInTransition(fadeIn, R.id.square1, View.VISIBLE);
-        assertTrue(latch.startLatch.await(200, TimeUnit.MILLISECONDS));
+        assertTrue(latch.startLatch.await(400, TimeUnit.MILLISECONDS));
         assertEquals(View.VISIBLE, square1.getVisibility());
         waitForAnimation();
         final float transitionAlpha = square1.getTransitionAlpha();
         assertTrue("expecting transitionAlpha to be between 0 and 1. Was " + transitionAlpha,
                 transitionAlpha > 0 && transitionAlpha < 1);
-        assertTrue(latch.endLatch.await(400, TimeUnit.MILLISECONDS));
+        assertTrue(latch.endLatch.await(800, TimeUnit.MILLISECONDS));
         assertEquals(1.0f, square1.getTransitionAlpha());
         assertEquals(View.VISIBLE, square1.getVisibility());
     }
@@ -76,14 +78,14 @@ public class FadeTransitionTest extends ActivityInstrumentationTestCase2<Animato
         FadeValueCheck fadeOutValueCheck = new FadeValueCheck(square1);
         fadeOut.addListener(fadeOutValueCheck);
         TransitionLatch outLatch = setVisibilityInTransition(fadeOut, R.id.square1, View.INVISIBLE);
-        assertTrue(outLatch.startLatch.await(200, TimeUnit.MILLISECONDS));
+        assertTrue(outLatch.startLatch.await(400, TimeUnit.MILLISECONDS));
         waitForAnimation();
 
         Fade fadeIn = new Fade(Fade.MODE_IN);
         FadeValueCheck fadeInValueCheck = new FadeValueCheck(square1);
         fadeIn.addListener(fadeInValueCheck);
         TransitionLatch inLatch = setVisibilityInTransition(fadeIn, R.id.square1, View.VISIBLE);
-        assertTrue(inLatch.startLatch.await(200, TimeUnit.MILLISECONDS));
+        assertTrue(inLatch.startLatch.await(400, TimeUnit.MILLISECONDS));
 
         assertEquals(fadeOutValueCheck.pauseTransitionAlpha, fadeInValueCheck.startTransitionAlpha);
         assertTrue("expecting transitionAlpha to be between 0 and 1. Was " +
@@ -91,7 +93,7 @@ public class FadeTransitionTest extends ActivityInstrumentationTestCase2<Animato
                 fadeOutValueCheck.pauseTransitionAlpha > 0 &&
                         fadeOutValueCheck.pauseTransitionAlpha < 1);
 
-        assertTrue(inLatch.endLatch.await(400, TimeUnit.MILLISECONDS));
+        assertTrue(inLatch.endLatch.await(800, TimeUnit.MILLISECONDS));
         assertEquals(1.0f, square1.getTransitionAlpha());
         assertEquals(View.VISIBLE, square1.getVisibility());
     }
@@ -109,24 +111,61 @@ public class FadeTransitionTest extends ActivityInstrumentationTestCase2<Animato
         FadeValueCheck fadeInValueCheck = new FadeValueCheck(square1);
         fadeIn.addListener(fadeInValueCheck);
         TransitionLatch inLatch = setVisibilityInTransition(fadeIn, R.id.square1, View.VISIBLE);
-        assertTrue(inLatch.startLatch.await(200, TimeUnit.MILLISECONDS));
+        assertTrue(inLatch.startLatch.await(400, TimeUnit.MILLISECONDS));
         waitForAnimation();
 
         Fade fadeOut = new Fade(Fade.MODE_OUT);
         FadeValueCheck fadeOutValueCheck = new FadeValueCheck(square1);
         fadeOut.addListener(fadeOutValueCheck);
         TransitionLatch outLatch = setVisibilityInTransition(fadeOut, R.id.square1, View.INVISIBLE);
-        assertTrue(outLatch.startLatch.await(200, TimeUnit.MILLISECONDS));
+        assertTrue(outLatch.startLatch.await(400, TimeUnit.MILLISECONDS));
 
-        assertEquals(fadeOutValueCheck.pauseTransitionAlpha, fadeInValueCheck.startTransitionAlpha);
+        assertEquals(fadeInValueCheck.pauseTransitionAlpha, fadeOutValueCheck.startTransitionAlpha);
         assertTrue("expecting transitionAlpha to be between 0 and 1. Was " +
                         fadeInValueCheck.pauseTransitionAlpha,
                 fadeInValueCheck.pauseTransitionAlpha > 0 &&
                         fadeInValueCheck.pauseTransitionAlpha < 1);
 
-        assertTrue(outLatch.endLatch.await(400, TimeUnit.MILLISECONDS));
+        assertTrue(outLatch.endLatch.await(800, TimeUnit.MILLISECONDS));
         assertEquals(1.0f, square1.getTransitionAlpha());
         assertEquals(View.INVISIBLE, square1.getVisibility());
+    }
+
+    @SmallTest
+    public void testSnapshotView() throws Throwable {
+        final View square1 = mActivity.findViewById(R.id.square1);
+
+        final CountDownLatch disappearCalled = new CountDownLatch(1);
+        final Fade fadeOut = new Fade(Fade.MODE_OUT) {
+            @Override
+            public Animator onDisappear(ViewGroup sceneRoot, View view,
+                    TransitionValues startValues,
+                    TransitionValues endValues) {
+                assertNotSame(square1, view);
+                assertTrue(view instanceof ImageView);
+                ImageView imageView = (ImageView) view;
+                BitmapDrawable background = (BitmapDrawable) imageView.getDrawable();
+                Bitmap bitmap = background.getBitmap();
+                assertEquals(Bitmap.Config.HARDWARE, bitmap.getConfig());
+                Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+                assertEquals(0xFFFF0000, copy.getPixel(1, 1));
+                disappearCalled.countDown();
+                return super.onDisappear(sceneRoot, view, startValues, endValues);
+            }
+        };
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ViewGroup container = mActivity.findViewById(R.id.container);
+                TransitionManager.beginDelayedTransition(container, fadeOut);
+                container.removeView(square1);
+                FrameLayout parent = new FrameLayout(mActivity);
+                parent.addView(square1);
+            }
+        });
+
+        assertTrue(disappearCalled.await(1, TimeUnit.SECONDS));
     }
 
     public TransitionLatch setVisibilityInTransition(final Transition transition, int viewId,

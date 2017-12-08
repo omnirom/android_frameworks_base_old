@@ -23,7 +23,7 @@
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 #include <GraphicsJNI.h>
-#include <ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 #include <gui/BufferItemConsumer.h>
 #include <gui/BufferQueue.h>
@@ -581,18 +581,6 @@ void NotifyHandler::handleMessage(const Message& message) {
     mObserver->decStrong(nullptr);
 }
 
-static jboolean android_view_ThreadedRenderer_supportsOpenGL(JNIEnv* env, jobject clazz) {
-    char prop[PROPERTY_VALUE_MAX];
-    if (property_get("ro.kernel.qemu", prop, NULL) == 0) {
-        // not in the emulator
-        return JNI_TRUE;
-    }
-    // In the emulator this property will be set > 0 when OpenGL ES 2.0 is
-    // enabled, 0 otherwise. On old emulator versions it will be undefined.
-    property_get("qemu.gles", prop, "0");
-    return atoi(prop) > 0 ? JNI_TRUE : JNI_FALSE;
-}
-
 static void android_view_ThreadedRenderer_rotateProcessStatsBuffer(JNIEnv* env, jobject clazz) {
     RenderProxy::rotateProcessStatsBuffer();
 }
@@ -691,6 +679,12 @@ static void android_view_ThreadedRenderer_setOpaque(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jboolean opaque) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     proxy->setOpaque(opaque);
+}
+
+static void android_view_ThreadedRenderer_setWideGamut(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jboolean wideGamut) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->setWideGamut(wideGamut);
 }
 
 static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
@@ -894,7 +888,7 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
     // Render into the surface
     {
         ContextFactory factory;
-        RenderProxy proxy{false, renderNode, &factory};
+        RenderProxy proxy{true, renderNode, &factory};
         proxy.loadSystemProperties();
         proxy.setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
         proxy.initialize(surface);
@@ -983,7 +977,6 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
 const char* const kClassPathName = "android/view/ThreadedRenderer";
 
 static const JNINativeMethod gMethods[] = {
-    { "nSupportsOpenGL", "()Z", (void*) android_view_ThreadedRenderer_supportsOpenGL },
     { "nRotateProcessStatsBuffer", "()V", (void*) android_view_ThreadedRenderer_rotateProcessStatsBuffer },
     { "nSetProcessStatsBuffer", "(I)V", (void*) android_view_ThreadedRenderer_setProcessStatsBuffer },
     { "nGetRenderThreadTid", "(J)I", (void*) android_view_ThreadedRenderer_getRenderThreadTid },
@@ -999,6 +992,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetup", "(JFII)V", (void*) android_view_ThreadedRenderer_setup },
     { "nSetLightCenter", "(JFFF)V", (void*) android_view_ThreadedRenderer_setLightCenter },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
+    { "nSetWideGamut", "(JZ)V", (void*) android_view_ThreadedRenderer_setWideGamut },
     { "nSyncAndDrawFrame", "(J[JI)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroy", "(JJ)V", (void*) android_view_ThreadedRenderer_destroy },
     { "nRegisterAnimatingRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_registerAnimatingRenderNode },

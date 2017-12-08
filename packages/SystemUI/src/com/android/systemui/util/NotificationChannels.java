@@ -19,6 +19,10 @@ import android.app.NotificationManager;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.AudioAttributes;
+import android.net.Uri;
+import android.provider.Settings;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
@@ -32,11 +36,21 @@ public class NotificationChannels extends SystemUI {
     public static String STORAGE     = "DSK";
     public static String TVPIP       = "TPP";
     public static String SCREENRECORDS = "SCR";
+    public static String BATTERY     = "BAT";
 
     @VisibleForTesting
     static void createAll(Context context) {
-
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
+        NotificationChannel batteryChannel = new NotificationChannel(BATTERY,
+                context.getString(R.string.notification_channel_battery),
+                NotificationManager.IMPORTANCE_MAX);
+        final String soundPath = Settings.Global.getString(context.getContentResolver(),
+                Settings.Global.LOW_BATTERY_SOUND);
+        batteryChannel.setSound(Uri.parse("file://" + soundPath), new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                .build());
+
         nm.createNotificationChannels(Arrays.asList(
                 new NotificationChannel(
                         ALERTS,
@@ -59,7 +73,10 @@ public class NotificationChannels extends SystemUI {
                 new NotificationChannel(
                         SCREENRECORDS,
                         context.getString(R.string.notification_channel_screenrecord),
-                        NotificationManager.IMPORTANCE_LOW)));
+                        NotificationManager.IMPORTANCE_LOW),
+                batteryChannel
+        ));
+
         if (isTv(context)) {
             // TV specific notification channel for TV PIP controls.
             // Importance should be {@link NotificationManager#IMPORTANCE_MAX} to have the highest

@@ -20,6 +20,8 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
+import android.util.Slog;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
@@ -34,10 +36,12 @@ import com.android.internal.util.omni.DeviceUtils;
  */
 public class LockTaskNotify {
     private static final String TAG = "LockTaskNotify";
+    private static final long SHOW_TOAST_MINIMUM_INTERVAL = 1000;
 
     private final Context mContext;
     private final H mHandler;
     private Toast mLastToast;
+    private long mLastShowToastTime;
 
     public LockTaskNotify(Context context) {
         mContext = context;
@@ -62,10 +66,16 @@ public class LockTaskNotify {
         if (text == null) {
             return;
         }
+        long showToastTime = SystemClock.elapsedRealtime();
+        if ((showToastTime - mLastShowToastTime) < SHOW_TOAST_MINIMUM_INTERVAL) {
+            Slog.i(TAG, "Ignore toast since it is requested in very short interval.");
+            return;
+        }
         if (mLastToast != null) {
             mLastToast.cancel();
         }
         mLastToast = makeAllUserToastAndShow(text);
+        mLastShowToastTime = showToastTime;
     }
 
     public void show(boolean starting) {

@@ -20,12 +20,12 @@
 #define LOG_TAG "AudioEffects-JNI"
 
 #include <utils/Log.h>
-#include <nativehelper/jni.h>
+#include <jni.h>
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include "media/AudioEffect.h"
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 using namespace android;
 

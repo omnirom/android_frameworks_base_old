@@ -16,13 +16,21 @@
 
 package com.android.systemui.doze;
 
+import android.os.PowerManager;
 import android.view.Display;
 
+/**
+ * Fake implementation of {@link DozeMachine.Service} for tests.
+ *
+ * Useful instead of mocking because it allows verifying state instead of interactions.
+ */
 public class DozeServiceFake implements DozeMachine.Service {
 
     public boolean finished;
     public int screenState;
+    public boolean screenStateSet;
     public boolean requestedWakeup;
+    public int screenBrightness;
 
     public DozeServiceFake() {
         reset();
@@ -36,15 +44,24 @@ public class DozeServiceFake implements DozeMachine.Service {
     @Override
     public void setDozeScreenState(int state) {
         screenState = state;
-    }
-
-    public void reset() {
-        finished = false;
-        screenState = Display.STATE_UNKNOWN;
+        screenStateSet = true;
     }
 
     @Override
     public void requestWakeUp() {
         requestedWakeup = true;
+    }
+
+    @Override
+    public void setDozeScreenBrightness(int brightness) {
+        screenBrightness = brightness;
+    }
+
+    public void reset() {
+        finished = false;
+        screenState = Display.STATE_UNKNOWN;
+        screenStateSet = false;
+        requestedWakeup = false;
+        screenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
     }
 }

@@ -36,7 +36,7 @@ public:
     bool draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
             const FrameBuilder::LightGeometry& lightGeometry,
             LayerUpdateQueue* layerUpdateQueue,
-            const Rect& contentDrawBounds, bool opaque,
+            const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
             const BakedOpRenderer::LightInfo& lightInfo,
             const std::vector< sp<RenderNode> >& renderNodes,
             FrameInfoVisualizer* profiler) override;
@@ -44,23 +44,25 @@ public:
             FrameInfo* currentFrameInfo, bool* requireSwap) override;
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) override;
     DeferredLayerUpdater* createTextureLayer() override;
-    bool setSurface(Surface* window, SwapBehavior swapBehavior) override;
+    bool setSurface(Surface* window, SwapBehavior swapBehavior, ColorMode colorMode) override;
     void onStop() override;
     bool isSurfaceReady() override;
     bool isContextReady() override;
     void onDestroyHardwareResources() override;
     void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-            LayerUpdateQueue* layerUpdateQueue, bool opaque,
+            LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
             const BakedOpRenderer::LightInfo& lightInfo) override;
     TaskManager* getTaskManager() override;
     bool createOrUpdateLayer(RenderNode* node,
-            const DamageAccumulator& damageAccumulator) override;
+            const DamageAccumulator& damageAccumulator, bool wideColorGamut) override;
     bool pinImages(std::vector<SkImage*>& mutableImages) override { return false; }
     bool pinImages(LsaVector<sk_sp<Bitmap>>& images) override;
     void unpinImages() override;
     static void destroyLayer(RenderNode* node);
     static void prepareToDraw(const RenderThread& thread, Bitmap* bitmap);
     static void invokeFunctor(const RenderThread& thread, Functor* functor);
+    static sk_sp<Bitmap> allocateHardwareBitmap(RenderThread& thread,
+            SkBitmap& skBitmap);
 
 private:
     EglManager& mEglManager;

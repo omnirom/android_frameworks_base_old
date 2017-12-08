@@ -57,6 +57,7 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
@@ -210,6 +211,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     final DisplayMetrics mRealDisplayMetrics = new DisplayMetrics();
     /** @see #computeCompatSmallestWidth(boolean, int, int, int, int) */
     private final DisplayMetrics mTmpDisplayMetrics = new DisplayMetrics();
+
     /**
      * Compat metrics computed based on {@link #mDisplayMetrics}.
      * @see #updateDisplayAndOrientation(int)
@@ -226,6 +228,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see #updateRotationUnchecked(boolean)
      */
     private int mRotation = 0;
+
     /**
      * Last applied orientation of the display.
      * Constants as per {@link android.content.pm.ActivityInfo.ScreenOrientation}.
@@ -233,6 +236,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see WindowManagerService#updateOrientationFromAppTokensLocked(boolean, int)
      */
     private int mLastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
     /**
      * Flag indicating that the application is receiving an orientation that has different metrics
      * than it expected. E.g. Portrait instead of Landscape.
@@ -240,6 +244,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see #updateRotationUnchecked(boolean)
      */
     private boolean mAltOrientation = false;
+
     /**
      * Orientation forced by some window. If there is no visible window that specifies orientation
      * it is set to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED}.
@@ -247,6 +252,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see NonAppWindowContainers#getOrientation()
      */
     private int mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
     /**
      * Last orientation forced by the keyguard. It is applied when keyguard is shown and is not
      * occluded.
@@ -254,6 +260,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see NonAppWindowContainers#getOrientation()
      */
     private int mLastKeyguardForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
+    /**
+     * Keep track of wallpaper visibility to notify changes.
+     */
+    private boolean mLastWallpaperVisible = false;
 
     private Rect mBaseDisplayRect = new Rect();
     private Rect mContentRect = new Rect();
@@ -944,10 +955,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int lastOrientation = mLastOrientation;
         final boolean oldAltOrientation = mAltOrientation;
         int rotation = mService.mPolicy.rotationForOrientationLw(lastOrientation, oldRotation);
-        final boolean rotateSeamlessly = mService.mPolicy.shouldRotateSeamlessly(oldRotation,
+        boolean mayRotateSeamlessly = mService.mPolicy.shouldRotateSeamlessly(oldRotation,
                 rotation);
 
-        if (rotateSeamlessly) {
+        if (mayRotateSeamlessly) {
             final WindowState seamlessRotated = getWindow((w) -> w.mSeamlesslyRotated);
             if (seamlessRotated != null) {
                 // We can't rotate (seamlessly or not) while waiting for the last seamless rotation
@@ -956,7 +967,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // window-removal.
                 return false;
             }
+
+            // In the presence of the PINNED stack or System Alert
+            // windows we unforuntately can not seamlessly rotate.
+            if (getStackById(PINNED_STACK_ID) != null) {
+                mayRotateSeamlessly = false;
+            }
+            for (int i = 0; i < mService.mSessions.size(); i++) {
+                if (mService.mSessions.valueAt(i).hasAlertWindowSurfaces()) {
+                    mayRotateSeamlessly = false;
+                    break;
+                }
+            }
         }
+        final boolean rotateSeamlessly = mayRotateSeamlessly;
 
         // TODO: Implement forced rotation changes.
         //       Set mAltOrientation to indicate that the application is receiving
@@ -1068,7 +1092,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
             if (w.mHasSurface && !rotateSeamlessly) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Set mOrientationChanging of " + w);
-                w.mOrientationChanging = true;
+                w.setOrientationChanging(true);
                 mService.mRoot.mOrientationChangeComplete = false;
                 w.mLastFreezeDuration = 0;
             }
@@ -1178,6 +1202,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int dh = displayInfo.logicalHeight;
         config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
                 Configuration.ORIENTATION_LANDSCAPE;
+
         config.screenWidthDp =
                 (int)(mService.mPolicy.getConfigDisplayWidth(dw, dh, displayInfo.rotation,
                         config.uiMode, mDisplayId) / mDisplayMetrics.density);
@@ -1212,7 +1237,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 (displayInfo.isHdr()
                         ? Configuration.COLOR_MODE_HDR_YES
                         : Configuration.COLOR_MODE_HDR_NO)
-                        | (displayInfo.isWideColorGamut()
+                        | (displayInfo.isWideColorGamut() && mService.hasWideColorGamutSupport()
                         ? Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_YES
                         : Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_NO);
 
@@ -2119,8 +2144,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
-            pw.println(subPrefix + "deferred=" + mDeferredRemoval
+            pw.print(subPrefix + "deferred=" + mDeferredRemoval
                     + " mLayoutNeeded=" + mLayoutNeeded);
+            pw.println(" mTouchExcludeRegion=" + mTouchExcludeRegion);
 
         pw.println();
         pw.println(prefix + "Application tokens in top down Z order:");
@@ -2672,10 +2698,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_TIMEOUT;
 
         forAllWindows(w -> {
-            if (!w.mOrientationChanging) {
+            if (!w.getOrientationChanging()) {
                 return;
             }
-            w.mOrientationChanging = false;
+            w.orientationChangeTimedOut();
             w.mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
                     - mService.mDisplayFreezeTime);
             Slog.w(TAG_WM, "Force clearing orientation change: " + w);
@@ -2769,6 +2795,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 true /* inTraversal, must call performTraversalInTrans... below */);
 
         stopDimmingIfNeeded();
+
+        final boolean wallpaperVisible = mWallpaperController.isWallpaperVisible();
+        if (wallpaperVisible != mLastWallpaperVisible) {
+            mLastWallpaperVisible = wallpaperVisible;
+            mService.mWallpaperVisibilityListeners.notifyWallpaperVisibilityChanged(this);
+        }
 
         while (!mTmpUpdateAllDrawn.isEmpty()) {
             final AppWindowToken atoken = mTmpUpdateAllDrawn.removeLast();
@@ -2979,14 +3011,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // Don't include wallpaper in bounds calculation
                 if (!w.mIsWallpaper && !mutableIncludeFullDisplay.value) {
                     if (includeDecor) {
-                        final TaskStack stack = w.getStack();
-                        if (stack != null) {
-                            stack.getBounds(frame);
-                        }
+                        final Task task = w.getTask();
+                        if (task != null) {
+                            task.getBounds(frame);
+                        } else {
 
-                        // We want to screenshot with the exact bounds of the surface of the app. Thus,
-                        // intersect it with the frame.
-                        frame.intersect(w.mFrame);
+                            // No task bounds? Too bad! Ain't no screenshot then.
+                            return true;
+                        }
                     } else {
                         final Rect wf = w.mFrame;
                         final Rect cr = w.mContentInsets;
@@ -3006,7 +3038,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 final boolean foundTargetWs =
                         (w.mAppToken != null && w.mAppToken.token == appToken)
                                 || (mScreenshotApplicationState.appWin != null && wallpaperOnly);
-                if (foundTargetWs && winAnim.getShown()) {
+                if (foundTargetWs && winAnim.getShown() && winAnim.mLastAlpha > 0f) {
                     mScreenshotApplicationState.screenshotReady = true;
                 }
 
@@ -3194,6 +3226,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mService.requestTraversal();
     }
 
+    boolean okToDisplay() {
+        if (mDisplayId == DEFAULT_DISPLAY) {
+            return !mService.mDisplayFrozen
+                    && mService.mDisplayEnabled && mService.mPolicy.isScreenOn();
+        }
+        return mDisplayInfo.state == Display.STATE_ON;
+    }
+
+    boolean okToAnimate() {
+        return okToDisplay() &&
+                (mDisplayId != DEFAULT_DISPLAY || mService.mPolicy.okToAnimate());
+    }
+
     static final class TaskForResizePointSearchResult {
         boolean searchDone;
         Task taskForResize;
@@ -3296,6 +3341,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     true /* adding */);
             addChild(stack, addIndex);
             setLayoutNeeded();
+        }
+
+
+        @Override
+        boolean isOnTop() {
+            // Considered always on top
+            return true;
         }
 
         @Override
@@ -3524,7 +3576,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
             mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
-            if (policy.isKeyguardShowingAndNotOccluded()) {
+            if (policy.isKeyguardShowingAndNotOccluded()
+                    || mService.mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE) {
                 return mLastKeyguardForcedOrientation;
             }
 

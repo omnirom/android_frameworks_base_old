@@ -60,6 +60,9 @@ public class CaffeineTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
+    public void handleSetListening(boolean listening) {}
+
+    @Override
     public BooleanState newTileState() {
         return new BooleanState();
     }
@@ -72,10 +75,6 @@ public class CaffeineTile extends QSTileImpl<BooleanState> {
       if (mWakeLock.isHeld()) {
             mWakeLock.release();
       }
-    }
-
-    @Override
-    public void setListening(boolean listening) {
     }
 
     @Override

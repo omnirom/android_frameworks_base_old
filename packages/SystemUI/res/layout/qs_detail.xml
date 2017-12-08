@@ -20,7 +20,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/qs_detail_background"
-    android:elevation="4dp"
     android:clickable="true"
     android:orientation="vertical"
     android:paddingBottom="8dp"
@@ -41,7 +40,6 @@
         android:background="@color/qs_detail_progress_track"
         android:src="@drawable/indeterminate_anim"
         android:scaleType="fitXY"
-        android:translationY="16dp"
         />
 
     <com.android.systemui.qs.NonInterceptingScrollView

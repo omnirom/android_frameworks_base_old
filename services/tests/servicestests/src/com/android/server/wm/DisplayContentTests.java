@@ -17,11 +17,16 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -30,11 +35,15 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.annotation.SuppressLint;
 import android.content.res.Configuration;
+import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.DisplayMetrics;
 import android.util.SparseIntArray;
+import android.view.MotionEvent;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -237,6 +246,52 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(currentConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
     }
 
+    /**
+     * Tests tapping on a stack in different display results in window gaining focus.
+     */
+    @Test
+    public void testInputEventBringsCorrectDisplayInFocus() throws Exception {
+        DisplayContent dc0 = sWm.getDefaultDisplayContentLocked();
+        // Create a second display
+        final DisplayContent dc1 = createNewDisplay();
+
+        // Add stack with activity.
+        final TaskStack stack0 = createTaskStackOnDisplay(dc0);
+        final Task task0 = createTaskInStack(stack0, 0 /* userId */);
+        final WindowTestUtils.TestAppWindowToken token =
+                new WindowTestUtils.TestAppWindowToken(dc0);
+        task0.addChild(token, 0);
+        dc0.mTapDetector = new TaskTapPointerEventListener(sWm, dc0);
+        sWm.registerPointerEventListener(dc0.mTapDetector);
+        final TaskStack stack1 = createTaskStackOnDisplay(dc1);
+        final Task task1 = createTaskInStack(stack1, 0 /* userId */);
+        final WindowTestUtils.TestAppWindowToken token1 =
+                new WindowTestUtils.TestAppWindowToken(dc0);
+        task1.addChild(token1, 0);
+        dc1.mTapDetector = new TaskTapPointerEventListener(sWm, dc0);
+        sWm.registerPointerEventListener(dc1.mTapDetector);
+
+        // tap on primary display (by sending ACTION_DOWN followed by ACTION_UP)
+        DisplayMetrics dm0 = dc0.getDisplayMetrics();
+        dc0.mTapDetector.onPointerEvent(
+                createTapEvent(dm0.widthPixels / 2, dm0.heightPixels / 2, true));
+        dc0.mTapDetector.onPointerEvent(
+                createTapEvent(dm0.widthPixels / 2, dm0.heightPixels / 2, false));
+
+        // Check focus is on primary display.
+        assertEquals(sWm.mCurrentFocus, dc0.findFocusedWindow());
+
+        // Tap on secondary display
+        DisplayMetrics dm1 = dc1.getDisplayMetrics();
+        dc1.mTapDetector.onPointerEvent(
+                createTapEvent(dm1.widthPixels / 2, dm1.heightPixels / 2, true));
+        dc1.mTapDetector.onPointerEvent(
+                createTapEvent(dm1.widthPixels / 2, dm1.heightPixels / 2, false));
+
+        // Check focus is on secondary.
+        assertEquals(sWm.mCurrentFocus, dc1.findFocusedWindow());
+    }
+
     @Test
     @Ignore
     public void testFocusedWindowMultipleDisplays() throws Exception {
@@ -329,6 +384,31 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(-1, orderedDisplayIds.indexOfValue(dc.getDisplayId()));
     }
 
+    @Test
+    @SuppressLint("InlinedApi")
+    public void testOrientationDefinedByKeyguard() {
+        final DisplayContent dc = createNewDisplay();
+        // Create a window that requests landscape orientation. It will define device orientation
+        // by default.
+        final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
+        window.mAppToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        final WindowState keyguard = createWindow(null, TYPE_STATUS_BAR, dc, "keyguard");
+        keyguard.mHasSurface = true;
+        keyguard.mAttrs.screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
+        assertEquals("Screen orientation must be defined by the app window by default",
+                SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
+
+        keyguard.mAttrs.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
+        assertEquals("Visible keyguard must influence device orientation",
+                SCREEN_ORIENTATION_PORTRAIT, dc.getOrientation());
+
+        sWm.setKeyguardGoingAway(true);
+        assertEquals("Keyguard that is going away must not influence device orientation",
+                SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
+    }
+
     private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,
                              int expectedBaseHeight, int expectedBaseDensity) {
         assertEquals(displayContent.mBaseDisplayWidth, expectedBaseWidth);
@@ -354,5 +434,19 @@ public class DisplayContentTests extends WindowTestsBase {
             assertEquals(w, actualWindows.pollLast());
         }
         assertTrue(actualWindows.isEmpty());
+    }
+
+    private MotionEvent createTapEvent(float x, float y, boolean isDownEvent) {
+        final long downTime = SystemClock.uptimeMillis();
+        final long eventTime = SystemClock.uptimeMillis() + 100;
+        final int metaState = 0;
+
+        return MotionEvent.obtain(
+                downTime,
+                eventTime,
+                isDownEvent ? MotionEvent.ACTION_DOWN : MotionEvent.ACTION_UP,
+                x,
+                y,
+                metaState);
     }
 }

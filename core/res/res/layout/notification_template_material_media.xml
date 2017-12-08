@@ -31,8 +31,8 @@
         android:scaleType="centerCrop"
     />
     <include layout="@layout/notification_template_header"
-        android:layout_width="fill_parent"
-        android:layout_height="53dp" />
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/media_notification_header_height" />
     <LinearLayout
         android:id="@+id/notification_main_column"
         android:layout_width="match_parent"
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_marginStart="10dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="@dimen/media_notification_actions_padding_bottom"
             android:layoutDirection="ltr"
             android:orientation="horizontal"
             >

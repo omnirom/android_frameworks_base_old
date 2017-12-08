@@ -75,8 +75,6 @@ public class QuickStatusBarHeader extends FrameLayout implements StatusBarHeader
         Resources res = getResources();
 
         mHeaderQsPanel = findViewById(R.id.quick_qs_panel);
-        mHeaderQsPanel.setVisibility(res.getBoolean(R.bool.config_showQuickSettingsRow)
-                ? VISIBLE : GONE);
 
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view

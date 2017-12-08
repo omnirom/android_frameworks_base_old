@@ -30,7 +30,7 @@
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">48dip</dimen>
 
-    <dimen name="toast_y_offset">64dip</dimen>
+    <dimen name="toast_y_offset">24dp</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">24dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
@@ -66,6 +66,9 @@
 
     <!-- The amount to leave on-screen when the PIP is minimized. -->
     <dimen name="pip_minimized_visible_size">48dp</dimen>
+
+    <!-- The the PIP decelerates at while moving from a fling. -->
+    <dimen name="pip_fling_deceleration">-3000dp</dimen>
 
     <!-- Min width for a tablet device -->
     <dimen name="min_xlarge_screen_width">800dp</dimen>
@@ -177,6 +180,12 @@
     <!-- height of the content margin on the bottom -->
     <dimen name="notification_content_margin_bottom">16dp</dimen>
 
+    <!-- The height of the progress bar. -->
+    <dimen name="notification_progress_bar_height">15dp</dimen>
+
+    <!-- The top margin before the notification progress bar. -->
+    <dimen name="notification_progress_margin_top">8dp</dimen>
+
     <!-- height of the notification header (for icon and package name) -->
     <dimen name="notification_header_height">48dp</dimen>
 
@@ -185,8 +194,15 @@
 
     <!-- The top padding for the notification header -->
     <dimen name="notification_header_padding_top">10dp</dimen>
+
     <!-- The bottom padding for the notification header -->
     <dimen name="notification_header_padding_bottom">11dp</dimen>
+
+    <!-- The margin at the bottom of the notification header. -->
+    <dimen name="notification_header_margin_bottom">5dp</dimen>
+
+    <!-- The end margin after the application icon in the notification header -->
+    <dimen name="notification_header_icon_margin_end">3dp</dimen>
 
     <!-- size (width and height) of the icon in the notification header -->
     <dimen name="notification_header_icon_size">18dp</dimen>
@@ -194,11 +210,24 @@
     <!-- size (width and height) of the icon in the notification header -->
     <dimen name="notification_header_icon_size_ambient">20dp</dimen>
 
+    <!-- The margin before the start of the app name in the header. -->
+    <dimen name="notification_header_app_name_margin_start">3dp</dimen>
+
+    <!-- The margin before and after each of the items in the notification header. -->
+    <dimen name="notification_header_separating_margin">2dp</dimen>
+
+    <!-- The absolute size of the notification expand icon. -2 for wrap_content. -->
+    <dimen name="notification_header_expand_icon_size">-2px</dimen>
+
+    <!-- The top padding for the notification expand button. -->
+    <dimen name="notification_expand_button_padding_top">1dp</dimen>
+
     <!-- Height of a small notification in the status bar -->
     <dimen name="notification_min_height">92dp</dimen>
 
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_width">64dp</dimen>
+
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_height">64dp</dimen>
 
@@ -208,11 +237,20 @@
     <!-- The minimum height of the content if there are at least two lines or a picture-->
     <dimen name="notification_min_content_height">41dp</dimen>
 
-    <!-- The small size of the image if the height drawing doesn't work anymore -->
-    <dimen name="media_notification_expanded_image_small_size">72dp</dimen>
+    <!-- The size of the media actions in the media notification. -->
+    <dimen name="media_notification_action_button_size">48dp</dimen>
+
+    <!-- The bottom padding for the media actions container. -->
+    <dimen name="media_notification_actions_padding_bottom">12dp</dimen>
+
+    <!-- The maximum size of the image in the expanded media notification -->
+    <dimen name="media_notification_expanded_image_max_size">94dp</dimen>
 
     <!-- The maximum size of the image in the expanded media notification -->
     <dimen name="media_notification_expanded_image_margin_bottom">20dp</dimen>
+
+    <!-- The absolute height for the header in a media notification. -->
+    <dimen name="media_notification_header_height">53dp</dimen>
 
     <!-- The margin of the content to an image-->
     <dimen name="notification_content_image_margin_end">8dp</dimen>
@@ -400,15 +438,6 @@
     <!-- Width of the outline stroke used by the accessibility screen magnification indicator -->
     <dimen name="accessibility_magnification_indicator_width">4dip</dimen>
 
-    <!-- Width of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_width">320dp</dimen>
-
-    <!-- Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_height">400dp</dimen>
-
-    <!-- Margin around the various security views -->
-    <dimen name="keyguard_security_view_margin">8dp</dimen>
-
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
 
@@ -492,6 +521,8 @@
     <dimen name="content_rect_bottom_clip_allowance">20dp</dimen>
 
     <dimen name="chooser_grid_padding">0dp</dimen>
+    <!-- Spacing around the background change frome service to non-service -->
+    <dimen name="chooser_service_spacing">8dp</dimen>
 
     <item type="dimen" name="aerr_padding_list_top">15dp</item>
     <item type="dimen" name="aerr_padding_list_bottom">8dp</item>
@@ -537,7 +568,47 @@
     <dimen name="item_touch_helper_swipe_escape_velocity">120dp</dimen>
     <dimen name="item_touch_helper_swipe_escape_max_velocity">800dp</dimen>
 
+    <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. This value is determined by the maximum notification height -->
+    <dimen name="notification_custom_view_max_image_height">284dp</dimen>
+    <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. This value is determined a maximum notification width -->
+    <dimen name="notification_custom_view_max_image_width">450dp</dimen>
+    <!-- The maximum height of a big picture in a notification. The images will be reduced to that height in case they are bigger. This value is determined by the maximum notification height -->
+    <dimen name="notification_big_picture_max_height">284dp</dimen>
+    <!-- The maximum width of a big picture in a notification. The images will be reduced to that width in case they are bigger. This value is determined by the standard panel size -->
+    <dimen name="notification_big_picture_max_width">416dp</dimen>
+    <!-- The maximum height of a image in a media notification. The images will be reduced to that height in case they are bigger. This value is determined by the expanded media template-->
+    <dimen name="notification_media_image_max_height">140dp</dimen>
+    <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
+    <dimen name="notification_media_image_max_width">280dp</dimen>
+    <!-- The size of the right icon -->
+    <dimen name="notification_right_icon_size">40dp</dimen>
+
+    <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
+    <dimen name="notification_custom_view_max_image_height_low_ram">208dp</dimen>
+    <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
+    <dimen name="notification_custom_view_max_image_width_low_ram">294dp</dimen>
+    <!-- The maximum height of a big picture in a notification. The images will be reduced to that height in case they are bigger. -->
+    <dimen name="notification_big_picture_max_height_low_ram">208dp</dimen>
+    <!-- The maximum width of a big picture in a notification. The images will be reduced to that width in case they are bigger. -->
+    <dimen name="notification_big_picture_max_width_low_ram">294dp</dimen>
+    <!-- The maximum height of a image in a media notification. The images will be reduced to that height in case they are bigger. -->
+    <dimen name="notification_media_image_max_height_low_ram">100dp</dimen>
+    <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
+    <dimen name="notification_media_image_max_width_low_ram">100dp</dimen>
+    <!-- The size of the right icon image when on low ram -->
+    <dimen name="notification_right_icon_size_low_ram">40dp</dimen>
+
     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
     <dimen name="autofill_dataset_picker_max_size">90%</dimen>
+
+    <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
+    <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>
+
+    <!-- Max (absolute) dimensions (both width and height) of autofill service icon on autofill save affordance.
+      NOTE: the actual displayed size might is actually smaller than this and is hardcoded in the
+      autofill_save.xml layout; this dimension is just used to avoid a crash in the UI (if the icon provided
+      by the autofill service metadata is bigger than these dimentionsit will not be displayed).
+    -->
+    <dimen name="autofill_save_icon_max_size">300dp</dimen>
 
 </resources>

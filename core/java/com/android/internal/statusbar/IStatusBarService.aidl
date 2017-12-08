@@ -31,6 +31,7 @@ interface IStatusBarService
 {
     void expandNotificationsPanel();
     void collapsePanels();
+    void togglePanel();
     void disable(int what, IBinder token, String pkg);
     void disableForUser(int what, IBinder token, String pkg, int userId);
     void disable2(int what, IBinder token, String pkg);
@@ -75,5 +76,5 @@ interface IStatusBarService
     void addTile(in ComponentName tile);
     void remTile(in ComponentName tile);
     void clickTile(in ComponentName tile);
-    void handleSystemNavigationKey(in int key);
+    void handleSystemKey(in int key);
 }

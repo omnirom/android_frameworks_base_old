@@ -37,7 +37,7 @@ const FrameBuilder::LightGeometry sLightGeometry = { {100, 100, 100}, 50};
 class ValidatingBakedOpRenderer : public BakedOpRenderer {
 public:
     ValidatingBakedOpRenderer(RenderState& renderState, std::function<void(const Glop& glop)> validator)
-            : BakedOpRenderer(Caches::getInstance(), renderState, true, sLightInfo)
+            : BakedOpRenderer(Caches::getInstance(), renderState, true, false, sLightInfo)
             , mValidator(validator) {
         mGlopReceiver = ValidatingGlopReceiver;
     }
@@ -118,7 +118,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, onLayerOp_bufferless) {
     layerPaint.setAlpha(128);
     OffscreenBuffer* buffer = nullptr; // no providing a buffer, should hit rect fallback case
     LayerOp op(Rect(10, 10), Matrix4::identity(), nullptr, &layerPaint, &buffer);
-    testUnmergedGlopDispatch(renderThread, &op, [&renderThread] (const Glop& glop) {
+    testUnmergedGlopDispatch(renderThread, &op, [] (const Glop& glop) {
         ADD_FAILURE() << "Nothing should happen";
     }, 0);
 }

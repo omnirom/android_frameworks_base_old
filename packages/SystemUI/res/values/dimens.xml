@@ -102,6 +102,9 @@
     <!-- Height of a the shelf with the notification icons -->
     <dimen name="notification_shelf_height">32dp</dimen>
 
+    <!-- Minimum height of a notification to be interactable -->
+    <dimen name="notification_min_interaction_height">40dp</dimen>
+
     <!-- the padding of the shelf icon container -->
     <dimen name="shelf_icon_container_padding">13dp</dimen>
 
@@ -188,7 +191,20 @@
     <dimen name="close_handle_underlap">32dp</dimen>
 
     <!-- Height of the status bar header bar -->
-    <dimen name="status_bar_header_height">130dp</dimen>
+    <dimen name="status_bar_header_height">124dp</dimen>
+
+    <!-- Height of the status bar header bar in the car setting. -->
+    <dimen name="car_status_bar_header_height">128dp</dimen>
+
+    <!-- The bottom padding of the status bar header. -->
+    <dimen name="status_bar_header_padding_bottom">48dp</dimen>
+
+    <!-- The height of the container that holds the system icons in the quick settings header. -->
+    <dimen name="qs_header_system_icons_area_height">40dp</dimen>
+
+    <!-- The height of the container that holds the system icons in the quick settings header in the
+         car setting. -->
+    <dimen name="car_qs_header_system_icons_area_height">54dp</dimen>
 
     <!-- Height of the status bar header bar when on Keyguard -->
     <dimen name="status_bar_header_height_keyguard">40dp</dimen>
@@ -202,7 +218,17 @@
     <!-- Width for the notification panel and related windows -->
     <dimen name="match_parent">-1px</dimen>
     <dimen name="standard_notification_panel_width">416dp</dimen>
+
+    <!-- The top margin of the panel that holds the list of notifications. -->
+    <dimen name="notification_panel_margin_top">0dp</dimen>
+
+    <!-- The bottom margin of the panel that holds the list of notifications. -->
+    <dimen name="notification_panel_margin_bottom">0dp</dimen>
+
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
+
+    <!-- The width of the panel that holds the quick settings. -->
+    <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
     <dimen name="volume_dialog_panel_width">@dimen/standard_notification_panel_width</dimen>
 
@@ -266,6 +292,7 @@
     <dimen name="qs_detail_padding_start">16dp</dimen>
     <dimen name="qs_detail_items_padding_top">4dp</dimen>
     <dimen name="qs_detail_item_icon_size">24dp</dimen>
+    <dimen name="qs_detail_item_icon_width">32dp</dimen>
     <dimen name="qs_detail_item_icon_marginStart">0dp</dimen>
     <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
     <dimen name="qs_footer_padding_start">16dp</dimen>
@@ -320,6 +347,22 @@
 
     <!-- The height of the divider between the individual notifications. -->
     <dimen name="notification_divider_height">0.5dp</dimen>
+
+    <!-- The corner radius of the shadow behind the notification. -->
+    <dimen name="notification_shadow_radius">0dp</dimen>
+
+    <!-- The alpha of the dividing line between child notifications of a notification group. -->
+    <item name="notification_divider_alpha" format="float" type="dimen">0.5</item>
+
+    <!-- The height of the divider between the individual notifications in a notification
+         group. -->
+    <dimen name="notification_children_container_divider_height">@dimen/notification_divider_height</dimen>
+
+    <!-- The height of the header for a container containing child notifications. -->
+    <dimen name="notification_children_container_header_height">53dp</dimen>
+
+    <!-- The top margin for the notification children container in its non-expanded form. -->
+    <dimen name="notification_children_container_margin_top">@*android:dimen/notification_content_margin_top</dimen>
 
     <!-- The height of a notification header -->
     <dimen name="notification_header_height">53dp</dimen>
@@ -753,6 +796,9 @@
     <!-- The shortest-edge size of the expanded PiP. -->
     <dimen name="pip_expanded_shortest_edge_size">160dp</dimen>
 
+    <!-- The additional offset to apply to the IME animation to account for the input field. -->
+    <dimen name="pip_ime_offset">48dp</dimen>
+
     <!-- The padding between actions in the PiP in landscape  Note that the PiP does not reflect
          the configuration of the device, so we can't use -land resources. -->
     <dimen name="pip_between_action_padding_land">8dp</dimen>
@@ -772,6 +818,38 @@
 
     <dimen name="signal_icon_size">17dp</dimen>
 
-    <dimen name="qs_gutter_height">0dp</dimen>
+    <dimen name="hwui_edge_margin">16dp</dimen>
+
+    <dimen name="global_actions_panel_width">120dp</dimen>
+
+    <dimen name="global_actions_top_padding">120dp</dimen>
+
+    <!-- the maximum offset in either direction that elements are moved horizontally to prevent
+            burn-in on AOD -->
+    <dimen name="burn_in_prevention_offset_x">8dp</dimen>
+
+    <!-- the maximum offset in either direction that elements are moved vertically to prevent
+            burn-in on AOD -->
+    <dimen name="burn_in_prevention_offset_y">50dp</dimen>
+
+    <!-- padding between the notification stack and the keyguard status view when dozing -->
+    <dimen name="dozing_stack_padding">10dp</dimen>
+
+    <dimen name="corner_size">16dp</dimen>
+    <dimen name="top_padding">0dp</dimen>
+    <dimen name="bottom_padding">48dp</dimen>
+    <dimen name="edge_margin">16dp</dimen>
+
+    <dimen name="rounded_corner_radius">0dp</dimen>
+    <dimen name="rounded_corner_content_padding">0dp</dimen>
+    <dimen name="nav_content_padding">0dp</dimen>
+
+    <!-- Intended corner radius when drawing the mobile signal -->
+    <dimen name="stat_sys_mobile_signal_corner_radius">0.75dp</dimen>
+    <!-- How far to inset the rounded edges -->
+    <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
+
+    <!-- Home button padding for sizing -->
+    <dimen name="home_padding">15dp</dimen>
 
 </resources>

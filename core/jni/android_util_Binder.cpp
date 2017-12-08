@@ -20,7 +20,7 @@
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include <fcntl.h>
 #include <inttypes.h>
@@ -44,8 +44,8 @@
 #include <utils/SystemClock.h>
 #include <utils/threads.h>
 
-#include <ScopedUtfChars.h>
-#include <ScopedLocalRef.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 #include "core_jni_helpers.h"
 
@@ -133,6 +133,14 @@ static struct strict_mode_callback_offsets_t
     jmethodID mCallback;
 } gStrictModeCallbackOffsets;
 
+static struct thread_dispatch_offsets_t
+{
+    // Class state.
+    jclass mClass;
+    jmethodID mDispatchUncaughtException;
+    jmethodID mCurrentThread;
+} gThreadDispatchOffsets;
+
 // ****************************************************************************
 // ****************************************************************************
 // ****************************************************************************
@@ -166,6 +174,23 @@ static JNIEnv* javavm_to_jnienv(JavaVM* vm)
     return vm->GetEnv((void **)&env, JNI_VERSION_1_4) >= 0 ? env : NULL;
 }
 
+// Report a java.lang.Error (or subclass). This may terminate the runtime.
+static void report_java_lang_error(JNIEnv* env, jthrowable error)
+{
+    // Try to run the uncaught exception machinery.
+    jobject thread = env->CallStaticObjectMethod(gThreadDispatchOffsets.mClass,
+            gThreadDispatchOffsets.mCurrentThread);
+    if (thread != nullptr) {
+        env->CallVoidMethod(thread, gThreadDispatchOffsets.mDispatchUncaughtException,
+                error);
+        // Should not return here, unless more errors occured.
+    }
+    // Some error occurred that meant that either dispatchUncaughtException could not be
+    // called or that it had an error itself (as this should be unreachable under normal
+    // conditions). Clear the exception.
+    env->ExceptionClear();
+}
+
 static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
 {
     env->ExceptionClear();
@@ -192,6 +217,10 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
     }
 
     if (env->IsInstanceOf(excep, gErrorOffsets.mClass)) {
+        // Try to report the error. This should not return under normal circumstances.
+        report_java_lang_error(env, excep);
+        // The traditional handling: re-raise and abort.
+
         /*
          * It's an Error: Reraise the exception and ask the runtime to abort.
          */
@@ -836,7 +865,7 @@ static void android_os_Binder_init(JNIEnv* env, jobject obj)
     env->SetLongField(obj, gBinderOffsets.mObject, (jlong)jbh);
 }
 
-static void android_os_Binder_destroy(JNIEnv* env, jobject obj)
+static void android_os_Binder_destroyBinder(JNIEnv* env, jobject obj)
 {
     JavaBBinderHolder* jbh = (JavaBBinderHolder*)
         env->GetLongField(obj, gBinderOffsets.mObject);
@@ -847,7 +876,7 @@ static void android_os_Binder_destroy(JNIEnv* env, jobject obj)
     } else {
         // Encountering an uninitialized binder is harmless.  All it means is that
         // the Binder was only partially initialized when its finalizer ran and called
-        // destroy().  The Binder could be partially initialized for several reasons.
+        // destroyBinder().  The Binder could be partially initialized for several reasons.
         // For example, a Binder subclass constructor might have thrown an exception before
         // it could delegate to its superclass's constructor.  Consequently init() would
         // not have been called and the holder pointer would remain NULL.
@@ -872,7 +901,7 @@ static const JNINativeMethod gBinderMethods[] = {
     { "getThreadStrictModePolicy", "()I", (void*)android_os_Binder_getThreadStrictModePolicy },
     { "flushPendingCommands", "()V", (void*)android_os_Binder_flushPendingCommands },
     { "init", "()V", (void*)android_os_Binder_init },
-    { "destroy", "()V", (void*)android_os_Binder_destroy },
+    { "destroyBinder", "()V", (void*)android_os_Binder_destroyBinder },
     { "blockUntilThreadAvailable", "()V", (void*)android_os_Binder_blockUntilThreadAvailable }
 };
 
@@ -1336,6 +1365,13 @@ int register_android_os_Binder(JNIEnv* env)
     gStrictModeCallbackOffsets.mClass = MakeGlobalRefOrDie(env, clazz);
     gStrictModeCallbackOffsets.mCallback = GetStaticMethodIDOrDie(env, clazz,
             "onBinderStrictModePolicyChange", "(I)V");
+
+    clazz = FindClassOrDie(env, "java/lang/Thread");
+    gThreadDispatchOffsets.mClass = MakeGlobalRefOrDie(env, clazz);
+    gThreadDispatchOffsets.mDispatchUncaughtException = GetMethodIDOrDie(env, clazz,
+            "dispatchUncaughtException", "(Ljava/lang/Throwable;)V");
+    gThreadDispatchOffsets.mCurrentThread = GetStaticMethodIDOrDie(env, clazz, "currentThread",
+            "()Ljava/lang/Thread;");
 
     return 0;
 }

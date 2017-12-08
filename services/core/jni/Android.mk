@@ -5,9 +5,17 @@ LOCAL_REL_DIR := core/jni
 LOCAL_CFLAGS += -Wall -Werror -Wno-unused-parameter
 
 LOCAL_SRC_FILES += \
+    $(LOCAL_REL_DIR)/BroadcastRadio/JavaRef.cpp \
+    $(LOCAL_REL_DIR)/BroadcastRadio/NativeCallbackThread.cpp \
+    $(LOCAL_REL_DIR)/BroadcastRadio/BroadcastRadioService.cpp \
+    $(LOCAL_REL_DIR)/BroadcastRadio/Tuner.cpp \
+    $(LOCAL_REL_DIR)/BroadcastRadio/TunerCallback.cpp \
+    $(LOCAL_REL_DIR)/BroadcastRadio/convert.cpp \
+    $(LOCAL_REL_DIR)/BroadcastRadio/regions.cpp \
     $(LOCAL_REL_DIR)/com_android_server_AlarmManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_am_BatteryStatsService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_connectivity_Vpn.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_connectivity_tethering_OffloadHardwareInterface.cpp \
     $(LOCAL_REL_DIR)/com_android_server_ConsumerIrService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_HardwarePropertiesManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_hdmi_HdmiCecController.cpp \
@@ -17,15 +25,16 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_lights_LightsService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_location_ContextHubService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_location_GnssLocationProvider.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_locksettings_SyntheticPasswordManager.cpp \
     $(LOCAL_REL_DIR)/com_android_server_power_PowerManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_SerialService.cpp \
-    $(LOCAL_REL_DIR)/com_android_server_SyntheticPasswordManager.cpp \
     $(LOCAL_REL_DIR)/com_android_server_storage_AppFuseBridge.cpp \
     $(LOCAL_REL_DIR)/com_android_server_SystemServer.cpp \
     $(LOCAL_REL_DIR)/com_android_server_tv_TvUinputBridge.cpp \
     $(LOCAL_REL_DIR)/com_android_server_tv_TvInputHal.cpp \
     $(LOCAL_REL_DIR)/com_android_server_vr_VrManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_UsbDeviceManager.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_UsbDescriptorParser.cpp \
     $(LOCAL_REL_DIR)/com_android_server_UsbMidiDevice.cpp \
     $(LOCAL_REL_DIR)/com_android_server_UsbHostManager.cpp \
     $(LOCAL_REL_DIR)/com_android_server_VibratorService.cpp \
@@ -49,6 +58,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SHARED_LIBRARIES += \
     libandroid_runtime \
     libandroidfw \
+    libaudioclient \
     libbase \
     libappfuse \
     libbinder \
@@ -57,6 +67,7 @@ LOCAL_SHARED_LIBRARIES += \
     liblog \
     libhardware \
     libhardware_legacy \
+    libhidlbase \
     libkeystore_binder \
     libnativehelper \
     libutils \
@@ -80,17 +91,24 @@ LOCAL_SHARED_LIBRARIES += \
     libutils \
     libhwui \
     android.hardware.audio.common@2.0 \
+    android.hardware.broadcastradio@1.0 \
+    android.hardware.broadcastradio@1.1 \
     android.hardware.contexthub@1.0 \
     android.hardware.gnss@1.0 \
     android.hardware.ir@1.0 \
     android.hardware.light@2.0 \
     android.hardware.power@1.0 \
+    android.hardware.power@1.1 \
+    android.hardware.tetheroffload.config@1.0 \
     android.hardware.thermal@1.0 \
     android.hardware.tv.cec@1.0 \
     android.hardware.tv.input@1.0 \
     android.hardware.vibrator@1.0 \
+    android.hardware.vibrator@1.1 \
     android.hardware.vr@1.0 \
     android.frameworks.schedulerservice@1.0 \
     android.frameworks.sensorservice@1.0 \
 
-LOCAL_STATIC_LIBRARIES += libscrypt_static
+LOCAL_STATIC_LIBRARIES += \
+    android.hardware.broadcastradio@1.1-utils-lib \
+    libscrypt_static \

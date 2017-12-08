@@ -15,9 +15,6 @@
  */
 package android.content.res;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.animation.Animator;
 import android.animation.StateListAnimator;
 import android.annotation.AnyRes;
@@ -32,7 +29,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.Configuration.NativeConfig;
 import android.content.res.Resources.NotFoundException;
-import android.graphics.FontFamily;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -40,8 +37,9 @@ import android.graphics.drawable.DrawableContainer;
 import android.icu.text.PluralRules;
 import android.os.Build;
 import android.os.LocaleList;
+import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Trace;
-import android.text.FontConfig;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -51,10 +49,14 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.view.DisplayAdjustments;
 
+import com.android.internal.util.GrowingArrayUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -72,9 +74,20 @@ public class ResourcesImpl {
 
     private static final boolean DEBUG_LOAD = false;
     private static final boolean DEBUG_CONFIG = false;
-    private static final boolean TRACE_FOR_PRELOAD = false;
-    private static final boolean TRACE_FOR_MISS_PRELOAD = false;
 
+    static final String TAG_PRELOAD = TAG + ".preload";
+
+    private static final boolean TRACE_FOR_PRELOAD = false; // Do we still need it?
+    private static final boolean TRACE_FOR_MISS_PRELOAD = false; // Do we still need it?
+
+    public static final boolean TRACE_FOR_DETAILED_PRELOAD =
+            SystemProperties.getBoolean("debug.trace_resource_preload", false);
+
+    /** Used only when TRACE_FOR_DETAILED_PRELOAD is true. */
+    private static int sPreloadTracingNumLoadedDrawables;
+    private long mPreloadTracingPreloadStartTime;
+    private long mPreloadTracingStartBitmapSize;
+    private long mPreloadTracingStartBitmapCount;
 
     private static final int ID_OTHER = 0x01000004;
 
@@ -105,6 +118,13 @@ public class ResourcesImpl {
             new ConfigurationBoundResourceCache<>();
     private final ConfigurationBoundResourceCache<StateListAnimator> mStateListAnimatorCache =
             new ConfigurationBoundResourceCache<>();
+
+    // A stack of all the resourceIds already referenced when parsing a resource. This is used to
+    // detect circular references in the xml.
+    // Using a ThreadLocal variable ensures that we have different stacks for multiple parallel
+    // calls to ResourcesImpl
+    private final ThreadLocal<LookupStack> mLookupStack =
+            ThreadLocal.withInitial(() -> new LookupStack());
 
     /** Size of the cyclical cache used to map XML files to blocks. */
     private static final int XML_BLOCK_CACHE_SIZE = 4;
@@ -593,6 +613,16 @@ public class ResourcesImpl {
             Drawable dr;
             boolean needsNewDrawableAfterCache = false;
             if (cs != null) {
+                if (TRACE_FOR_DETAILED_PRELOAD) {
+                    // Log only framework resources
+                    if (((id >>> 24) == 0x1) && (android.os.Process.myUid() != 0)) {
+                        final String name = getResourceName(id);
+                        if (name != null) {
+                            Log.d(TAG_PRELOAD, "Hit preloaded FW drawable #"
+                                    + Integer.toHexString(id) + " " + name);
+                        }
+                    }
+                }
                 dr = cs.newDrawable(wrapper);
             } else if (isColorDrawable) {
                 dr = new ColorDrawable(value.data);
@@ -744,6 +774,18 @@ public class ResourcesImpl {
             }
         }
 
+        // For prelaod tracing.
+        long startTime = 0;
+        int startBitmapCount = 0;
+        long startBitmapSize = 0;
+        int startDrwableCount = 0;
+        if (TRACE_FOR_DETAILED_PRELOAD) {
+            startTime = System.nanoTime();
+            startBitmapCount = Bitmap.sPreloadTracingNumInstantiatedBitmaps;
+            startBitmapSize = Bitmap.sPreloadTracingTotalBitmapsSize;
+            startDrwableCount = sPreloadTracingNumLoadedDrawables;
+        }
+
         if (DEBUG_LOAD) {
             Log.v(TAG, "Loading drawable for cookie " + value.assetCookie + ": " + file);
         }
@@ -751,17 +793,27 @@ public class ResourcesImpl {
         final Drawable dr;
 
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
+        LookupStack stack = mLookupStack.get();
         try {
-            if (file.endsWith(".xml")) {
-                final XmlResourceParser rp = loadXmlResourceParser(
-                        file, id, value.assetCookie, "drawable");
-                dr = Drawable.createFromXmlForDensity(wrapper, rp, density, theme);
-                rp.close();
-            } else {
-                final InputStream is = mAssets.openNonAsset(
-                        value.assetCookie, file, AssetManager.ACCESS_STREAMING);
-                dr = Drawable.createFromResourceStream(wrapper, value, is, file, null);
-                is.close();
+            // Perform a linear search to check if we have already referenced this resource before.
+            if (stack.contains(id)) {
+                throw new Exception("Recursive reference in drawable");
+            }
+            stack.push(id);
+            try {
+                if (file.endsWith(".xml")) {
+                    final XmlResourceParser rp = loadXmlResourceParser(
+                            file, id, value.assetCookie, "drawable");
+                    dr = Drawable.createFromXmlForDensity(wrapper, rp, density, theme);
+                    rp.close();
+                } else {
+                    final InputStream is = mAssets.openNonAsset(
+                            value.assetCookie, file, AssetManager.ACCESS_STREAMING);
+                    dr = Drawable.createFromResourceStream(wrapper, value, is, file, null);
+                    is.close();
+                }
+            } finally {
+                stack.pop();
             }
         } catch (Exception e) {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
@@ -771,6 +823,37 @@ public class ResourcesImpl {
             throw rnf;
         }
         Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+
+        if (TRACE_FOR_DETAILED_PRELOAD) {
+            if (((id >>> 24) == 0x1)) {
+                final String name = getResourceName(id);
+                if (name != null) {
+                    final long time = System.nanoTime() - startTime;
+                    final int loadedBitmapCount =
+                            Bitmap.sPreloadTracingNumInstantiatedBitmaps - startBitmapCount;
+                    final long loadedBitmapSize =
+                            Bitmap.sPreloadTracingTotalBitmapsSize - startBitmapSize;
+                    final int loadedDrawables =
+                            sPreloadTracingNumLoadedDrawables - startDrwableCount;
+
+                    sPreloadTracingNumLoadedDrawables++;
+
+                    final boolean isRoot = (android.os.Process.myUid() == 0);
+
+                    Log.d(TAG_PRELOAD,
+                            (isRoot ? "Preloaded FW drawable #"
+                                    : "Loaded non-preloaded FW drawable #")
+                            + Integer.toHexString(id)
+                            + " " + name
+                            + " " + file
+                            + " " + dr.getClass().getCanonicalName()
+                            + " #nested_drawables= " + loadedDrawables
+                            + " #bitmaps= " + loadedBitmapCount
+                            + " total_bitmap_size= " + loadedBitmapSize
+                            + " in[us] " + (time / 1000));
+                }
+            }
+        }
 
         return dr;
     }
@@ -1102,6 +1185,13 @@ public class ResourcesImpl {
             mPreloading = true;
             mConfiguration.densityDpi = DisplayMetrics.DENSITY_DEVICE;
             updateConfiguration(null, null, null);
+
+            if (TRACE_FOR_DETAILED_PRELOAD) {
+                mPreloadTracingPreloadStartTime = SystemClock.uptimeMillis();
+                mPreloadTracingStartBitmapSize = Bitmap.sPreloadTracingTotalBitmapsSize;
+                mPreloadTracingStartBitmapCount = Bitmap.sPreloadTracingNumInstantiatedBitmaps;
+                Log.d(TAG_PRELOAD, "Preload starting");
+            }
         }
     }
 
@@ -1111,6 +1201,16 @@ public class ResourcesImpl {
      */
     void finishPreloading() {
         if (mPreloading) {
+            if (TRACE_FOR_DETAILED_PRELOAD) {
+                final long time = SystemClock.uptimeMillis() - mPreloadTracingPreloadStartTime;
+                final long size =
+                        Bitmap.sPreloadTracingTotalBitmapsSize - mPreloadTracingStartBitmapSize;
+                final long count = Bitmap.sPreloadTracingNumInstantiatedBitmaps
+                        - mPreloadTracingStartBitmapCount;
+                Log.d(TAG_PRELOAD, "Preload finished, "
+                        + count + " bitmaps of " + size + " bytes in " + time + " ms");
+            }
+
             mPreloading = false;
             flushLayoutCache();
         }
@@ -1294,6 +1394,31 @@ public class ResourcesImpl {
                     AssetManager.applyThemeStyle(mTheme, resId, force);
                 }
             }
+        }
+    }
+
+    private static class LookupStack {
+
+        // Pick a reasonable default size for the array, it is grown as needed.
+        private int[] mIds = new int[4];
+        private int mSize = 0;
+
+        public void push(int id) {
+            mIds = GrowingArrayUtils.append(mIds, mSize, id);
+            mSize++;
+        }
+
+        public boolean contains(int id) {
+            for (int i = 0; i < mSize; i++) {
+                if (mIds[i] == id) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void pop() {
+            mSize--;
         }
     }
 }

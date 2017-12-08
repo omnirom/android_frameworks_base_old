@@ -29,20 +29,18 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
 import java.util.Map;
 
 /**
- * Creates a looper on the current thread with control over if/when messages are
- * executed. Warning: This class works through some reflection and may break/need
- * to be updated from time to time.
+ * This is a wrapper around {@link TestLooperManager} to make it easier to manage
+ * and provide an easy annotation for use with tests.
+ *
+ * @see TestableLooperTest TestableLooperTest for examples.
  */
 public class TestableLooper {
 
     private Looper mLooper;
     private MessageQueue mQueue;
-    private boolean mMain;
-    private Object mOriginalMain;
     private MessageHandler mMessageHandler;
 
     private Handler mHandler;
@@ -50,7 +48,7 @@ public class TestableLooper {
     private TestLooperManager mQueueWrapper;
 
     public TestableLooper(Looper l) throws Exception {
-        this(InstrumentationRegistry.getInstrumentation().acquireLooperManager(l), l);
+        this(acquireLooperManager(l), l);
     }
 
     private TestableLooper(TestLooperManager wrapper, Looper l) throws Exception {
@@ -72,35 +70,23 @@ public class TestableLooper {
         mHandler = new Handler(mLooper);
     }
 
-    public void setAsMainLooper() throws NoSuchFieldException, IllegalAccessException {
-        mMain = true;
-        setAsMainInt();
-    }
-
-    private void setAsMainInt() throws NoSuchFieldException, IllegalAccessException {
-        Field field = mLooper.getClass().getDeclaredField("sMainLooper");
-        field.setAccessible(true);
-        if (mOriginalMain == null) {
-            mOriginalMain = field.get(null);
-        }
-        field.set(null, mLooper);
-    }
-
     /**
-     * Must be called if setAsMainLooper is called to restore the main looper when the
-     * test is complete, otherwise the main looper will not be available for any subsequent
-     * tests.
+     * Must be called to release the looper when the test is complete, otherwise
+     * the looper will not be available for any subsequent tests. This is
+     * automatically handled for tests using {@link RunWithLooper}.
      */
     public void destroy() throws NoSuchFieldException, IllegalAccessException {
         mQueueWrapper.release();
-        if (mMain && mOriginalMain != null) {
-            Field field = mLooper.getClass().getDeclaredField("sMainLooper");
-            field.setAccessible(true);
-            field.set(null, mOriginalMain);
-            mOriginalMain = null;
+        if (mLooper == Looper.getMainLooper()) {
+            TestableInstrumentation.releaseMain();
         }
     }
 
+    /**
+     * Sets a callback for all messages processed on this TestableLooper.
+     *
+     * @see {@link MessageHandler}
+     */
     public void setMessageHandler(MessageHandler handler) {
         mMessageHandler = handler;
     }
@@ -119,6 +105,9 @@ public class TestableLooper {
         return num;
     }
 
+    /**
+     * Process messages in the queue until no more are found.
+     */
     public void processAllMessages() {
         while (processQueuedMessages() != 0) ;
     }
@@ -183,6 +172,11 @@ public class TestableLooper {
         void run() throws Exception;
     }
 
+    /**
+     * Annotation that tells the {@link AndroidTestingRunner} to create a TestableLooper and
+     * run this test/class on that thread. The {@link TestableLooper} can be acquired using
+     * {@link #get(Object)}.
+     */
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.METHOD, ElementType.TYPE})
     public @interface RunWithLooper {
@@ -204,13 +198,24 @@ public class TestableLooper {
         }
     }
 
+    private static TestLooperManager acquireLooperManager(Looper l) {
+        if (l == Looper.getMainLooper()) {
+            TestableInstrumentation.acquireMain();
+        }
+        return InstrumentationRegistry.getInstrumentation().acquireLooperManager(l);
+    }
+
     private static final Map<Object, TestableLooper> sLoopers = new ArrayMap<>();
 
+    /**
+     * For use with {@link RunWithLooper}, used to get the TestableLooper that was
+     * automatically created for this test.
+     */
     public static TestableLooper get(Object test) {
         return sLoopers.get(test);
     }
 
-    public static class LooperFrameworkMethod extends FrameworkMethod {
+    static class LooperFrameworkMethod extends FrameworkMethod {
         private HandlerThread mHandlerThread;
 
         private final TestableLooper mTestableLooper;
@@ -251,8 +256,7 @@ public class TestableLooper {
             }
             boolean set = mTestableLooper.mQueueWrapper == null;
             if (set) {
-                mTestableLooper.mQueueWrapper = InstrumentationRegistry.getInstrumentation()
-                        .acquireLooperManager(mLooper);
+                mTestableLooper.mQueueWrapper = acquireLooperManager(mLooper);
             }
             try {
                 Object[] ret = new Object[1];
@@ -287,6 +291,9 @@ public class TestableLooper {
                 if (set) {
                     mTestableLooper.mQueueWrapper.release();
                     mTestableLooper.mQueueWrapper = null;
+                    if (mLooper == Looper.getMainLooper()) {
+                        TestableInstrumentation.releaseMain();
+                    }
                 }
             }
         }
@@ -319,6 +326,11 @@ public class TestableLooper {
         }
     }
 
+    /**
+     * Callback to control the execution of messages on the looper, when set with
+     * {@link #setMessageHandler(MessageHandler)} then {@link #onMessageHandled(Message)}
+     * will get called back for every message processed on the {@link TestableLooper}.
+     */
     public interface MessageHandler {
         /**
          * Return true to have the message executed and delivered to target.

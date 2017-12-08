@@ -17,11 +17,12 @@
 #define LOG_TAG "LightsService"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 
 #include <android/hardware/light/2.0/ILight.h>
 #include <android/hardware/light/2.0/types.h>
+#include <android-base/chrono_utils.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
 #include <map>
@@ -178,9 +179,10 @@ static void setLight_native(
         colorARGB, flashMode, onMS, offMS, brightnessMode);
 
     {
-        ALOGD_IF_SLOW(50, "Excessive delay setting light");
+        android::base::Timer t;
         Return<Status> ret = hal->setLight(type, state);
         processReturn(ret, type, state);
+        if (t.duration() > 50ms) ALOGD("Excessive delay setting light");
     }
 }
 

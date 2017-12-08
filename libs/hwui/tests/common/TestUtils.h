@@ -189,7 +189,7 @@ public:
     static sk_sp<Bitmap> createBitmap(int width, int height, SkBitmap* outBitmap) {
         SkImageInfo info = SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType);
         outBitmap->setInfo(info);
-        return Bitmap::allocateHeapBitmap(outBitmap, nullptr);
+        return Bitmap::allocateHeapBitmap(outBitmap);
     }
 
     static sp<DeferredLayerUpdater> createTextureLayerUpdater(
@@ -365,8 +365,15 @@ private:
         }
         auto displayList = node->getDisplayList();
         if (displayList) {
-            for (auto&& childOp : displayList->getChildren()) {
-                syncHierarchyPropertiesAndDisplayListImpl(childOp->renderNode);
+            if (displayList->isSkiaDL()) {
+                for (auto&& childDr : static_cast<skiapipeline::SkiaDisplayList*>(
+                        const_cast<DisplayList*>(displayList))->mChildNodes) {
+                    syncHierarchyPropertiesAndDisplayListImpl(childDr.getRenderNode());
+                }
+            } else {
+                for (auto&& childOp : displayList->getChildren()) {
+                    syncHierarchyPropertiesAndDisplayListImpl(childOp->renderNode);
+                }
             }
         }
     }

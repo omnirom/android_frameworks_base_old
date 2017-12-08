@@ -45,6 +45,8 @@
 #include <unistd.h>
 
 #include "android-base/logging.h"
+#include <android-base/file.h>
+#include <android-base/stringprintf.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <cutils/sched_policy.h>
@@ -54,10 +56,10 @@
 #include <processgroup/processgroup.h>
 
 #include "core_jni_helpers.h"
-#include "JNIHelp.h"
-#include "ScopedLocalRef.h"
-#include "ScopedPrimitiveArray.h"
-#include "ScopedUtfChars.h"
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "fd_utils.h"
 
 #include "nativebridge/native_bridge.h"
@@ -65,6 +67,8 @@
 namespace {
 
 using android::String8;
+using android::base::StringPrintf;
+using android::base::WriteStringToFile;
 
 static pid_t gSystemServerPid = 0;
 
@@ -220,6 +224,14 @@ static void SetRLimits(JNIEnv* env, jobjectArray javaRlimits) {
 
 // The debug malloc library needs to know whether it's the zygote or a child.
 extern "C" int gMallocLeakZygoteChild;
+
+static void PreApplicationInit() {
+  // The child process sets this to indicate it's not the zygote.
+  gMallocLeakZygoteChild = 1;
+
+  // Set the jemalloc decay time to 1.
+  mallopt(M_DECAY_TIME, 1);
+}
 
 static void EnableKeepCapabilities(JNIEnv* env) {
   int rc = prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0);
@@ -517,11 +529,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   pid_t pid = fork();
 
   if (pid == 0) {
-    // The child process.
-    gMallocLeakZygoteChild = 1;
-
-    // Set the jemalloc decay time to 1.
-    mallopt(M_DECAY_TIME, 1);
+    PreApplicationInit();
 
     // Clean up any descriptors which must be closed immediately
     DetachDescriptors(env, fdsToClose);
@@ -678,6 +686,10 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
 namespace android {
 
+static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jclass) {
+  PreApplicationInit();
+}
+
 static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
         jint debug_flags, jobjectArray rlimits,
@@ -746,6 +758,11 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
           ALOGE("System server process %d has died. Restarting Zygote!", pid);
           RuntimeAbort(env, __LINE__, "System server process has died. Restarting Zygote!");
       }
+
+      // Assign system_server to the correct memory cgroup.
+      if (!WriteStringToFile(StringPrintf("%d", pid), "/dev/memcg/system/tasks")) {
+        ALOGE("couldn't write %d to /dev/memcg/system/tasks", pid);
+      }
   }
   return pid;
 }
@@ -807,7 +824,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeAllowFileAcrossFork", "(Ljava/lang/String;)V",
       (void *) com_android_internal_os_Zygote_nativeAllowFileAcrossFork },
     { "nativeUnmountStorageOnInit", "()V",
-      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit }
+      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit },
+    { "nativePreApplicationInit", "()V",
+      (void *) com_android_internal_os_Zygote_nativePreApplicationInit }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {

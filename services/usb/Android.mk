@@ -10,6 +10,7 @@ LOCAL_SRC_FILES += \
 LOCAL_JAVA_LIBRARIES := services.core \
 android.hidl.manager-V1.0-java
 
-LOCAL_STATIC_JAVA_LIBRARIES := android.hardware.usb-V1.0-java
+LOCAL_STATIC_JAVA_LIBRARIES := android.hardware.usb-V1.0-java \
+android.hardware.usb-V1.1-java
 
 include $(BUILD_STATIC_JAVA_LIBRARY)

@@ -27,6 +27,10 @@ class DozeHostFake implements DozeHost {
     boolean pulseAborted;
     boolean pulseExtended;
     boolean animateWakeup;
+    boolean dozing;
+    float doubleTapX;
+    float doubleTapY;
+    float aodDimmingScrimOpacity;
 
     @Override
     public void addCallback(@NonNull Callback callback) {
@@ -40,7 +44,7 @@ class DozeHostFake implements DozeHost {
 
     @Override
     public void startDozing() {
-        throw new RuntimeException("not implemented");
+        dozing = true;
     }
 
     @Override
@@ -50,7 +54,7 @@ class DozeHostFake implements DozeHost {
 
     @Override
     public void stopDozing() {
-        throw new RuntimeException("not implemented");
+        dozing = false;
     }
 
     @Override
@@ -69,8 +73,22 @@ class DozeHostFake implements DozeHost {
     }
 
     @Override
+    public boolean isProvisioned() {
+        return false;
+    }
+
+    @Override
+    public boolean isBlockingDoze() {
+        return false;
+    }
+
+    @Override
     public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
         throw new RuntimeException("not implemented");
+    }
+
+    @Override
+    public void onIgnoreTouchWhilePulsing(boolean ignore) {
     }
 
     @Override
@@ -86,5 +104,20 @@ class DozeHostFake implements DozeHost {
     @Override
     public void setAnimateWakeup(boolean animateWakeup) {
         this.animateWakeup = animateWakeup;
+    }
+
+    @Override
+    public void onDoubleTap(float x, float y) {
+        doubleTapX = y;
+        doubleTapY = y;
+    }
+
+    @Override
+    public void setDozeScreenBrightness(int value) {
+    }
+
+    @Override
+    public void setAodDimmingScrim(float scrimOpacity) {
+        aodDimmingScrimOpacity = scrimOpacity;
     }
 }

@@ -39,6 +39,9 @@ public class PictureInPictureTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
+    public void handleSetListening(boolean listening) {}
+
+    @Override
     public int getMetricsCategory() {
         return MetricsEvent.CUSTOM_QUICK_TILES;
     }
@@ -47,9 +50,6 @@ public class PictureInPictureTile extends QSTileImpl<BooleanState> {
     public BooleanState newTileState() {
         return new BooleanState();
     }
-
-    @Override
-    public void setListening(boolean listening) {}
 
     @Override
     public void handleClick() {

@@ -19,7 +19,7 @@
 #include <stdio.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "android_os_Parcel.h"
 #include "android/graphics/GraphicBuffer.h"
 #include "android/graphics/GraphicsJNI.h"
@@ -47,7 +47,7 @@
 #include <utils/misc.h>
 #include <utils/Log.h>
 
-#include <ScopedUtfChars.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 #include <AnimationContext.h>
 #include <FrameInfo.h>
@@ -135,6 +135,7 @@ int android_view_Surface_mapPublicFormatToHalFormat(PublicFormat f) {
         case PublicFormat::DEPTH16:
             return HAL_PIXEL_FORMAT_Y16;
         case PublicFormat::RAW_SENSOR:
+        case PublicFormat::RAW_DEPTH:
             return HAL_PIXEL_FORMAT_RAW16;
         default:
             // Most formats map 1:1
@@ -149,6 +150,7 @@ android_dataspace android_view_Surface_mapPublicFormatToHalDataspace(
             return HAL_DATASPACE_V0_JFIF;
         case PublicFormat::DEPTH_POINT_CLOUD:
         case PublicFormat::DEPTH16:
+        case PublicFormat::RAW_DEPTH:
             return HAL_DATASPACE_DEPTH;
         case PublicFormat::RAW_SENSOR:
         case PublicFormat::RAW_PRIVATE:
@@ -182,8 +184,12 @@ PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
             // Enums overlap in both name and value
             return static_cast<PublicFormat>(format);
         case HAL_PIXEL_FORMAT_RAW16:
-            // Name differs, though value is the same
-            return PublicFormat::RAW_SENSOR;
+            switch (dataSpace) {
+                case HAL_DATASPACE_DEPTH:
+                  return PublicFormat::RAW_DEPTH;
+                default:
+                  return PublicFormat::RAW_SENSOR;
+            }
         case HAL_PIXEL_FORMAT_RAW_OPAQUE:
             // Name differs, though value is the same
             return PublicFormat::RAW_PRIVATE;
@@ -531,6 +537,20 @@ static jint nativeAttachAndQueueBuffer(JNIEnv *env, jclass clazz, jlong nativeOb
     return err;
 }
 
+static jint nativeSetSharedBufferModeEnabled(JNIEnv* env, jclass clazz, jlong nativeObject,
+        jboolean enabled) {
+    Surface* surface = reinterpret_cast<Surface*>(nativeObject);
+    return ((ANativeWindow*) nativeObject)->perform(surface,
+            NATIVE_WINDOW_SET_SHARED_BUFFER_MODE, enabled);
+}
+
+static jint nativeSetAutoRefreshEnabled(JNIEnv* env, jclass clazz, jlong nativeObject,
+        jboolean enabled) {
+    Surface* surface = reinterpret_cast<Surface*>(nativeObject);
+    return ((ANativeWindow*) nativeObject)->perform(surface,
+            NATIVE_WINDOW_SET_AUTO_REFRESH, enabled);
+}
+
 namespace uirenderer {
 
 using namespace android::uirenderer::renderthread;
@@ -612,6 +632,8 @@ static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeSetScalingMode", "(JI)I", (void*)nativeSetScalingMode },
     {"nativeForceScopedDisconnect", "(J)I", (void*)nativeForceScopedDisconnect},
     {"nativeAttachAndQueueBuffer", "(JLandroid/graphics/GraphicBuffer;)I", (void*)nativeAttachAndQueueBuffer},
+    {"nativeSetSharedBufferModeEnabled", "(JZ)I", (void*)nativeSetSharedBufferModeEnabled},
+    {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
 
     // HWUI context
     {"nHwuiCreate", "(JJ)J", (void*) hwui::create },

@@ -926,7 +926,9 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
                         @Override
                         public void sendResult(Bundle data) throws RemoteException {
-                            mWakeLock.release();
+                            if (mWakeLock.isHeld()) {
+                                mWakeLock.release();
+                            }
                         }
                     });
                 } catch (DeadObjectException e) {
@@ -1084,18 +1086,19 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName) {
             final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
-            final int pid = Binder.getCallingPid();
             final boolean restricted = isRestricted();
+
+            if (!canUseFingerprint(opPackageName, true /* foregroundOnly */, callingUid, callingPid,
+                    callingUserId)) {
+                if (DEBUG) Slog.v(TAG, "authenticate(): reject " + opPackageName);
+                return;
+            }
+
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (!canUseFingerprint(opPackageName, true /* foregroundOnly */,
-                            callingUid, pid, callingUserId)) {
-                        if (DEBUG) Slog.v(TAG, "authenticate(): reject " + opPackageName);
-                        return;
-                    }
-
                     MetricsLogger.histogram(mContext, "fingerprint_token", opId != 0L ? 1 : 0);
 
                     // Get performance stats object for this user.
@@ -1116,32 +1119,34 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
         @Override // Binder call
         public void cancelAuthentication(final IBinder token, final String opPackageName) {
-            final int uid = Binder.getCallingUid();
-            final int pid = Binder.getCallingPid();
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
+
+            if (!canUseFingerprint(opPackageName, true /* foregroundOnly */, callingUid, callingPid,
+                    callingUserId)) {
+                if (DEBUG) Slog.v(TAG, "cancelAuthentication(): reject " + opPackageName);
+                return;
+            }
+
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (!canUseFingerprint(opPackageName, true /* foregroundOnly */, uid, pid,
-                            callingUserId)) {
-                        if (DEBUG) Slog.v(TAG, "cancelAuthentication(): reject " + opPackageName);
-                    } else {
-                        ClientMonitor client = mCurrentClient;
-                        if (client instanceof AuthenticationClient) {
-                            if (client.getToken() == token) {
-                                if (DEBUG) Slog.v(TAG, "stop client " + client.getOwnerString());
-                                final int stopResult = client.stop(client.getToken() == token);
-                                if (mRemoveClientOnCancel && (stopResult == 0)) {
-                                    handleError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_CANCELED, 0 /*vendorCode */);
-                                }
-                            } else {
-                                if (DEBUG) Slog.v(TAG, "can't stop client "
-                                        + client.getOwnerString() + " since tokens don't match");
+                    ClientMonitor client = mCurrentClient;
+                    if (client instanceof AuthenticationClient) {
+                        if (client.getToken() == token) {
+                            if (DEBUG) Slog.v(TAG, "stop client " + client.getOwnerString());
+                            final int stopResult = client.stop(client.getToken() == token);
+                            if (mRemoveClientOnCancel && (stopResult == 0)) {
+                                handleError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_CANCELED, 0 /*vendorCode */);
                             }
-                        } else if (client != null) {
-                            if (DEBUG) Slog.v(TAG, "can't cancel non-authenticating client "
-                                    + client.getOwnerString());
+                        } else {
+                            if (DEBUG) Slog.v(TAG, "can't stop client "
+                                    + client.getOwnerString() + " since tokens don't match");
                         }
+                    } else if (client != null) {
+                        if (DEBUG) Slog.v(TAG, "can't cancel non-authenticating client "
+                                + client.getOwnerString());
                     }
                 }
             });

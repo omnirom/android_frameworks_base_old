@@ -15,7 +15,7 @@
  */
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "GraphicsJNI.h"
 
 #include <math.h>
@@ -49,27 +49,6 @@ void mx4transform(float x, float y, float z, float w, const float* pM, float* pD
     pDest[3] = pM[3 + 4 * 0] * x + pM[3 + 4 * 1] * y + pM[3 + 4 * 2] * z + pM[3 + 4 * 3] * w;
 }
 
-class MallocHelper {
-public:
-    MallocHelper() {
-        mData = 0;
-    }
-
-    ~MallocHelper() {
-        if (mData != 0) {
-            free(mData);
-        }
-    }
-
-    void* alloc(size_t size) {
-        mData = malloc(size);
-        return mData;
-    }
-
-private:
-    void* mData;
-};
-
 #if 0
 static
 void
@@ -85,10 +64,7 @@ print_poly(const char* label, Poly* pPoly) {
 static
 int visibilityTest(float* pWS, float* pPositions, int positionsLength,
         unsigned short* pIndices, int indexCount) {
-    MallocHelper mallocHelper;
     int result = POLY_CLIP_OUT;
-    float* pTransformed = 0;
-    int transformedIndexCount = 0;
 
     if ( indexCount < 3 ) {
         return POLY_CLIP_OUT;
@@ -116,8 +92,9 @@ int visibilityTest(float* pWS, float* pPositions, int positionsLength,
         return -1;
     }
 
-    transformedIndexCount = maxIndex - minIndex + 1;
-    pTransformed = (float*) mallocHelper.alloc(transformedIndexCount * 4 * sizeof(float));
+    int transformedIndexCount = maxIndex - minIndex + 1;
+    std::unique_ptr<float[]> holder{new float[transformedIndexCount * 4]};
+    float* pTransformed = holder.get();
 
     if (pTransformed == 0 ) {
         return -2;
@@ -646,9 +623,6 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 static int checkFormat(SkColorType colorType, int format, int type)
 {
     switch(colorType) {
-        case kIndex_8_SkColorType:
-            if (format == GL_PALETTE8_RGBA8_OES)
-                return 0;
         case kN32_SkColorType:
         case kAlpha_8_SkColorType:
             if (type == GL_UNSIGNED_BYTE)
@@ -680,8 +654,6 @@ static int getInternalFormat(SkColorType colorType)
             return GL_RGBA;
         case kN32_SkColorType:
             return GL_RGBA;
-        case kIndex_8_SkColorType:
-            return GL_PALETTE8_RGBA8_OES;
         case kRGB_565_SkColorType:
             return GL_RGB;
         default:
@@ -698,8 +670,6 @@ static int getType(SkColorType colorType)
             return GL_UNSIGNED_SHORT_4_4_4_4;
         case kN32_SkColorType:
             return GL_UNSIGNED_BYTE;
-        case kIndex_8_SkColorType:
-            return -1; // No type for compressed data.
         case kRGB_565_SkColorType:
             return GL_UNSIGNED_SHORT_5_6_5;
         default:
@@ -739,34 +709,14 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     int err = checkFormat(colorType, internalformat, type);
     if (err)
         return err;
-    bitmap.lockPixels();
     const int w = bitmap.width();
     const int h = bitmap.height();
     const void* p = bitmap.getPixels();
     if (internalformat == GL_PALETTE8_RGBA8_OES) {
-        if (sizeof(SkPMColor) != sizeof(uint32_t)) {
-            err = -1;
-            goto error;
-        }
-        const size_t size = bitmap.getSize();
-        const size_t palette_size = 256*sizeof(SkPMColor);
-        const size_t imageSize = size + palette_size;
-        void* const data = malloc(imageSize);
-        if (data) {
-            void* const pixels = (char*)data + palette_size;
-            SkColorTable* ctable = bitmap.getColorTable();
-            memcpy(data, ctable->readColors(), ctable->count() * sizeof(SkPMColor));
-            memcpy(pixels, p, size);
-            glCompressedTexImage2D(target, level, internalformat, w, h, border, imageSize, data);
-            free(data);
-        } else {
-            err = -1;
-        }
+        err = -1;
     } else {
         glTexImage2D(target, level, internalformat, w, h, border, internalformat, type, p);
     }
-error:
-    bitmap.unlockPixels();
     return err;
 }
 
@@ -785,12 +735,10 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
     int err = checkFormat(colorType, format, type);
     if (err)
         return err;
-    bitmap.lockPixels();
     const int w = bitmap.width();
     const int h = bitmap.height();
     const void* p = bitmap.getPixels();
     glTexSubImage2D(target, level, xoffset, yoffset, w, h, format, type, p);
-    bitmap.unlockPixels();
     return 0;
 }
 

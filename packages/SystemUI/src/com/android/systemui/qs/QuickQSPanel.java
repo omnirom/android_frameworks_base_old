@@ -150,7 +150,7 @@ public class QuickQSPanel extends QSPanel {
         ((HeaderTileLayout) mTileLayout).updateTileGaps(mMaxTiles);
     }
 
-    public static int getNumQuickTiles() {
+    public static int getNumQuickTiles(Context context) {
         return mMaxTiles;
     }
 
@@ -317,7 +317,7 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public int getNumColumns() {
-            return getNumQuickTiles();
+            return getNumQuickTiles(mContext);
         }
 
         @Override

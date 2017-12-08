@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 import android.os.HandlerThread;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.SubscriptionInfo;
+import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -160,12 +161,11 @@ public class CallbackHandlerTest extends SysuiTestCase {
     @Test
     public void testSignalCallback_setNoSims() {
         boolean noSims = true;
-        mHandler.setNoSims(noSims);
+        boolean simDetected = false;
+        mHandler.setNoSims(noSims, simDetected);
         waitForCallbacks();
 
-        ArgumentCaptor<Boolean> noSimsArg = ArgumentCaptor.forClass(Boolean.class);
-        Mockito.verify(mSignalCallback).setNoSims(noSimsArg.capture());
-        assertEquals(noSims, (boolean) noSimsArg.getValue());
+        Mockito.verify(mSignalCallback).setNoSims(eq(noSims), eq(simDetected));
     }
 
     @Test

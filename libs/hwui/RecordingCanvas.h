@@ -168,9 +168,7 @@ public:
     virtual void drawArc(float left, float top, float right, float bottom,
             float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) override;
     virtual void drawPath(const SkPath& path, const SkPaint& paint) override;
-    virtual void drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
-            const float* verts, const float* tex, const int* colors,
-            const uint16_t* indices, int indexCount, const SkPaint& paint) override
+    virtual void drawVertices(const SkVertices*, SkBlendMode, const SkPaint& paint) override
         { /* RecordingCanvas does not support drawVertices(); ignore */ }
 
     virtual void drawVectorDrawable(VectorDrawableRoot* tree) override;
@@ -191,9 +189,8 @@ public:
     virtual bool drawTextAbsolutePos() const override { return false; }
 
 protected:
-    virtual void drawGlyphs(const uint16_t* text, const float* positions, int count,
-            const SkPaint& paint, float x, float y,
-            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
+    virtual void drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& paint, float x,
+            float y, float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
             float totalAdvance) override;
     virtual void drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
             const SkPaint& paint, const SkPath& path, size_t start, size_t end) override;

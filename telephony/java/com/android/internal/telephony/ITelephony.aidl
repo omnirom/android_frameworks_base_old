@@ -19,7 +19,10 @@ package com.android.internal.telephony;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Messenger;
 import android.os.ResultReceiver;
+import android.net.NetworkStats;
 import android.net.Uri;
 import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
@@ -29,8 +32,10 @@ import android.telephony.ClientRequestStats;
 import android.telephony.IccOpenLogicalChannelResponse;
 import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
+import android.telephony.NetworkScanRequest;
 import android.telephony.RadioAccessFamily;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
 import com.android.ims.internal.IImsServiceController;
@@ -367,9 +372,16 @@ interface ITelephony {
     /**
      * Report whether data connectivity is possible.
      */
-    boolean isDataConnectivityPossible();
+    boolean isDataConnectivityPossible(int subId);
 
     Bundle getCellLocation(String callingPkg);
+
+    /**
+     * Returns the ISO country code equivalent of the current registered
+     * operator's MCC (Mobile Country Code).
+     * @see android.telephony.TelephonyManager#getNetworkCountryIso
+     */
+    String getNetworkCountryIsoForPhone(int phoneId);
 
     /**
      * Returns the neighboring cell information of the device.
@@ -618,11 +630,13 @@ interface ITelephony {
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
      * @param subId The subscription to use.
+     * @param callingPackage the name of the package making the call.
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
      */
-    IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID, int p2);
+    IccOpenLogicalChannelResponse iccOpenLogicalChannel(
+            int subId, String callingPackage, String AID, int p2);
 
     /**
      * Closes a previously opened logical channel to the ICC card.
@@ -791,6 +805,26 @@ interface ITelephony {
      * @return CellNetworkScanResult containing status of scan and networks.
      */
     CellNetworkScanResult getCellNetworkScanResults(int subId);
+
+    /**
+     * Perform a radio network scan and return the id of this scan.
+     *
+     * @param subId the id of the subscription.
+     * @param request Defines all the configs for network scan.
+     * @param messenger Callback messages will be sent using this messenger.
+     * @param binder the binder object instantiated in TelephonyManager.
+     * @return An id for this scan.
+     */
+    int requestNetworkScan(int subId, in NetworkScanRequest request, in Messenger messenger,
+            in IBinder binder);
+
+    /**
+     * Stop an existing radio network scan.
+     *
+     * @param subId the id of the subscription.
+     * @param scanId The id of the scan that is going to be stopped.
+     */
+    void stopNetworkScan(int subId, int scanId);
 
     /**
      * Ask the radio to connect to the input network and change selection mode to manual.
@@ -1269,12 +1303,24 @@ interface ITelephony {
     void carrierActionSetRadioEnabled(int subId, boolean enabled);
 
     /**
-     * Get aggregated video call data usage since boot.
-     * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
-     * @return total data usage in bytes
+     * Action set from carrier signalling broadcast receivers to start/stop reporting default
+     * network conditions.
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @param report control start/stop reporting default network events.
      * @hide
      */
-    long getVtDataUsage();
+    void carrierActionReportDefaultNetworkStatus(int subId, boolean report);
+
+    /**
+     * Get aggregated video call data usage since boot.
+     * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
+     *
+     * @param perUidStats True if requesting data usage per uid, otherwise overall usage.
+     * @return Snapshot of video call data usage
+     * @hide
+     */
+    NetworkStats getVtDataUsage(int subId, boolean perUidStats);
 
     /**
      * Policy control of data connection. Usually used when data limit is passed.
@@ -1294,12 +1340,12 @@ interface ITelephony {
     List<ClientRequestStats> getClientRequestStats(String callingPackage, int subid);
 
     /**
-     * Set SIM card power state. Request is equivalent to inserting or removing the card.
+     * Set SIM card power state.
      * @param slotIndex SIM slot id
-     * @param powerUp True if powering up the SIM, otherwise powering down
+     * @param state  State of SIM (power down, power up, pass through)
      * @hide
      * */
-    void setSimPowerStateForSlot(int slotIndex, boolean powerUp);
+    void setSimPowerStateForSlot(int slotIndex, int state);
 
     /**
      * Returns a list of Forbidden PLMNs from the specified SIM App
@@ -1320,4 +1366,15 @@ interface ITelephony {
      * @hide
      */
     boolean getEmergencyCallbackMode(int subId);
+
+    /**
+     * Get the most recently available signal strength information.
+     *
+     * Get the most recent SignalStrength information reported by the modem. Due
+     * to power saving this information may not always be current.
+     * @param subId Subscription index
+     * @return the most recent cached signal strength info from the modem
+     * @hide
+     */
+    SignalStrength getSignalStrength(int subId);
 }

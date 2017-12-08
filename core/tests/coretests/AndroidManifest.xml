@@ -978,6 +978,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="android.view.ViewTransientState" android:label="View Transient State">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
         <activity android:name="android.view.RemoteViewsActivity" android:label="RemoteViewsActicity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1172,6 +1179,7 @@
         </activity>
         <activity android:name="com.android.internal.app.ChooserWrapperActivity"/>
         <activity android:name="com.android.internal.app.ResolverWrapperActivity"/>
+        <activity android:name="com.android.internal.app.IntentForwarderActivityTest$IntentForwarderWrapperActivity"/>
 
         <receiver android:name="android.app.activity.AbortReceiver">
             <intent-filter android:priority="1">
@@ -1309,14 +1317,16 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="android.animation.BasicAnimatorActivity">
+        <activity android:name="android.animation.BasicAnimatorActivity"
+                  android:screenOrientation="locked">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
-        <activity android:name="android.animation.AnimatorSetActivity">
+        <activity android:name="android.animation.AnimatorSetActivity"
+                  android:screenOrientation="locked">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />

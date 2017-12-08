@@ -4,7 +4,7 @@
 #include <sys/mman.h>
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 
@@ -327,8 +327,6 @@ jint GraphicsJNI::colorTypeToLegacyBitmapConfig(SkColorType colorType) {
             return kARGB_4444_LegacyBitmapConfig;
         case kRGB_565_SkColorType:
             return kRGB_565_LegacyBitmapConfig;
-        case kIndex_8_SkColorType:
-            return kIndex8_LegacyBitmapConfig;
         case kAlpha_8_SkColorType:
             return kA8_LegacyBitmapConfig;
         case kUnknown_SkColorType:
@@ -342,7 +340,7 @@ SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
     const uint8_t gConfig2ColorType[] = {
         kUnknown_SkColorType,
         kAlpha_8_SkColorType,
-        kIndex_8_SkColorType,
+        kUnknown_SkColorType, // Previously kIndex_8_SkColorType,
         kRGB_565_SkColorType,
         kARGB_4444_SkColorType,
         kN32_SkColorType,
@@ -435,7 +433,7 @@ jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
 ///////////////////////////////////////////////////////////////////////////////
 
 android::Bitmap* GraphicsJNI::mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
-        SkColorTable* ctable, int fd, void* addr, size_t size, bool readOnly) {
+        int fd, void* addr, size_t size, bool readOnly) {
     const SkImageInfo& info = bitmap->info();
     if (info.colorType() == kUnknown_SkColorType) {
         doThrowIAE(env, "unknown bitmap configuration");
@@ -456,15 +454,11 @@ android::Bitmap* GraphicsJNI::mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
     // attempting to compute our own.
     const size_t rowBytes = bitmap->rowBytes();
 
-    auto wrapper = new android::Bitmap(addr, fd, size, info, rowBytes, ctable);
+    auto wrapper = new android::Bitmap(addr, fd, size, info, rowBytes);
     wrapper->getSkBitmap(bitmap);
     if (readOnly) {
         bitmap->pixelRef()->setImmutable();
     }
-    // since we're already allocated, we lockPixels right away
-    // HeapAllocator behaves this way too
-    bitmap->lockPixels();
-
     return wrapper;
 }
 
@@ -613,8 +607,8 @@ jobject GraphicsJNI::getColorSpace(JNIEnv* env, sk_sp<SkColorSpace>& decodeColor
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool HeapAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-    mStorage = android::Bitmap::allocateHeapBitmap(bitmap, ctable);
+bool HeapAllocator::allocPixelRef(SkBitmap* bitmap) {
+    mStorage = android::Bitmap::allocateHeapBitmap(bitmap);
     return !!mStorage;
 }
 
@@ -630,7 +624,7 @@ RecyclingClippingPixelAllocator::RecyclingClippingPixelAllocator(
 
 RecyclingClippingPixelAllocator::~RecyclingClippingPixelAllocator() {}
 
-bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap) {
     // Ensure that the caller did not pass in a NULL bitmap to the constructor or this
     // function.
     LOG_ALWAYS_FATAL_IF(!mRecycledBitmap);
@@ -653,7 +647,7 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTab
     const size_t rowBytes = maxInfo.minRowBytes();
     const size_t bytesNeeded = maxInfo.getSafeSize(rowBytes);
     if (bytesNeeded <= mRecycledBytes) {
-        // Here we take advantage of reconfigure() to reset the rowBytes and ctable
+        // Here we take advantage of reconfigure() to reset the rowBytes
         // of mRecycledBitmap.  It is very important that we pass in
         // mRecycledBitmap->info() for the SkImageInfo.  According to the
         // specification for BitmapRegionDecoder, we are not allowed to change
@@ -662,20 +656,18 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTab
         // storage needs
         mRecycledBitmap->reconfigure(
                 mRecycledBitmap->info().makeColorSpace(bitmap->refColorSpace()),
-                rowBytes, ctable);
+                rowBytes);
 
         // Give the bitmap the same pixelRef as mRecycledBitmap.
         // skbug.com/4538: We also need to make sure that the rowBytes on the pixel ref
         //                 match the rowBytes on the bitmap.
         bitmap->setInfo(bitmap->info(), rowBytes);
-        mRecycledBitmap->ref();
-        bitmap->setPixelRef(mRecycledBitmap)->unref();
+        bitmap->setPixelRef(sk_ref_sp(mRecycledBitmap), 0, 0);
 
         // Make sure that the recycled bitmap has the correct alpha type.
         mRecycledBitmap->setAlphaType(bitmap->alphaType());
 
         bitmap->notifyPixelsChanged();
-        bitmap->lockPixels();
         mNeedsCopy = false;
 
         // TODO: If the dimensions of the SkBitmap are smaller than those of
@@ -691,7 +683,7 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTab
     // decode is complete.
     mNeedsCopy = true;
 
-    return heapAllocator.allocPixelRef(bitmap, ctable);
+    return heapAllocator.allocPixelRef(bitmap);
 }
 
 void RecyclingClippingPixelAllocator::copyIfNecessary() {
@@ -722,8 +714,8 @@ AshmemPixelAllocator::AshmemPixelAllocator(JNIEnv *env) {
             "env->GetJavaVM failed");
 }
 
-bool AshmemPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-    mStorage = android::Bitmap::allocateAshmemBitmap(bitmap, ctable);
+bool AshmemPixelAllocator::allocPixelRef(SkBitmap* bitmap) {
+    mStorage = android::Bitmap::allocateAshmemBitmap(bitmap);
     return !!mStorage;
 }
 

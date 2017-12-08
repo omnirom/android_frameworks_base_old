@@ -16,16 +16,15 @@
 
 package android.app.admin;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import android.os.Parcel;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /** Unit tests for {@link PasswordMetrics}. */
 @RunWith(AndroidJUnit4.class)
@@ -43,20 +42,6 @@ public class PasswordMetricsTest {
         assertEquals(0, metrics.numeric);
         assertEquals(0, metrics.symbols);
         assertEquals(0, metrics.nonLetter);
-        assertTrue("default constructor does not produce default metrics", metrics.isDefault());
-    }
-
-    @Test
-    public void testIsNotDefault() {
-        final PasswordMetrics metrics = new PasswordMetrics(
-                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC, 12);
-        assertFalse("non-default metrics are repoted as default", metrics.isDefault());
-    }
-
-    @Test
-    public void testComputeForEmptyPassword() {
-        final PasswordMetrics metrics = PasswordMetrics.computeForPassword("");
-        assertTrue("empty password has default metrics", metrics.isDefault());
     }
 
     @Test
@@ -134,5 +119,49 @@ public class PasswordMetricsTest {
         assertEquals(4, PasswordMetrics.maxLengthSequence(";;;;"));
         // ordered, but not composed of alphas or digits
         assertEquals(1, PasswordMetrics.maxLengthSequence(":;<=>"));
+    }
+
+    @Test
+    public void testEquals() {
+        PasswordMetrics metrics0 = new PasswordMetrics();
+        PasswordMetrics metrics1 = new PasswordMetrics();
+        assertNotEquals(metrics0, null);
+        assertNotEquals(metrics0, new Object());
+        assertEquals(metrics0, metrics0);
+        assertEquals(metrics0, metrics1);
+
+        assertEquals(new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 4),
+                new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 4));
+
+        assertNotEquals(new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 4),
+                new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 5));
+
+        assertNotEquals(new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 4),
+                new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, 4));
+
+        metrics0 = PasswordMetrics.computeForPassword("1234abcd,./");
+        metrics1 = PasswordMetrics.computeForPassword("1234abcd,./");
+        assertEquals(metrics0, metrics1);
+        metrics1.letters++;
+        assertNotEquals(metrics0, metrics1);
+        metrics1.letters--;
+        metrics1.upperCase++;
+        assertNotEquals(metrics0, metrics1);
+        metrics1.upperCase--;
+        metrics1.lowerCase++;
+        assertNotEquals(metrics0, metrics1);
+        metrics1.lowerCase--;
+        metrics1.numeric++;
+        assertNotEquals(metrics0, metrics1);
+        metrics1.numeric--;
+        metrics1.symbols++;
+        assertNotEquals(metrics0, metrics1);
+        metrics1.symbols--;
+        metrics1.nonLetter++;
+        assertNotEquals(metrics0, metrics1);
+        metrics1.nonLetter--;
+        assertEquals(metrics0, metrics1);
+
+
     }
 }

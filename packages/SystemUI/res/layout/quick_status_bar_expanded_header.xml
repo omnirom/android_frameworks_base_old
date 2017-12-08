@@ -18,7 +18,6 @@
 <!-- Extends FrameLayout -->
 <com.android.systemui.qs.QuickStatusBarHeader
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/header"
     android:layout_width="match_parent"
     android:layout_height="@dimen/status_bar_header_height"
@@ -49,52 +48,9 @@
 
     </LinearLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <include layout="@layout/quick_status_bar_header_system_icons" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="32dp"
-            android:layout_alignParentEnd="true"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:paddingEnd="16dp"
-            android:paddingStart="16dp">
-
-            <com.android.keyguard.CarrierText
-                android:id="@+id/qs_carrier_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:ellipsize="marquee"
-                android:gravity="center_vertical|start"
-                android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorPrimary"/>
-
-            <com.android.systemui.BatteryMeterView
-                android:id="@+id/battery"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                />
-
-            <com.android.systemui.statusbar.policy.Clock
-                android:id="@+id/clock"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical|start"
-                android:paddingEnd="@dimen/status_bar_clock_end_padding"
-                android:paddingStart="@dimen/status_bar_clock_starting_padding"
-                android:singleLine="true"
-                android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-                systemui:showDark="false"
-                />
-        </LinearLayout>
-
-        <com.android.systemui.qs.HorizontalClippingLinearLayout
+    <com.android.systemui.qs.HorizontalClippingLinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
@@ -129,29 +85,27 @@
                     android:importantForAccessibility="yes"/>
 
             </HorizontalScrollView>
-        </com.android.systemui.qs.HorizontalClippingLinearLayout>
+    </com.android.systemui.qs.HorizontalClippingLinearLayout>
 
-        <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:id="@+id/qs_detail_header_progress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:alpha="0"
-            android:background="@color/qs_detail_progress_track"
-            android:src="@drawable/indeterminate_anim"/>
+    <com.android.systemui.statusbar.AlphaOptimizedImageView
+        android:id="@+id/qs_detail_header_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:alpha="0"
+        android:background="@color/qs_detail_progress_track"
+        android:src="@drawable/indeterminate_anim"/>
 
-        <TextView
-            android:id="@+id/header_debug_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:fontFamily="sans-serif-condensed"
-            android:padding="2dp"
-            android:textColor="#00A040"
-            android:textSize="11dp"
-            android:textStyle="bold"
-            android:visibility="invisible"/>
+    <TextView
+        android:id="@+id/header_debug_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:fontFamily="sans-serif-condensed"
+        android:padding="2dp"
+        android:textColor="#00A040"
+        android:textSize="11dp"
+        android:textStyle="bold"
+        android:visibility="invisible"/>
 
-    </RelativeLayout>
 </com.android.systemui.qs.QuickStatusBarHeader>
-

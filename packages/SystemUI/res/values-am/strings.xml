@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"የኮምፒውተሩ RSA ቁልፍ ጣት አሻራ ይሄ ነው፦\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ሁልጊዜ ከዚህ ኮምፒውተር ፍቀድ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"የዩኤስቢ እርማት አይፈቀድም"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"አሁን ወደዚህ መሣሪያ የገባው ተጠቃሚ የዩ ኤስ ቢ እርማትን ማብራት አይችልም። ይህን ባህሪ ለመጠቀም እባክዎ ወደ የአስተዳዳሪ ተጠቃሚ ይቀይሩ።"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"አሁን ወደዚህ መሣሪያ የገባው ተጠቃሚ የዩኤስቢ እርማትን ማብራት አይችልም። ይህን ባህሪ ለመጠቀም ወደ ዋና ተጠቃሚ ይቀይሩ።"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ማያ እንዲሞላ አጉላ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ማያ ለመሙለት ሳብ"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
@@ -298,7 +298,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ጠፍቷል"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi በርቷል"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ምንም የWi-Fi  አውታረ መረቦች የሉም"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ውሰድ"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"በመውሰድ ላይ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ያልተሰየመ መሳሪያ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ለመውሰድ ዝግጁ"</string>
@@ -310,6 +310,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"ተጨማሪ ቅንብሮች"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"ተከናውኗል"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"ተገናኝቷል"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"ተገናኝቷል፣ ባትሪ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"በማገናኘት ላይ..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"በማገናኘት ላይ"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"መገናኛ ነጥብ"</string>
@@ -352,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"ፍለጋ"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"ለ<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ወደ ላይ አንሸራትት።"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"ለ<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ወደ ግራ አንሸራትት።"</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"እርስዎ ከወሰንዋቸው ማንቂያዎች፣ አስታዋሾች፣ ክስተቶች እና ደዋዮች በስተቀር፣ በድምጾች እና ንዝረቶች አይረበሹም። ሙዚቃ፣ ቪዲዮዎች እና ጨዋታዎች ጨምሮ ለመጫወት የሚመርጡትን ማንኛውም ነገር አሁንም ይሰማሉ።"</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"ከማንቂያዎች በስተቀር፣ በድምጾች እና ንዝረቶች አይረበሹም። ሙዚቃ፣ ቪዲዮዎች እና ጨዋታዎች ጨምሮ ለመጫወት የሚመርጡትን ማንኛውም ነገር አሁንም ይሰማሉ።"</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"እርስዎ ከወሰንዋቸው ማንቂያዎች፣ አስታዋሾች፣ ክስተቶች እና ደዋዮች በስተቀር፣ በድምጾች እና ንዝረቶች አይረበሹም። ሙዚቃ፣ ቪዲዮዎች እና ጨዋታዎች ጨምሮ ለመጫወት የሚመርጡትን ማንኛውም ነገር አሁንም ይሰማሉ።"</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"ከማንቂያዎች በስተቀር፣ በድምጾች እና ንዝረቶች አይረበሹም። ሙዚቃ፣ ቪዲዮዎች እና ጨዋታዎች ጨምሮ ለመጫወት የሚመርጡትን ማንኛውም ነገር አሁንም ይሰማሉ።"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"አብጅ"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ይሄ ማንቂያዎችን፣ ሙዚቃን፣ ቪዲዮዎችን እና ጨዋታዎችንም ጨምሮ ሁሉንም ድምጾች እና ንዝረቶች ያጠፋል። አሁንም የድምጽ ጥሪዎችን ማድረግ ይችላሉ።"</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"ይሄ ማንቂያዎችን፣ ሙዚቃን፣ ቪዲዮዎችን እና ጨዋታዎችንም ጨምሮ ሁሉንም ድምጾች እና ንዝረቶች ያጠፋል። አሁንም የድምጽ ጥሪዎችን ማድረግ ይችላሉ።"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ይሄ ማንቂያዎችን፣ ሙዚቃን፣ ቪዲዮዎችን እና ጨዋታዎችንም ጨምሮ ሁሉንም ድምጾች እና ንዝረቶች ያጠፋል።"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"በጣም አስቸካይ ያልሆኑ ማሳወቂያዎች ከታች"</string>
@@ -455,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"የበለጠ ለመረዳት"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"የVPN ቅንብሮችን ይክፈቱ"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"የቪፒኤን ቅንብሮችን ይክፈቱ"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"የታመኑ ምስክርነቶችን ክፈት"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"የእርስዎ አስተዳዳሪ የአውታረ መረብ ምዝግብ ማስታወሻ መያዝን አብርተዋል፣ ይህም በመሣሪያዎ ላይ ያለውን ትራፊክ ይከታተላል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
@@ -467,6 +468,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን ከሚከታተለው ከ<xliff:g id="APPLICATION">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"የእርስዎ የሥራ መገለጫ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> የሚተዳደር ነው። መገለጫው ኢሜይሎችን፣ መተግበሪያዎችን፣ እና የድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴን መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION">%2$s</xliff:g> ጋር ተገናኝቷል።\n\nለተጨማሪ መረጃ የእርስዎን አስተዳዳሪ ያነጋግሩ።"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"የእርስዎ የሥራ መገለጫ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> የሚተዳደር ነው። መገለጫው ኢሜይሎችን፣ መተግበሪያዎችን፣ እና የድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴን መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ጋር ተገናኝቷል።\n\nበተጨማሪ የእርስዎን የግል የአውታረ መረብ እንቅስቃሴ መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ጋር ተገናኝተዋል።"</string>
+    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"ለ<xliff:g id="USER_NAME">%1$s</xliff:g> ተከፍቷል"</string>
+    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> እያሄደ ነው"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"እራስዎ እስኪከፍቱት ድረስ መሣሪያ እንደተቆለፈ ይቆያል"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ማሳወቂያዎችን ፈጥነው ያግኙ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ከመክፈትዎ በፊት ይመልከቷቸው"</string>
@@ -548,12 +551,13 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ጠፍቷል"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"በኃይል ማሳወቂያ መቆጣጠሪያዎች አማካኝነት የአንድ መተግበሪያ ማሳወቂያዎች የአስፈላጊነት ደረጃ ከ0 እስከ 5 ድረስ ማዘጋጀት ይችላሉ። \n\n"<b>"ደረጃ 5"</b>" \n- በማሳወቂያ ዝርዝሩ አናት ላይ አሳይ \n- የሙሉ ማያ ገጽ ማቋረጥን ፍቀድ \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 4"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 3"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- በፍጹም አጮልቀው አይምልከቱ \n\n"<b>"ደረጃ 2"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ እና ንዝረትን በፍጹም አይኑር \n\n"<b>"ደረጃ 1"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ ወይም ንዝረትን በፍጹም አያደርጉ \n- ከመቆለፊያ ገጽ እና የሁኔታ አሞሌ ይደብቁ \n- በማሳወቂያ ዝርዝር ግርጌ ላይ አሳይ \n\n"<b>"ደረጃ 0"</b>" \n- ሁሉንም የመተግበሪያው ማሳወቂያዎች ያግዱ"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ማሳወቂያዎች"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"እነዚህን ማሳወቂያዎች ከእንግዲህ አያግኙዋቸውም።"</string>
+    <string name="notification_channel_disabled" msgid="2139193533791840539">"እነዚህን ማሳወቂያዎች ከእንግዲህ አያገኟቸውም"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> የማሳወቂያ ምድቦች"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"ይህ መተግበሪያ የማሳወቂያ ምድቦች የሉትም"</string>
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"ከዚህ መተግበሪያ የሚመጡ ማሳወቂያዎች ሊጠፉ አይችሉም"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 ከ<xliff:g id="NUMBER_1">%d</xliff:g> የማሳወቂያ ምድቦች ከዚህ መተግበሪያ</item>
-      <item quantity="other">1 <xliff:g id="NUMBER_1">%d</xliff:g> የማሳወቂያ ምድቦች ከዚህ መተግበሪያ</item>
+      <item quantity="one">1 ከ<xliff:g id="NUMBER_1">%s</xliff:g> የማሳወቂያ ምድቦች ከዚህ መተግበሪያ</item>
+      <item quantity="other">1 <xliff:g id="NUMBER_1">%s</xliff:g> የማሳወቂያ ምድቦች ከዚህ መተግበሪያ</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>፣ <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -570,15 +574,19 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"የማሳወቂያ መቆጣጠሪያዎች"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"የማሳወቂያ ማሸለቢያ አማራጮች"</string>
-    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 ደቂቃዎች"</string>
-    <string name="snooze_option_30_min" msgid="867081342535195788">"30 ደቂቃዎች"</string>
-    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 ሰዓት"</string>
-    <string name="snooze_option_2_hour" msgid="8332218255658969475">"2 ሰዓቶች"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ቀልብስ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"ለ<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> አሸልቧል"</string>
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one"> %d ሰዓቶች</item>
+      <item quantity="other"> %d ሰዓቶች</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one"> %d ደቂቃዎች</item>
+      <item quantity="other"> %d ደቂቃዎች</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"የባትሪ አጠቃቀም"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ኃይል በሚሞላበት ጊዜ ባትሪ ቆጣቢ አይገኝም"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"ባትሪ ቆጣቢ"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"ኃይል በሚሞላበት ጊዜ ባትሪ ቆጣቢ አይገኝም"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"የባትሪ ኃይል ቆጣቢ"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"አፈጻጸምን እና የጀርባ ውሂብን ይቀንሳል"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"አዝራር <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"መነሻ"</string>
@@ -718,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"አሳንስ"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ዝጋ"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"ለማሰናበት ወደ ታች ይጎትቱ"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"በስዕል ምናሌ ውስጥ ያለ ስዕል"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"ምናሌ"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> በስዕል-ላይ-ስዕል ውስጥ ነው"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g> ይህን ባህሪ እንዲጠቀም ካልፈለጉ ቅንብሮችን ለመክፈት መታ ያድርጉና ያጥፉት።"</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g> ይህን ባህሪ እንዲጠቀም ካልፈለጉ ቅንብሮችን ለመክፈት መታ ያድርጉና ያጥፉት።"</string>
     <string name="pip_play" msgid="1417176722760265888">"አጫውት"</string>
     <string name="pip_pause" msgid="8881063404466476571">"ባለበት አቁም"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"ወደ ቀጣይ ዝለል"</string>
@@ -746,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"ምናሌ"</string>
     <string name="tuner_app" msgid="3507057938640108777">"የ<xliff:g id="APP">%1$s</xliff:g> መተግበሪያ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ማንቂያዎች"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"ባትሪ"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ቅጽበታዊ ገጽ እይታዎች"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"አጠቃላይ መልዕክቶች"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ማከማቻ"</string>
@@ -765,4 +774,6 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ተካ"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"በጀርባ ውስጥ የሚያሄዱ መተግበሪያዎች"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"በባትሪ እና ውሂብ አጠቃቀም ላይ ዝርዝሮችን ለማግኘት መታ ያድርጉ"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"የተንቀሳቃሽ ስልክ ውሂብ ይጥፋ?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"አንድ መተግበሪያ የፍቃድ ጥያቄ እያገደ ስለሆነ ቅንብሮች ጥያቄዎን ማረጋገጥ አይችሉም።"</string>
 </resources>

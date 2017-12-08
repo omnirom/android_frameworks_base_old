@@ -17,9 +17,11 @@
 package android.provider;
 
 import static com.google.android.collect.Sets.newHashSet;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
@@ -28,14 +30,15 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 /** Tests that ensure appropriate settings are backed up. */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SettingsBackupTest {
@@ -96,12 +99,15 @@ public class SettingsBackupTest {
                     Settings.Global.ALARM_MANAGER_CONSTANTS,
                     Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED,
                     Settings.Global.ALWAYS_FINISH_ACTIVITIES,
+                    Settings.Global.ALWAYS_ON_DISPLAY_CONSTANTS,
                     Settings.Global.ANIMATOR_DURATION_SCALE,
+                    Settings.Global.ANOMALY_DETECTION_CONSTANTS,
                     Settings.Global.APN_DB_UPDATE_CONTENT_URL,
                     Settings.Global.APN_DB_UPDATE_METADATA_URL,
                     Settings.Global.APP_IDLE_CONSTANTS,
                     Settings.Global.ASSISTED_GPS_ENABLED,
                     Settings.Global.AUDIO_SAFE_VOLUME_STATE,
+                    Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED,
                     Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
                     Settings.Global.BATTERY_DISCHARGE_THRESHOLD,
                     Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE,
@@ -115,7 +121,6 @@ public class SettingsBackupTest {
                     Settings.Global.BLUETOOTH_INTEROPERABILITY_LIST,
                     Settings.Global.BLUETOOTH_MAP_CLIENT_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_MAP_PRIORITY_PREFIX,
-                    Settings.Global.BLUETOOTH_ON, // Candidate for backup?
                     Settings.Global.BLUETOOTH_PAN_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_PBAP_CLIENT_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_SAP_PRIORITY_PREFIX,
@@ -154,6 +159,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEBUG_VIEW_ATTRIBUTES,
                     Settings.Global.DEFAULT_DNS_SERVER,
                     Settings.Global.DEFAULT_INSTALL_LOCATION,
+                    Settings.Global.DEFAULT_RESTRICT_BACKGROUND_DATA,
                     Settings.Global.DESK_DOCK_SOUND,
                     Settings.Global.DESK_UNDOCK_SOUND,
                     Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,
@@ -164,6 +170,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVICE_IDLE_CONSTANTS,
                     Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,
+                    Settings.Global.DEFAULT_SM_DP_PLUS,
                     Settings.Global.DEVICE_NAME,
                     Settings.Global.DEVICE_POLICY_CONSTANTS,
                     Settings.Global.DEVICE_PROVISIONED,
@@ -188,11 +195,14 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
                     Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,
                     Settings.Global.ENABLE_CELLULAR_ON_BOOT,
+                    Settings.Global.ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE,
                     Settings.Global.ENABLE_DISKSTATS_LOGGING,
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
                     Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
                     Settings.Global.ERROR_LOGCAT_PREFIX,
+                    Settings.Global.EUICC_PROVISIONED,
+                    Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
                     Settings.Global.FANCY_IME_ANIMATIONS,
                     Settings.Global.FORCE_ALLOW_ON_EXTERNAL,
                     Settings.Global.FSTRIM_MANDATORY_INTERVAL,
@@ -209,6 +219,7 @@ public class SettingsBackupTest {
                     Settings.Global.HTTP_PROXY,
                     Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY,
                     Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY,
+                    Settings.Global.INSTANT_APP_DEXOPT_ENABLED,
                     Settings.Global.INTENT_FIREWALL_UPDATE_CONTENT_URL,
                     Settings.Global.INTENT_FIREWALL_UPDATE_METADATA_URL,
                     Settings.Global.JOB_SCHEDULER_CONSTANTS,
@@ -243,6 +254,7 @@ public class SettingsBackupTest {
                     Settings.Global.NETSTATS_GLOBAL_ALERT_BYTES,
                     Settings.Global.NETSTATS_POLL_INTERVAL,
                     Settings.Global.NETSTATS_SAMPLE_ENABLED,
+                    Settings.Global.NETSTATS_AUGMENT_ENABLED,
                     Settings.Global.NETSTATS_TIME_CACHE_MAX_AGE,
                     Settings.Global.NETSTATS_UID_BUCKET_DURATION,
                     Settings.Global.NETSTATS_UID_DELETE_AGE,
@@ -265,6 +277,7 @@ public class SettingsBackupTest {
                     Settings.Global.NEW_CONTACT_AGGREGATOR,
                     Settings.Global.NITZ_UPDATE_DIFF,
                     Settings.Global.NITZ_UPDATE_SPACING,
+                    Settings.Global.NOTIFICATION_SNOOZE_OPTIONS,
                     Settings.Global.NSD_ON,
                     Settings.Global.NTP_SERVER,
                     Settings.Global.NTP_TIMEOUT,
@@ -294,7 +307,6 @@ public class SettingsBackupTest {
                     Settings.Global.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS,
                     Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT,
                     Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT,
-                    Settings.Global.RETAIL_DEMO_MODE_CONSTANTS,
                     Settings.Global.SAFE_BOOT_DISALLOWED,
                     Settings.Global.SAMPLING_PROFILER_MS,
                     Settings.Global.SELINUX_STATUS,
@@ -317,7 +329,9 @@ public class SettingsBackupTest {
                     Settings.Global.SMS_SHORT_CODE_RULE,
                     Settings.Global.SMS_SHORT_CODES_UPDATE_CONTENT_URL,
                     Settings.Global.SMS_SHORT_CODES_UPDATE_METADATA_URL,
+                    Settings.Global.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS,
                     Settings.Global.STORAGE_BENCHMARK_INTERVAL,
+                    Settings.Global.STORAGE_SETTINGS_CLOBBER_THRESHOLD,
                     Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
                     Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
                     Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
@@ -328,7 +342,9 @@ public class SettingsBackupTest {
                     Settings.Global.TCP_DEFAULT_INIT_RWND,
                     Settings.Global.TETHER_DUN_APN,
                     Settings.Global.TETHER_DUN_REQUIRED,
+                    Settings.Global.TETHER_OFFLOAD_DISABLED,
                     Settings.Global.TETHER_SUPPORTED,
+                    Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
                     Settings.Global.THEATER_MODE_ON,
                     Settings.Global.TRANSITION_ANIMATION_SCALE,
                     Settings.Global.TRUSTED_SOUND,
@@ -408,10 +424,12 @@ public class SettingsBackupTest {
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
+                 Settings.Secure.AUTOMATIC_STORAGE_MANAGER_TURNED_OFF_BY_POLICY,
                  Settings.Secure.BACKUP_AUTO_RESTORE,
                  Settings.Secure.BACKUP_ENABLED,
                  Settings.Secure.BACKUP_PROVISIONED,
                  Settings.Secure.BACKUP_TRANSPORT,
+                 Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED, // Candidate for backup?
                  Settings.Secure.CARRIER_APPS_HANDLED,
                  Settings.Secure.CMAS_ADDITIONAL_BROADCAST_PKG,
                  Settings.Secure.COMPLETED_CATEGORY_PREFIX,
@@ -424,8 +442,10 @@ public class SettingsBackupTest {
                  Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,
                  Settings.Secure.DISPLAY_DENSITY_FORCED,
                  Settings.Secure.DOZE_ALWAYS_ON,
+                 Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
                  Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
+                 Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
                  Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
                  Settings.Secure.ENABLED_PRINT_SERVICES,
                  Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
@@ -444,17 +464,15 @@ public class SettingsBackupTest {
                  Settings.Secure.MANAGED_PROFILE_CONTACT_REMOTE_SEARCH,
                  Settings.Secure.MULTI_PRESS_TIMEOUT,
                  Settings.Secure.NFC_PAYMENT_FOREGROUND,
+                 Settings.Secure.NIGHT_DISPLAY_ACTIVATED,
+                 Settings.Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
                  Settings.Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME,
                  Settings.Secure.PACKAGE_VERIFIER_STATE,
                  Settings.Secure.PACKAGE_VERIFIER_USER_CONSENT,
                  Settings.Secure.PARENTAL_CONTROL_LAST_UPDATE,
                  Settings.Secure.PAYMENT_SERVICE_SEARCH_URI,
                  Settings.Secure.PRINT_SERVICE_SEARCH_URI,
-                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK, // Candidate?
-                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, // Candidate?
-                 Settings.Secure.SCREENSAVER_COMPONENTS,
                  Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT, // Candidate?
-                 Settings.Secure.SCREENSAVER_ENABLED, // Candidate?
                  Settings.Secure.SEARCH_GLOBAL_SEARCH_ACTIVITY,
                  Settings.Secure.SEARCH_MAX_RESULTS_PER_SOURCE,
                  Settings.Secure.SEARCH_MAX_RESULTS_TO_DISPLAY,
@@ -482,6 +500,7 @@ public class SettingsBackupTest {
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_INPUT_CUSTOM_LABELS,
                  Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
+                 Settings.Secure.TV_USER_SETUP_COMPLETE,
                  Settings.Secure.UI_NIGHT_MODE, // candidate?
                  Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED,
                  Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS,

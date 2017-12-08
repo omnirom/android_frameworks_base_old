@@ -19,14 +19,21 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.NetworkKey;
+import android.net.RssiCurve;
 import android.net.ScoredNetwork;
+import android.net.WifiKey;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.WifiSsid;
@@ -38,7 +45,11 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.SpannableString;
+import android.text.format.DateUtils;
 import android.text.style.TtsSpan;
+
+import com.android.settingslib.R;
+import com.android.settingslib.wifi.AccessPoint.Speed;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,20 +58,43 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AccessPointTest {
 
-    private static final String TEST_SSID = "test_ssid";
+    private static final String TEST_SSID = "\"test_ssid\"";
+    private static final int NUM_SCAN_RESULTS = 5;
+
+    private static final ArrayList<ScanResult> SCAN_RESULTS = buildScanResultCache();
+
+    private static final RssiCurve FAST_BADGE_CURVE =
+            new RssiCurve(-150, 10, new byte[]{Speed.FAST});
+    public static final String TEST_BSSID = "00:00:00:00:00:00";
+    private static final long MAX_SCORE_CACHE_AGE_MILLIS =
+            20 * DateUtils.MINUTE_IN_MILLIS;;
+
     private Context mContext;
-    @Mock private WifiNetworkScoreCache mWifiNetworkScoreCache;
+    @Mock private RssiCurve mockBadgeCurve;
+    @Mock private WifiNetworkScoreCache mockWifiNetworkScoreCache;
+
+    private static ScanResult createScanResult(String ssid, String bssid, int rssi) {
+        ScanResult scanResult = new ScanResult();
+        scanResult.SSID = ssid;
+        scanResult.level = rssi;
+        scanResult.BSSID = bssid;
+        scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
+        scanResult.capabilities = "";
+        return scanResult;
+    }
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = InstrumentationRegistry.getTargetContext();
+        WifiTracker.sVerboseLogging = false;
     }
 
     @Test
@@ -134,7 +168,13 @@ public class AccessPointTest {
         assertSortingWorks(savedAp, notSavedAp);
     }
 
-    //TODO: add tests for mRankingScore sort order if ranking is exposed
+    @Test
+    public void testCompareTo_GivesHighSpeedBeforeLowSpeed() {
+        AccessPoint fastAp = new TestAccessPointBuilder(mContext).setSpeed(Speed.FAST).build();
+        AccessPoint slowAp = new TestAccessPointBuilder(mContext).setSpeed(Speed.SLOW).build();
+
+        assertSortingWorks(fastAp, slowAp);
+    }
 
     @Test
     public void testCompareTo_GivesHighLevelBeforeLowLevel() {
@@ -159,6 +199,21 @@ public class AccessPointTest {
 
         assertThat(firstAp.getSsidStr().compareToIgnoreCase(secondAp.getSsidStr()) < 0).isTrue();
         assertSortingWorks(firstAp, secondAp);
+    }
+
+    @Test
+    public void testCompareTo_GivesSsidCasePrecendenceAfterAlphabetical() {
+
+        final String firstName = "aaAaaa";
+        final String secondName = "aaaaaa";
+        final String thirdName = "BBBBBB";
+
+        AccessPoint firstAp = new TestAccessPointBuilder(mContext).setSsid(firstName).build();
+        AccessPoint secondAp = new TestAccessPointBuilder(mContext).setSsid(secondName).build();
+        AccessPoint thirdAp = new TestAccessPointBuilder(mContext).setSsid(thirdName).build();
+
+        assertSortingWorks(firstAp, secondAp);
+        assertSortingWorks(secondAp, thirdAp);
     }
 
     @Test
@@ -223,7 +278,7 @@ public class AccessPointTest {
         scanResult.BSSID = "bssid";
         scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
         scanResult.capabilities = "";
-        assertThat(ap.update(scanResult)).isTrue();
+        assertThat(ap.update(scanResult, true /* evict old scan results */)).isTrue();
 
         assertThat(ap.getRssi()).isEqualTo(expectedRssi);
     }
@@ -274,33 +329,17 @@ public class AccessPointTest {
     }
 
     @Test
-    public void testIsMetered_returnTrueWhenNetworkInfoIsMetered() {
-        WifiConfiguration configuration = createWifiConfiguration();
-
-        NetworkInfo networkInfo =
-                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 2, "WIFI", "WIFI_SUBTYPE");
-        networkInfo.setMetered(true);
-        AccessPoint accessPoint = new AccessPoint(mContext, configuration);
-        WifiInfo wifiInfo = new WifiInfo();
-        wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(configuration.SSID));
-        wifiInfo.setBSSID(configuration.BSSID);
-        wifiInfo.setNetworkId(configuration.networkId);
-        accessPoint.update(configuration, wifiInfo, networkInfo);
-
-        assertThat(accessPoint.isMetered()).isTrue();
-    }
-
-    @Test
     public void testIsMetered_returnTrueWhenScoredNetworkIsMetered() {
         AccessPoint ap = createAccessPointWithScanResultCache();
 
-        when(mWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
                 .thenReturn(
                         new ScoredNetwork(
                                 null /* NetworkKey */,
                                 null /* rssiCurve */,
                                 true /* metered */));
-        ap.update(mWifiNetworkScoreCache, false /* scoringUiEnabled */);
+        ap.update(mockWifiNetworkScoreCache, false /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
 
         assertThat(ap.isMetered()).isTrue();
     }
@@ -321,20 +360,233 @@ public class AccessPointTest {
         assertThat(accessPoint.isMetered()).isFalse();
     }
 
+    @Test
+    public void testSpeedLabel_returnsVeryFast() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.VERY_FAST);
+        assertThat(ap.getSpeedLabel())
+                .isEqualTo(mContext.getString(R.string.speed_label_very_fast));
+    }
+
+    @Test
+    public void testSpeedLabel_returnsFast() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.FAST);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.FAST);
+        assertThat(ap.getSpeedLabel())
+                .isEqualTo(mContext.getString(R.string.speed_label_fast));
+    }
+
+    @Test
+    public void testSpeedLabel_returnsOkay() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.MODERATE);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.MODERATE);
+        assertThat(ap.getSpeedLabel())
+                .isEqualTo(mContext.getString(R.string.speed_label_okay));
+    }
+
+    @Test
+    public void testSpeedLabel_returnsSlow() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.SLOW);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        assertThat(ap.getSpeed()).isEqualTo(AccessPoint.Speed.SLOW);
+        assertThat(ap.getSpeedLabel())
+                .isEqualTo(mContext.getString(R.string.speed_label_slow));
+    }
+
+    @Test
+    public void testSummaryString_showsSpeedLabel() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        assertThat(ap.getSummary()).isEqualTo(mContext.getString(R.string.speed_label_very_fast));
+    }
+
+    @Test
+    public void testVerboseSummaryString_showsScanResultSpeedLabel() {
+        WifiTracker.sVerboseLogging = true;
+
+        Bundle bundle = new Bundle();
+        ArrayList<ScanResult> scanResults = buildScanResultCache();
+        bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, scanResults);
+        AccessPoint ap = new AccessPoint(mContext, bundle);
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+        String summary = ap.verboseScanResultSummary(scanResults.get(0), null, 0);
+
+        assertThat(summary.contains(mContext.getString(R.string.speed_label_very_fast))).isTrue();
+    }
+
+    @Test
+    public void testSummaryString_concatenatesSpeedLabel() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+        ap.update(new WifiConfiguration());
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        String expectedString = mContext.getString(R.string.speed_label_very_fast) + " / "
+                + mContext.getString(R.string.wifi_remembered);
+        assertThat(ap.getSummary()).isEqualTo(expectedString);
+    }
+
+    @Test
+    public void testSummaryString_showsWrongPasswordLabel() {
+        WifiConfiguration configuration = createWifiConfiguration();
+        configuration.getNetworkSelectionStatus().setNetworkSelectionStatus(
+                WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_PERMANENTLY_DISABLED);
+        configuration.getNetworkSelectionStatus().setNetworkSelectionDisableReason(
+                WifiConfiguration.NetworkSelectionStatus.DISABLED_BY_WRONG_PASSWORD);
+        AccessPoint ap = new AccessPoint(mContext, configuration);
+
+        assertThat(ap.getSummary()).isEqualTo(mContext.getString(
+                R.string.wifi_check_password_try_again));
+    }
+
+    @Test
+    public void testSummaryString_showsAvaiableViaCarrier() {
+        String carrierName = "Test Carrier";
+        ScanResult result = new ScanResult();
+        result.BSSID = "00:11:22:33:44:55";
+        result.capabilities = "EAP";
+        result.isCarrierAp = true;
+        result.carrierApEapType = WifiEnterpriseConfig.Eap.SIM;
+        result.carrierName = carrierName;
+
+        AccessPoint ap = new AccessPoint(mContext, result);
+        assertThat(ap.getSummary()).isEqualTo(String.format(mContext.getString(
+                R.string.available_via_carrier), carrierName));
+        assertThat(ap.isCarrierAp()).isEqualTo(true);
+        assertThat(ap.getCarrierApEapType()).isEqualTo(WifiEnterpriseConfig.Eap.SIM);
+        assertThat(ap.getCarrierName()).isEqualTo(carrierName);
+    }
+
+    @Test
+    public void testSummaryString_showsConnectedViaCarrier() {
+        int networkId = 123;
+        int rssi = -55;
+        String carrierName = "Test Carrier";
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = networkId;
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setNetworkId(networkId);
+        wifiInfo.setRssi(rssi);
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "", "");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setNetworkInfo(networkInfo)
+                .setNetworkId(networkId)
+                .setRssi(rssi)
+                .setWifiInfo(wifiInfo)
+                .setIsCarrierAp(true)
+                .setCarrierName(carrierName)
+                .build();
+        assertThat(ap.getSummary()).isEqualTo(String.format(mContext.getString(
+                R.string.connected_via_carrier), carrierName));
+    }
+
+    @Test
+    public void testUpdateScanResultWithCarrierInfo() {
+        String ssid = "ssid";
+        AccessPoint ap = new TestAccessPointBuilder(mContext).setSsid(ssid).build();
+        assertThat(ap.isCarrierAp()).isEqualTo(false);
+        assertThat(ap.getCarrierApEapType()).isEqualTo(WifiEnterpriseConfig.Eap.NONE);
+        assertThat(ap.getCarrierName()).isEqualTo(null);
+
+        int carrierApEapType = WifiEnterpriseConfig.Eap.SIM;
+        String carrierName = "Test Carrier";
+        ScanResult scanResult = new ScanResult();
+        scanResult.SSID = ssid;
+        scanResult.BSSID = "00:11:22:33:44:55";
+        scanResult.capabilities = "";
+        scanResult.isCarrierAp = true;
+        scanResult.carrierApEapType = carrierApEapType;
+        scanResult.carrierName = carrierName;
+        assertThat(ap.update(scanResult, true /* evictOldScanresults */)).isTrue();
+
+        assertThat(ap.isCarrierAp()).isEqualTo(true);
+        assertThat(ap.getCarrierApEapType()).isEqualTo(carrierApEapType);
+        assertThat(ap.getCarrierName()).isEqualTo(carrierName);
+    }
+
+    private ScoredNetwork buildScoredNetworkWithMockBadgeCurve() {
+        return buildScoredNetworkWithGivenBadgeCurve(mockBadgeCurve);
+
+    }
+
+    private ScoredNetwork buildScoredNetworkWithGivenBadgeCurve(RssiCurve badgeCurve) {
+        Bundle attr1 = new Bundle();
+        attr1.putParcelable(ScoredNetwork.ATTRIBUTES_KEY_BADGING_CURVE, badgeCurve);
+        return new ScoredNetwork(
+                new NetworkKey(new WifiKey(TEST_SSID, TEST_BSSID)),
+                badgeCurve,
+                false /* meteredHint */,
+                attr1);
+
+    }
+
     private AccessPoint createAccessPointWithScanResultCache() {
         Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, SCAN_RESULTS);
+        return new AccessPoint(mContext, bundle);
+    }
+
+    private static ArrayList<ScanResult> buildScanResultCache() {
         ArrayList<ScanResult> scanResults = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            ScanResult scanResult = new ScanResult();
-            scanResult.level = i;
-            scanResult.BSSID = "bssid-" + i;
-            scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
-            scanResult.capabilities = "";
+            ScanResult scanResult = createScanResult(TEST_SSID, "bssid-" + i, i);
             scanResults.add(scanResult);
         }
-
-        bundle.putParcelableArrayList("key_scanresultcache", scanResults);
-        return new AccessPoint(mContext, bundle);
+        return scanResults;
     }
 
     private WifiConfiguration createWifiConfiguration() {
@@ -345,8 +597,20 @@ public class AccessPointTest {
         return configuration;
     }
 
+    private AccessPoint createApWithFastTimestampedScoredNetworkCache(
+            long elapsedTimeMillis) {
+        TimestampedScoredNetwork recentScore = new TimestampedScoredNetwork(
+                buildScoredNetworkWithGivenBadgeCurve(FAST_BADGE_CURVE),
+                elapsedTimeMillis);
+        return new TestAccessPointBuilder(mContext)
+                .setSsid(TEST_SSID)
+                .setScoredNetworkCache(
+                        new ArrayList<>(Arrays.asList(recentScore)))
+                .build();
+    }
+
     /**
-    * Assert that the first AccessPoint appears after the second AccessPoint
+    * Assert that the first AccessPoint appears before the second AccessPoint
     * once sorting has been completed.
     */
     private void assertSortingWorks(AccessPoint first, AccessPoint second) {
@@ -486,5 +750,310 @@ public class AccessPointTest {
 
         NetworkInfo newInfo = new NetworkInfo(networkInfo); // same values
         assertThat(ap.update(config, wifiInfo, newInfo)).isFalse();
+    }
+
+    @Test
+    public void testUpdateWithDifferentRssi_returnsTrue() {
+        int networkId = 123;
+        int rssi = -55;
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = networkId;
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setNetworkId(networkId);
+        wifiInfo.setRssi(rssi);
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTING, "", "");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setNetworkInfo(networkInfo)
+                .setNetworkId(networkId)
+                .setRssi(rssi)
+                .setWifiInfo(wifiInfo)
+                .build();
+
+        NetworkInfo newInfo = new NetworkInfo(networkInfo); // same values
+        wifiInfo.setRssi(rssi + 1);
+        assertThat(ap.update(config, wifiInfo, newInfo)).isTrue();
+    }
+
+    @Test
+    public void testUpdateWithInvalidRssi_returnsFalse() {
+        int networkId = 123;
+        int rssi = -55;
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = networkId;
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setNetworkId(networkId);
+        wifiInfo.setRssi(rssi);
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTING, "", "");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setNetworkInfo(networkInfo)
+                .setNetworkId(networkId)
+                .setRssi(rssi)
+                .setWifiInfo(wifiInfo)
+                .build();
+
+        NetworkInfo newInfo = new NetworkInfo(networkInfo); // same values
+        wifiInfo.setRssi(WifiInfo.INVALID_RSSI);
+        assertThat(ap.update(config, wifiInfo, newInfo)).isFalse();
+    }
+    @Test
+    public void testUpdateWithConfigChangeOnly_returnsFalseButInvokesListener() {
+        int networkId = 123;
+        int rssi = -55;
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = networkId;
+        config.numNoInternetAccessReports = 1;
+
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setNetworkId(networkId);
+        wifiInfo.setRssi(rssi);
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, "", "");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setNetworkInfo(networkInfo)
+                .setNetworkId(networkId)
+                .setRssi(rssi)
+                .setWifiInfo(wifiInfo)
+                .build();
+
+        AccessPoint.AccessPointListener mockListener = mock(AccessPoint.AccessPointListener.class);
+        ap.setListener(mockListener);
+        WifiConfiguration newConfig = new WifiConfiguration(config);
+        config.validatedInternetAccess = true;
+
+        assertThat(ap.update(newConfig, wifiInfo, networkInfo)).isFalse();
+        verify(mockListener).onAccessPointChanged(ap);
+    }
+
+    @Test
+    public void testUpdateWithNullWifiConfiguration_doesNotThrowNPE() {
+        int networkId = 123;
+        int rssi = -55;
+        WifiConfiguration config = new WifiConfiguration();
+        config.networkId = networkId;
+        WifiInfo wifiInfo = new WifiInfo();
+        wifiInfo.setNetworkId(networkId);
+        wifiInfo.setRssi(rssi);
+
+        NetworkInfo networkInfo =
+                new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0 /* subtype */, "WIFI", "");
+        networkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTING, "", "");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setNetworkInfo(networkInfo)
+                .setNetworkId(networkId)
+                .setRssi(rssi)
+                .setWifiInfo(wifiInfo)
+                .build();
+
+        ap.update(null, wifiInfo, networkInfo);
+    }
+
+    @Test
+    public void testSpeedLabelAveragesAllBssidScores() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        int speed1 = Speed.MODERATE;
+        RssiCurve badgeCurve1 = mock(RssiCurve.class);
+        when(badgeCurve1.lookupScore(anyInt())).thenReturn((byte) speed1);
+        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(0)))
+                .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve1));
+        int speed2 = Speed.VERY_FAST;
+        RssiCurve badgeCurve2 = mock(RssiCurve.class);
+        when(badgeCurve2.lookupScore(anyInt())).thenReturn((byte) speed2);
+        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(1)))
+                .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve2));
+
+        int expectedSpeed = (speed1 + speed2) / 2;
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        assertThat(ap.getSpeed()).isEqualTo(expectedSpeed);
+    }
+
+    @Test
+    public void testSpeedLabelAverageIgnoresNoSpeedScores() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+
+        int speed1 = Speed.VERY_FAST;
+        RssiCurve badgeCurve1 = mock(RssiCurve.class);
+        when(badgeCurve1.lookupScore(anyInt())).thenReturn((byte) speed1);
+        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(0)))
+                .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve1));
+        int speed2 = Speed.NONE;
+        RssiCurve badgeCurve2 = mock(RssiCurve.class);
+        when(badgeCurve2.lookupScore(anyInt())).thenReturn((byte) speed2);
+        when(mockWifiNetworkScoreCache.getScoredNetwork(SCAN_RESULTS.get(1)))
+                .thenReturn(buildScoredNetworkWithGivenBadgeCurve(badgeCurve2));
+
+        ap.update(
+        mockWifiNetworkScoreCache, true /* scoringUiEnabled */, MAX_SCORE_CACHE_AGE_MILLIS);
+
+        assertThat(ap.getSpeed()).isEqualTo(speed1);
+    }
+
+    @Test
+    public void testSpeedLabelFallbackScoreIgnoresNullCurves() {
+        int rssi = -55;
+        String bssid = "00:00:00:00:00:00";
+        int networkId = 123;
+
+        WifiInfo info = new WifiInfo();
+        info.setRssi(rssi);
+        info.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
+        info.setBSSID(bssid);
+        info.setNetworkId(networkId);
+
+        ArrayList<ScanResult> scanResults = new ArrayList<>();
+        ScanResult scanResultUnconnected = createScanResult(TEST_SSID, "11:11:11:11:11:11", rssi);
+        scanResults.add(scanResultUnconnected);
+
+        ScanResult scanResultConnected = createScanResult(TEST_SSID, bssid, rssi);
+        scanResults.add(scanResultConnected);
+
+        AccessPoint ap =
+                new TestAccessPointBuilder(mContext)
+                        .setActive(true)
+                        .setNetworkId(networkId)
+                        .setSsid(TEST_SSID)
+                        .setScanResultCache(scanResults)
+                        .setWifiInfo(info)
+                        .build();
+
+        int fallbackSpeed = Speed.SLOW;
+        when(mockWifiNetworkScoreCache.getScoredNetwork(scanResultUnconnected))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) fallbackSpeed);
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(scanResultConnected))
+                .thenReturn(null);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        assertThat(ap.getSpeed()).isEqualTo(fallbackSpeed);
+    }
+
+    @Test
+    public void testScoredNetworkCacheBundling() {
+        long timeMillis = SystemClock.elapsedRealtime();
+        AccessPoint ap = createApWithFastTimestampedScoredNetworkCache(timeMillis);
+        Bundle bundle = new Bundle();
+        ap.saveWifiState(bundle);
+
+        ArrayList<TimestampedScoredNetwork> list =
+                bundle.getParcelableArrayList(AccessPoint.KEY_SCOREDNETWORKCACHE);
+        assertThat(list).hasSize(1);
+        assertThat(list.get(0).getUpdatedTimestampMillis()).isEqualTo(timeMillis);
+
+        RssiCurve curve = list.get(0).getScore().attributes.getParcelable(
+                ScoredNetwork.ATTRIBUTES_KEY_BADGING_CURVE);
+        assertThat(curve).isEqualTo(FAST_BADGE_CURVE);
+    }
+
+    @Test
+    public void testRecentNetworkScoresAreUsedForSpeedLabelGeneration() {
+        AccessPoint ap =
+                createApWithFastTimestampedScoredNetworkCache(SystemClock.elapsedRealtime());
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        assertThat(ap.getSpeed()).isEqualTo(Speed.FAST);
+    }
+
+    @Test
+    public void testNetworkScoresAreUsedForSpeedLabelGenerationWhenWithinAgeRange() {
+        long withinRangeTimeMillis =
+                SystemClock.elapsedRealtime() - (MAX_SCORE_CACHE_AGE_MILLIS - 10000);
+        AccessPoint ap =
+                createApWithFastTimestampedScoredNetworkCache(withinRangeTimeMillis);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        assertThat(ap.getSpeed()).isEqualTo(Speed.FAST);
+    }
+
+    @Test
+    public void testOldNetworkScoresAreNotUsedForSpeedLabelGeneration() {
+        long tooOldTimeMillis =
+                SystemClock.elapsedRealtime() - (MAX_SCORE_CACHE_AGE_MILLIS + 1);
+        AccessPoint ap =
+                createApWithFastTimestampedScoredNetworkCache(tooOldTimeMillis);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        assertThat(ap.getSpeed()).isEqualTo(Speed.NONE);
+    }
+
+    @Test
+    public void testUpdateScoresRefreshesScoredNetworkCacheTimestamps () {
+        long tooOldTimeMillis =
+                SystemClock.elapsedRealtime() - (MAX_SCORE_CACHE_AGE_MILLIS + 1);
+
+        ScoredNetwork scoredNetwork = buildScoredNetworkWithGivenBadgeCurve(FAST_BADGE_CURVE);
+        TimestampedScoredNetwork recentScore = new TimestampedScoredNetwork(
+                scoredNetwork,
+                tooOldTimeMillis);
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setSsid(TEST_SSID)
+                .setBssid(TEST_BSSID)
+                .setActive(true)
+                .setScoredNetworkCache(
+                        new ArrayList(Arrays.asList(recentScore)))
+                .setScanResultCache(SCAN_RESULTS)
+                .build();
+
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(scoredNetwork);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        // Fast should still be returned since cache was updated with recent time
+        assertThat(ap.getSpeed()).isEqualTo(Speed.FAST);
+    }
+
+    @Test
+    public void testUpdateScoresRefreshesScoredNetworkCacheWithNewSpeed () {
+        long tooOldTimeMillis =
+                SystemClock.elapsedRealtime() - (MAX_SCORE_CACHE_AGE_MILLIS + 1);
+
+        ScoredNetwork scoredNetwork = buildScoredNetworkWithGivenBadgeCurve(FAST_BADGE_CURVE);
+        TimestampedScoredNetwork recentScore = new TimestampedScoredNetwork(
+                scoredNetwork,
+                tooOldTimeMillis);
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setSsid(TEST_SSID)
+                .setBssid(TEST_BSSID)
+                .setActive(true)
+                .setScoredNetworkCache(
+                        new ArrayList(Arrays.asList(recentScore)))
+                .setScanResultCache(SCAN_RESULTS)
+                .build();
+
+        int newSpeed = Speed.MODERATE;
+        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
+                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) newSpeed);
+
+        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
+                MAX_SCORE_CACHE_AGE_MILLIS);
+
+        // Fast should still be returned since cache was updated with recent time
+        assertThat(ap.getSpeed()).isEqualTo(newSpeed);
     }
 }

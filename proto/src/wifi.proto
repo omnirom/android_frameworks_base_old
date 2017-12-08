@@ -255,6 +255,87 @@ message WifiLog {
   // Indicates the number of times an error was encountered in
   // Wificond when wifi was turned on.
   optional int32 num_wifi_on_failure_due_to_wificond = 56;
+
+  // Wi-Fi Aware metrics
+  optional WifiAwareLog wifi_aware_log = 57;
+
+  // Number of saved Passpoint providers in user profile.
+  optional int32 num_passpoint_providers = 58;
+
+  // Count of times Passpoint provider being installed.
+  optional int32 num_passpoint_provider_installation = 59;
+
+  // Count of times Passpoint provivider is installed successfully.
+  optional int32 num_passpoint_provider_install_success = 60;
+
+  // Count of times Passpoint provider is being uninstalled.
+  optional int32 num_passpoint_provider_uninstallation = 61;
+
+  // Count of times Passpoint provider is uninstalled successfully.
+  optional int32 num_passpoint_provider_uninstall_success = 62;
+
+  // Count of saved Passpoint providers device has ever connected to.
+  optional int32 num_passpoint_providers_successfully_connected = 63;
+
+  // Histogram counting instances of scans with N many ScanResults with unique ssids
+  repeated NumConnectableNetworksBucket total_ssids_in_scan_histogram = 64;
+
+  // Histogram counting instances of scans with N many ScanResults/bssids
+  repeated NumConnectableNetworksBucket total_bssids_in_scan_histogram = 65;
+
+  // Histogram counting instances of scans with N many unique open ssids
+  repeated NumConnectableNetworksBucket available_open_ssids_in_scan_histogram = 66;
+
+  // Histogram counting instances of scans with N many bssids for open networks
+  repeated NumConnectableNetworksBucket available_open_bssids_in_scan_histogram = 67;
+
+  // Histogram counting instances of scans with N many unique ssids for saved networks
+  repeated NumConnectableNetworksBucket available_saved_ssids_in_scan_histogram = 68;
+
+  // Histogram counting instances of scans with N many bssids for saved networks
+  repeated NumConnectableNetworksBucket available_saved_bssids_in_scan_histogram = 69;
+
+  // Histogram counting instances of scans with N many unique SSIDs for open or saved networks
+  repeated NumConnectableNetworksBucket available_open_or_saved_ssids_in_scan_histogram = 70;
+
+  // Histogram counting instances of scans with N many BSSIDs for open or saved networks
+  repeated NumConnectableNetworksBucket available_open_or_saved_bssids_in_scan_histogram = 71;
+
+  // Histogram counting instances of scans with N many ScanResults matching unique saved passpoint providers
+  repeated NumConnectableNetworksBucket available_saved_passpoint_provider_profiles_in_scan_histogram = 72;
+
+  // Histogram counting instances of scans with N many ScanResults BSSIDs matching a saved passpoint provider
+  repeated NumConnectableNetworksBucket available_saved_passpoint_provider_bssids_in_scan_histogram = 73;
+
+  // Counts the number of AllSingleScanLister.onResult calls with a full band scan result
+  optional int32 full_band_all_single_scan_listener_results = 74;
+
+  // Counts the number of AllSingleScanLister.onResult calls with a partial (channels) scan result
+  optional int32 partial_all_single_scan_listener_results = 75;
+
+  // Pno scan metrics
+  optional PnoScanMetrics pno_scan_metrics = 76;
+
+  // Histogram of "Connect to Network" notifications.
+  // The notification Action should be unset.
+  repeated ConnectToNetworkNotificationAndActionCount connect_to_network_notification_count = 77;
+
+  // Histogram of "Connect to Network" notification user actions.
+  repeated ConnectToNetworkNotificationAndActionCount connect_to_network_notification_action_count = 78;
+
+  // The number of SSIDs blacklisted from recommendation by the open network
+  // notification recommender
+  optional int32 open_network_recommender_blacklist_size = 79;
+
+  // Is the available network notification feature turned on
+  optional bool is_wifi_networks_available_notification_on = 80;
+
+  // Count of recommendation updates made by the open network notification
+  // recommender
+  optional int32 num_open_network_recommendation_updates = 81;
+
+  // Count of connection attempts that were initiated unsuccessfully
+  optional int32 num_open_network_connect_message_failed_to_send = 82;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -675,4 +756,283 @@ message StaEvent {
 
   // Authentication failure reason, as reported by WifiManager (calculated from state & deauth code)
   optional AuthFailureReason auth_failure_reason = 13 [default = AUTH_FAILURE_UNKNOWN];
+}
+
+// Wi-Fi Aware metrics
+message WifiAwareLog {
+  // total number of unique apps that used Aware (measured on attach)
+  optional int32 num_apps = 1;
+
+  // total number of unique apps that used an identity callback when attaching
+  optional int32 num_apps_using_identity_callback = 2;
+
+  // maximum number of attaches for an app
+  optional int32 max_concurrent_attach_sessions_in_app = 3;
+
+  // histogram of attach request results
+  repeated NanStatusHistogramBucket histogram_attach_session_status = 4;
+
+  // maximum number of concurrent publish sessions in a single app
+  optional int32 max_concurrent_publish_in_app = 5;
+
+  // maximum number of concurrent subscribe sessions in a single app
+  optional int32 max_concurrent_subscribe_in_app = 6;
+
+  // maximum number of concurrent discovery (publish+subscribe) sessions in a single app
+  optional int32 max_concurrent_discovery_sessions_in_app = 7;
+
+  // maximum number of concurrent publish sessions in the system
+  optional int32 max_concurrent_publish_in_system = 8;
+
+  // maximum number of concurrent subscribe sessions in the system
+  optional int32 max_concurrent_subscribe_in_system = 9;
+
+  // maximum number of concurrent discovery (publish+subscribe) sessions in the system
+  optional int32 max_concurrent_discovery_sessions_in_system = 10;
+
+  // histogram of publish request results
+  repeated NanStatusHistogramBucket histogram_publish_status = 11;
+
+  // histogram of subscribe request results
+  repeated NanStatusHistogramBucket histogram_subscribe_status = 12;
+
+  // number of unique apps which experienced a discovery session creation failure due to lack of
+  // resources
+  optional int32 num_apps_with_discovery_session_failure_out_of_resources = 13;
+
+  // histogram of create ndp request results
+  repeated NanStatusHistogramBucket histogram_request_ndp_status = 14;
+
+  // histogram of create ndp out-of-band (OOB) request results
+  repeated NanStatusHistogramBucket histogram_request_ndp_oob_status = 15;
+
+  // maximum number of concurrent active data-interfaces (NDI) in a single app
+  optional int32 max_concurrent_ndi_in_app = 19;
+
+  // maximum number of concurrent active data-interfaces (NDI) in the system
+  optional int32 max_concurrent_ndi_in_system = 20;
+
+  // maximum number of concurrent data-paths (NDP) in a single app
+  optional int32 max_concurrent_ndp_in_app = 21;
+
+  // maximum number of concurrent data-paths (NDP) in the system
+  optional int32 max_concurrent_ndp_in_system = 22;
+
+  // maximum number of concurrent secure data-paths (NDP) in a single app
+  optional int32 max_concurrent_secure_ndp_in_app = 23;
+
+  // maximum number of concurrent secure data-paths (NDP) in the system
+  optional int32 max_concurrent_secure_ndp_in_system = 24;
+
+  // maximum number of concurrent data-paths (NDP) per data-interface (NDI)
+  optional int32 max_concurrent_ndp_per_ndi = 25;
+
+  // histogram of durations of Aware being available
+  repeated HistogramBucket histogram_aware_available_duration_ms = 26;
+
+  // histogram of durations of Aware being enabled
+  repeated HistogramBucket histogram_aware_enabled_duration_ms = 27;
+
+  // histogram of duration (in ms) of attach sessions
+  repeated HistogramBucket histogram_attach_duration_ms = 28;
+
+  // histogram of duration (in ms) of publish sessions
+  repeated HistogramBucket histogram_publish_session_duration_ms = 29;
+
+  // histogram of duration (in ms) of subscribe sessions
+  repeated HistogramBucket histogram_subscribe_session_duration_ms = 30;
+
+  // histogram of duration (in ms) of data-paths (NDP)
+  repeated HistogramBucket histogram_ndp_session_duration_ms = 31;
+
+  // histogram of usage (in MB) of data-paths (NDP)
+  repeated HistogramBucket histogram_ndp_session_data_usage_mb = 32;
+
+  // histogram of usage (in MB) of data-path creation time (in ms) measured as request -> confirm
+  repeated HistogramBucket histogram_ndp_creation_time_ms = 33;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: minimum
+  optional int64 ndp_creation_time_ms_min = 34;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: maximum
+  optional int64 ndp_creation_time_ms_max = 35;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: sum
+  optional int64 ndp_creation_time_ms_sum = 36;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: sum of sq
+  optional int64 ndp_creation_time_ms_sum_of_sq = 37;
+
+  // statistics for data-path (NDP) creation time (in ms) measured as request -> confirm: number of
+  // samples
+  optional int64 ndp_creation_time_ms_num_samples = 38;
+
+  // total time within the logging window that aware was available
+  optional int64 available_time_ms = 39;
+
+  // total time within the logging window that aware was enabled
+  optional int64 enabled_time_ms = 40;
+
+  // Histogram bucket for Wi-Fi Aware logs. Range is [start, end)
+  message HistogramBucket {
+    // lower range of the bucket (inclusive)
+    optional int64 start = 1;
+
+    // upper range of the bucket (exclusive)
+    optional int64 end = 2;
+
+    // number of samples in the bucket
+    optional int32 count = 3;
+  }
+
+  // Status of various NAN operations
+  enum NanStatusTypeEnum {
+    // constant to be used by proto
+    UNKNOWN = 0;
+
+    // NAN operation succeeded
+    SUCCESS = 1;
+
+    // NAN Discovery Engine/Host driver failures
+    INTERNAL_FAILURE = 2;
+
+    // NAN OTA failures
+    PROTOCOL_FAILURE = 3;
+
+    // The publish/subscribe discovery session id is invalid
+    INVALID_SESSION_ID = 4;
+
+    // Out of resources to fufill request
+    NO_RESOURCES_AVAILABLE = 5;
+
+    // Invalid arguments passed
+    INVALID_ARGS = 6;
+
+    // Invalid peer id
+    INVALID_PEER_ID = 7;
+
+    // Invalid NAN data-path (ndp) id
+    INVALID_NDP_ID = 8;
+
+    // Attempting to enable NAN when not available, e.g. wifi is disabled
+    NAN_NOT_ALLOWED = 9;
+
+    // Over the air ACK not received
+    NO_OTA_ACK = 10;
+
+    // Attempting to enable NAN when already enabled
+    ALREADY_ENABLED = 11;
+
+    // Can't queue tx followup message foor transmission
+    FOLLOWUP_TX_QUEUE_FULL = 12;
+
+    // Unsupported concurrency of NAN and another feature - NAN disabled
+    UNSUPPORTED_CONCURRENCY_NAN_DISABLED = 13;
+
+    // Unknown NanStatusType
+    UNKNOWN_HAL_STATUS = 14;
+  }
+
+  // Histogram bucket for Wi-Fi Aware (NAN) status.
+  message NanStatusHistogramBucket {
+    // status type defining the bucket
+    optional NanStatusTypeEnum nan_status_type = 1;
+
+    // number of samples in the bucket
+    optional int32 count = 2;
+  }
+}
+
+// Data point used to build 'Number of Connectable Network' histograms
+message NumConnectableNetworksBucket {
+  // Number of connectable networks seen in a scan result
+  optional int32 num_connectable_networks = 1 [default = 0];
+
+  // Number of scan results with num_connectable_networks
+  optional int32 count = 2 [default = 0];
+}
+
+// Pno scan metrics
+// Here "Pno Scan" refers to the session of offloaded scans, these metrics count the result of a
+// single session, and not the individual scans within that session.
+message PnoScanMetrics {
+  // Total number of attempts to offload pno scans
+  optional int32 num_pno_scan_attempts = 1;
+
+  // Total number of pno scans failed
+  optional int32 num_pno_scan_failed = 2;
+
+  // Number of pno scans started successfully over offload
+  optional int32 num_pno_scan_started_over_offload = 3;
+
+  // Number of pno scans failed over offload
+  optional int32 num_pno_scan_failed_over_offload = 4;
+
+  // Total number of pno scans that found any network
+  optional int32 num_pno_found_network_events = 5;
+}
+
+// Number of occurrences for a particular "Connect to Network" Notification or
+// notification Action.
+message ConnectToNetworkNotificationAndActionCount {
+
+  // "Connect to Network" notifications
+  enum Notification {
+
+    // Default
+    NOTIFICATION_UNKNOWN = 0;
+
+    // Initial notification with a recommended network.
+    NOTIFICATION_RECOMMEND_NETWORK = 1;
+
+    // Notification when connecting to the recommended network.
+    NOTIFICATION_CONNECTING_TO_NETWORK = 2;
+
+    // Notification when successfully connected to the network.
+    NOTIFICATION_CONNECTED_TO_NETWORK = 3;
+
+    // Notification when failed to connect to network.
+    NOTIFICATION_FAILED_TO_CONNECT = 4;
+  }
+
+  // "Connect to Network" notification actions
+  enum Action {
+
+    // Default
+    ACTION_UNKNOWN = 0;
+
+    // User dismissed the "Connect to Network" notification.
+    ACTION_USER_DISMISSED_NOTIFICATION = 1;
+
+    // User tapped action button to connect to recommended network.
+    ACTION_CONNECT_TO_NETWORK = 2;
+
+    // User tapped action button to open Wi-Fi Settings.
+    ACTION_PICK_WIFI_NETWORK = 3;
+
+    // User tapped "Failed to connect" notification to open Wi-Fi Settings.
+    ACTION_PICK_WIFI_NETWORK_AFTER_CONNECT_FAILURE = 4;
+  }
+
+  // Recommenders of the "Connect to Network" notification
+  enum Recommender {
+
+    // Default.
+    RECOMMENDER_UNKNOWN = 0;
+
+    // Open Network Available recommender.
+    RECOMMENDER_OPEN = 1;
+  }
+
+  // Notification Type.
+  optional Notification notification = 1;
+
+  // Action Type.
+  optional Action action = 2;
+
+  // Recommender Type.
+  optional Recommender recommender = 3;
+
+  // Occurrences of this action.
+  optional int32 count = 4;
 }

@@ -3,7 +3,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Inputenheder"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android-tastatur"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Engelsk (UK)"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Engelsk (Storbritannien)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"engelsk (USA)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Engelsk (USA), international stil"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Engelsk (USA), Colemak-stil"</string>
@@ -41,4 +41,5 @@
     <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"Litauisk"</string>
     <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"Spansk (latinamerika)"</string>
     <string name="keyboard_layout_latvian" msgid="4405417142306250595">"Lettisk"</string>
+    <string name="keyboard_layout_persian" msgid="3920643161015888527">"Persisk"</string>
 </resources>

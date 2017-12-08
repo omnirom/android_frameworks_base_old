@@ -70,7 +70,7 @@ static bool parseMcc(const char* name, ResTable_config* out) {
 
 static bool parseMnc(const char* name, ResTable_config* out) {
   if (strcmp(name, kWildcardName) == 0) {
-    if (out) out->mcc = 0;
+    if (out) out->mnc = 0;
     return true;
   }
   const char* c = name;
@@ -877,7 +877,16 @@ ConfigDescription ConfigDescription::CopyWithoutSdkVersion() const {
 }
 
 bool ConfigDescription::Dominates(const ConfigDescription& o) const {
-  if (*this == DefaultConfig() || *this == o) {
+  if (*this == o) {
+    return true;
+  }
+
+  // Locale de-duping is not-trivial, disable for now (b/62409213).
+  if (diff(o) & CONFIG_LOCALE) {
+    return false;
+  }
+
+  if (*this == DefaultConfig()) {
     return true;
   }
   return MatchWithDensity(o) && !o.MatchWithDensity(*this) &&
@@ -958,8 +967,6 @@ bool ConfigDescription::ConflictsWith(const ConfigDescription& o) const {
                o.screenLayout & MASK_LAYOUTDIR) ||
          !pred(screenLayout & MASK_SCREENLONG,
                o.screenLayout & MASK_SCREENLONG) ||
-         !pred(screenLayout & MASK_UI_MODE_TYPE,
-               o.screenLayout & MASK_UI_MODE_TYPE) ||
          !pred(uiMode & MASK_UI_MODE_TYPE, o.uiMode & MASK_UI_MODE_TYPE) ||
          !pred(uiMode & MASK_UI_MODE_NIGHT, o.uiMode & MASK_UI_MODE_NIGHT) ||
          !pred(screenLayout2 & MASK_SCREENROUND,

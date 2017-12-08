@@ -16,15 +16,20 @@ package com.android.systemui.qs;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserManager;
+import android.provider.Settings;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableStringBuilder;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -39,6 +44,7 @@ import android.testing.TestableImageView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 /*
  * Compile and run the whole SystemUI test suite:
@@ -63,6 +69,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     private TestableImageView mFooterIcon;
     private QSSecurityFooter mFooter;
     private SecurityController mSecurityController = mock(SecurityController.class);
+    private UserManager mUserManager;
 
     @Before
     public void setUp() {
@@ -72,6 +79,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 new LayoutInflaterBuilder(mContext)
                         .replace("ImageView", TestableImageView.class)
                         .build());
+        mUserManager = Mockito.mock(UserManager.class);
+        mContext.addMockSystemService(Context.USER_SERVICE, mUserManager);
         Handler h = new Handler(Looper.getMainLooper());
         h.post(() -> mFooter = new QSSecurityFooter(null, mContext));
         waitForIdleSync(h);
@@ -120,6 +129,21 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
         // -1 == never set.
         assertEquals(-1, mFooterIcon.getLastImageResource());
+    }
+
+    @Test
+    public void testManagedDemoMode() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.getDeviceOwnerOrganizationName()).thenReturn(null);
+        final UserInfo mockUserInfo = Mockito.mock(UserInfo.class);
+        when(mockUserInfo.isDemo()).thenReturn(true);
+        when(mUserManager.getUserInfo(anyInt())).thenReturn(mockUserInfo);
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.DEVICE_DEMO_MODE, 1);
+
+        mFooter.refreshState();
+
+        waitForIdleSync(mFooter.mHandler);
+        assertEquals(View.GONE, mRootView.getVisibility());
     }
 
     @Test
@@ -370,6 +394,57 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                                  R.string.monitoring_description_personal_profile_named_vpn,
                                  VPN_PACKAGE)),
                      mFooter.getVpnMessage(false, true, VPN_PACKAGE, null));
+    }
+
+    @Test
+    public void testConfigSubtitleVisibility() {
+        View view = LayoutInflater.from(mContext)
+                .inflate(R.layout.quick_settings_footer_dialog, null);
+
+        // Device Management subtitle should be shown when there is Device Management section only
+        // Other sections visibility will be set somewhere else so it will not be tested here
+        mFooter.configSubtitleVisibility(true, false, false, false, view);
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.device_management_subtitle).getVisibility());
+
+        // If there are multiple sections, all subtitles should be shown
+        mFooter.configSubtitleVisibility(true, true, false, false, view);
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.device_management_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.ca_certs_subtitle).getVisibility());
+
+        // If there are multiple sections, all subtitles should be shown
+        mFooter.configSubtitleVisibility(true, true, true, true, view);
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.device_management_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.ca_certs_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.network_logging_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.vpn_subtitle).getVisibility());
+
+        // If there are multiple sections, all subtitles should be shown, event if there is no
+        // Device Management section
+        mFooter.configSubtitleVisibility(false, true, true, true, view);
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.ca_certs_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.network_logging_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.vpn_subtitle).getVisibility());
+
+        // If there is only 1 section, the title should be hidden
+        mFooter.configSubtitleVisibility(false, true, false, false, view);
+        assertEquals(View.GONE,
+                view.findViewById(R.id.ca_certs_subtitle).getVisibility());
+        mFooter.configSubtitleVisibility(false, false, true, false, view);
+        assertEquals(View.GONE,
+                view.findViewById(R.id.network_logging_subtitle).getVisibility());
+        mFooter.configSubtitleVisibility(false, false, false, true, view);
+        assertEquals(View.GONE,
+                view.findViewById(R.id.vpn_subtitle).getVisibility());
     }
 
     private CharSequence addLink(CharSequence description) {

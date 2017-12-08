@@ -142,8 +142,8 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         : mRenderThread(thread)
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
-        , mJankTracker(thread.mainDisplayInfo())
-        , mProfiler(mFrames)
+        , mJankTracker(&thread.globalProfileData(), thread.mainDisplayInfo())
+        , mProfiler(mJankTracker.frames())
         , mContentDrawBounds(0, 0, 0, 0)
         , mRenderPipeline(std::move(renderPipeline)) {
     rootRenderNode->makeRoot();
@@ -186,7 +186,8 @@ void CanvasContext::setSurface(Surface* surface) {
 
     mNativeSurface = surface;
 
-    bool hasSurface = mRenderPipeline->setSurface(surface, mSwapBehavior);
+    ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::Srgb;
+    bool hasSurface = mRenderPipeline->setSurface(surface, mSwapBehavior, colorMode);
 
     mFrameNumber = -1;
 
@@ -239,6 +240,10 @@ void CanvasContext::setLightCenter(const Vector3& lightCenter) {
 
 void CanvasContext::setOpaque(bool opaque) {
     mOpaque = opaque;
+}
+
+void CanvasContext::setWideGamut(bool wideGamut) {
+    mWideColorGamut = wideGamut;
 }
 
 bool CanvasContext::makeCurrent() {
@@ -316,7 +321,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
     // If the previous frame was dropped we don't need to hold onto it, so
     // just keep using the previous frame's structure instead
     if (!wasSkipped(mCurrentFrameInfo)) {
-        mCurrentFrameInfo = &mFrames.next();
+        mCurrentFrameInfo = mJankTracker.startFrame();
     }
     mCurrentFrameInfo->importUiThreadInfo(uiFrameInfo);
     mCurrentFrameInfo->set(FrameInfoIndex::SyncQueued) = syncQueued;
@@ -416,7 +421,7 @@ void CanvasContext::draw() {
     SkRect windowDirty = computeDirtyRect(frame, &dirty);
 
     bool drew = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry, &mLayerUpdateQueue,
-            mContentDrawBounds, mOpaque, mLightInfo, mRenderNodes, &(profiler()));
+            mContentDrawBounds, mOpaque, mWideColorGamut, mLightInfo, mRenderNodes, &(profiler()));
 
     waitOnFences();
 
@@ -480,8 +485,7 @@ void CanvasContext::draw() {
     }
 #endif
 
-    mJankTracker.addFrame(*mCurrentFrameInfo);
-    mRenderThread.jankTracker().addFrame(*mCurrentFrameInfo);
+    mJankTracker.finishFrame(*mCurrentFrameInfo);
     if (CC_UNLIKELY(mFrameMetricsReporter.get() != nullptr)) {
         mFrameMetricsReporter->reportFrameMetrics(mCurrentFrameInfo->data());
     }
@@ -558,7 +562,8 @@ void CanvasContext::buildLayer(RenderNode* node) {
     // purposes when the frame is actually drawn
     node->setPropertyFieldsDirty(RenderNode::GENERIC);
 
-    mRenderPipeline->renderLayers(mLightGeometry, &mLayerUpdateQueue, mOpaque, mLightInfo);
+    mRenderPipeline->renderLayers(mLightGeometry, &mLayerUpdateQueue,
+            mOpaque, mWideColorGamut, mLightInfo);
 
     node->incStrong(nullptr);
     mPrefetchedLayers.insert(node);
@@ -580,15 +585,37 @@ void CanvasContext::destroyHardwareResources() {
 }
 
 void CanvasContext::trimMemory(RenderThread& thread, int level) {
-    // No context means nothing to free
-    if (!thread.eglManager().hasEglContext()) return;
-
-    ATRACE_CALL();
-    if (level >= TRIM_MEMORY_COMPLETE) {
-        thread.renderState().flush(Caches::FlushMode::Full);
-        thread.eglManager().destroy();
-    } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
-        thread.renderState().flush(Caches::FlushMode::Moderate);
+    auto renderType = Properties::getRenderPipelineType();
+    switch (renderType) {
+        case RenderPipelineType::OpenGL: {
+            // No context means nothing to free
+            if (!thread.eglManager().hasEglContext()) return;
+            ATRACE_CALL();
+            if (level >= TRIM_MEMORY_COMPLETE) {
+                thread.renderState().flush(Caches::FlushMode::Full);
+                thread.eglManager().destroy();
+            } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
+                thread.renderState().flush(Caches::FlushMode::Moderate);
+            }
+            break;
+        }
+        case RenderPipelineType::SkiaGL:
+        case RenderPipelineType::SkiaVulkan: {
+            // No context means nothing to free
+            if (!thread.getGrContext()) return;
+            ATRACE_CALL();
+            if (level >= TRIM_MEMORY_COMPLETE) {
+                thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
+                thread.eglManager().destroy();
+                thread.vulkanManager().destroy();
+            } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
+                thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::UiHidden);
+            }
+            break;
+        }
+        default:
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            break;
     }
 }
 
@@ -597,30 +624,12 @@ DeferredLayerUpdater* CanvasContext::createTextureLayer() {
 }
 
 void CanvasContext::dumpFrames(int fd) {
-    mJankTracker.dump(fd);
-    FILE* file = fdopen(fd, "a");
-    fprintf(file, "\n\n---PROFILEDATA---\n");
-    for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::NumIndexes); i++) {
-        fprintf(file, "%s", FrameInfoNames[i].c_str());
-        fprintf(file, ",");
-    }
-    for (size_t i = 0; i < mFrames.size(); i++) {
-        FrameInfo& frame = mFrames[i];
-        if (frame[FrameInfoIndex::SyncStart] == 0) {
-            continue;
-        }
-        fprintf(file, "\n");
-        for (int i = 0; i < static_cast<int>(FrameInfoIndex::NumIndexes); i++) {
-            fprintf(file, "%" PRId64 ",", frame[i]);
-        }
-    }
-    fprintf(file, "\n---PROFILEDATA---\n\n");
-    fflush(file);
+    mJankTracker.dumpStats(fd);
+    mJankTracker.dumpFrames(fd);
 }
 
 void CanvasContext::resetFrameStats() {
-    mFrames.clear();
-    mRenderThread.jankTracker().reset();
+    mJankTracker.reset();
 }
 
 void CanvasContext::setName(const std::string&& name) {

@@ -224,6 +224,15 @@ public class IpConnectivityMetricsTest {
         dnsEvent(101, EVENT_GETADDRINFO, 0, 56);
         dnsEvent(101, EVENT_GETHOSTBYNAME, 0, 34);
 
+        // iface, uid
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("rmnet0", 10123);
+        wakeupEvent("wlan0", 1000);
+        wakeupEvent("rmnet0", 10008);
+        wakeupEvent("wlan0", -1);
+        wakeupEvent("wlan0", 10008);
+        wakeupEvent("rmnet0", 1000);
+
         String want = String.join("\n",
                 "dropped_events: 0",
                 "events <",
@@ -256,9 +265,14 @@ public class IpConnectivityMetricsTest {
                 "  time_ms: 300",
                 "  transports: 0",
                 "  default_network_event <",
+                "    default_network_duration_ms: 0",
+                "    final_score: 0",
+                "    initial_score: 0",
+                "    ip_support: 0",
                 "    network_id <",
                 "      network_id: 102",
                 "    >",
+                "    no_default_network_duration_ms: 0",
                 "    previous_network_id <",
                 "      network_id: 101",
                 "    >",
@@ -308,6 +322,8 @@ public class IpConnectivityMetricsTest {
                 "    program_updates_all: 7",
                 "    program_updates_allowing_multicast: 3",
                 "    received_ras: 10",
+                "    total_packet_dropped: 0",
+                "    total_packet_processed: 0",
                 "    zero_lifetime_ras: 1",
                 "  >",
                 ">",
@@ -367,6 +383,10 @@ public class IpConnectivityMetricsTest {
                 "    event_types: 1",
                 "    event_types: 1",
                 "    event_types: 2",
+                "    getaddrinfo_error_count: 0",
+                "    getaddrinfo_query_count: 0",
+                "    gethostbyname_error_count: 0",
+                "    gethostbyname_query_count: 0",
                 "    latencies_ms: 3456",
                 "    latencies_ms: 45",
                 "    latencies_ms: 638",
@@ -384,10 +404,46 @@ public class IpConnectivityMetricsTest {
                 "  dns_lookup_batch <",
                 "    event_types: 1",
                 "    event_types: 2",
+                "    getaddrinfo_error_count: 0",
+                "    getaddrinfo_query_count: 0",
+                "    gethostbyname_error_count: 0",
+                "    gethostbyname_query_count: 0",
                 "    latencies_ms: 56",
                 "    latencies_ms: 34",
                 "    return_codes: 0",
                 "    return_codes: 0",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 2",
+                "  network_id: 0",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  wakeup_stats <",
+                "    application_wakeups: 2",
+                "    duration_sec: 0",
+                "    no_uid_wakeups: 0",
+                "    non_application_wakeups: 0",
+                "    root_wakeups: 0",
+                "    system_wakeups: 1",
+                "    total_wakeups: 3",
+                "  >",
+                ">",
+                "events <",
+                "  if_name: \"\"",
+                "  link_layer: 4",
+                "  network_id: 0",
+                "  time_ms: 0",
+                "  transports: 0",
+                "  wakeup_stats <",
+                "    application_wakeups: 1",
+                "    duration_sec: 0",
+                "    no_uid_wakeups: 1",
+                "    non_application_wakeups: 0",
+                "    root_wakeups: 0",
+                "    system_wakeups: 2",
+                "    total_wakeups: 4",
                 "  >",
                 ">",
                 "version: 2\n");
@@ -408,6 +464,11 @@ public class IpConnectivityMetricsTest {
 
     void dnsEvent(int netId, int type, int result, int latency) throws Exception {
         mNetdListener.onDnsEvent(netId, type, result, latency, "", null, 0, 0);
+    }
+
+    void wakeupEvent(String iface, int uid) throws Exception {
+        String prefix = NetdEventListenerService.WAKEUP_EVENT_IFACE_PREFIX + iface;
+        mNetdListener.onWakeupEvent(prefix, uid, uid, 0);
     }
 
     List<ConnectivityMetricsEvent> verifyEvents(int n, int timeoutMs) throws Exception {
