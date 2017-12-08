@@ -36,6 +36,7 @@ import android.widget.TextView;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.BatteryInfo;
+import com.android.settingslib.graph.BatteryMeterDrawableBase;
 import com.android.settingslib.graph.UsageView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -158,6 +159,10 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
 
     private final class BatteryDetail implements DetailAdapter, OnClickListener,
             OnAttachStateChangeListener {
+        private final BatteryMeterDrawableBase mDrawable
+                = new BatteryMeterDrawableBase(
+                        mHost.getContext(),
+                        mHost.getContext().getColor(R.color.meter_background_color));
         private View mCurrentView;
 
         @Override
@@ -196,6 +201,11 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
             if (mCurrentView == null) {
                 return;
             }
+            mDrawable.setBatteryLevel(100);
+            mDrawable.setCharging(false);
+            mDrawable.setPowerSave(true);
+            mDrawable.setShowPercent(false);
+            ((ImageView) mCurrentView.findViewById(android.R.id.icon)).setImageDrawable(mDrawable);
             Checkable checkbox = (Checkable) mCurrentView.findViewById(android.R.id.toggle);
             checkbox.setChecked(mPowerSave);
             BatteryInfo.getBatteryInfo(mContext, new BatteryInfo.Callback() {
@@ -210,27 +220,20 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
                     (TextView) mCurrentView.findViewById(android.R.id.title);
             final TextView batterySaverSummary =
                     (TextView) mCurrentView.findViewById(android.R.id.summary);
-            final ImageView batterySaverIcon = (ImageView) mCurrentView.findViewById(android.R.id.icon);
             if (mCharging) {
+                mCurrentView.findViewById(R.id.switch_container).setAlpha(.7f);
                 batterySaverTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
                 batterySaverTitle.setText(R.string.battery_detail_charging_summary);
                 mCurrentView.findViewById(android.R.id.toggle).setVisibility(View.GONE);
                 mCurrentView.findViewById(R.id.switch_container).setClickable(false);
-                batterySaverIcon.setImageResource(R.drawable.ic_qs_battery_saver_charging);
-                batterySaverIcon.setAlpha(.5f);
             } else {
+                mCurrentView.findViewById(R.id.switch_container).setAlpha(1);
                 batterySaverTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
                 batterySaverTitle.setText(R.string.battery_detail_switch_title);
                 batterySaverSummary.setText(R.string.battery_detail_switch_summary);
                 mCurrentView.findViewById(android.R.id.toggle).setVisibility(View.VISIBLE);
                 mCurrentView.findViewById(R.id.switch_container).setClickable(true);
                 mCurrentView.findViewById(R.id.switch_container).setOnClickListener(this);
-                batterySaverIcon.setImageResource(R.drawable.ic_qs_battery_saver);
-                if (!mPowerSave) {
-                    batterySaverIcon.setAlpha(.5f);
-                } else {
-                    batterySaverIcon.setAlpha(1f);
-                }
             }
         }
 
