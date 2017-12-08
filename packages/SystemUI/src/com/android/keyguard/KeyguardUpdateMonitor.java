@@ -1121,16 +1121,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        if (!mSwitchingUser && !isFingerprintDisabled(getCurrentUser())) {
-            if (mContext.getResources().getBoolean(
-                    com.android.keyguard.R.bool.config_fingerprintWakeAndUnlock)) {
-                return (mKeyguardIsVisible || !mDeviceInteractive || 
-                            (mBouncer && !mKeyguardGoingAway) || mGoingToSleep);
-            } else {
-                return mDeviceInteractive && (mKeyguardIsVisible || (mBouncer && !mKeyguardGoingAway));
-            }
-        }
-        return false;
+        return (mKeyguardIsVisible || !mDeviceInteractive ||
+                    (mBouncer && !mKeyguardGoingAway) || mGoingToSleep)
+                && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser());
     }
 
     private void startListeningForFingerprint() {
