@@ -99,11 +99,12 @@ public class AmbientDisplayConfiguration {
     }
 
     public boolean alwaysOnAvailable() {
-        return true;
+        return (alwaysOnDisplayDebuggingEnabled() || alwaysOnDisplayAvailable())
+                && ambientDisplayAvailable();
     }
 
     public boolean alwaysOnAvailableForUser(int user) {
-        return alwaysOnAvailable();
+        return alwaysOnAvailable() && !accessibilityInversionEnabled(user);
     }
 
     public String ambientDisplayComponent() {
