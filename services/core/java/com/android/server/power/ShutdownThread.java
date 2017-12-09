@@ -353,17 +353,26 @@ public final class ShutdownThread extends Thread {
                     pd.setIndeterminate(true);
                 }
             } else {
+                if (showSysuiReboot()) {
+                    return null;
+                }
                 pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_recovery_title));
                 pd.setMessage(context.getText(
                         com.android.internal.R.string.reboot_to_recovery_message));
                 pd.setIndeterminate(true);
             }
         } else if (mReason != null && PowerManager.REBOOT_BOOTLOADER.equals(mReason) && mRebootCustom) {
+            if (showSysuiReboot()) {
+                return null;
+            }
             pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_bootloader_title));
             pd.setMessage(context.getText(
                     com.android.internal.R.string.reboot_to_bootloader_message));
             pd.setIndeterminate(true);
         } else if (mReason == null && mRebootCustom) {
+            if (showSysuiReboot()) {
+                return null;
+            }
             pd.setTitle(context.getText(com.android.internal.R.string.reboot_system_title));
             pd.setMessage(context.getText(
                     com.android.internal.R.string.reboot_system_message));
@@ -388,7 +397,7 @@ public final class ShutdownThread extends Thread {
         try {
             StatusBarManagerInternal service = LocalServices.getService(
                     StatusBarManagerInternal.class);
-            if (service.showShutdownUi(mReboot, mReason)) {
+            if (service.showShutdownUi(mReboot, mReason, mRebootCustom)) {
                 // Sysui will handle shutdown UI.
                 Log.d(TAG, "SysUI handling shutdown UI");
                 return true;
