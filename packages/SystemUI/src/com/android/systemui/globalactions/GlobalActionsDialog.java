@@ -495,7 +495,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         }
     }
 
-    private final class RestartAction extends SinglePressAction implements LongPressAction, View.OnClickListener {
+    private final class RestartAction extends SinglePressAction implements LongPressAction {
         private RestartAction() {
             super(R.drawable.ic_restart, com.android.systemui.R.string.global_action_reboot);
             if (mRebootMenu) {
@@ -527,22 +527,10 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
 
         @Override
         public void onPress() {
-        }
-
-        @Override
-        public View create(Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
-            View v = super.create(context, convertView, parent, inflater);
-            v.setOnClickListener(this);
-            return v;
-        }
-
-        @Override
-        public void onClick(View v) {
             if (!mRebootMenu && showRebootSubmenu()) {
                 mRebootMenu = true;
                 mCurrentMenuActions = mRebootMenuActions;
-                buildMenuList();
-                mAdapter.notifyDataSetChanged();
+                handleShow();
             } else {
                 mHandler.sendEmptyMessage(MESSAGE_DISMISS);
                 if (!mRebootMenu && !dismissDialogEnabled()) {
@@ -993,9 +981,9 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
             View view = action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
-            if (position == 2) {
+            /*if (position == 2) {
                 HardwareUiLayout.get(parent).setDivisionView(view);
-            }
+            }*/
             return view;
         }
     }
