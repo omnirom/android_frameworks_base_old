@@ -158,6 +158,11 @@ public abstract class DisplayManagerInternal {
      */
     public abstract void setDisplayOffsets(int displayId, int x, int y);
 
+     /**
+     * Ambient display auto brightness
+     */
+    public abstract void enableAutoDozeBrightness(boolean enable);
+
     /**
      * Provide a list of UIDs that are present on the display and are allowed to access it.
      *
