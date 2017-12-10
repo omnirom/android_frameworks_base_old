@@ -126,6 +126,10 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         mScreenBrightnessDoze = value / 255f;
     }
 
+    public void updateDozeBrightness(int value) {
+        setDozeScreenBrightness(value);
+    }
+
     public void setKeyguardDark(boolean dark) {
         int vis = mStatusBarView.getSystemUiVisibility();
         if (dark) {
