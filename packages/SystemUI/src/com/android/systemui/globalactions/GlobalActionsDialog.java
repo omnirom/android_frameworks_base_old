@@ -242,29 +242,10 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener, DialogIn
         } else {
             WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
             attrs.setTitle("ActionsDialog");
-            int powermenuAnimations = getPowermenuAnimations();
-
-            if (powermenuAnimations == 0) {
-                attrs.windowAnimations = R.style.GlobalActionsAnimationEnter;
-                attrs.gravity = Gravity.CENTER|Gravity.CENTER_HORIZONTAL;
-            }
-            if (powermenuAnimations == 1) {
-                attrs.windowAnimations = R.style.GlobalActionsAnimation;
-                attrs.gravity = Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL;
-            }
-            if (powermenuAnimations == 2) {
-                attrs.windowAnimations = R.style.GlobalActionsAnimationTop;
-                attrs.gravity = Gravity.TOP|Gravity.CENTER_HORIZONTAL;
-            }
             mDialog.getWindow().setAttributes(attrs);
             mDialog.show();
             mWindowManagerFuncs.onGlobalActionsShown();
         }
-    }
-
-    private int getPowermenuAnimations() {
-        return Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_ANIMATIONS, 0, UserHandle.USER_CURRENT);
     }
 
     public void settingsChanged() {
