@@ -3434,7 +3434,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM);
+                UserHandle.USER_SYSTEM, false);
         if (matches.size() >= 1) {
             String optionalVerifierName = mContext.getResources().getString(R.string.config_optionalPackageVerifierName);
             if (TextUtils.isEmpty(optionalVerifierName))
@@ -16568,7 +16568,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         final Intent optionalIntent = new Intent(verification);
                         optionalIntent.setAction("com.qualcomm.qti.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION");
                         final List<ResolveInfo> optional_receivers = queryIntentReceiversInternal(optionalIntent,
-                            PACKAGE_MIME_TYPE, 0, verifierUser.getIdentifier());
+                            PACKAGE_MIME_TYPE, 0, verifierUser.getIdentifier(), false);
                         final ComponentName optionalVerifierComponent = matchComponentForVerifier(
                             mOptionalVerifierPackage, optional_receivers);
                         optionalIntent.setComponent(optionalVerifierComponent);
