@@ -23,7 +23,7 @@
     android:paddingStart="@dimen/qs_footer_padding_start"
     android:paddingEnd="@dimen/qs_footer_padding_end"
     android:gravity="center_vertical"
-    android:background="?android:attr/colorPrimary" >
+    android:background="@drawable/qs_background_primary" >
 
     <TextView
         android:id="@+id/footer_text"
