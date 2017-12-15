@@ -4274,12 +4274,20 @@ public final class Settings {
         * Whether to show media art on lockscreen
         * @hide
         */
-       public static final String LOCKSCREEN_HIDE_MEDIA_METADATA = "lockscreen_hide_media";
+        public static final String LOCKSCREEN_HIDE_MEDIA_METADATA = "lockscreen_hide_media";
 
         /**
          * @hide
          */
         public static final String DEVICE_FEATURE_SETTINGS = "device_feature_settings";
+
+        /**
+         * 0 - wallpaper based
+         * 1 - force light
+         * 2 - force dark
+         * @hide
+         */
+        public static final String SYSTEM_UI_THEME = "system_ui_theme";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -4498,6 +4506,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(STATUS_BAR_CUSTOM_HEADER_IMAGE);
             PRIVATE_SETTINGS.add(LOCKSCREEN_HIDE_MEDIA_METADATA);
             PRIVATE_SETTINGS.add(DEVICE_FEATURE_SETTINGS);
+            PRIVATE_SETTINGS.add(SYSTEM_UI_THEME);
         }
 
         /**
