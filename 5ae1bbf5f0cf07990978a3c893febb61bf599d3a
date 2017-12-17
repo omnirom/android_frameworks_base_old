@@ -16,6 +16,24 @@
       "revId": "5ae1bbf5f0cf07990978a3c893febb61bf599d3a",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "854e622e_927aae2e",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarPolicy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-12-17T15:44:56Z",
+      "side": 1,
+      "message": "consider AUDIO_VIDEO_PORTABLE_AUDIO AUDIO_VIDEO_LOUDSPEAKER AUDIO_VIDEO_HEADPHONES?",
+      "parentUuid": "4f7b5c2d_21f3a4af",
+      "revId": "5ae1bbf5f0cf07990978a3c893febb61bf599d3a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
