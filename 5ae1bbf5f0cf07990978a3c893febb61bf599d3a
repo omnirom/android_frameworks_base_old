@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f7b5c2d_21f3a4af",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarPolicy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-12-17T15:39:25Z",
+      "side": 1,
+      "message": "Hm - my bt speaker does not show up - but I think it should also match this",
+      "revId": "5ae1bbf5f0cf07990978a3c893febb61bf599d3a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
