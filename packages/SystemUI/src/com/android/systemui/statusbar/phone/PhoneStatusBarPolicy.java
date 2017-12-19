@@ -501,6 +501,9 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             switch (type.getDeviceClass()) {
             case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
             case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
+            case BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO:
+            case BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER:
+            case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
                 show = true;
                 break;
             default:
