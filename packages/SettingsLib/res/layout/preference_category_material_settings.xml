@@ -17,20 +17,24 @@
 
 <!-- Based off frameworks/base/core/res/res/layout/preference_category_material.xml
      except that this supports icon -->
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
     android:layout_marginBottom="8dp"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart" >
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:clipToPadding="false" >
 
     <LinearLayout
-        android:id="@+id/icon_container"
+        android:id="@+id/icon_frame"
+        style="@style/preference_icon_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="start|center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:clipToPadding="false"
+        android:paddingEnd="12dp" >
         <com.android.internal.widget.PreferenceImageView
             android:id="@android:id/icon"
             android:layout_width="wrap_content"
@@ -41,9 +45,9 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="56dp"
+        android:layout_weight="1"
         android:orientation="vertical">
         <TextView
             android:id="@android:id/title"
@@ -64,4 +68,4 @@
             android:singleLine="true" />
     </LinearLayout>
 
-</FrameLayout>
+</LinearLayout>
