@@ -108,7 +108,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             }
         }
     }
-    private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
+    private OmniSettingsObserver mOmniSettingsObserver;
 
     private SignalCallback mSignalCallback = new SignalCallback() {
         @Override
@@ -123,6 +123,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mNetworkController = Dependency.get(NetworkController.class);
         mStatusBarComponent = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
+        mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
         mOmniSettingsObserver.observe();
     }
 
