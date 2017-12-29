@@ -606,7 +606,6 @@ public class AudioService extends IAudioService.Stub
     private AudioManagerInternal.RingerModeDelegate mRingerModeDelegate;
     private VolumePolicy mVolumePolicy = VolumePolicy.DEFAULT;
     private long mLoweredFromNormalToVibrateTime;
-    private boolean mVolumeKeyForceMediaStream;
 
     // Array of Uids of valid accessibility services to check if caller is one of them
     private int[] mAccessibilityServiceUids;
@@ -646,8 +645,6 @@ public class AudioService extends IAudioService.Stub
             }
         }
     }
-
-    private boolean mLinkNotificationWithVolume;
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
@@ -761,11 +758,6 @@ public class AudioService extends IAudioService.Stub
 
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
-
-        mLinkNotificationWithVolume = Settings.System.getIntForUser(mContentResolver,
-                Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
-        mVolumeKeyForceMediaStream = Settings.System.getIntForUser(mContentResolver,
-                Settings.System.VOLUME_BUTTON_FORCE_MEDIA, 0, UserHandle.USER_CURRENT) == 1;
 
         // must be called before readPersistedSettings() which needs a valid mStreamVolumeAlias[]
         // array initialized by updateStreamVolumeAlias()
@@ -1203,7 +1195,7 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
-        if (mLinkNotificationWithVolume) {
+        if (isLinkNotificationWithVolume()) {
             mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
         } else {
             mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
@@ -1350,6 +1342,12 @@ public class AudioService extends IAudioService.Stub
             updateRingerModeAffectedStreams();
             readDockAudioSettings(cr);
             sendEncodedSurroundMode(cr, "readPersistedSettings");
+
+            if (isLinkNotificationWithVolume()) {
+                mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
+            } else {
+                mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
+            }
         }
 
         mMuteAffectedStreams = System.getIntForUser(cr,
@@ -4017,7 +4015,7 @@ public class AudioService extends IAudioService.Stub
                         Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                     return AudioSystem.STREAM_MUSIC;
                 } else {
-                    if (!mVolumeKeyForceMediaStream) {
+                    if (!isVolumeKeyForceMediaStream()) {
                         if (DEBUG_VOL)
                             Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
                         return AudioSystem.STREAM_RING;
@@ -4054,7 +4052,7 @@ public class AudioService extends IAudioService.Stub
                     if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: forcing STREAM_MUSIC");
                     return AudioSystem.STREAM_MUSIC;
                 } else {
-                    if (!mVolumeKeyForceMediaStream) {
+                    if (!isVolumeKeyForceMediaStream()) {
                         if (DEBUG_VOL)
                             Log.v(TAG,
                                     "getActiveStreamType: using STREAM_NOTIFICATION as default");
@@ -5250,8 +5248,6 @@ public class AudioService extends IAudioService.Stub
                     Settings.Global.ENCODED_SURROUND_OUTPUT), false, this);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.VOLUME_LINK_NOTIFICATION), false, this);
-            mContentResolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.VOLUME_BUTTON_FORCE_MEDIA), false, this);
         }
 
         @Override
@@ -5273,15 +5269,11 @@ public class AudioService extends IAudioService.Stub
                 updateMasterMono(mContentResolver);
                 updateEncodedSurroundOutput();
 
-                mLinkNotificationWithVolume = Settings.System.getIntForUser(mContentResolver,
-                        Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
-                if (mLinkNotificationWithVolume) {
+                if (isLinkNotificationWithVolume()) {
                     mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
                 } else {
                     mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
                 }
-                mVolumeKeyForceMediaStream = System.getIntForUser(mContentResolver,
-                        Settings.System.VOLUME_BUTTON_FORCE_MEDIA, 0, UserHandle.USER_CURRENT) == 1;
             }
         }
 
@@ -6746,6 +6738,16 @@ public class AudioService extends IAudioService.Stub
             mVolumePolicy = policy;
             if (DEBUG_VOL) Log.d(TAG, "Volume policy changed: " + mVolumePolicy);
         }
+    }
+
+    private boolean isVolumeKeyForceMediaStream() {
+        return System.getIntForUser(mContentResolver, Settings.System.VOLUME_BUTTON_FORCE_MEDIA,
+                0, UserHandle.USER_CURRENT) == 1;
+    }
+
+    private boolean isLinkNotificationWithVolume() {
+        return Settings.System.getIntForUser(mContentResolver, Settings.System.VOLUME_LINK_NOTIFICATION,
+                1, UserHandle.USER_CURRENT) == 1;
     }
 
     public static class VolumeController {
