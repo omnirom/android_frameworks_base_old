@@ -19,13 +19,75 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">Taaskäivita</string>
+  <string name="global_action_reboot_more">Taaskäivita\u2026</string>
+  <string name="global_action_reboot_sub">Süsteemi</string>
+  <string name="global_action_reboot_recovery">Taastusesse</string>
+  <string name="global_action_reboot_bootloader">Käivituslaadurisse</string>
+  <string name="global_action_dismissable_dialog_text">Täpsem taaskäivitus on keelatud.\nKas soovid taaskäivitada\u003f</string>
+  <string name="global_action_dnaa">Ära enam näita</string>
+  <string name="global_action_settings">Seaded</string>
+  <string name="qs_menu_item_columns">Veerud</string>
+  <string name="qs_menu_item_columns_landscape">Veerud horisontaalpaigutuses</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Lähtesta</string>
+  <string name="qs_menu_item_titles">Kuva sildid</string>
+  <string name="qs_menu_item_rows">Read</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="qs_menu_item_scroll">Kiirriba kerimine</string>
+  <string name="tuner_quick_settings">Kiirseaded</string>
+  <string name="tuner_show_brightness_mode">Kuva heledusrežiimi lülitit</string>
+  <string name="tuner_show_brightness_new">Kuva heledusliugurit</string>
+  <string name="lockscreen_default">Vaikimisi</string>
+  <string name="lockscreen_hidden">Puudub</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
+  <string name="custom_hint">Käivitamiseks viipa ikoonilt</string>
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Ekraani hetkel lindistatakse</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Lindistan ekraani</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Peata</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Kuva kursorit</string>
+  <string name="screenrecord_notif_pointer_off">Peida kursor</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Ekraani ei saa lindistada</string>
+  <string name="notification_channel_screenrecord">Kuva lindistused</string>
+  <string name="quick_settings_network_adb_enabled_label">Sees</string>
+  <string name="quick_settings_network_adb_disabled_label">Keelatud</string>
+  <string name="quick_settings_network_adb_label">ADB üle võrgu</string>
+  <string name="quick_settings_network_adb_toast">USB-silumine pole lubatud</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">See hoiab seda vaates, kuni eemaldad kinnituse. Selleks vajuta ja hoia tagasinuppu.</string>
+  <string name="omnijaws_service_error">Viga</string>
+  <string name="omnijaws_service_unkown">Ilmaandmed puuduvad</string>
+  <string name="omnijaws_service_error_long">Ilmateate laadimisel esines viga</string>
+  <string name="omnijaws_service_disabled">Teenus on keelatud</string>
+  <string name="omnijaws_detail_header">Ilm</string>
+  <string name="omnijaws_label_default">Ilm</string>
+  <string name="omnijaws_current_text">Nüüd</string>
+  <string name="omnijaws_package_not_available">OmniJaws pole saadaval</string>
+  <string name="omnijaws_service_last_update">Viimane uuendus:</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">Pilt pildis</string>
+  <string name="quick_settings_pip_tile_app_na">Rakendus ei toeta pilt pildis režiimi</string>
+  <string name="quick_settings_screenshot_label">Kuvatõmmis</string>
+  <string name="quick_settings_caffeine_label">Kofeiin</string>
+  <string name="accessibility_quick_settings_caffeine_off">Kofeiin väljas</string>
+  <string name="accessibility_quick_settings_caffeine_on">Kofeiin sees</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Asukohateavitus: aku säästmise režiim.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Asukohateavitus: ainult sensorite režiim.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Asukohateavitust: kõrge täpsusega režiim.</string>
 </resources>

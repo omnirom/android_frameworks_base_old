@@ -85,5 +85,9 @@
   <string name="quick_settings_caffeine_label">Cofeină</string>
   <string name="accessibility_quick_settings_caffeine_off">Cofeină oprit</string>
   <string name="accessibility_quick_settings_caffeine_on">Cofeină pornit</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Raportare locație: economisire energie.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Raportare locație: doar dispozitiv.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Raportare locație: precizie ridicată.</string>
 </resources>

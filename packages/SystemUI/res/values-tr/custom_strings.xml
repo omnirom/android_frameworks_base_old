@@ -25,9 +25,9 @@
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
   <string name="global_action_dismissable_dialog_text">İleri seviye tekrar başlatma devre dışı.\nTekrar başlatmak istiyor musunuz\u003f</string>
-  <string name="global_action_dnaa">Bir daha gösterme</string>
+  <string name="global_action_dnaa">Tekrar gösterme</string>
   <string name="global_action_settings">Ayarlar</string>
-  <string name="qs_menu_item_columns">Sütünlar</string>
+  <string name="qs_menu_item_columns">Sütunlar</string>
   <string name="qs_menu_item_columns_landscape">Yatay sütunlar</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
@@ -43,14 +43,14 @@
   <string name="qs_menu_item_rows_two">2</string>
   <string name="qs_menu_item_rows_three">3</string>
   <string name="qs_menu_item_rows_four">4</string>
-  <string name="qs_menu_item_scroll">Hızlı ayarlar kaydırıcısı</string>
+  <string name="qs_menu_item_scroll">Hızlı çubuk kaydırması</string>
   <string name="tuner_quick_settings">Hızlı ayarlar</string>
   <string name="tuner_show_brightness_mode">Parlaklık modu düğmesini göster</string>
   <string name="tuner_show_brightness_new">Parlaklık kaydırıcısını göster</string>
   <string name="lockscreen_default">Varsayılan</string>
   <string name="lockscreen_hidden">Hiçbiri</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-  <string name="custom_hint">Başlatmak için simgeden kaydır</string>
+  <string name="custom_hint">Başlatmak için simgeden kaydırın</string>
   <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Ekran kaydediliyor</string>
   <!-- Screenrecord notification title -->
@@ -81,9 +81,13 @@
   <!-- PiP Tile -->
   <string name="quick_settings_pip_label">Resim içinde resim</string>
   <string name="quick_settings_pip_tile_app_na">Uygulama resim içinde resim modunu desteklemiyor</string>
-  <string name="quick_settings_screenshot_label">Ekran görüntüsü</string>
+  <string name="quick_settings_screenshot_label">Ekran resmi</string>
   <string name="quick_settings_caffeine_label">Caffeine</string>
   <string name="accessibility_quick_settings_caffeine_off">Caffeine kapalı</string>
   <string name="accessibility_quick_settings_caffeine_on">Caffeine açık</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Konum bildirimi: pil tasarrufu modu.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Konum bildirimi: sadece sensörler modu.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Konum bildirimi: yüksek hassâsiyyet modu.</string>
 </resources>

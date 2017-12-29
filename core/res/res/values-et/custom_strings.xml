@@ -20,9 +20,19 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">Taaskäivita käivituslaadurisse</string>
+  <string name="reboot_to_bootloader_message">Taaskäivitan käivituslaadurisse\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">Taaskäivita taastusesse</string>
+  <string name="reboot_to_recovery_message">Taaskäivitan taastusesse\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">Taaskäivita süsteemi</string>
+  <string name="reboot_system_message">Taaskäivitan süsteemi\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Peta paki allkirja</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Lubab rakendusel esineda teise rakendusena. Pahatahtlikud rakendused võivad kasutada seda, pääsemaks ligi privaatsetele rakenduse andmetele. Ole ettevaatlik selle loa andmisel!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">Ekraani vabastamiseks vajuta ja hoia all tagasinuppu.</string>
+  <string name="app_unpin_message">Rakendus vabastatud</string>
 </resources>
