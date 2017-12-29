@@ -19,13 +19,75 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">Перезапуск</string>
+  <string name="global_action_reboot_more">Перезапуск\u2026</string>
+  <string name="global_action_reboot_sub">Система</string>
+  <string name="global_action_reboot_recovery">Рекавери</string>
+  <string name="global_action_reboot_bootloader">Загрузчик</string>
+  <string name="global_action_dismissable_dialog_text">Расширенный перезапуск отключен. \nПерезапустить\u003f</string>
+  <string name="global_action_dnaa">Больше не показывать</string>
+  <string name="global_action_settings">Настройки</string>
+  <string name="qs_menu_item_columns">Столбцы</string>
+  <string name="qs_menu_item_columns_landscape">Колонок в альбомном повороте</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Сбросить</string>
+  <string name="qs_menu_item_titles">Показать метки</string>
+  <string name="qs_menu_item_rows">Строки</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="qs_menu_item_scroll">Прокрутка плиток</string>
+  <string name="tuner_quick_settings">Быстрые настройки</string>
+  <string name="tuner_show_brightness_mode">Показать переключатель режима подсветки</string>
+  <string name="tuner_show_brightness_new">Показать ползунок яркости</string>
+  <string name="lockscreen_default">По умолчанию</string>
+  <string name="lockscreen_hidden">Нет</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
+  <string name="custom_hint">Свайп от значка, чтобы запустить</string>
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Идёт запись экрана</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Запись экрана</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Стоп</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Показывать нажатия</string>
+  <string name="screenrecord_notif_pointer_off">Скрыть нажатия</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Невозможно записать экран</string>
+  <string name="notification_channel_screenrecord">Запись экрана</string>
+  <string name="quick_settings_network_adb_enabled_label">Включено</string>
+  <string name="quick_settings_network_adb_disabled_label">Выключено</string>
+  <string name="quick_settings_network_adb_label">Отладки по сети</string>
+  <string name="quick_settings_network_adb_toast">Отладка по USB отключена</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Находится в поле зрения, пока вы не открепите. Нажмите и удерживайте \"Назад\" чтобы открепить.</string>
+  <string name="omnijaws_service_error">Ошибка</string>
+  <string name="omnijaws_service_unkown">Нет данных погоды</string>
+  <string name="omnijaws_service_error_long">Ошибка загрузки данных о погоде</string>
+  <string name="omnijaws_service_disabled">Служба отключена</string>
+  <string name="omnijaws_detail_header">Погода</string>
+  <string name="omnijaws_label_default">Погода</string>
+  <string name="omnijaws_current_text">Только что</string>
+  <string name="omnijaws_package_not_available">OmniJaws не доступно</string>
+  <string name="omnijaws_service_last_update">Последнее обновление:</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">PiP</string>
+  <string name="quick_settings_pip_tile_app_na">Приложение не поддерживает PiP</string>
+  <string name="quick_settings_screenshot_label">Снимок экрана</string>
+  <string name="quick_settings_caffeine_label">Запрет сна</string>
+  <string name="accessibility_quick_settings_caffeine_off">Запрет сна выкл</string>
+  <string name="accessibility_quick_settings_caffeine_on">Запрет сна вкл</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Отображение местоположения: энергосберегающий режим.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Режим местоположения: только датчики.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Режим местоположения: высокая точность.</string>
 </resources>

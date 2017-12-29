@@ -21,14 +21,17 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Bootloader modunda tekrar başlat</string>
+  <string name="reboot_to_bootloader_message">Bootloader modunda tekrar başlatılıyor\u2026</string>
   <!-- advanced reboot to recovery. -->
   <string name="reboot_to_recovery_title">Recovery modunda tekrar başlat</string>
+  <string name="reboot_to_recovery_message">Recovery modunda tekrar başlatılıyor\u2026</string>
   <!-- advanced reboot system -->
   <string name="reboot_system_title">Sistemi tekrar başlat</string>
+  <string name="reboot_system_message">Sistem tekrar başlatılıyor\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Paket imzasını taklit et</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-  <string name="permdesc_fakePackageSignature">Uygulamaya farklı bir uygulama gibi davranma izni verir. Zararlı uygulamalar bunu hususi uygulama verilerine erişmek için kullanabilir. Bu izni çok dikkatli bir şekilde verin!</string>
+  <string name="permdesc_fakePackageSignature">Uygulamaya farklı bir uygulama gibi davranma izni verir. Zararlı uygulamalar bunu hususî uygulama verilerine erişmek için kullanabilir. Bu izni çok dikkatli bir şekilde verin!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">Bu ekran sabitlemesini iptal etmek için, Geri düğmesine dokunun ve basılı tutun.</string>
   <string name="app_unpin_message">Uygulama sabitlemesi iptal edildi</string>

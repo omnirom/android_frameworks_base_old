@@ -20,9 +20,19 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">Перезапуск в загрузчик</string>
+  <string name="reboot_to_bootloader_message">Перезапуск в загрузчик\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">Перезапуск в рекавери</string>
+  <string name="reboot_to_recovery_message">Перезапуск в рекавери\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">Перезапуск системы</string>
+  <string name="reboot_system_message">Перезапуск системы\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Имитировать подпись пакета</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Разрешить приложению маскироваться под другое приложение. Вредоносные приложения могут использовать это для доступа к конфиденциальным данным приложений. Предоставляйте это разрешение с осторожностью!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">Для открепления экрана нажмите и удерживайте кнопку \"Назад\".</string>
+  <string name="app_unpin_message">Приложение откреплено</string>
 </resources>

@@ -85,5 +85,9 @@
   <string name="quick_settings_caffeine_label">Caffeine</string>
   <string name="accessibility_quick_settings_caffeine_off">Caffeine vypnuto</string>
   <string name="accessibility_quick_settings_caffeine_on">Caffeine zapnuto</string>
+  <string name="status_bar_vpn">Síť VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Hlášení polohy: úspora baterie.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Hlášení polohy: pouze zařízení.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Hlášení polohy: vysoká přesnost.</string>
 </resources>
