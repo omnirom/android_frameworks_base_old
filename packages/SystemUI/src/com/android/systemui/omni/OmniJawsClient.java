@@ -330,7 +330,8 @@ public class OmniJawsClient {
             return mRes.getDrawable(resId);
         } catch(Exception e) {
             Log.w(TAG, "Failed to get condition image for " + conditionCode);
-            return null;
+            int resId = mRes.getIdentifier(mIconPrefix + "_na", "drawable", mPackageName);
+            return mRes.getDrawable(resId);
         }
     }
 
