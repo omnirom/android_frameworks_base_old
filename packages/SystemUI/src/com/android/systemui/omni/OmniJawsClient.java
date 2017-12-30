@@ -32,6 +32,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
@@ -295,6 +297,27 @@ public class OmniJawsClient {
         }
     }
 
+    private Drawable getDefaultConditionImage() {
+        String packageName = ICON_PACKAGE_DEFAULT;
+        String iconPrefix = ICON_PREFIX_DEFAULT;
+
+        try {
+            PackageManager packageManager = mContext.getPackageManager();
+            Resources res = packageManager.getResourcesForApplication(packageName);
+            if (res != null) {
+                int resId = res.getIdentifier(iconPrefix + "_na", "drawable", packageName);
+                Drawable d = res.getDrawable(resId);
+                if (d != null) {
+                    return d;
+                }
+            }
+        } catch (Exception e) {
+        }
+        // absolute absolute fallback
+        Log.w(TAG, "No default package found");
+        return new ColorDrawable(Color.RED);
+    }
+
     private void loadCustomIconPackage() {
         int idx = mSettingIconPackage.lastIndexOf(".");
         mPackageName = mSettingIconPackage.substring(0, idx);
@@ -327,11 +350,20 @@ public class OmniJawsClient {
         }
         try {
             int resId = mRes.getIdentifier(mIconPrefix + "_" + conditionCode, "drawable", mPackageName);
-            return mRes.getDrawable(resId);
+            Drawable d = mRes.getDrawable(resId);
+            if (d != null) {
+                return d;
+            }
+            Log.w(TAG, "Failed to get condition image for " + conditionCode + " use default");
+            resId = mRes.getIdentifier(mIconPrefix + "_na", "drawable", mPackageName);
+            d = mRes.getDrawable(resId);
+            if (d != null) {
+                return d;
+            }
         } catch(Exception e) {
-            Log.w(TAG, "Failed to get condition image for " + conditionCode);
-            return null;
         }
+        Log.w(TAG, "Failed to get condition image for " + conditionCode);
+        return getDefaultConditionImage();
     }
 
     public boolean isOmniJawsServiceInstalled() {
