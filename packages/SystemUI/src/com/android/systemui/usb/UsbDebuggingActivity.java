@@ -93,8 +93,8 @@ public class UsbDebuggingActivity extends AlertActivity
         // if obscured, do not let user give permissions (could be tapjacking involved)
         final View.OnTouchListener filterTouchListener = (View v, MotionEvent event) -> {
             // Filter obscured touches by consuming them.
-            if (((event.getFlags() & MotionEvent.FLAG_WINDOW_IS_OBSCURED) != 0)
-                    || ((event.getFlags() & MotionEvent.FLAG_WINDOW_IS_PARTIALLY_OBSCURED) != 0)) {
+            /*if (((event.getFlags() & MotionEvent.FLAG_WINDOW_IS_OBSCURED) != 0)
+                    || ((event.getFlags() & MotionEvent.FLAG_WINDOW_IS_PARTIALLY_OBSCURED) != 0)) {*/
                 if (event.getAction() == MotionEvent.ACTION_UP) {
                     EventLog.writeEvent(0x534e4554, "62187985"); // safety net logging
                     Toast.makeText(v.getContext(),
@@ -102,8 +102,8 @@ public class UsbDebuggingActivity extends AlertActivity
                             Toast.LENGTH_SHORT).show();
                 }
                 return true;
-            }
-            return false;
+            /*}
+            return false;*/
         };
         mAlert.getButton(BUTTON_POSITIVE).setOnTouchListener(filterTouchListener);
 
