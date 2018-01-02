@@ -350,7 +350,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     }
 
     private boolean hasRoundedCorners() {
-        return mRoundedDefault > 0 || mRoundedDefaultBottom > 0 || mRoundedDefaultTop > 0;
+        // return mRoundedDefault > 0 || mRoundedDefaultBottom > 0 || mRoundedDefaultTop > 0;
+        return true;
     }
 
     private boolean shouldDrawCutout() {
@@ -368,10 +369,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         // screen decorations overlay.
         int padding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
-        if (padding != 0) {
-            setupStatusBarPadding(padding);
-        }
-
+        setupStatusBarPadding(padding);
     }
 
     private void setupStatusBarPadding(int padding) {
