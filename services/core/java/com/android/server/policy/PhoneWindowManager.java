@@ -234,6 +234,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.DeviceKeyHandler;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -4414,11 +4415,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void preloadRecentApps() {
-        if (mOmniSwitchRecents) {
-            OmniSwitchConstants.preloadOmniSwitchRecents(mContext, UserHandle.CURRENT);
+        if (keyguardOn()) {
             return;
         }
-        if (keyguardOn()) {
+        if (mOmniSwitchRecents) {
+            OmniSwitchConstants.preloadOmniSwitchRecents(mContext, UserHandle.CURRENT);
             return;
         }
         mPreloadedRecentApps = true;
@@ -4429,10 +4430,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void cancelPreloadRecentApps() {
-        if (mOmniSwitchRecents) {
+        if (keyguardOn()) {
             return;
         }
-        if (keyguardOn()) {
+        if (mOmniSwitchRecents) {
             return;
         }
         if (mPreloadedRecentApps) {
@@ -9092,11 +9093,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 OmniUtils.sendKeycode(KeyEvent.KEYCODE_MENU);
                 break;
             case KEY_ACTION_SPLIT:
-                boolean dockStatus = TaskUtils.isTaskDocked(mContext);
-                if (dockStatus) {
-                    TaskUtils.undockTask(mContext);
-                } else {
-                    TaskUtils.dockTopTask(mContext);
+                if (ActivityManager.supportsMultiWindow(mContext)) {
+                    mStatusBarManagerInternal.toggleSplitScreen();
                 }
                 break;
             case KEY_ACTION_LAST_APP:
@@ -9120,7 +9118,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void appSwitchLongPress() {
         mAppSwitchConsumed = true;
-        cancelPreloadRecentApps();
         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
         performKeyAction(mLongPressOnAppSwitchBehavior);
     }
@@ -9138,7 +9135,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void handleLongPressOnMenu() {
         if (mLongPressOnMenuBehavior == 1) {
             mAppSwitchConsumed = true;
-            cancelPreloadRecentApps();
             performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
             toggleRecentApps();
         }
