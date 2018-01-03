@@ -816,6 +816,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mLongPressOnAppSwitchBehavior;
     private boolean mGlobalActionsOnLockDisable;
     private int mLongPressOnHomeBehaviorCustom;
+    private int mDoubleTapOnHomeBehaviorCustom;
     private DeviceKeyHandler mDeviceKeyHandler;
     private boolean mHardwareKeysDisable;
     private int mUserRotationAngles = -1;
@@ -832,6 +833,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mDoCustomAction;
     private boolean mLongPressBackConsumed;
     private boolean mMenuConsumed;
+    private int mEventDeviceId;
 
     // constants for rotation bits
     private static final int ROTATION_0_MODE = 1;
@@ -1079,6 +1081,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BUTTON_SWAP_MENU_RECENTS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_DOUBLE_PRESS_HOME), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -1967,9 +1972,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void handleDoubleTapOnHome() {
-        if (mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
-            mHomeConsumed = true;
-            toggleRecentApps();
+        if (mDoubleTapOnHomeBehaviorCustom == DOUBLE_TAP_HOME_NOTHING) {
+            return;
+        }
+        mHomeConsumed = true;
+        switch (mDoubleTapOnHomeBehaviorCustom) {
+            case DOUBLE_TAP_HOME_RECENT_SYSTEM_UI:
+                toggleRecentApps();
+                break;
+            case LONG_PRESS_HOME_ASSIST:
+                launchAssistAction(null, mEventDeviceId);
+                break;
+            default:
+                performKeyAction(mDoubleTapOnHomeBehaviorCustom);
+                break;
         }
     }
 
@@ -2551,6 +2567,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_CURRENT) != 0;
             mLongPressOnHomeBehaviorCustom = Settings.System.getIntForUser(resolver,
                     Settings.System.BUTTON_LONG_PRESS_HOME, mLongPressOnHomeBehavior,
+                    UserHandle.USER_CURRENT);
+            mDoubleTapOnHomeBehaviorCustom = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_DOUBLE_PRESS_HOME, mDoubleTapOnHomeBehavior,
                     UserHandle.USER_CURRENT);
             mHardwareKeysDisable = Settings.System.getIntForUser(resolver,
                     Settings.System.HARDWARE_KEYS_DISABLE, 0,
@@ -3664,7 +3683,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
 
                 // Delay handling home if a double-tap is possible.
-                if (mDoubleTapOnHomeBehavior != DOUBLE_TAP_HOME_NOTHING) {
+                if (mDoubleTapOnHomeBehaviorCustom != DOUBLE_TAP_HOME_NOTHING) {
+                    mEventDeviceId = event.getDeviceId();
                     mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable); // just in case
                     mHomeDoubleTapPending = true;
                     mHandler.postDelayed(mHomeDoubleTapTimeoutRunnable,
@@ -3706,7 +3726,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable);
                     handleDoubleTapOnHome();
                 } else if (mLongPressOnHomeBehaviorCustom == KEY_ACTION_APP_SWITCH
-                        || mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
+                        || mDoubleTapOnHomeBehaviorCustom == KEY_ACTION_APP_SWITCH
+                        || mDoubleTapOnHomeBehaviorCustom == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
                     preloadRecentApps();
                 }
             } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {

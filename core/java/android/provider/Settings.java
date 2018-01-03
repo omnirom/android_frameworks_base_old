@@ -4030,6 +4030,19 @@ public final class Settings {
          */
         public static final String BUTTON_LONG_PRESS_HOME = "button_long_press_home";
 
+        /**
+         * 0 for nothing
+         * 1 DOUBLE_TAP_HOME_RECENT_SYSTEM_UI
+         * 2 start assist
+         * 3 show menu
+         * 4 toggle split screen
+         * 5 switch to last app
+         * 6 turn off
+         * 7 recents
+         * @hide
+         */
+        public static final String BUTTON_DOUBLE_PRESS_HOME = "button_double_press_home";
+
         /** some devices have a extra hw button e.g. n3 on the back on the
          * fingerprint sensor. allow mapping button to key
          *
