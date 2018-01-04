@@ -19,7 +19,8 @@
     android:layout_width="match_parent"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    style="@style/BrightnessDialogContainer">
+    style="@style/BrightnessDialogContainer"
+    android:background="@drawable/qs_background_primary" >
 
     <ImageView
         android:id="@+id/brightness_icon"
@@ -29,7 +30,7 @@
         android:src="@drawable/ic_qs_brightness_auto_off"
         android:contentDescription="@null"
         android:paddingLeft="8dp"
-        android:visibility="gone" />
+        android:visibility="invisible" />
 
     <com.android.systemui.settings.ToggleSliderView
         android:id="@+id/brightness_slider"
