@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "665411a3_c504606c",
+        "filename": "packages/SystemUI/src/com/android/systemui/screenshot/GlobalScreenshot.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-01-04T19:49:40Z",
+      "side": 1,
+      "message": "you should try using Rect:isEmpty()",
+      "revId": "c2db04f94b8ffb86a3dd3817686e6717314e70b6",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
