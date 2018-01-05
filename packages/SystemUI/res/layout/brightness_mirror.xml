@@ -19,6 +19,7 @@
     android:layout_width="@dimen/qs_panel_width"
     android:layout_height="wrap_content"
     android:layout_gravity="@integer/notification_panel_layout_gravity"
+    android:theme="@style/qs_theme"
     android:visibility="invisible">
     <FrameLayout
         android:layout_width="match_parent"
