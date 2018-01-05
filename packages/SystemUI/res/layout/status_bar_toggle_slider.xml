@@ -43,6 +43,7 @@
         android:paddingEnd="20dp"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
+        android:background="@android:color/transparent"
         android:thumb="@drawable/ic_brightness_thumb"
         android:splitTrack="false"
         />
