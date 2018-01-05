@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -722,6 +723,11 @@ public class TelecomManager {
         try {
             if (isServiceConnected()) {
                 getTelecomService().setUserSelectedOutgoingPhoneAccount(accountHandle);
+                // hack a shaq
+                final int oldValue = Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.VOICE_CALL_DEFAULT_CHANGED, 0);
+                Settings.Global.putInt(mContext.getContentResolver(),
+                        Settings.Global.VOICE_CALL_DEFAULT_CHANGED, oldValue == 0 ? 1 : 0);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#setUserSelectedOutgoingPhoneAccount");
