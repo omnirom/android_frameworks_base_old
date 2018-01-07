@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "86f6ba00_e4dd8490",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 3631,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-01-07T17:31:20Z",
+      "side": 1,
+      "message": "hm - interesting that the other settings here dont have a @hide\nbut you should still add it to prevent any public API issues",
+      "revId": "ee470235e6a6d191cf1ecfe07b468a96c786d217",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "823f4b22_bc8938c6",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 4438,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-01-07T17:31:20Z",
+      "side": 1,
+      "message": "thats exactly what we dont want - all out settings are always private settings to not change the public api.\nSo I would handle this like any other settings we add",
+      "revId": "ee470235e6a6d191cf1ecfe07b468a96c786d217",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ac6deaba_85500298",
+        "filename": "packages/SettingsProvider/src/com/android/providers/settings/DatabaseHelper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2288,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-01-07T17:31:20Z",
+      "side": 1,
+      "message": "hmmmm  - not sure if we need all of this - in the end we just want to store a simple true/false value like we have dozen of others. So I think we only need the Settings.java change catually",
+      "range": {
+        "startLine": 2288,
+        "startChar": 1,
+        "endLine": 2288,
+        "endChar": 2
+      },
+      "revId": "ee470235e6a6d191cf1ecfe07b468a96c786d217",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e8781df5_556a681e",
+        "filename": "packages/SettingsProvider/src/com/android/providers/settings/SettingsProtoDumpUtil.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1589,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-01-07T17:31:20Z",
+      "side": 1,
+      "message": "same ...",
+      "revId": "ee470235e6a6d191cf1ecfe07b468a96c786d217",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
