@@ -2285,6 +2285,19 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    private void loadIsProximitySensorDisabledInDialer(SQLiteDatabase db) {
+        // The default should be on.
+        int disabledProximitySensorInDialer = getIntValueFromSystem(db, Settings.System.DISABLED_PROXIMIT_SENSOR, 1);
+        SQLiteStatement stmt = null;
+        try {
+            stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
+                    + " VALUES(?,?);");
+            loadSetting(stmt, Settings.System.VIBRATE_WHEN_RINGING, 1);
+        } finally {
+            if (stmt != null) stmt.close();
+        }
+    }
+
     private void loadSettings(SQLiteDatabase db) {
         loadSystemSettings(db);
         loadSecureSettings(db);
