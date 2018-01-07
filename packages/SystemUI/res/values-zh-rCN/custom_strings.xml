@@ -19,13 +19,75 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">重新启动</string>
+  <string name="global_action_reboot_more">重新启动\u2026</string>
+  <string name="global_action_reboot_sub">系统</string>
+  <string name="global_action_reboot_recovery">恢复模式</string>
+  <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_dismissable_dialog_text">未开启高级重启功能。\n确定重新启动？\u003f</string>
+  <string name="global_action_dnaa">不再提示</string>
+  <string name="global_action_settings">设置</string>
+  <string name="qs_menu_item_columns">列数</string>
+  <string name="qs_menu_item_columns_landscape">行数</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">重置​​​</string>
+  <string name="qs_menu_item_titles">显示标签</string>
+  <string name="qs_menu_item_rows">行数</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="qs_menu_item_scroll">滚动快捷工具栏</string>
+  <string name="tuner_quick_settings">快速设置</string>
+  <string name="tuner_show_brightness_mode">显示亮度模式开关</string>
+  <string name="tuner_show_brightness_new">亮度滑块</string>
+  <string name="lockscreen_default">默认</string>
+  <string name="lockscreen_hidden">无</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
+  <string name="custom_hint">从启动器提取图标</string>
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">屏幕正在被录制</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">正在录制屏幕</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">停止录制</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">显示指针</string>
+  <string name="screenrecord_notif_pointer_off">隐藏指针</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">无法录制屏幕</string>
+  <string name="notification_channel_screenrecord">屏幕录像</string>
+  <string name="quick_settings_network_adb_enabled_label">启用</string>
+  <string name="quick_settings_network_adb_disabled_label">禁用</string>
+  <string name="quick_settings_network_adb_label">网络 ADB 调试</string>
+  <string name="quick_settings_network_adb_toast">未启用 USB 调试</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">这会将它锁定在视图中。长按返回键解锁。</string>
+  <string name="omnijaws_service_error">错误</string>
+  <string name="omnijaws_service_unkown">没有天气数据</string>
+  <string name="omnijaws_service_error_long">读取天气数据时出现错误</string>
+  <string name="omnijaws_service_disabled">服务已禁用</string>
+  <string name="omnijaws_detail_header">天气</string>
+  <string name="omnijaws_label_default">天气</string>
+  <string name="omnijaws_current_text">现在</string>
+  <string name="omnijaws_package_not_available">OmniJaws无法使用</string>
+  <string name="omnijaws_service_last_update">最后更新</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">PiP</string>
+  <string name="quick_settings_pip_tile_app_na">应用程序不支持PiP</string>
+  <string name="quick_settings_screenshot_label">屏幕截图</string>
+  <string name="quick_settings_caffeine_label">Caffeine</string>
+  <string name="accessibility_quick_settings_caffeine_off">Caffeine关闭</string>
+  <string name="accessibility_quick_settings_caffeine_on">Caffeine开启</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">位置信息：低耗电量。</string>
+  <string name="accessibility_quick_settings_location_gps_only">位置信息：仅限设备。</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">位置信息：高精确度。</string>
 </resources>

@@ -21,10 +21,13 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Reiniciar bootloader</string>
+  <string name="reboot_to_bootloader_message">Reiniciar para bootloader\u2026</string>
   <!-- advanced reboot to recovery. -->
   <string name="reboot_to_recovery_title">Reiniciar recovery</string>
+  <string name="reboot_to_recovery_message">Reiniciar para recovery\u2026</string>
   <!-- advanced reboot system -->
   <string name="reboot_system_title">Reiniciar o sistema</string>
+  <string name="reboot_system_message">A reiniciar sistema\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Imitar a assinatura dos pacotes</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

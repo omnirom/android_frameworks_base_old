@@ -20,9 +20,19 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">Újraindítás: bootloader</string>
+  <string name="reboot_to_bootloader_message">Újraindítás bootloaderbe\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">Újraindítás: recovery</string>
+  <string name="reboot_to_recovery_message">Újraindítás recoverybe\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">Rendszer újraindítása</string>
+  <string name="reboot_system_message">Rendszer újraindítása\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Csomag hamisított aláírása</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Lehetővé teszi az alkalmazás számára, hogy magát másik alkalmazásnak tettese. A rosszindulatú alkalmazások ezt a személyes adatokhoz való hozzáférésre használhatják. Ezt az engedélyt csak óvatosan adja meg!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">A képernyő rögzítésének feloldásához, érintse meg és tartsa nyomva a Vissza gombot.</string>
+  <string name="app_unpin_message">Rögzítés visszavonva</string>
 </resources>
