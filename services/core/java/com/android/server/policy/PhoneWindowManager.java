@@ -6424,7 +6424,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     result &= ~ACTION_PASS_TO_USER;
                     return result;
                 }
-                if (!interactive && mDeviceKeyHandler.isCameraLaunchEvent(event)) {
+                if (mDeviceKeyHandler.isCameraLaunchEvent(event)) {
                     if (DEBUG_INPUT) {
                         Slog.i(TAG, "isCameraLaunchEvent from DeviceKeyHandler");
                     }
@@ -6436,7 +6436,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     result &= ~ACTION_PASS_TO_USER;
                     return result;
                 }
-                if (!interactive && mDeviceKeyHandler.isWakeEvent(event)) {
+                if (mDeviceKeyHandler.isWakeEvent(event)) {
                     if (DEBUG_INPUT) {
                         Slog.i(TAG, "isWakeEvent from DeviceKeyHandler");
                     }
@@ -6445,7 +6445,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return result;
                 }
                 final Intent eventLaunchActivity = mDeviceKeyHandler.isActivityLaunchEvent(event);
-                if (!interactive && eventLaunchActivity != null) {
+                if (eventLaunchActivity != null) {
                     if (DEBUG_INPUT) {
                         Slog.i(TAG, "isActivityLaunchEvent from DeviceKeyHandler " + eventLaunchActivity);
                     }
