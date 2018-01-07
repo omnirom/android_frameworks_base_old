@@ -19,13 +19,75 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">Újraindítás</string>
+  <string name="global_action_reboot_more">Újraindítás\u2026</string>
+  <string name="global_action_reboot_sub">Rendszer</string>
+  <string name="global_action_reboot_recovery">Recovery</string>
+  <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_dismissable_dialog_text">Speciális újraindítás letiltva.\nSzeretné újraindítani\u003f</string>
+  <string name="global_action_dnaa">Ne jelenjen meg újra</string>
+  <string name="global_action_settings">Beállitások</string>
+  <string name="qs_menu_item_columns">Oszlopok</string>
+  <string name="qs_menu_item_columns_landscape">Oszlopok (fekvő)</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Visszaállítás</string>
+  <string name="qs_menu_item_titles">Címkék megjelenítése</string>
+  <string name="qs_menu_item_rows">Sorok</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="qs_menu_item_scroll">Gyorsbeállítások sáv görgetése</string>
+  <string name="tuner_quick_settings">Gyorsbeállítások</string>
+  <string name="tuner_show_brightness_mode">Fényerő üzemmódok közötti váltás megjelenítése</string>
+  <string name="tuner_show_brightness_new">Fényerő csúszka megjelenítése</string>
+  <string name="lockscreen_default">Alapértelmezett</string>
+  <string name="lockscreen_hidden">Nincs</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
+  <string name="custom_hint">Csúsztasson az ikonról az elindításához</string>
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Képernyő felvétel folyamatban</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Képernyő felvétel</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Állj</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Mutató megjelenítése</string>
+  <string name="screenrecord_notif_pointer_off">Mutató elrejtése</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Képernyő felvétel nem lehetséges</string>
+  <string name="notification_channel_screenrecord">Képernyő felvételek</string>
+  <string name="quick_settings_network_adb_enabled_label">Bekapcsolva</string>
+  <string name="quick_settings_network_adb_disabled_label">Kikapcsolva</string>
+  <string name="quick_settings_network_adb_label">ADB hálózaton keresztül</string>
+  <string name="quick_settings_network_adb_toast">USB hibakeresés nincs engedélyezve</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Ez a rögzítés feloldásáig a nézetben tartja, Feloldáshoz nyomja meg és tartsa nyomva a Vissza gombot.</string>
+  <string name="omnijaws_service_error">Hiba</string>
+  <string name="omnijaws_service_unkown">Nincs időjárási adat</string>
+  <string name="omnijaws_service_error_long">Hiba az időjárási adatok betöltésekor</string>
+  <string name="omnijaws_service_disabled">Szolgáltatás le van tiltva</string>
+  <string name="omnijaws_detail_header">Időjárás</string>
+  <string name="omnijaws_label_default">Időjárás</string>
+  <string name="omnijaws_current_text">Most</string>
+  <string name="omnijaws_package_not_available">OmniJaws nem elérhető</string>
+  <string name="omnijaws_service_last_update">Utolsó frissítés:</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">PiP</string>
+  <string name="quick_settings_pip_tile_app_na">Az alkalmazás nem támogatja a PiP funkciót</string>
+  <string name="quick_settings_screenshot_label">Képernyőkép</string>
+  <string name="quick_settings_caffeine_label">Caffeine</string>
+  <string name="accessibility_quick_settings_caffeine_off">Caffeine ki</string>
+  <string name="accessibility_quick_settings_caffeine_on">Caffeine be</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Helyzetmeghatározás: energiatakarékos mód.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Helyzetmeghatározás: csak GPS mód.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Helyzetmeghatározás: nagy pontosságú mód.</string>
 </resources>

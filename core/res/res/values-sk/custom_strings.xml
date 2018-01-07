@@ -20,9 +20,19 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">Reštart do Bootloadera</string>
+  <string name="reboot_to_bootloader_message">Reštartovanie do bootloadera\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">Reštart do Recovery</string>
+  <string name="reboot_to_recovery_message">Reštartovanie do recovery\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">Reštart Systému</string>
+  <string name="reboot_system_message">Reštartovanie systému\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Sfalšovanie podpisu balíka</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Umožňuje aplikácií predstierať, že je iná app. Škodlivé aplikácie môžu byť schopné toto použiť pre prístup k súkromným dátam aplikácie. Udeliť toto oprávnenie len s opatrnosťou!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">Pokiaľ chcete odobrať túto obrazovku, stlačte a podržte tlačidlo Späť.</string>
+  <string name="app_unpin_message">Aplikácia odopnutá</string>
 </resources>

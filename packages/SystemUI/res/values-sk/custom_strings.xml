@@ -19,13 +19,75 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">Reštartovať</string>
+  <string name="global_action_reboot_more">Reštart\u2026</string>
+  <string name="global_action_reboot_sub">Systém</string>
+  <string name="global_action_reboot_recovery">Recovery</string>
+  <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_dismissable_dialog_text">Pokročilé reštartovanie je zakázané.\nChcete vykonať reštart\u003f</string>
+  <string name="global_action_dnaa">Nezobrazovať znovu</string>
+  <string name="global_action_settings">Nastavenia</string>
+  <string name="qs_menu_item_columns">Stĺpce</string>
+  <string name="qs_menu_item_columns_landscape">Stĺpce na šírku</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Resetovať</string>
+  <string name="qs_menu_item_titles">Zobraziť názvy</string>
+  <string name="qs_menu_item_rows">Riadky</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="qs_menu_item_scroll">Posuvník rýchleho menu</string>
+  <string name="tuner_quick_settings">Rýchle nastavenia</string>
+  <string name="tuner_show_brightness_mode">Zobraziť prepínač režimu jasu</string>
+  <string name="tuner_show_brightness_new">Zobraziť posuvník jasu</string>
+  <string name="lockscreen_default">Predvolené</string>
+  <string name="lockscreen_hidden">Nič</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
+  <string name="custom_hint">Potiahnite prstom smerom od ikony na spustenie</string>
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Obrazovka sa nahráva</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Nahrávanie obrazovky</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Zastaviť</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Zobraziť ukazovateľ</string>
+  <string name="screenrecord_notif_pointer_off">Skryť ukazovateľ</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Nemožno nahrávať obrazovku</string>
+  <string name="notification_channel_screenrecord">Záznamy obrazovky</string>
+  <string name="quick_settings_network_adb_enabled_label">Zapnuté</string>
+  <string name="quick_settings_network_adb_disabled_label">Vypnuté</string>
+  <string name="quick_settings_network_adb_label">ADB cez sieť</string>
+  <string name="quick_settings_network_adb_toast">USB ladenie nie je povolené</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Toto udržuje obrazovku v pripnutú popredí, pokým ju neodopnete stlačením a podržaním tlačídla Späť.</string>
+  <string name="omnijaws_service_error">Chyba</string>
+  <string name="omnijaws_service_unkown">Žiadne údaje o počasí</string>
+  <string name="omnijaws_service_error_long">Chyba pri načítavaní údajov o počasí</string>
+  <string name="omnijaws_service_disabled">Služba je vypnutá</string>
+  <string name="omnijaws_detail_header">Počasie</string>
+  <string name="omnijaws_label_default">Počasie</string>
+  <string name="omnijaws_current_text">Teraz</string>
+  <string name="omnijaws_package_not_available">OmniJaws nie je dostupný</string>
+  <string name="omnijaws_service_last_update">Posledná aktualizácia:</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">PiP</string>
+  <string name="quick_settings_pip_tile_app_na">Aplikácia nepodporuje PiP</string>
+  <string name="quick_settings_screenshot_label">Snímka obrazovky</string>
+  <string name="quick_settings_caffeine_label">Kofeín</string>
+  <string name="accessibility_quick_settings_caffeine_off">Kofeín vyp.</string>
+  <string name="accessibility_quick_settings_caffeine_on">Kofeín zap.</string>
+  <string name="status_bar_vpn">Sieť VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Hlásenie umiestnenia: režim úspory batérie.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Hlásenie umiestnenia: režim senzorov zariadenia.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Hlásenie umiestnenie: režim vysokej presnosti.</string>
 </resources>

@@ -85,5 +85,9 @@
   <string name="quick_settings_caffeine_label">Cafeína</string>
   <string name="accessibility_quick_settings_caffeine_off">Cafeína desligado</string>
   <string name="accessibility_quick_settings_caffeine_on">Cafeína Ligada</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Relatório de localização: modo de poupança de bateria.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Relatório de localização: apenas modo de sensores.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Relatório de localização: modo de alta precisão.</string>
 </resources>

@@ -28,7 +28,7 @@
   <string name="global_action_dnaa">Ära enam näita</string>
   <string name="global_action_settings">Seaded</string>
   <string name="qs_menu_item_columns">Veerud</string>
-  <string name="qs_menu_item_columns_landscape">Veerud horisontaalpaigutuses</string>
+  <string name="qs_menu_item_columns_landscape">Horisontaalsed veerud</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>

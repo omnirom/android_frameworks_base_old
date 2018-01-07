@@ -20,9 +20,19 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">重启到bootloader</string>
+  <string name="reboot_to_bootloader_message">重启到bootloader\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">重启到恢复模式</string>
+  <string name="reboot_to_recovery_message">重启到恢复模式\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">重新启动</string>
+  <string name="reboot_system_message">正在重启\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">伪装软件包签名</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">允许应用程序假装成一个不同的程序。恶意程序可能利用此特性来访问私有程序数据。请一定谨慎授予此权限！!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">按住并拖动以解除锁定。</string>
+  <string name="app_unpin_message">应用程序取消固定</string>
 </resources>

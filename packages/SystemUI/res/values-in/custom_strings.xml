@@ -85,5 +85,9 @@
   <string name="quick_settings_caffeine_label">Kafein</string>
   <string name="accessibility_quick_settings_caffeine_off">Kafein mati</string>
   <string name="accessibility_quick_settings_caffeine_on">Kafein hidup</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Pelaporan lokasi: mode hemat baterai.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Pelaporan lokasi: mode sensor saja.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Pelaporan lokasi: mode akurasi tinggi.</string>
 </resources>
