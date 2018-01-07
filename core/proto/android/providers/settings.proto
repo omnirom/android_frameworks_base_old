@@ -578,6 +578,7 @@ message SystemSettingsProto {
     SettingProto lock_to_app_enabled = 64;
     SettingProto egg_mode = 65;
     SettingProto when_to_make_wifi_calls = 66;
+    SettingProto disable_proximity_sensor = 67;
 }
 
 message SettingProto {

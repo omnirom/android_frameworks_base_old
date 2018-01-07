@@ -3623,6 +3623,18 @@ public final class Settings {
         public static final Validator DTMF_TONE_WHEN_DIALING_VALIDATOR = sBooleanValidator;
 
         /**
+         * If this value is set, the dialer app will act as there is no proximity sensor
+         * on the device. This will allow user to not auto shutdown/blackify the screen
+         * while the proximity sensor is broken.
+         *     0 = proximity sensors act as usual (if avaiable)
+         *     1 = app dialer act as there is no proximity sensor avaiable
+         */
+        public static final String DISABLED_PROXIMITY_SENSOR = "disable_proximity_sensor";
+
+        /** @hide */
+        public static final Validator DISABLED_PROXIMITY_SENSOR_VALIDATOR = sBooleanValidator;
+
+        /**
          * CDMA only settings
          * DTMF tone type played by the dialer when dialing.
          *                 0 = Normal
@@ -4423,6 +4435,7 @@ public final class Settings {
             PUBLIC_SETTINGS.add(HAPTIC_FEEDBACK_ENABLED);
             PUBLIC_SETTINGS.add(SHOW_WEB_SUGGESTIONS);
             PUBLIC_SETTINGS.add(VIBRATE_WHEN_RINGING);
+            PUBLIC_SETTINGS.add(DISABLED_PROXIMITY_SENSOR);
         }
 
         /**
@@ -4576,6 +4589,7 @@ public final class Settings {
             VALIDATORS.put(HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
                     HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY_VALIDATOR);
             VALIDATORS.put(VIBRATE_WHEN_RINGING, VIBRATE_WHEN_RINGING_VALIDATOR);
+            VALIDATORS.put(DISABLED_PROXIMITY_SENSOR, DISABLED_PROXIMITY_SENSOR_VALIDATOR);
             VALIDATORS.put(DTMF_TONE_TYPE_WHEN_DIALING, DTMF_TONE_TYPE_WHEN_DIALING_VALIDATOR);
             VALIDATORS.put(HEARING_AID, HEARING_AID_VALIDATOR);
             VALIDATORS.put(TTY_MODE, TTY_MODE_VALIDATOR);
