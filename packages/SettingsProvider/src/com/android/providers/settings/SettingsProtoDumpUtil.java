@@ -1585,6 +1585,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.VIBRATE_WHEN_RINGING,
                 SystemSettingsProto.VIBRATE_WHEN_RINGING);
+		dumpSetting(s, p,
+				Settings.System.DISABLED_PROXIMIT_SENSOR,
+				SystemSettingsProto.DISABLED_PROXIMIT_SENSOR);
         dumpSetting(s, p,
                 Settings.System.DTMF_TONE_WHEN_DIALING,
                 SystemSettingsProto.DTMF_TONE_WHEN_DIALING);
