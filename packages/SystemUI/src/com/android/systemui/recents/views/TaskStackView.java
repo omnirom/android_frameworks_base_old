@@ -1536,9 +1536,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Update the new front most task's action button
         if (mScreenPinningEnabled && newFrontMostTask != null) {
             TaskView frontTv = getChildViewForTask(newFrontMostTask);
-            if (frontTv != null) {
-                frontTv.showActionButton(true /* fadeIn */, DEFAULT_SYNC_STACK_DURATION);
-            }
+            //if (frontTv != null) {
+            //    frontTv.showActionButton(true /* fadeIn */, DEFAULT_SYNC_STACK_DURATION);
+            //}
         }
 
         // If there are no remaining tasks, then just close recents
@@ -1616,9 +1616,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         tv.resetViewProperties();
         tv.setFocusedState(false, false /* requestViewFocus */);
         tv.setClipViewInStack(false);
-        if (mScreenPinningEnabled) {
-            tv.hideActionButton(false /* fadeOut */, 0 /* duration */, false /* scaleDown */, null);
-        }
+        //if (mScreenPinningEnabled) {
+        //    tv.hideActionButton(false /* fadeOut */, 0 /* duration */, false /* scaleDown */, null);
+        //}
 
         // Detach the view from the hierarchy
         detachViewFromParent(tv);
@@ -1672,10 +1672,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Restore the action button visibility if it is the front most task view
-        if (mScreenPinningEnabled && tv.getTask() ==
-                mStack.getStackFrontMostTask(false /* includeFreeform */)) {
-            tv.showActionButton(false /* fadeIn */, 0 /* fadeInDuration */);
-        }
+        //if (mScreenPinningEnabled && tv.getTask() ==
+        //        mStack.getStackFrontMostTask(false /* includeFreeform */)) {
+        //    tv.showActionButton(false /* fadeIn */, 0 /* fadeInDuration */);
+        //}
     }
 
     @Override
