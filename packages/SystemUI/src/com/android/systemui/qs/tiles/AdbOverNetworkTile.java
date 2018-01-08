@@ -116,8 +116,8 @@ public class AdbOverNetworkTile extends QSTileImpl<BooleanState> {
     }
 
     private boolean isAdbNetworkEnabled() {
-        return Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ADB_PORT, 0) > 0;
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ADB_PORT, 0, UserHandle.USER_CURRENT) > 0;
     }
 
     private ContentObserver mObserver = new ContentObserver(mHandler) {
