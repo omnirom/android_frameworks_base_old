@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0314f71d_64413eb0",
+        "filename": "packages/SettingsProvider/src/com/android/providers/settings/SettingsProtoDumpUtil.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1590,
+      "author": {
+        "id": 1001711
+      },
+      "writtenOn": "2018-01-08T06:19:16Z",
+      "side": 1,
+      "message": "Breaks the build: \nERROR: /var/jenkins_home/workspace/omni-8.1/frameworks/base/packages/SettingsProvider/src/com/android/providers/settings/SettingsProtoDumpUtil.java:1590.37: DISABLED_PROXIMITY_SENSOR cannot be resolved or is not a field",
+      "revId": "e7d91fa4e6c4eb8f351703b61e0c64ff65aeb6aa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
