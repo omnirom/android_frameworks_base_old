@@ -3023,7 +3023,10 @@ public class AudioService extends IAudioService.Stub
 
         // Only enable calls from system components
         if (Binder.getCallingUid() >= FIRST_APPLICATION_UID) {
-            mForcedUseForCommExt = on ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE;
+            if (on)
+                mForcedUseForCommExt = AudioSystem.FORCE_BT_SCO;
+            else if (mForcedUseForCommExt == AudioSystem.FORCE_BT_SCO)
+                mForcedUseForCommExt = AudioSystem.FORCE_NONE;
             return;
         }
 
