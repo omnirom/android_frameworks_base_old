@@ -96,4 +96,6 @@
     <bool name="config_notificationTinting_override">false</bool>
 
     <string name="def_wireless_charging_started_sound" translatable="false">/system/media/audio/ui/WirelessChargingStarted.ogg</string>
+
+    <integer name="config_flashlightProximityTimeout">300</integer>
 </resources>
