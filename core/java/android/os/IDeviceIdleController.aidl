@@ -42,7 +42,4 @@ interface IDeviceIdleController {
     void unregisterMaintenanceActivityListener(IMaintenanceActivityListener listener);
     int getIdleStateDetailed();
     int getLightIdleStateDetailed();
-    String[] getSystemPowerWhitelistOriginal();
-    void addSystemPowerSaveWhitelistApp(String name);
-    void removeSystemPowerSaveWhitelistApp(String name);
 }
