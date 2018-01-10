@@ -6448,7 +6448,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     result &= ~ACTION_PASS_TO_USER;
                     return result;
                 }
-                if (!interactive && mDeviceKeyHandler.isCameraLaunchEvent(event)) {
+                if (mDeviceKeyHandler.isCameraLaunchEvent(event)) {
                     if (DEBUG_INPUT) {
                         Slog.i(TAG, "isCameraLaunchEvent from DeviceKeyHandler");
                     }
