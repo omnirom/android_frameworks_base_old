@@ -107,4 +107,10 @@
     <string name="accessibility_quick_settings_heads_up_on">Peek notifications allowed.</string>
     <string name="accessibility_quick_settings_heads_up_changed_off">Peek notifications turned off.</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Peek notifications turned on.</string>
+
+    <!-- Screenshot QS tile -->
+    <string name="quick_settings_screenrecord_label">Screenrecord</string>
+    <string name="quick_settings_screenrecord_lq_label">Screenrecord LQ</string>
+    <string name="quick_settings_screenrecord_mq_label">Screenrecord MQ</string>
+    <string name="quick_settings_screenrecord_hq_label">Screenrecord HQ</string>
 </resources>
