@@ -55,10 +55,12 @@
     <string name="custom_hint">Swipe from icon to launch</string>
     <!-- Screenrecord Notification Ticker -->
     <string name="screenrecord_notif_ticker">Screen is being recorded</string>
+    <string name="screenrecord_notif_final_ticker">Screen recorded successfully</string>
     <!-- Screenrecord notification title -->
     <string name="screenrecord_notif_title">Recording screen</string>
     <!-- Screenrecord notification action: Stop -->
     <string name="screenrecord_notif_stop">Stop</string>
+    <string name="screenrecord_notif_completed">Screen recorded successfully</string>
     <!-- Screenrecord notification action: show/hide pointer -->
     <string name="screenrecord_notif_pointer_on">Show pointer</string>
     <string name="screenrecord_notif_pointer_off">Hide pointer</string>
