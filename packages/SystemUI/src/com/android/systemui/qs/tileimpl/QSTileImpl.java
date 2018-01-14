@@ -33,7 +33,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.service.quicksettings.Tile;
 import android.text.format.DateUtils;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -70,7 +69,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     // @NonFinalForTesting
     protected H mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
-    private final ArraySet<Object> mListeners = new ArraySet<>();
+    private final ArrayList<Object> mListeners = new ArrayList<>();
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
