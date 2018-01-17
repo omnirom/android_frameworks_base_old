@@ -442,7 +442,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
                 mFooterText.setText(mFooterTextContent);
             }
             mRootView.setVisibility(mIsVisible ? View.VISIBLE : View.GONE);
-            if (mDivider != null) mDivider.setVisibility(mIsVisible ? View.GONE : View.VISIBLE);
+            //if (mDivider != null) mDivider.setVisibility(mIsVisible ? View.GONE : View.VISIBLE);
         }
     };
 
