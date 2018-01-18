@@ -66,11 +66,11 @@
   <string name="quick_settings_network_adb_enabled_label">Sees</string>
   <string name="quick_settings_network_adb_disabled_label">Keelatud</string>
   <string name="quick_settings_network_adb_label">ADB üle võrgu</string>
-  <string name="quick_settings_network_adb_toast">USB-silumine pole lubatud</string>
+  <string name="quick_settings_network_adb_toast">USB silumine pole lubatud</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">See hoiab seda vaates, kuni eemaldad kinnituse. Selleks vajuta ja hoia tagasinuppu.</string>
   <string name="omnijaws_service_error">Viga</string>
-  <string name="omnijaws_service_unkown">Ilmaandmed puuduvad</string>
+  <string name="omnijaws_service_unkown">Ilmateade puudub</string>
   <string name="omnijaws_service_error_long">Ilmateate laadimisel esines viga</string>
   <string name="omnijaws_service_disabled">Teenus on keelatud</string>
   <string name="omnijaws_detail_header">Ilm</string>
@@ -89,5 +89,5 @@
   <!-- Advance location quick setting tile -->
   <string name="accessibility_quick_settings_location_battery_saving">Asukohateavitus: aku säästmise režiim.</string>
   <string name="accessibility_quick_settings_location_gps_only">Asukohateavitus: ainult sensorite režiim.</string>
-  <string name="accessibility_quick_settings_location_high_accuracy">Asukohateavitust: kõrge täpsusega režiim.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Asukohateavitus: kõrge täpsusega režiim.</string>
 </resources>
