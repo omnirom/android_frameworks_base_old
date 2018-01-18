@@ -37,6 +37,7 @@ public class AmbientDisplayConfiguration {
                 || pulseOnPickupEnabled(user)
                 || pulseOnDoubleTapEnabled(user)
                 || pulseOnLongPressEnabled(user)
+                || pulseOnMedia(user)
                 || alwaysOnEnabled(user);
     }
 
@@ -47,6 +48,12 @@ public class AmbientDisplayConfiguration {
 
     public boolean pulseOnNotificationEnabled(int user) {
         return boolSettingDefaultOn(Settings.Secure.DOZE_ENABLED, user) && pulseOnNotificationAvailable();
+    }
+
+    public boolean pulseOnMedia(int user) {
+        boolean enabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.FORCE_AMBIENT_FOR_MEDIA, 0, user) != 0;
+        return enabled && ambientDisplayAvailable();
     }
 
     public boolean pulseOnNotificationAvailable() {
