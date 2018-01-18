@@ -1760,10 +1760,10 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardBottomArea.setImportantForAccessibility(alpha == 0f
                 ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 : IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-        View ambientIndicationContainer = mStatusBar.getAmbientIndicationContainer();
+        /*View ambientIndicationContainer = mStatusBar.getAmbientIndicationContainer();
         if (ambientIndicationContainer != null) {
             ambientIndicationContainer.setAlpha(alpha);
-        }
+        }*/
     }
 
     private float getNotificationsTopY() {
@@ -2678,6 +2678,10 @@ public class NotificationPanelView extends PanelView implements
 
     public void updateDoubleTapToSleep(boolean doubleTapToSleepEnabled) {
         mDoubleTapToSleepEnabled = doubleTapToSleepEnabled;
+    }
+
+    public void setCleanLayout(int reason) {
+        mKeyguardStatusView.setCleanLayout(reason);
     }
 
     public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
