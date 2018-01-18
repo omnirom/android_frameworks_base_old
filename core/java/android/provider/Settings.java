@@ -4330,6 +4330,12 @@ public final class Settings {
         public static final String INCREASING_RING_RAMP_UP_TIME = "increasing_ring_ramp_up_time";
 
         /**
+         * @hide
+         */
+        public static final String FORCE_SAFE_MEDIA_VOLUME_DISABLED =
+                "force_safe_media_volume_disabled";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -4551,6 +4557,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(INCREASING_RING);
             PRIVATE_SETTINGS.add(INCREASING_RING_START_VOLUME);
             PRIVATE_SETTINGS.add(INCREASING_RING_RAMP_UP_TIME);
+            PRIVATE_SETTINGS.add(FORCE_SAFE_MEDIA_VOLUME_DISABLED);
         }
 
         /**

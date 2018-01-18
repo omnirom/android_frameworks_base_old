@@ -89,6 +89,7 @@ import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.IAudioPolicyCallback;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -888,7 +889,8 @@ public class AudioService extends IAudioService.Stub
                 0,
                 0,
                 TAG,
-                SystemProperties.getBoolean("audio.safemedia.bypass", false) ?
+                (SystemProperties.getBoolean("audio.safemedia.bypass", false) ||
+                        isSafeMediaVolumeDisabled()) ?
                         0 : SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
 
         initA11yMonitoring();
@@ -3736,44 +3738,49 @@ public class AudioService extends IAudioService.Stub
 
                 mSafeUsbMediaVolumeIndex = getSafeUsbMediaVolumeIndex();
 
-                boolean safeMediaVolumeEnabled =
-                        SystemProperties.getBoolean("audio.safemedia.force", false)
-                        || mContext.getResources().getBoolean(
-                                com.android.internal.R.bool.config_safe_media_volume_enabled);
-
-                boolean safeMediaVolumeBypass =
-                        SystemProperties.getBoolean("audio.safemedia.bypass", false);
-
-                // The persisted state is either "disabled" or "active": this is the state applied
-                // next time we boot and cannot be "inactive"
-                int persistedState;
-                if (safeMediaVolumeEnabled && !safeMediaVolumeBypass) {
-                    persistedState = SAFE_MEDIA_VOLUME_ACTIVE;
-                    // The state can already be "inactive" here if the user has forced it before
-                    // the 30 seconds timeout for forced configuration. In this case we don't reset
-                    // it to "active".
-                    if (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_INACTIVE) {
-                        if (mMusicActiveMs == 0) {
-                            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
-                            enforceSafeMediaVolume(caller);
-                        } else {
-                            // We have existing playback time recorded, already confirmed.
-                            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_INACTIVE;
-                        }
-                    }
-                } else {
-                    persistedState = SAFE_MEDIA_VOLUME_DISABLED;
-                    mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
-                }
                 mMcc = mcc;
-                sendMsg(mAudioHandler,
-                        MSG_PERSIST_SAFE_VOLUME_STATE,
-                        SENDMSG_QUEUE,
-                        persistedState,
-                        0,
-                        null,
-                        0);
+
+                doConfigureSaveVolume(caller);
             }
+        }
+    }
+
+    private void doConfigureSaveVolume(String caller) {
+        synchronized (mSafeMediaVolumeState) {
+            boolean safeMediaVolumeEnabled =
+                    SystemProperties.getBoolean("audio.safemedia.force", false)
+                    || mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_safe_media_volume_enabled);
+
+            boolean safeMediaVolumeBypass =
+                    SystemProperties.getBoolean("audio.safemedia.bypass", false) ||
+                    isSafeMediaVolumeDisabled();
+
+            // The persisted state is either "disabled" or "active": this is the state applied
+            // next time we boot and cannot be "inactive"
+            int persistedState;
+            if (safeMediaVolumeEnabled && !safeMediaVolumeBypass) {
+                persistedState = SAFE_MEDIA_VOLUME_ACTIVE;
+                if (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_INACTIVE) {
+                    if (mMusicActiveMs == 0) {
+                        mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
+                        enforceSafeMediaVolume(caller);
+                    } else {
+                        // We have existing playback time recorded, already confirmed.
+                        mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_INACTIVE;
+                    }
+                }
+            } else {
+                persistedState = SAFE_MEDIA_VOLUME_DISABLED;
+                mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
+            }
+            sendMsg(mAudioHandler,
+                    MSG_PERSIST_SAFE_VOLUME_STATE,
+                    SENDMSG_QUEUE,
+                    persistedState,
+                    0,
+                    null,
+                    0);
         }
     }
 
@@ -5248,6 +5255,18 @@ public class AudioService extends IAudioService.Stub
                     Settings.Global.ENCODED_SURROUND_OUTPUT), false, this);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.VOLUME_LINK_NOTIFICATION), false, this);
+            mContentResolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.FORCE_SAFE_MEDIA_VOLUME_DISABLED), false, this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.FORCE_SAFE_MEDIA_VOLUME_DISABLED))) {
+                doConfigureSaveVolume("SettingsObserver");
+                return;
+            }
+            onChange(selfChange);
         }
 
         @Override
@@ -6748,6 +6767,11 @@ public class AudioService extends IAudioService.Stub
     private boolean isLinkNotificationWithVolume() {
         return Settings.System.getIntForUser(mContentResolver, Settings.System.VOLUME_LINK_NOTIFICATION,
                 1, UserHandle.USER_CURRENT) == 1;
+    }
+
+    private boolean isSafeMediaVolumeDisabled() {
+        return Settings.System.getIntForUser(mContentResolver, Settings.System.FORCE_SAFE_MEDIA_VOLUME_DISABLED,
+                0, UserHandle.USER_CURRENT) == 1;
     }
 
     public static class VolumeController {
