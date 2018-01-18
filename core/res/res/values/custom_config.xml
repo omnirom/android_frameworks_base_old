@@ -82,4 +82,5 @@
 
     <bool name="config_dozeAlwaysOnDisplayEnabledDefault">true</bool>
 
+    <bool name="config_canForceDozeNotifications">true</bool>
 </resources>
