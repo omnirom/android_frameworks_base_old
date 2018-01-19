@@ -10740,11 +10740,6 @@ public final class Settings {
         public static final String DEVICE_IDLE_CONSTANTS_USER = "device_idle_constants_user";
 
         /**
-         * @hide
-         */
-        public static final String VOICE_CALL_DEFAULT_CHANGED = "voice_call_default_changed";
-
-        /**
          * Flag to enable use of RefactoredBackupManagerService.
          *
          * @hide
