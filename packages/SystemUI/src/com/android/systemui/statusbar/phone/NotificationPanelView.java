@@ -41,7 +41,6 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -863,11 +862,15 @@ public class NotificationPanelView extends PanelView implements
         if (!mQsExpanded
                 && mDoubleTapToSleepEnabled
                 && event.getY() < mStatusBarHeaderHeight) {
-            mDoubleTapGesture.onTouchEvent(event);
+            if (mDoubleTapGesture.onTouchEvent(event)) {
+                return false;
+            }
         }
         if (mIsLockscreenDoubleTapEnabled
                 && mStatusBarState == StatusBarState.KEYGUARD) {
-            mLockscreenDoubleTapToSleep.onTouchEvent(event);
+            if (mLockscreenDoubleTapToSleep.onTouchEvent(event)) {
+                return false;
+            }
         }
         initDownStates(event);
         if (mListenForHeadsUp && !mHeadsUpTouchHelper.isTrackingHeadsUp()
