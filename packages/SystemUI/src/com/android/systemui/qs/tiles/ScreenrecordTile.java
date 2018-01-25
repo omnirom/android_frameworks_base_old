@@ -40,6 +40,9 @@ public class ScreenrecordTile extends QSTileImpl<BooleanState> {
 
     public ScreenrecordTile(QSHost host) {
         super(host);
+        mMode = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREENRECORD_QUALITY_MODE, SCREEN_RECORD_LOW_QUALITY,
+                UserHandle.USER_CURRENT);
     }
 
     @Override
@@ -70,6 +73,9 @@ public class ScreenrecordTile extends QSTileImpl<BooleanState> {
         } else if (mMode == SCREEN_RECORD_HIGH_QUALITY) {
             mMode = SCREEN_RECORD_LOW_QUALITY;
         }
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREENRECORD_QUALITY_MODE, mMode,
+                UserHandle.USER_CURRENT);
     }
 
     @Override
