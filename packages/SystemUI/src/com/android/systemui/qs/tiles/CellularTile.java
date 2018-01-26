@@ -114,9 +114,14 @@ public class CellularTile extends QSTileImpl<SignalState> {
     protected void handleClick() {
         if (mDataController.isMobileDataEnabled()) {
             if (mKeyguardMonitor.isSecure() && !mKeyguardMonitor.canSkipBouncer()) {
-                mActivityStarter.postQSRunnableDismissingKeyguard(this::showDisableDialog);
+                mActivityStarter.postQSRunnableDismissingKeyguard(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDataController.setMobileDataEnabled(false);
+                    }
+                });
             } else {
-                mUiHandler.post(this::showDisableDialog);
+                mDataController.setMobileDataEnabled(false);
             }
         } else {
             mDataController.setMobileDataEnabled(true);
