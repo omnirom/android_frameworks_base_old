@@ -456,7 +456,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         KeyButtonView keyButtonView = (KeyButtonView) v;
         keyButtonView.sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
-        keyButtonView.sendEvent(KeyEvent.ACTION_UP, 0);
         keyButtonView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
 
         mStatusBar.awakenDreams();
