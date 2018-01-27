@@ -25,6 +25,9 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.SystemProperties;
 import android.service.quicksettings.Tile;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +53,8 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
+import java.util.List;
+
 /** Quick settings tile: Cellular **/
 public class CellularTile extends QSTileImpl<SignalState> {
     private static final ComponentName CELLULAR_SETTING_COMPONENT = new ComponentName(
@@ -71,6 +76,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
     private final CellSignalCallback mSignalCallback = new CellSignalCallback();
     private final ActivityStarter mActivityStarter;
     private final KeyguardMonitor mKeyguardMonitor;
+    private TelephonyManager mTelephonyManager;
 
     public CellularTile(QSHost host) {
         super(host);
@@ -79,6 +85,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mDataController = mController.getMobileDataController();
         mDetailAdapter = new CellularDetailAdapter();
+        mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
     @Override
@@ -173,7 +180,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
         state.isOverlayIconWide = cb.isDataTypeIconWide;
         state.overlayIconId = cb.dataTypeIconId;
 
-        state.label = r.getString(R.string.mobile_data);
+        state.label =  isMobileIms() ? "IMS" : r.getString(R.string.mobile_data);
 
         final String signalContentDesc = cb.enabled && (cb.mobileSignalIconId > 0)
                 ? cb.signalContentDescription
@@ -219,6 +226,23 @@ public class CellularTile extends QSTileImpl<SignalState> {
             return string.substring(0, length - 1);
         }
         return string;
+    }
+
+    private boolean isMobileIms() {
+        List<SubscriptionInfo> subInfos = SubscriptionManager.from(mContext)
+                        .getActiveSubscriptionInfoList();
+        if (subInfos != null) {
+            for (SubscriptionInfo subInfo: subInfos) {
+                int subId = subInfo.getSubscriptionId();
+                if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+                    continue;
+                }
+                if (mTelephonyManager.isImsRegisteredForSubscriber(subId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static final class CallbackInfo {
