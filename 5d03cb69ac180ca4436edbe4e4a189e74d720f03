@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dbba63e9_5d798100",
+        "filename": "services/core/java/com/android/server/notification/NotificationManagerService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 3959,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-01-28T01:54:34Z",
+      "side": 1,
+      "message": "shouldnt there be first a check if mAnnoyingNotificationThreshold is !\u003d0 at all before doing any work - iuf all of this is disabled nothing should happen",
+      "revId": "5d03cb69ac180ca4436edbe4e4a189e74d720f03",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
