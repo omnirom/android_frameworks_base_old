@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7db6ba63_2ce85dee",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 4106,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-01-28T01:15:48Z",
+      "side": 1,
+      "message": "please add MUTE_ANNOYING_NOTIFICATIONS_THRESHOLD to PRIVATE_SETTINGS list below",
+      "revId": "47bf265bf857bbfd91064de9c301c5c632027162",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
