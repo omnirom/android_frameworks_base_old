@@ -73,6 +73,11 @@
             android:key="bluetooth"
             android:title="@string/quick_settings_bluetooth_label" />
 
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="bluetooth_show_conn"
+            android:title="@string/tuner_bluetooth_show_connected_title"
+            android:dependency="bluetooth"/>
+
         <!-- nfc -->
         <!-- tty -->
         <!-- speakerphone -->
@@ -98,6 +103,12 @@
         <com.android.systemui.tuner.StatusBarSwitch
             android:key="mobile"
             android:title="@string/tuner_cellular_title" />
+                
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="hide_disabled_sim"
+            android:title="@string/tuner_hide_disabled_sim"
+            sysui:defValue="false"
+            android:dependency="mobile" />
 
         <com.android.systemui.tuner.StatusBarSwitch
             android:key="roaming"
@@ -127,11 +138,7 @@
             android:title="@string/tuner_time"
             android:summary="%s"
             android:entries="@array/clock_options" />
-        
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="hide_disabled_sim"
-            android:title="@string/tuner_hide_disabled_sim"
-            sysui:defValue="false" />
+
 
     </PreferenceScreen>
 
