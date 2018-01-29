@@ -20,7 +20,10 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">Herstart bootloader</string>
+  <string name="reboot_to_bootloader_message">Opnieuw opstarten naar bootloader\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">Herstarten in recovery</string>
   <!-- advanced reboot system -->
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

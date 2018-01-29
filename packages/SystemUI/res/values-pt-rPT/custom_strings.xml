@@ -53,16 +53,20 @@
   <string name="custom_hint">Deslize do ícone para o lançamento</string>
   <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">O ecrã está a ser gravado</string>
+  <string name="screenrecord_notif_final_ticker">Tela gravada com sucesso</string>
   <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">A gravar ecrã</string>
   <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Parar</string>
+  <string name="screenrecord_notif_completed">Tela gravada com sucesso</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Mostrar o ponteiro</string>
   <string name="screenrecord_notif_pointer_off">Ocultar o ponteiro</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Não é possível gravar o ecrã</string>
   <string name="notification_channel_screenrecord">Gravação de ecrã</string>
+  <string name="screenrecord_hide_hint">Esconder dicas</string>
+  <string name="screenrecord_show_hint">Mostrar dicas</string>
   <string name="quick_settings_network_adb_enabled_label">Ligado</string>
   <string name="quick_settings_network_adb_disabled_label">Desligado</string>
   <string name="quick_settings_network_adb_label">ADB através da rede</string>
@@ -82,6 +86,7 @@
   <string name="quick_settings_pip_label">PiP</string>
   <string name="quick_settings_pip_tile_app_na">App não suporta PiP</string>
   <string name="quick_settings_screenshot_label">Captura de ecrã</string>
+  <string name="quick_settings_region_screenshot_label">Captura Parcial de Ecrã</string>
   <string name="quick_settings_caffeine_label">Cafeína</string>
   <string name="accessibility_quick_settings_caffeine_off">Cafeína desligado</string>
   <string name="accessibility_quick_settings_caffeine_on">Cafeína Ligada</string>
@@ -90,4 +95,15 @@
   <string name="accessibility_quick_settings_location_battery_saving">Relatório de localização: modo de poupança de bateria.</string>
   <string name="accessibility_quick_settings_location_gps_only">Relatório de localização: apenas modo de sensores.</string>
   <string name="accessibility_quick_settings_location_high_accuracy">Relatório de localização: modo de alta precisão.</string>
+  <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Notificações flutuantes</string>
+  <string name="accessibility_quick_settings_heads_up_off">Notificações flutuantes desativadas.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Notificações flutuantes ativadas.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Notificações flutuantes desativadas.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Notificações flutuantes ativadas.</string>
+  <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Gravar ecrã</string>
+  <string name="quick_settings_screenrecord_lq_label">Gravar ecrã baixa qualidade</string>
+  <string name="quick_settings_screenrecord_mq_label">Gravar ecrã média qualidade</string>
+  <string name="quick_settings_screenrecord_hq_label">Gravar ecrã alta qualidade</string>
 </resources>

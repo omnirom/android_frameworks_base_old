@@ -53,16 +53,20 @@
   <string name="custom_hint">Csúsztasson az ikonról az elindításához</string>
   <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Képernyő felvétel folyamatban</string>
+  <string name="screenrecord_notif_final_ticker">Képernyő felvétel sikeres</string>
   <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Képernyő felvétel</string>
   <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Állj</string>
+  <string name="screenrecord_notif_completed">Képernyő felvétel sikeres</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Mutató megjelenítése</string>
   <string name="screenrecord_notif_pointer_off">Mutató elrejtése</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Képernyő felvétel nem lehetséges</string>
   <string name="notification_channel_screenrecord">Képernyő felvételek</string>
+  <string name="screenrecord_hide_hint">Tipp elrejtése</string>
+  <string name="screenrecord_show_hint">Tipp mutatása</string>
   <string name="quick_settings_network_adb_enabled_label">Bekapcsolva</string>
   <string name="quick_settings_network_adb_disabled_label">Kikapcsolva</string>
   <string name="quick_settings_network_adb_label">ADB hálózaton keresztül</string>
@@ -82,6 +86,7 @@
   <string name="quick_settings_pip_label">PiP</string>
   <string name="quick_settings_pip_tile_app_na">Az alkalmazás nem támogatja a PiP funkciót</string>
   <string name="quick_settings_screenshot_label">Képernyőkép</string>
+  <string name="quick_settings_region_screenshot_label">Részleges képernyőmentés</string>
   <string name="quick_settings_caffeine_label">Caffeine</string>
   <string name="accessibility_quick_settings_caffeine_off">Caffeine ki</string>
   <string name="accessibility_quick_settings_caffeine_on">Caffeine be</string>
@@ -90,4 +95,15 @@
   <string name="accessibility_quick_settings_location_battery_saving">Helyzetmeghatározás: energiatakarékos mód.</string>
   <string name="accessibility_quick_settings_location_gps_only">Helyzetmeghatározás: csak GPS mód.</string>
   <string name="accessibility_quick_settings_location_high_accuracy">Helyzetmeghatározás: nagy pontosságú mód.</string>
+  <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Felugró értesítések</string>
+  <string name="accessibility_quick_settings_heads_up_off">Felugró értesítések letiltva.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Felugró értesítések engedélyezve.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Felugró értesítések kikapcsolva.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Felugró értesítések bekapcsolva.</string>
+  <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Képernyő felvétel</string>
+  <string name="quick_settings_screenrecord_lq_label">Képernyő felvétel LQ</string>
+  <string name="quick_settings_screenrecord_mq_label">Képernyő felvétel MQ</string>
+  <string name="quick_settings_screenrecord_hq_label">Képernyő felvétel HQ</string>
 </resources>

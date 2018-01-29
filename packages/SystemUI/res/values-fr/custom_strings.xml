@@ -20,13 +20,15 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="global_action_reboot">Redémarrer</string>
+  <string name="global_action_reboot_more">Redémarrage\u2026</string>
   <string name="global_action_reboot_sub">Système</string>
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
-  <string name="global_action_dismissable_dialog_text">L\'option de redémarrage avancé est désactivé.\nVoulez-vous redémarrer\u003f</string>
+  <string name="global_action_dismissable_dialog_text">L\'option de redémarrage avancée est désactivée.\nVoulez-vous redémarrer\u003f</string>
   <string name="global_action_dnaa">Ne plus afficher</string>
   <string name="global_action_settings">Paramètres</string>
   <string name="qs_menu_item_columns">Colonnes</string>
+  <string name="qs_menu_item_columns_landscape">Colonnes «Mode Paysage »</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
@@ -36,26 +38,72 @@
   <string name="qs_menu_item_columns_nine">9</string>
   <string name="qs_menu_item_reset">Réinitialiser</string>
   <string name="qs_menu_item_titles">Afficher le libellé</string>
+  <string name="qs_menu_item_rows">Lignes</string>
   <string name="qs_menu_item_rows_one">1</string>
   <string name="qs_menu_item_rows_two">2</string>
   <string name="qs_menu_item_rows_three">3</string>
   <string name="qs_menu_item_rows_four">4</string>
-  <string name="tuner_quick_settings">Paramètres rapides</string>
-  <string name="tuner_show_brightness_new">Curseur de luminosité</string>
-  <string name="lockscreen_default">Défaut</string>
+  <string name="qs_menu_item_scroll">Défilement de la barre de raccourcis</string>
+  <string name="tuner_quick_settings">Réglages Rapides</string>
+  <string name="tuner_show_brightness_mode">Montrer le bouton pour changer le mode de luminosité</string>
+  <string name="tuner_show_brightness_new">Afficher le curseur de luminosité</string>
+  <string name="lockscreen_default">Par défaut</string>
   <string name="lockscreen_hidden">Aucun</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
+  <string name="custom_hint">Glissez depuis l\'icône pour lancer</string>
   <!-- Screenrecord Notification Ticker -->
-  <string name="screenrecord_notif_ticker">Capture vidéo en cours</string>
+  <string name="screenrecord_notif_ticker">L\'écran est en cours d\'enregistrement</string>
+  <string name="screenrecord_notif_final_ticker">Écran enregistré avec succès</string>
   <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Enregistrement de l\'écran</string>
   <!-- Screenrecord notification action: Stop -->
-  <string name="screenrecord_notif_stop">Arrêt</string>
+  <string name="screenrecord_notif_stop">Arrêter</string>
+  <string name="screenrecord_notif_completed">Écran enregistré avec succès</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Afficher le pointeur</string>
   <string name="screenrecord_notif_pointer_off">Masquer le pointeur</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Impossible d\'enregistrer l\'écran</string>
+  <string name="notification_channel_screenrecord">Enregistrement d\'écran</string>
+  <string name="screenrecord_hide_hint">Cacher l\'indication</string>
+  <string name="screenrecord_show_hint">Montrer l\'indication</string>
+  <string name="quick_settings_network_adb_enabled_label">Activé</string>
+  <string name="quick_settings_network_adb_disabled_label">Désactivé</string>
+  <string name="quick_settings_network_adb_label">ADB par le réseau</string>
+  <string name="quick_settings_network_adb_toast">Le débogage USB n’est pas activé</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Cela permet de maintenir en vue jusqu\'à ce que vous l\'enleviez. Touchez et maintenez le bouton Retour pour détacher.</string>
+  <string name="omnijaws_service_error">Erreur</string>
+  <string name="omnijaws_service_unkown">Donnée météo indisponible</string>
+  <string name="omnijaws_service_error_long">Erreur lors du chargement des données météo</string>
+  <string name="omnijaws_service_disabled">Le service est désactivé</string>
+  <string name="omnijaws_detail_header">Météo</string>
+  <string name="omnijaws_label_default">Météo</string>
+  <string name="omnijaws_current_text">Maintenant</string>
+  <string name="omnijaws_package_not_available">OmniJaws indisponible</string>
+  <string name="omnijaws_service_last_update">Dernière mise à jour :</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">Picture-in-picture (PiP)</string>
+  <string name="quick_settings_pip_tile_app_na">L\'app ne prend pas en charge le PiP</string>
+  <string name="quick_settings_screenshot_label">Capture d’écran</string>
+  <string name="quick_settings_region_screenshot_label">Capture d’écran partielle</string>
+  <string name="quick_settings_caffeine_label">Caffeine</string>
+  <string name="accessibility_quick_settings_caffeine_off">Caffeine désactivée</string>
+  <string name="accessibility_quick_settings_caffeine_on">Caffeine activée</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Suivi de Localisation: Mode d\'économie d\'énergie.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Suivi de Localisation: Mode appareil uniquement.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Suivi de Localisation: mode haute précision.</string>
+  <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Notifications flottantes</string>
+  <string name="accessibility_quick_settings_heads_up_off">Notifications flottantes désactivées.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Notifications flottantes autorisées.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Notifications flottantes éteintes.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Notifications flottantes allumées.</string>
+  <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Capture vidéo</string>
+  <string name="quick_settings_screenrecord_lq_label">Enregistrement d\'écran basse qualité</string>
+  <string name="quick_settings_screenrecord_mq_label">Enregistrement d\'écran qualité moyenne</string>
+  <string name="quick_settings_screenrecord_hq_label">Enregistrement d\'écran haute qualité</string>
 </resources>

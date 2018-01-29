@@ -86,4 +86,6 @@
   <string name="accessibility_quick_settings_caffeine_off">Cafeína activo</string>
   <string name="accessibility_quick_settings_caffeine_on">Cafeína inactivo</string>
   <!-- Advance location quick setting tile -->
+  <!-- Heads Up QS Tile -->
+  <!-- Screenrecord QS tile -->
 </resources>

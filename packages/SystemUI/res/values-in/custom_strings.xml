@@ -90,4 +90,6 @@
   <string name="accessibility_quick_settings_location_battery_saving">Pelaporan lokasi: mode hemat baterai.</string>
   <string name="accessibility_quick_settings_location_gps_only">Pelaporan lokasi: mode sensor saja.</string>
   <string name="accessibility_quick_settings_location_high_accuracy">Pelaporan lokasi: mode akurasi tinggi.</string>
+  <!-- Heads Up QS Tile -->
+  <!-- Screenrecord QS tile -->
 </resources>

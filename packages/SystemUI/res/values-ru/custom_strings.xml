@@ -28,7 +28,7 @@
   <string name="global_action_dnaa">Больше не показывать</string>
   <string name="global_action_settings">Настройки</string>
   <string name="qs_menu_item_columns">Столбцы</string>
-  <string name="qs_menu_item_columns_landscape">Колонок в альбомном повороте</string>
+  <string name="qs_menu_item_columns_landscape">Столбцов в альбомной ориентации экрана</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
@@ -45,24 +45,28 @@
   <string name="qs_menu_item_rows_four">4</string>
   <string name="qs_menu_item_scroll">Прокрутка плиток</string>
   <string name="tuner_quick_settings">Быстрые настройки</string>
-  <string name="tuner_show_brightness_mode">Показать переключатель режима подсветки</string>
-  <string name="tuner_show_brightness_new">Показать ползунок яркости</string>
+  <string name="tuner_show_brightness_mode">Отображать переключатель режима подсветки</string>
+  <string name="tuner_show_brightness_new">Отображать ползунок яркости</string>
   <string name="lockscreen_default">По умолчанию</string>
   <string name="lockscreen_hidden">Нет</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
   <string name="custom_hint">Свайп от значка, чтобы запустить</string>
   <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Идёт запись экрана</string>
+  <string name="screenrecord_notif_final_ticker">Запись экрана сохранена</string>
   <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Запись экрана</string>
   <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Стоп</string>
+  <string name="screenrecord_notif_completed">Запись экрана сохранена</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Показывать нажатия</string>
   <string name="screenrecord_notif_pointer_off">Скрыть нажатия</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Невозможно записать экран</string>
   <string name="notification_channel_screenrecord">Запись экрана</string>
+  <string name="screenrecord_hide_hint">Скрыть</string>
+  <string name="screenrecord_show_hint">Просмотреть</string>
   <string name="quick_settings_network_adb_enabled_label">Включено</string>
   <string name="quick_settings_network_adb_disabled_label">Выключено</string>
   <string name="quick_settings_network_adb_label">Отладки по сети</string>
@@ -76,18 +80,30 @@
   <string name="omnijaws_detail_header">Погода</string>
   <string name="omnijaws_label_default">Погода</string>
   <string name="omnijaws_current_text">Только что</string>
-  <string name="omnijaws_package_not_available">OmniJaws не доступно</string>
+  <string name="omnijaws_package_not_available">OmniJaws недоступен</string>
   <string name="omnijaws_service_last_update">Последнее обновление:</string>
   <!-- PiP Tile -->
   <string name="quick_settings_pip_label">PiP</string>
   <string name="quick_settings_pip_tile_app_na">Приложение не поддерживает PiP</string>
   <string name="quick_settings_screenshot_label">Снимок экрана</string>
+  <string name="quick_settings_region_screenshot_label">Частичный снимок экрана</string>
   <string name="quick_settings_caffeine_label">Запрет сна</string>
-  <string name="accessibility_quick_settings_caffeine_off">Запрет сна выкл</string>
-  <string name="accessibility_quick_settings_caffeine_on">Запрет сна вкл</string>
+  <string name="accessibility_quick_settings_caffeine_off">Запрет сна выкл.</string>
+  <string name="accessibility_quick_settings_caffeine_on">Запрет сна вкл.</string>
   <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
   <string name="accessibility_quick_settings_location_battery_saving">Отображение местоположения: энергосберегающий режим.</string>
   <string name="accessibility_quick_settings_location_gps_only">Режим местоположения: только датчики.</string>
   <string name="accessibility_quick_settings_location_high_accuracy">Режим местоположения: высокая точность.</string>
+  <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Всплывающие уведомления</string>
+  <string name="accessibility_quick_settings_heads_up_off">Всплывающие уведомления отключены.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Всплывающие уведомления разрешены.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Всплывающие уведомления запрещены.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Всплывающие уведомления разрешены.</string>
+  <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Запись экрана</string>
+  <string name="quick_settings_screenrecord_lq_label">Низкое качество</string>
+  <string name="quick_settings_screenrecord_mq_label">Среднее качество</string>
+  <string name="quick_settings_screenrecord_hq_label">Высокое качество</string>
 </resources>
