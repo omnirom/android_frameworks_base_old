@@ -91,6 +91,8 @@ import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.NotificationChannels;
 
 import java.util.Collection;
@@ -104,9 +106,12 @@ import java.util.Locale;
  */
 public class PhoneStatusBarPolicy implements Callback, Callbacks,
         RotationLockControllerCallback, Listener, LocationChangeCallback,
-        ZenModeController.Callback, DeviceProvisionedListener, KeyguardMonitor.Callback {
+        ZenModeController.Callback, DeviceProvisionedListener, KeyguardMonitor.Callback,
+        Tunable {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    private static final String BLUETOOTH_SHOW_CONN = "bluetooth_show_conn";
 
     public static final int LOCATION_STATUS_ICON_ID = R.drawable.stat_sys_location;
     public static final int NUM_TASKS_FOR_INSTANT_APP_INFO = 5;
@@ -200,6 +205,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
+        Dependency.get(TunerService.class).addTunable(this, BLUETOOTH_SHOW_CONN);
+
         // listen for user / profile change.
         try {
             ActivityManager.getService().registerUserSwitchObserver(mUserSwitchListener, TAG);
@@ -285,6 +292,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mLocationController.removeCallback(this);
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallbacks(this);
         mContext.unregisterReceiver(mIntentReceiver);
+        Dependency.get(TunerService.class).removeTunable(this);
 
         NotificationManager noMan = mContext.getSystemService(NotificationManager.class);
         mCurrentNotifs.forEach(v -> noMan.cancelAsUser(v.first, SystemMessage.NOTE_INSTANT_APPS,
@@ -440,9 +448,10 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         int iconId = R.drawable.stat_sys_data_bluetooth;
         String contentDescription =
                 mContext.getString(R.string.accessibility_quick_settings_bluetooth_on);
-        boolean bluetoothEnabled = false;
+        boolean shouldShowBluetooth = Dependency.get(TunerService.class)
+                             .getValue(BLUETOOTH_SHOW_CONN, 0) != 1;
+        boolean bluetoothVisible = shouldShowBluetooth;
         if (mBluetooth != null) {
-            bluetoothEnabled = mBluetooth.isBluetoothEnabled();
             final Collection<CachedBluetoothDevice> devices = mBluetooth.getDevices();
             if (devices != null) {
                 // get battery level for the first device with battery level support
@@ -459,6 +468,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                             iconId = R.drawable.stat_sys_data_bluetooth_connected;
                         }
                         contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
+                        bluetoothVisible = mBluetooth.isBluetoothEnabled();
                         break;
                     }
                 }
@@ -466,7 +476,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         }
 
         mIconController.setIcon(mSlotBluetooth, iconId, contentDescription);
-        mIconController.setIconVisibility(mSlotBluetooth, bluetoothEnabled);
+        mIconController.setIconVisibility(mSlotBluetooth, bluetoothVisible);
     }
 
     private int getBtLevelIconRes(int batteryLevel) {
@@ -898,4 +908,11 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             mIconController.setIconVisibility(mSlotCast, false);
         }
     };
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (BLUETOOTH_SHOW_CONN.equals(key)) {
+            updateBluetooth();
+        }
+    }
 }
