@@ -139,4 +139,9 @@
     <string name="right">Right</string>
     <string name="navbar_editor_title">Editor</string>
     <string name="navbar_editor_summary">Configure navigaton bar</string>
+
+    <!-- key disable QS Tile -->
+    <string name="quick_settings_key_disable_label">Disable keys</string>
+    <string name="accessibility_quick_settings_key_disable_on">Keys disabled.</string>
+    <string name="accessibility_quick_settings_key_disable_off">Keys allowed.</string>
 </resources>
