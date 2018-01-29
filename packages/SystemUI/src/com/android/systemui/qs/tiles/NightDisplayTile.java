@@ -35,6 +35,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
     private NightDisplayController mController;
     private boolean mIsListening;
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_night_display_on);
 
     public NightDisplayTile(QSHost host) {
         super(host);
@@ -77,9 +78,13 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
     protected void handleUpdateState(BooleanState state, Object arg) {
         final boolean isActivated = mController.isActivated();
         state.value = isActivated;
+        if (state.slash == null) {
+            state.slash = new SlashState();
+        }
+        state.icon = mIcon;
+        state.slash.isSlashed = !state.value;
         state.label = state.contentDescription =
                 mContext.getString(R.string.quick_settings_night_display_label);
-        state.icon = ResourceIcon.get(R.drawable.ic_qs_night_display_on);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
