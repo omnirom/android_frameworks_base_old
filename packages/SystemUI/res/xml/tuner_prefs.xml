@@ -73,6 +73,10 @@
             android:key="bluetooth"
             android:title="@string/quick_settings_bluetooth_label" />
 
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="bluetooth_show_conn"
+            android:title="@string/tuner_bluetooth_show_connected" />
+
         <!-- nfc -->
         <!-- tty -->
         <!-- speakerphone -->
