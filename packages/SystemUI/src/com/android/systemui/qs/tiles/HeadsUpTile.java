@@ -34,6 +34,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 public class HeadsUpTile extends QSTileImpl<BooleanState> {
 
     private final GlobalSetting mSetting;
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_heads_up_on);
 
     public HeadsUpTile(QSHost host) {
         super(host);
@@ -77,15 +78,18 @@ public class HeadsUpTile extends QSTileImpl<BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int value = arg instanceof Integer ? (Integer)arg : mSetting.getValue();
         final boolean headsUp = value != 0;
+        if (state.slash == null) {
+            state.slash = new SlashState();
+        }
+        state.icon = mIcon;
         state.value = headsUp;
+        state.slash.isSlashed = !state.value;
         state.label = mContext.getString(R.string.quick_settings_heads_up_label);
         if (headsUp) {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_heads_up_on);
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_heads_up_on);
             state.state = Tile.STATE_ACTIVE;
         } else {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_heads_up_off);
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_heads_up_off);
             state.state = Tile.STATE_INACTIVE;
