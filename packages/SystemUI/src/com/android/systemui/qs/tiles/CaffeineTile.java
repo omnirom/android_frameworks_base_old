@@ -51,6 +51,7 @@ public class CaffeineTile extends QSTileImpl<BooleanState> {
     public long mLastClickTime = -1;
     private final Receiver mReceiver = new Receiver();
     private boolean mListening;
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_caffeine_on);
 
     public CaffeineTile(QSHost host) {
         super(host);
@@ -173,15 +174,19 @@ public class CaffeineTile extends QSTileImpl<BooleanState> {
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.value = mWakeLock.isHeld();
+        if (state.slash == null) {
+            state.slash = new SlashState();
+        }
+        state.icon = mIcon;
+        state.slash.isSlashed = !state.value;
+
         if (state.value) {
             state.label = formatValueWithRemainingTime();
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_caffeine_on);
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_caffeine_on);
             state.state = Tile.STATE_ACTIVE;
         } else {
             state.label = mContext.getString(R.string.quick_settings_caffeine_label);
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_caffeine_off);
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_caffeine_off);
             state.state = Tile.STATE_INACTIVE;
