@@ -31,4 +31,12 @@
     <color name="omni_text1">@color/black</color>
     <color name="omni_text2">@color/black</color>
     <color name="omni_text3">@color/black</color>
+
+    <!-- Moved here from Settings (Omni) -->
+    <color name="suggestion_condition_background">#f2f2f2</color>
+    <color name="condition_card_background">#f8f8f8</color>
+    <color name="global_wifi_details_icon_color">#8A000000</color>
+
+    <!-- Moved here from SystemUI (Omni) -->
+    <color name="zen_introduction">#ffffffff</color>
 </resources>

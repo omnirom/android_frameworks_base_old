@@ -148,7 +148,7 @@
 
     <color name="instant_apps_color">#ff4d5a64</color>
 
-    <color name="zen_introduction">#ffffffff</color>
+    <color name="zen_introduction">@*android:color/zen_introduction</color>
 
     <color name="smart_reply_button_text">#5F6368</color>
     <color name="smart_reply_button_text_dark_bg">@*android:color/notification_primary_text_color_dark</color>
