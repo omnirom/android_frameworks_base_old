@@ -53,16 +53,20 @@
   <string name="custom_hint">Přejeďte od ikony pro spuštění</string>
   <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Obrazovka se nahrává</string>
+  <string name="screenrecord_notif_final_ticker">Obrazovka byla úspěšně zaznamenána</string>
   <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Nahrávání obrazovky</string>
   <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Stop</string>
+  <string name="screenrecord_notif_completed">Obrazovka byla úspěšně zaznamenána</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Zobrazit ukazatel</string>
   <string name="screenrecord_notif_pointer_off">Skrýt ukazatel</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Nelze nahrávat obrazovku</string>
   <string name="notification_channel_screenrecord">Nahrávání obrazovky</string>
+  <string name="screenrecord_hide_hint">Skrýt nápovědu</string>
+  <string name="screenrecord_show_hint">Zobrazit nápovědu</string>
   <string name="quick_settings_network_adb_enabled_label">Povoleno</string>
   <string name="quick_settings_network_adb_disabled_label">Zakázáno</string>
   <string name="quick_settings_network_adb_label">ADB přes síť</string>
@@ -82,6 +86,7 @@
   <string name="quick_settings_pip_label">PiP</string>
   <string name="quick_settings_pip_tile_app_na">Aplikace nepodporuje PiP</string>
   <string name="quick_settings_screenshot_label">Snímek obrazovky</string>
+  <string name="quick_settings_region_screenshot_label">Částečný snímek obrazovky</string>
   <string name="quick_settings_caffeine_label">Caffeine</string>
   <string name="accessibility_quick_settings_caffeine_off">Caffeine vypnuto</string>
   <string name="accessibility_quick_settings_caffeine_on">Caffeine zapnuto</string>
@@ -90,4 +95,15 @@
   <string name="accessibility_quick_settings_location_battery_saving">Hlášení polohy: úspora baterie.</string>
   <string name="accessibility_quick_settings_location_gps_only">Hlášení polohy: pouze zařízení.</string>
   <string name="accessibility_quick_settings_location_high_accuracy">Hlášení polohy: vysoká přesnost.</string>
+  <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Prohlížení oznámení</string>
+  <string name="accessibility_quick_settings_heads_up_off">Prohlížení oznámení zakázáno.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Prohlížení oznámení povoleno.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Prohlížení oznámení vypnuto.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Prohlížení oznámení zapnuto.</string>
+  <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Nahrávání obrazovky</string>
+  <string name="quick_settings_screenrecord_lq_label">Nahrávání obrazovky LQ</string>
+  <string name="quick_settings_screenrecord_mq_label">Nahrávání obrazovky MQ</string>
+  <string name="quick_settings_screenrecord_hq_label">Nahrávání obrazovky HQ</string>
 </resources>

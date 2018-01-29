@@ -21,12 +21,18 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Redémarrer en mode Bootloader</string>
+  <string name="reboot_to_bootloader_message">Redémarrage vers le bootloader\u2026</string>
   <!-- advanced reboot to recovery. -->
   <string name="reboot_to_recovery_title">Redémarrer en mode Recovery</string>
+  <string name="reboot_to_recovery_message">Redémarrage en mode recovery\u2026</string>
   <!-- advanced reboot system -->
   <string name="reboot_system_title">Redémarrer le système</string>
+  <string name="reboot_system_message">Redémarrage du système\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Imiter la signature des paquets</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permdesc_fakePackageSignature">Permet à une application de se faire passer pour une autre. Les applications malveillantes peuvent utiliser ceci et avoir accès aux données privées des applications. Accorder seulement cette autorisation avec précaution !</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">Pour déverrouiller l\'écran, touchez et maintenez la touche retour.</string>
+  <string name="app_unpin_message">Application des-épinglée</string>
 </resources>

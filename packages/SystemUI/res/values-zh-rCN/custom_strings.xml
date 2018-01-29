@@ -90,4 +90,6 @@
   <string name="accessibility_quick_settings_location_battery_saving">位置信息：低耗电量。</string>
   <string name="accessibility_quick_settings_location_gps_only">位置信息：仅限设备。</string>
   <string name="accessibility_quick_settings_location_high_accuracy">位置信息：高精确度。</string>
+  <!-- Heads Up QS Tile -->
+  <!-- Screenrecord QS tile -->
 </resources>

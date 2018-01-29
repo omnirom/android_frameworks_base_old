@@ -28,7 +28,7 @@
   <string name="global_action_dnaa">Tekrar gösterme</string>
   <string name="global_action_settings">Ayarlar</string>
   <string name="qs_menu_item_columns">Sütunlar</string>
-  <string name="qs_menu_item_columns_landscape">Yatay sütunlar</string>
+  <string name="qs_menu_item_columns_landscape">Ufki sütunlar</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
@@ -53,16 +53,20 @@
   <string name="custom_hint">Başlatmak için simgeden kaydırın</string>
   <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Ekran kaydediliyor</string>
+  <string name="screenrecord_notif_final_ticker">Ekran başarıyla kaydedildi</string>
   <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Ekranı kaydetme</string>
   <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Dur</string>
+  <string name="screenrecord_notif_completed">Ekran başarıyla kaydedildi</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">İşaretçiyi göster</string>
-  <string name="screenrecord_notif_pointer_off">İşaretçiyi gizle</string>
+  <string name="screenrecord_notif_pointer_off">İşaretçiyi sakla</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Ekran kaydedilemiyor</string>
   <string name="notification_channel_screenrecord">Ekran kayıtları</string>
+  <string name="screenrecord_hide_hint">İpucunu sakla</string>
+  <string name="screenrecord_show_hint">İpucunu göster</string>
   <string name="quick_settings_network_adb_enabled_label">Etkin</string>
   <string name="quick_settings_network_adb_disabled_label">Devre dışı</string>
   <string name="quick_settings_network_adb_label">Ağ üzerinden ADB</string>
@@ -82,6 +86,7 @@
   <string name="quick_settings_pip_label">Resim içinde resim</string>
   <string name="quick_settings_pip_tile_app_na">Uygulama resim içinde resim modunu desteklemiyor</string>
   <string name="quick_settings_screenshot_label">Ekran resmi</string>
+  <string name="quick_settings_region_screenshot_label">Kısmî ekran görüntüsü</string>
   <string name="quick_settings_caffeine_label">Caffeine</string>
   <string name="accessibility_quick_settings_caffeine_off">Caffeine kapalı</string>
   <string name="accessibility_quick_settings_caffeine_on">Caffeine açık</string>
@@ -90,4 +95,15 @@
   <string name="accessibility_quick_settings_location_battery_saving">Konum bildirimi: pil tasarrufu modu.</string>
   <string name="accessibility_quick_settings_location_gps_only">Konum bildirimi: sadece sensörler modu.</string>
   <string name="accessibility_quick_settings_location_high_accuracy">Konum bildirimi: yüksek hassâsiyyet modu.</string>
+  <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Ekran üstü bildirimleri</string>
+  <string name="accessibility_quick_settings_heads_up_off">Ekran üstü bildirimleri devre dışı bırakıldı.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Ekran üstü bildirimlerine izin verildi.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Ekran üstü bildirimleri kapatıldı.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Ekran üstü bildirimleri açıldı.</string>
+  <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Ekran kaydı</string>
+  <string name="quick_settings_screenrecord_lq_label">Düşük kalitede ekran kaydı</string>
+  <string name="quick_settings_screenrecord_mq_label">Vasat kalitede ekran kaydı</string>
+  <string name="quick_settings_screenrecord_hq_label">Yüksek kalitede ekran kaydı</string>
 </resources>

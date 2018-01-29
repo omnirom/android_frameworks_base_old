@@ -52,17 +52,21 @@
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
   <string name="custom_hint">Käivitamiseks viipa ikoonilt</string>
   <!-- Screenrecord Notification Ticker -->
-  <string name="screenrecord_notif_ticker">Ekraani hetkel lindistatakse</string>
+  <string name="screenrecord_notif_ticker">Kuva hetkel lindistatakse</string>
+  <string name="screenrecord_notif_final_ticker">Kuva edukalt lindistatud</string>
   <!-- Screenrecord notification title -->
-  <string name="screenrecord_notif_title">Lindistan ekraani</string>
+  <string name="screenrecord_notif_title">Lindistan kuva</string>
   <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Peata</string>
+  <string name="screenrecord_notif_completed">Kuva edukalt lindistatud</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Kuva kursorit</string>
   <string name="screenrecord_notif_pointer_off">Peida kursor</string>
   <!-- Screen record notification error title -->
-  <string name="screenrecord_notif_error">Ekraani ei saa lindistada</string>
+  <string name="screenrecord_notif_error">Kuva ei saa lindistada</string>
   <string name="notification_channel_screenrecord">Kuva lindistused</string>
+  <string name="screenrecord_hide_hint">Peida vihje</string>
+  <string name="screenrecord_show_hint">Kuva vihjet</string>
   <string name="quick_settings_network_adb_enabled_label">Sees</string>
   <string name="quick_settings_network_adb_disabled_label">Keelatud</string>
   <string name="quick_settings_network_adb_label">ADB üle võrgu</string>
@@ -82,6 +86,7 @@
   <string name="quick_settings_pip_label">Pilt pildis</string>
   <string name="quick_settings_pip_tile_app_na">Rakendus ei toeta pilt pildis režiimi</string>
   <string name="quick_settings_screenshot_label">Kuvatõmmis</string>
+  <string name="quick_settings_region_screenshot_label">Osaline kuvatõmmis</string>
   <string name="quick_settings_caffeine_label">Kofeiin</string>
   <string name="accessibility_quick_settings_caffeine_off">Kofeiin väljas</string>
   <string name="accessibility_quick_settings_caffeine_on">Kofeiin sees</string>
@@ -90,4 +95,15 @@
   <string name="accessibility_quick_settings_location_battery_saving">Asukohateavitus: aku säästmise režiim.</string>
   <string name="accessibility_quick_settings_location_gps_only">Asukohateavitus: ainult sensorite režiim.</string>
   <string name="accessibility_quick_settings_location_high_accuracy">Asukohateavitus: kõrge täpsusega režiim.</string>
+  <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Piiluvad teated</string>
+  <string name="accessibility_quick_settings_heads_up_off">Piiluvad teated keelatud.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Piiluvad teated lubatud.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Piiluvad teated välja lülitatud.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Piiluvad teated sisse lülitatud.</string>
+  <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Kuva lindistamine</string>
+  <string name="quick_settings_screenrecord_lq_label">Kuva lindistamine madala kv.</string>
+  <string name="quick_settings_screenrecord_mq_label">Kuva lindistamine keskmise kv.</string>
+  <string name="quick_settings_screenrecord_hq_label">Kuva lindistamine kõrge kv.</string>
 </resources>

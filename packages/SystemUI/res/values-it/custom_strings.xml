@@ -53,16 +53,20 @@
   <string name="custom_hint">Scorri dall\'icona per avviare</string>
   <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Registrazione dello schermo in corso</string>
+  <string name="screenrecord_notif_final_ticker">Schermo registrato con successo</string>
   <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Registrazione dello schermo</string>
   <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Stop</string>
+  <string name="screenrecord_notif_completed">Schermo registrato con successo</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Mostra puntatore</string>
   <string name="screenrecord_notif_pointer_off">Nascondi puntatore</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Impossibile registrare lo schermo</string>
   <string name="notification_channel_screenrecord">Registrazioni dello schermo</string>
+  <string name="screenrecord_hide_hint">Nascondi suggerimento</string>
+  <string name="screenrecord_show_hint">Mostra suggerimento</string>
   <string name="quick_settings_network_adb_enabled_label">Abilitato</string>
   <string name="quick_settings_network_adb_disabled_label">Disabilitato</string>
   <string name="quick_settings_network_adb_label">ADB attraverso la rete</string>
@@ -82,6 +86,7 @@
   <string name="quick_settings_pip_label">PiP</string>
   <string name="quick_settings_pip_tile_app_na">L\'app non supporta il PiP</string>
   <string name="quick_settings_screenshot_label">Screenshot</string>
+  <string name="quick_settings_region_screenshot_label">Screenshot parziale</string>
   <string name="quick_settings_caffeine_label">Caffeina</string>
   <string name="accessibility_quick_settings_caffeine_off">Caffeina off</string>
   <string name="accessibility_quick_settings_caffeine_on">Caffeina on</string>
@@ -90,4 +95,15 @@
   <string name="accessibility_quick_settings_location_battery_saving">Geolocalizzazione: modalità risparmio energetico.</string>
   <string name="accessibility_quick_settings_location_gps_only">Geolocalizzazione: modalità solo Gps.</string>
   <string name="accessibility_quick_settings_location_high_accuracy">Geolocalizzazione: modalità alta precisione.</string>
+  <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Notifiche peek</string>
+  <string name="accessibility_quick_settings_heads_up_off">Le notifiche peek sono disattivate.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Notifiche peek permesse.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Notifiche peek disattivate.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Notifiche peek attivate.</string>
+  <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Registra schermo</string>
+  <string name="quick_settings_screenrecord_lq_label">Registra schermo LQ</string>
+  <string name="quick_settings_screenrecord_mq_label">Registra schermo MQ</string>
+  <string name="quick_settings_screenrecord_hq_label">Registra schermo HQ</string>
 </resources>
