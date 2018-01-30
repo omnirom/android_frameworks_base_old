@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "366b8642_e6f81988",
+        "filename": "packages/SettingsLib/res/values/strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-01-30T12:32:58Z",
+      "side": 1,
+      "message": "must be in custom_strings else no translations",
+      "revId": "8cd73dc951efad12ed00a5a7eb89d5fb60ab07a2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "050632ed_c8f7712a",
+        "filename": "wifi/java/android/net/wifi/WifiManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-01-30T12:32:58Z",
+      "side": 1,
+      "message": "one @ to much :)",
+      "revId": "8cd73dc951efad12ed00a5a7eb89d5fb60ab07a2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
