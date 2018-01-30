@@ -22,4 +22,6 @@
     <string name="screen_zoom_summary_smaller">Smaller</string>
     <!-- Description for the screen zoom level that makes interface elements smallest. [CHAR LIMIT=24] -->
     <string name="screen_zoom_summary_smallest">Smallest</string>
+    <!-- Text when wrong password entered for psk networks -->
+    <string name="wifi_auth_password_wrong">Password may be incorrect</string>
 </resources>

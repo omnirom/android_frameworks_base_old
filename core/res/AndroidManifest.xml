@@ -88,6 +88,7 @@
     <protected-broadcast android:name="android.intent.action.OVERLAY_REMOVED" />
     <protected-broadcast android:name="android.intent.action.OVERLAY_PRIORITY_CHANGED" />
 
+    <protected-broadcast android:name="android.intent.action.AUTH_PASSWORD_WRONG" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGING" />
     <protected-broadcast android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED" />
@@ -551,6 +552,10 @@
     <protected-broadcast android:name="android.media.tv.action.WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED" />
     <protected-broadcast android:name="android.media.tv.action.CHANNEL_BROWSABLE_REQUESTED" />
     <protected-broadcast android:name="com.android.server.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER" />
+
+    <!-- Added in O : DPM  -->
+    <protected-broadcast android:name="com.qti.dpmframework.DPM_INTERNET_CONNECTED" />
+    <protected-broadcast android:name="com.qti.dpmframework.DPM_PREFERENCE_CHANGED" />
 
     <!-- omni additions start -->
     <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_TOGGLE_OVERLAY2" />
