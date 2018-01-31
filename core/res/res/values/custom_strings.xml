@@ -35,4 +35,10 @@
     <!-- Notify use that they are in Lock-to-app in accessibility mode -->
     <string name="lock_to_app_toast_back">To unpin this screen, touch and hold Back.</string>
     <string name="app_unpin_message">App unpinned</string>
+
+    <string name="icon_mask_square_string" translatable="false">M50,0L92,0C96.42,0 100,4.58 100 8L100,92C100, 96.42 96.42 100 92 100L8 100C4.58, 100 0 96.42 0 92L0 8 C 0 4.42 4.42 0 8 0L50 0Z</string>
+    <string name="icon_mask_rounded_square_string" translatable="false">M50,0L70,0 A30,30,0,0 1 100,30 L100,70 A30,30,0,0 1 70,100 L30,100 A30,30,0,0 1 0,70 L 0,30 A30,30,0,0 1 30,0z</string>
+    <string name="icon_mask_squircle_string" translatable="false">M50,0 C10,0 0,10 0,50 0,90 10,100 50,100 90,100 100,90 100,50 100,10 90,0 50,0 Z</string>
+    <string name="icon_mask_circle_string" translatable="false">M50 0C77.6 0 100 22.4 100 50C100 77.6 77.6 100 50 100C22.4 100 0 77.6 0 50C0 22.4 22.4 0 50 0Z</string>
+    <string name="icon_mask_teardrop_string" translatable="false">M50,0A50,50,0,0 1 100,50 L100,85 A15,15,0,0 1 85,100 L50,100 A50,50,0,0 1 50,0z</string>
 </resources>

@@ -55,4 +55,9 @@
   <java-symbol type="bool" name="config_sms_authorization_enabled" />
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayEnabledDefault" />
   <java-symbol type="bool" name="config_canForceDozeNotifications" />
+  <java-symbol type="string" name="icon_mask_square_string" />
+  <java-symbol type="string" name="icon_mask_rounded_square_string" />
+  <java-symbol type="string" name="icon_mask_squircle_string" />
+  <java-symbol type="string" name="icon_mask_circle_string" />
+  <java-symbol type="string" name="icon_mask_teardrop_string" />
 </resources>

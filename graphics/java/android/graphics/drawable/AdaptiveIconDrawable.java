@@ -39,6 +39,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
+import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.PathParser;
@@ -137,6 +138,8 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG |
         Paint.FILTER_BITMAP_FLAG);
 
+    private static String sIconMaskString;
+
     /**
      * Constructor used for xml inflation.
      */
@@ -150,16 +153,42 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      */
     AdaptiveIconDrawable(@Nullable LayerState state, @Nullable Resources res) {
         mLayerState = createConstantState(state, res);
-
-        if (sMask == null) {
-            sMask = PathParser.createPathFromPathData(
-                Resources.getSystem().getString(R.string.config_icon_mask));
+        if (sIconMaskString == null) {
+            sIconMaskString = getSystemIconMask();
         }
-        mMask = PathParser.createPathFromPathData(
-            Resources.getSystem().getString(R.string.config_icon_mask));
+        if (sMask == null) {
+            sMask = PathParser.createPathFromPathData(sIconMaskString);
+        }
+        mMask = PathParser.createPathFromPathData(sIconMaskString);
         mMaskMatrix = new Matrix();
         mCanvas = new Canvas();
         mTransparentRegion = new Region();
+    }
+
+    private static String getSystemIconMask() {
+        String iconMask = SystemProperties.get("persist.sys.icon_mask", "0");
+        int maskId = Integer.valueOf(iconMask);
+        switch (maskId) {
+            case 0:
+                iconMask = Resources.getSystem().getString(R.string.config_icon_mask);
+                break;
+            case 1:
+                iconMask = Resources.getSystem().getString(R.string.icon_mask_rounded_square_string);
+                break;
+            case 2:
+                iconMask = Resources.getSystem().getString(R.string.icon_mask_squircle_string);
+                break;
+            case 3:
+                iconMask = Resources.getSystem().getString(R.string.icon_mask_circle_string);
+                break;
+            case 4:
+                iconMask = Resources.getSystem().getString(R.string.icon_mask_teardrop_string);
+                break;
+            default:
+                iconMask = Resources.getSystem().getString(R.string.config_icon_mask);
+                break;
+        }
+        return iconMask;
     }
 
     private ChildDrawable createChildDrawable(Drawable drawable) {
