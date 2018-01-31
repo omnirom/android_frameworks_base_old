@@ -6547,12 +6547,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return result;
                 }
                 final Intent eventLaunchActivity = mDeviceKeyHandler.isActivityLaunchEvent(event);
-                if (!interactive && eventLaunchActivity != null) {
+                if (eventLaunchActivity != null) {
                     if (DEBUG_INPUT) {
                         Slog.i(TAG, "isActivityLaunchEvent from DeviceKeyHandler " + eventLaunchActivity);
                     }
-                    wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey, "android.policy:KEY");
-                    OmniUtils.launchKeyguardDismissIntent(mContext, UserHandle.CURRENT, eventLaunchActivity);
+                    if (!interactive) {
+                        wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey, "android.policy:KEY");
+                        OmniUtils.launchKeyguardDismissIntent(mContext, UserHandle.CURRENT_OR_SELF, eventLaunchActivity);
+                    } else {
+                        startActivityAsUser(eventLaunchActivity, UserHandle.CURRENT_OR_SELF);
+                    }
                     result &= ~ACTION_PASS_TO_USER;
                     return result;
                 }
