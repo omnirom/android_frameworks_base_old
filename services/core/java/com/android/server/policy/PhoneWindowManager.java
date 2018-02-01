@@ -275,7 +275,7 @@ import java.util.List;
  * can be acquired with either the Lw and Li lock held, so has the restrictions
  * of both of those when held.
  */
-public class PhoneWindowManager implements WindowManagerPolicy {
+public class PhoneWindowManager implements WindowManagerPolicy, DeviceKeyHandler.IDeviceKeyHandlerCallback {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
@@ -2357,6 +2357,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Constructor<?> constructor = klass.getConstructor(Context.class);
                 mDeviceKeyHandler = (DeviceKeyHandler) constructor.newInstance(
                         mContext);
+                mDeviceKeyHandler.setCallBack(this);
                 if(DEBUG) Slog.d(TAG, "Device key handler loaded");
             } catch (Exception e) {
                 Slog.w(TAG, "Could not instantiate device key handler "
@@ -9378,5 +9379,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return mPressOnMenuBehavior;
         }
         return -1;
+    }
+
+    @Override
+    public void performHapticFeedback() {
+        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, true);
     }
 }

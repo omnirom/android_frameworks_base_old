@@ -19,6 +19,10 @@ import android.view.KeyEvent;
 
 public interface DeviceKeyHandler {
 
+    public interface IDeviceKeyHandlerCallback {
+        public void performHapticFeedback();
+    }
+
     /**
      * Invoked when an unknown key was detected by the system, letting the device handle
      * this special keys prior to pass the key to the active app.
@@ -70,4 +74,6 @@ public interface DeviceKeyHandler {
      * @return an Intent or null
      */
     public Intent isActivityLaunchEvent(KeyEvent event);
+
+    default public void setCallBack(IDeviceKeyHandlerCallback callback) {}
 }
