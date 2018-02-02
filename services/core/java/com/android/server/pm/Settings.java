@@ -5151,7 +5151,7 @@ public final class Settings {
         @GuardedBy("Settings.this.mLock")
         public void setRuntimePermissionsFingerPrintLPr(@NonNull String fingerPrint,
                 @UserIdInt int userId) {
-            mFingerprints.put(userId, fingerPrint);
+            mFingerprints.put(userId, Build.OMNI_FINGERPRINT);
             writePermissionsForUserAsyncLPr(userId);
         }
 
