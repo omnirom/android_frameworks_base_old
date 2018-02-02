@@ -234,6 +234,7 @@ final class Settings {
     private static final String ATTR_SDK_VERSION = "sdkVersion";
     private static final String ATTR_DATABASE_VERSION = "databaseVersion";
     private static final String ATTR_DONE = "done";
+    private static final String ATTR_OMNI_FINGERPRINT = "omniFingerprint";
 
     // Bookkeeping for restored permission grants
     private static final String TAG_RESTORED_RUNTIME_PERMISSIONS = "restored-perms";
@@ -338,6 +339,11 @@ final class Settings {
         String fingerprint;
 
         /**
+         * @hide
+         */
+        String omniFingerprint;
+
+        /**
          * Force all version information to match current system values,
          * typically after resolving any required upgrade steps.
          */
@@ -345,6 +351,7 @@ final class Settings {
             sdkVersion = Build.VERSION.SDK_INT;
             databaseVersion = CURRENT_DATABASE_VERSION;
             fingerprint = Build.FINGERPRINT;
+            omniFingerprint = Build.OMNI_FINGERPRINT;
         }
     }
 
@@ -2495,6 +2502,7 @@ final class Settings {
                 XmlUtils.writeIntAttribute(serializer, ATTR_SDK_VERSION, ver.sdkVersion);
                 XmlUtils.writeIntAttribute(serializer, ATTR_DATABASE_VERSION, ver.databaseVersion);
                 XmlUtils.writeStringAttribute(serializer, ATTR_FINGERPRINT, ver.fingerprint);
+                XmlUtils.writeStringAttribute(serializer, ATTR_OMNI_FINGERPRINT, ver.omniFingerprint);
                 serializer.endTag(null, TAG_VERSION);
             }
 
@@ -3177,6 +3185,7 @@ final class Settings {
                     ver.sdkVersion = XmlUtils.readIntAttribute(parser, ATTR_SDK_VERSION);
                     ver.databaseVersion = XmlUtils.readIntAttribute(parser, ATTR_SDK_VERSION);
                     ver.fingerprint = XmlUtils.readStringAttribute(parser, ATTR_FINGERPRINT);
+                    ver.omniFingerprint = XmlUtils.readStringAttribute(parser, ATTR_OMNI_FINGERPRINT);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
                             + parser.getName());
@@ -4563,6 +4572,8 @@ final class Settings {
             pw.printPair("databaseVersion", ver.databaseVersion);
             pw.println();
             pw.printPair("fingerprint", ver.fingerprint);
+            pw.println();
+            pw.printPair("omniFingerprint", ver.omniFingerprint);
             pw.println();
             pw.decreaseIndent();
         }

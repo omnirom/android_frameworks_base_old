@@ -2597,7 +2597,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            mCacheDir = preparePackageParserCache(mIsUpgrade);
+            final boolean packageCacheUpdate = !Build.OMNI_FINGERPRINT.equals(ver.omniFingerprint);
+            if (packageCacheUpdate) {
+                logCriticalInfo(Log.INFO,
+                        "PackageCache: upgrading from " + ver.omniFingerprint + " to " + Build.OMNI_FINGERPRINT);
+            }
+
+            mCacheDir = preparePackageParserCache(mIsUpgrade || packageCacheUpdate);
 
             // Set flag to monitor and not change apk file paths when
             // scanning install directories.
