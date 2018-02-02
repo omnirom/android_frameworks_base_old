@@ -916,7 +916,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     showRecentApps(false, msg.arg1 != 0);
                     break;
                 case MSG_DISPATCH_SHOW_GLOBAL_ACTIONS:
-                    showGlobalActionsInternal();
+                    showGlobalActionsInternal(false);
                     break;
                 case MSG_KEYGUARD_DRAWN_COMPLETE:
                     if (DEBUG_WAKEUP) Slog.w(TAG, "Setting mKeyguardDrawComplete");
@@ -1658,8 +1658,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             break;
         case LONG_PRESS_POWER_GLOBAL_ACTIONS:
             mPowerKeyHandled = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-            showGlobalActionsInternal();
+            showGlobalActionsInternal(true);
             break;
         case LONG_PRESS_POWER_SHUT_OFF:
         case LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM:
@@ -1809,8 +1808,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void run() {
             mEndCallKeyHandled = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-            showGlobalActionsInternal();
+            showGlobalActionsInternal(true);
         }
     };
 
@@ -1859,10 +1857,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandler.sendEmptyMessage(MSG_DISPATCH_SHOW_GLOBAL_ACTIONS);
     }
 
-    void showGlobalActionsInternal() {
+    void showGlobalActionsInternal(boolean withFeedback) {
         final boolean keyguardShowing = isKeyguardShowingAndNotOccluded();
         if (keyguardShowing && isKeyguardSecure(mCurrentUserId) && mGlobalActionsOnLockDisable) {
             return;
+        }
+        if (withFeedback) {
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
         }
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
         if (mGlobalActions == null) {
