@@ -924,6 +924,12 @@ public class Build {
     public static final String FINGERPRINT = deriveFingerprint();
 
     /**
+     * @hide
+     */
+    public static final String OMNI_FINGERPRINT = SystemProperties.get("ro.omni.fingerprint",
+            deriveFingerprint());
+
+    /**
      * Some devices split the fingerprint components between multiple
      * partitions, so we might derive the fingerprint at runtime.
      */
