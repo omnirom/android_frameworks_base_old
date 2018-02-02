@@ -4071,7 +4071,14 @@ public final class Settings {
         public static final String DEVICE_PROXI_CHECK_ENABLED = "device_proxi_check_enabled";
 
         /**
-         * Enable Gesture Haptic feedback
+         * Enable Off-Screen Gesture Haptic feedback
+         * KeyHandler
+         * @hide
+         */
+        public static final String DEVICE_OFF_SCREEN_GESTURE_FEEDBACK_ENABLED = "device_off_screen_gesture_feedback_enabled";
+
+        /**
+         * Enable Fingerprint Gesture Haptic feedback
          * KeyHandler
          * @hide
          */
@@ -4556,6 +4563,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(BUTTON_EXTRA_KEY_MAPPING);
             PRIVATE_SETTINGS.add(HARDWARE_KEYS_DISABLE);
             PRIVATE_SETTINGS.add(DEVICE_PROXI_CHECK_ENABLED);
+            PRIVATE_SETTINGS.add(DEVICE_OFF_SCREEN_GESTURE_FEEDBACK_ENABLED);
             PRIVATE_SETTINGS.add(DEVICE_GESTURE_FEEDBACK_ENABLED);
             PRIVATE_SETTINGS.add(ACCELEROMETER_ROTATION_ANGLES);
             PRIVATE_SETTINGS.add(LOCKSCREEN_ROTATION);
