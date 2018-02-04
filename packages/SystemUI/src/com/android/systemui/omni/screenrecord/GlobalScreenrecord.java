@@ -522,8 +522,8 @@ class GlobalScreenrecord {
 
         Notification.Builder builder = new Notification.Builder(mContext, NotificationChannels.SCREENRECORDS)
             .setTicker(r.getString(R.string.screenrecord_notif_final_ticker))
-            .setContentTitle(r.getString(R.string.screenrecord_notif_completed) + " - "
-                    + r.getString(R.string.screenrecord_notif_duration) + " " + totalTime + ", " + size + "MB")
+            .setContentTitle(r.getString(R.string.screenrecord_notif_completed) + " ("
+                    + totalTime + ", " + size + "MB" + ")")
             .setSmallIcon(R.drawable.ic_capture_video)
             .setWhen(System.currentTimeMillis())
             .setAutoCancel(true);
