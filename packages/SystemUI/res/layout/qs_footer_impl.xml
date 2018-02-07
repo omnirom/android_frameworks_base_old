@@ -98,7 +98,7 @@
                 android:paddingEnd="4dp"
                 android:src="@drawable/tuner"
                 android:tint="?android:attr/textColorTertiary"
-                android:visibility="invisible"/>
+                android:visibility="gone"/>
 
         </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
 
