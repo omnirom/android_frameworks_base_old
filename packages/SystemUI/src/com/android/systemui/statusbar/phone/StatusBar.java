@@ -631,7 +631,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 getMediaControllerPlaybackState(mMediaController)) {
             tickTrackInfo(mMediaController);
         } else {
-            if (mAmbientMediaPlaying != 0 && mAmbientIndicationContainer != null) {
+            if (isAmbientContainerAvailable()) {
                 ((AmbientIndicationContainer)mAmbientIndicationContainer).hideIndication();
             }
         }
@@ -644,7 +644,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         for (int i = 0; i < N; i++) {
             final Entry entry = activeNotifications.get(i);
             if (entry.notification.getPackageName().equals(pkg)) {
-                if (mAmbientMediaPlaying != 0 && mAmbientIndicationContainer != null) {
+                if (isAmbientContainerAvailable()) {
                     ((AmbientIndicationContainer)mAmbientIndicationContainer).setIndication(mMediaMetadata);
                 }
                 break;
@@ -1255,7 +1255,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAmbientIndicationContainer = mStatusBarWindow.findViewById(
                 R.id.ambient_indication_container);
         if (mAmbientIndicationContainer != null) {
-            ((AmbientIndicationContainer) mAmbientIndicationContainer).initializeView(this);
+            ((AmbientIndicationContainer) mAmbientIndicationContainer).initializeView(this, mHandler);
         }
 
         // set the initial view visibility
@@ -5741,6 +5741,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                         setPulsing(pulsingEntries);
                     }
                     setCleanLayout(mAmbientMediaPlaying == 3 ? reason : -1);
+                    if (isAmbientContainerAvailable()) {
+                        ((AmbientIndicationContainer)mAmbientIndicationContainer).setTickerMarquee(true);
+                    }
                 }
 
                 @Override
@@ -5748,6 +5751,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                     callback.onPulseFinished();
                     setPulsing(null);
                     setCleanLayout(-1);
+                    if (isAmbientContainerAvailable()) {
+                        ((AmbientIndicationContainer)mAmbientIndicationContainer).setTickerMarquee(false);
+                    }
                 }
 
                 private void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing) {
@@ -5760,7 +5766,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 private void setCleanLayout(int reason) {
                     mNotificationPanel.setCleanLayout(reason);
                     mNotificationShelf.setCleanLayout(reason);
-                    if (mAmbientMediaPlaying != 0 && mAmbientIndicationContainer != null) {
+                    if (isAmbientContainerAvailable()) {
                         ((AmbientIndicationContainer)mAmbientIndicationContainer).setCleanLayout(reason);
                     }
                 }
@@ -6044,9 +6050,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAmbientMediaPlaying = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.FORCE_AMBIENT_FOR_MEDIA, 0,
                 UserHandle.USER_CURRENT);
-        if (mAmbientMediaPlaying != 0 && mAmbientIndicationContainer != null) {
+        if (isAmbientContainerAvailable()) {
             ((AmbientIndicationContainer)mAmbientIndicationContainer).setIndication(mMediaMetadata);
         }
+    }
+
+    private boolean isAmbientContainerAvailable() {
+        return mAmbientMediaPlaying != 0 && mAmbientIndicationContainer != null;
     }
 
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
