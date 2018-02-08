@@ -19,11 +19,14 @@ package com.android.systemui.settings;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -39,6 +42,8 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
     private CompoundButton mToggle;
     private ToggleSeekBar mSlider;
     private TextView mLabel;
+    private ImageView mLeftButton;
+    private ImageView mRightButton;
 
     private ToggleSliderView mMirror;
     private BrightnessMirrorController mMirrorController;
@@ -71,6 +76,43 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
 
         mSlider.setAccessibilityLabel(getContentDescription().toString());
 
+        mLeftButton = findViewById(R.id.left_button);
+        mLeftButton.setOnClickListener(v -> {
+            int max = getMax();
+            int current = getProgress();
+            int step = (int) (max / 20);
+            if (current > 0) {
+                current = Math.max(current - step, 0);
+                setValue(current);
+                if (mListener != null) {
+                    mListener.onChanged(
+                            ToggleSliderView.this, true, mToggle.isChecked(), current, false);
+                }
+            }
+        });
+        mLeftButton.setOnLongClickListener(v -> {
+            toggleBrightnessMode();
+            return true;
+        });
+
+        mRightButton = findViewById(R.id.right_button);
+        mRightButton.setOnClickListener(v -> {
+            int max = getMax();
+            int current = getProgress();
+            int step = (int) (max / 20);
+            if (current < max) {
+                current = Math.min(current + step, max);
+                setValue(current);
+                if (mListener != null) {
+                    mListener.onChanged(
+                            ToggleSliderView.this, true, mToggle.isChecked(), current, false);
+                }
+            }
+        });
+        mRightButton.setOnLongClickListener(v -> {
+            toggleBrightnessMode();
+            return true;
+        });
         a.recycle();
     }
 
@@ -117,12 +159,20 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
         }
     }
 
+    private int getMax() {
+        return mSlider.getMax();
+    }
+
     @Override
     public void setValue(int value) {
         mSlider.setProgress(value);
         if (mMirror != null) {
             mMirror.setValue(value);
         }
+    }
+
+    private int getProgress() {
+        return mSlider.getProgress();
     }
 
     @Override
@@ -197,5 +247,21 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
             }
         }
     };
+
+    public void setMirrorStyle() {
+        mLeftButton.setVisibility(View.INVISIBLE);
+        mRightButton.setVisibility(View.INVISIBLE);
+    }
+
+    private void toggleBrightnessMode() {
+        boolean automatic = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
+                UserHandle.USER_CURRENT) != Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL;
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE, automatic ? Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL :
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC,
+                UserHandle.USER_CURRENT);
+    }
 }
 
