@@ -31,6 +31,12 @@
             android:key="qs_show_brightness_mode"
             android:title="@string/tuner_show_brightness_mode"
             sysui:defValue="false" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_show_brightness_side_buttons"
+            android:title="@string/tuner_show_brightness_side_buttons"
+            sysui:defValue="true" />
+
     </PreferenceScreen>
     
     <PreferenceScreen
