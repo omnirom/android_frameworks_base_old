@@ -16,47 +16,68 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<merge
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     >
-    <CheckBox
-        android:id="@+id/toggle"
-        android:layout_width="48dp"
-        android:layout_height="0dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:button="@null"
-        android:background="@*android:drawable/switch_track_material"
-        android:visibility="gone"
-        />
-    <com.android.systemui.settings.ToggleSeekBar
-        android:id="@+id/slider"
-        android:layout_width="0dp"
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/toggle"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
-        android:thumb="@drawable/ic_brightness_thumb"
-        android:splitTrack="false"
-        />
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/toggle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:background="@*android:drawable/switch_track_material"
+            android:button="@null"
+            android:visibility="gone"
+            />
+
+        <ImageView
+            android:id="@+id/left_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:background="?android:selectableItemBackground"
+            android:scaleType="center"
+            android:src="@drawable/ic_brightness_left"
+            />
+
+        <com.android.systemui.settings.ToggleSeekBar
+            android:id="@+id/slider"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:layout_weight="1"
+            android:splitTrack="false"
+            android:thumb="@drawable/ic_brightness_thumb"
+            />
+
+        <ImageView
+            android:id="@+id/right_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:background="?android:selectableItemBackground"
+            android:scaleType="center"
+            android:src="@drawable/ic_brightness_right"
+            />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/label"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@id/toggle"
-        android:layout_alignEnd="@id/toggle"
-        android:layout_centerVertical="true"
         android:gravity="center"
-        android:paddingTop="26dp"
         android:textColor="#666666"
         android:textSize="12sp"
         android:visibility="gone"
         />
-</merge>
+</LinearLayout>
+
