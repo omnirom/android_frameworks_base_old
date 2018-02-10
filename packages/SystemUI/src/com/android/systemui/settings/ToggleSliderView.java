@@ -255,11 +255,6 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
         }
     };
 
-    public void setMirrorStyle() {
-        mLeftButton.setVisibility(View.INVISIBLE);
-        mRightButton.setVisibility(View.INVISIBLE);
-    }
-
     public void showSideButtons(boolean enable) {
         mLeftButton.setVisibility(enable ? View.VISIBLE : View.GONE);
         mRightButton.setVisibility(enable ? View.VISIBLE : View.GONE);
