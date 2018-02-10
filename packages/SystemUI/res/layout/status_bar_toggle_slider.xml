@@ -47,6 +47,7 @@
             android:background="?android:selectableItemBackground"
             android:scaleType="center"
             android:src="@drawable/ic_brightness_left"
+            android:visibility="gone"
             />
 
         <com.android.systemui.settings.ToggleSeekBar
@@ -67,6 +68,7 @@
             android:background="?android:selectableItemBackground"
             android:scaleType="center"
             android:src="@drawable/ic_brightness_right"
+            android:visibility="gone"
             />
     </LinearLayout>
 
