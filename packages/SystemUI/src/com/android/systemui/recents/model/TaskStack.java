@@ -641,6 +641,9 @@ public class TaskStack {
      */
     public void removeTask(Task t, AnimationProps animation, boolean fromDockGesture,
             boolean dismissRecentsIfAllRemoved) {
+        if (Recents.sLockedTasks.contains(t)) {
+            Recents.sLockedTasks.remove(t);
+        }
         if (mStackTaskList.contains(t)) {
             removeTaskImpl(mStackTaskList, t);
             Task newFrontMostTask = getStackFrontMostTask(false  /* includeFreeform */);
@@ -661,6 +664,9 @@ public class TaskStack {
         tasks.addAll(mStackTaskList.getTasks());
         for (int i = tasks.size() - 1; i >= 0; i--) {
             Task t = tasks.get(i);
+            if (Recents.sLockedTasks.contains(t)) {
+                continue;
+            }
             removeTaskImpl(mStackTaskList, t);
             mRawTaskList.remove(t);
         }
