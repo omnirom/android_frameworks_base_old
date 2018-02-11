@@ -40,6 +40,7 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
+import com.android.systemui.omni.BatteryViewManager;
 import com.android.systemui.omni.StatusBarHeaderMachine;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSDetail.Callback;
@@ -64,6 +65,7 @@ public class QuickStatusBarHeader extends FrameLayout implements StatusBarHeader
     private HorizontalScrollView mQuickQsPanelScroller;
     private ImageView mBackgroundImage;
     private Drawable mCurrentBackground;
+    private BatteryViewManager mBatteryViewManager;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -81,6 +83,9 @@ public class QuickStatusBarHeader extends FrameLayout implements StatusBarHeader
 
         updateResources();
 
+        ViewGroup batteryContainer = (ViewGroup) findViewById(R.id.battery_container);
+        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer);
+
         // Set the light/dark theming on the header status UI to match the current theme.
         int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
         float intensity = colorForeground == Color.WHITE ? 0 : 1;
@@ -88,6 +93,7 @@ public class QuickStatusBarHeader extends FrameLayout implements StatusBarHeader
 
         applyDarkness(R.id.battery, tintArea, intensity, colorForeground);
         applyDarkness(R.id.clock, tintArea, intensity, colorForeground);
+        applyDarkness(R.id.battery_style, tintArea, intensity, colorForeground);
 
         BatteryMeterView battery = findViewById(R.id.battery);
         battery.setForceShowPercent(true);
