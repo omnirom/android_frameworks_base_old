@@ -150,7 +150,6 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.util.omni.DeviceUtils;
-
 import com.android.internal.util.omni.OmniSwitchConstants;
 import com.android.internal.util.omni.OmniUtils;
 import com.android.internal.util.omni.TaskUtils;
@@ -4069,6 +4068,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateNotificationShade();
         clearCurrentMediaNotification();
         setLockscreenUser(newUserId);
+        if (mStatusBarView != null) {
+            mStatusBarView.getBatteryViewManager().update();
+        }
+        mOmniSettingsObserver.update();
+        mStatusBarHeaderMachine.updateEnablement();
     }
 
     protected void setLockscreenUser(int newUserId) {
