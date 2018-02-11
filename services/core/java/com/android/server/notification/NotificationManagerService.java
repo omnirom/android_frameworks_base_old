@@ -332,7 +332,9 @@ public class NotificationManagerService extends SystemService {
     // The last key in this list owns the hardware.
     ArrayList<String> mLights = new ArrayList<>();
 
+    @GuardedBy("mNotificationLock")
     private HashMap<String, Long> mAnnoyingNotifications = new HashMap<String, Long>();
+
     private long mAnnoyingNotificationThreshold = -1;
 
     private AppOpsManager mAppOps;
@@ -3965,22 +3967,23 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private boolean notificationIsAnnoying(String pkg) {
-        if (pkg == null
+    @GuardedBy("mNotificationLock")
+    private boolean notificationIsAnnoying(String key, String pkg) {
+        if (key == null
                 || mAnnoyingNotificationThreshold <= 0
-                || "android".equals(pkg)) {
+                || (pkg != null && "android".equals(pkg))) {
             return false;
         }
 
         long currentTime = System.currentTimeMillis();
-        if (mAnnoyingNotifications.containsKey(pkg)
-                && (currentTime - mAnnoyingNotifications.get(pkg)
+        if (mAnnoyingNotifications.containsKey(key)
+                && (currentTime - mAnnoyingNotifications.get(key)
                 < mAnnoyingNotificationThreshold)) {
             // less than threshold; it's an annoying notification!!
             return true;
         } else {
             // not in map or time to re-add
-            mAnnoyingNotifications.put(pkg, currentTime);
+            mAnnoyingNotifications.put(key, currentTime);
             return false;
         }
     }
@@ -4082,7 +4085,7 @@ public class NotificationManagerService extends SystemService {
 
         if (aboveThreshold && isNotificationForCurrentUser(record)) {
 
-            if (mSystemReady && mAudioManager != null && !notificationIsAnnoying(pkg)) {
+            if (mSystemReady && mAudioManager != null && !notificationIsAnnoying(key, pkg)) {
                 Uri soundUri = record.getSound();
                 hasValidSound = soundUri != null && !Uri.EMPTY.equals(soundUri);
                 long[] vibration = record.getVibration();
