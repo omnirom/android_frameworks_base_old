@@ -44,6 +44,7 @@
         android:maxLines="1"
         android:ellipsize="marquee"
         android:fadingEdge="horizontal"
+        android:paddingEnd="75dp"
         android:forceHasOverlappingRendering="false" />
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/move_task"
@@ -69,12 +70,23 @@
         android:id="@+id/lock_to_app_fab"
         android:layout_width="48.0dip"
         android:layout_height="48.0dip"
-        android:layout_marginEnd="40.0dip"
+        android:layout_marginEnd="89.3dip"
         android:layout_gravity="end|center"
         android:padding="12.0dip"
         android:background="?android:selectableItemBackground"
         android:visibility="gone"
         android:src="@drawable/ic_pin" />
+    <com.android.systemui.recents.views.FixedSizeImageView
+        android:id="@+id/lock_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/recents_task_view_header_lock_button_padding"
+        android:layout_gravity="end|center"
+        android:padding="@dimen/recents_task_view_header_button_padding"
+        android:src="@drawable/recents_dismiss_light"
+        android:background="?android:selectableItemBackground"
+        android:alpha="0"
+        android:visibility="gone" />
 
     <!-- The progress indicator shows if auto-paging is enabled -->
     <ViewStub android:id="@+id/focus_timer_indicator_stub"
