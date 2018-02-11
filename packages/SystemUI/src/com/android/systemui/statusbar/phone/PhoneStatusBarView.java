@@ -23,12 +23,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.LinearLayout;
 
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.omni.BatteryViewManager;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 
@@ -53,6 +55,7 @@ public class PhoneStatusBarView extends PanelBar {
         }
     };
     private DarkReceiver mBattery;
+    private BatteryViewManager mBatteryViewManager;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,6 +79,8 @@ public class PhoneStatusBarView extends PanelBar {
     public void onFinishInflate() {
         mBarTransitions.init();
         mBattery = findViewById(R.id.battery);
+        LinearLayout batteryContainer = (LinearLayout) findViewById(R.id.battery_container);
+        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer);
     }
 
     @Override
@@ -213,5 +218,10 @@ public class PhoneStatusBarView extends PanelBar {
         layoutParams.height = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_height);
         setLayoutParams(layoutParams);
+        mBatteryViewManager.onDensityOrFontScaleChanged();
+    }
+
+    public BatteryViewManager getBatteryViewManager() {
+        return mBatteryViewManager;
     }
 }
