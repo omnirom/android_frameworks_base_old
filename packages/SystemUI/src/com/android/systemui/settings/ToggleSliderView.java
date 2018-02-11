@@ -94,7 +94,8 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
             }
         });
         mLeftButton.setOnLongClickListener(v -> {
-            if (mAutomaticAvailable) {
+            // only on the slider in qs panel
+            if (mMirror != null && mAutomaticAvailable) {
                 toggleBrightnessMode();
             }
             return true;
@@ -115,7 +116,8 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
             }
         });
         mRightButton.setOnLongClickListener(v -> {
-            if (mAutomaticAvailable) {
+            // only on the slider in qs panel
+            if (mMirror != null && mAutomaticAvailable) {
                 toggleBrightnessMode();
             }
             return true;

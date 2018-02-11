@@ -58,6 +58,7 @@
             android:layout_weight="1"
             android:splitTrack="false"
             android:thumb="@drawable/ic_brightness_thumb"
+            android:thumbTint="?android:attr/colorControlNormal"
             />
 
         <ImageView
