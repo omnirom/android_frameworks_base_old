@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b153480f_d5d304d0",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 3976,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-02-13T22:18:31Z",
+      "side": 1,
+      "message": "must be added to PRIVATE_SETTINGS below",
+      "revId": "6c9f5b7fcafe4d5b4ecede6f4a2dbc31adfec2d2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "141f81d9_d7cd5982",
+        "filename": "core/res/res/values/custom_config.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-02-13T22:18:31Z",
+      "side": 1,
+      "message": "we should set it shorter because this is added to the normal long press already so that then 750 + 1500 - thats pretty long. Think we reduced it to 1000 in the past at some point",
+      "revId": "6c9f5b7fcafe4d5b4ecede6f4a2dbc31adfec2d2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "32d1cdf4_04672840",
+        "filename": "services/core/java/com/android/server/policy/PhoneWindowManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-02-13T22:18:31Z",
+      "side": 1,
+      "message": "for what?",
+      "revId": "6c9f5b7fcafe4d5b4ecede6f4a2dbc31adfec2d2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "757b5377_d51e733c",
+        "filename": "services/core/java/com/android/server/policy/PhoneWindowManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2232,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-02-13T22:18:31Z",
+      "side": 1,
+      "message": "whats that?",
+      "revId": "6c9f5b7fcafe4d5b4ecede6f4a2dbc31adfec2d2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cdf9de29_926921fc",
+        "filename": "services/core/java/com/android/server/policy/PhoneWindowManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 4302,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-02-13T22:18:31Z",
+      "side": 1,
+      "message": "wrong indent",
+      "revId": "6c9f5b7fcafe4d5b4ecede6f4a2dbc31adfec2d2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
