@@ -54,7 +54,6 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
     private float mButtonHeightFraction;
     private final Paint mFramePaint, mBatteryPaint;
     private int mBarWidth;
-    private int mBarHeight;
     private int mBarSpaceWidth;
     private int mHeight;
     private int mWidth;
@@ -103,7 +102,6 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mWidth = (isWideDisplay() ? mTextWidth : 0) + mBarSpaceWidth;
-        mHeight = mBarHeight;
         setMeasuredDimension(mWidth, mHeight);
     }
 
@@ -155,9 +153,9 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
 
         if (showChargingImage()) {
             // define the bolt shape
-            final float bl = mFrame.left + mFrame.width() / 4f + 1;
+            final float bl = mFrame.left + mFrame.width() / 4f;
             final float bt = mFrame.top + mFrame.height() / 6f;
-            final float br = mFrame.right - mFrame.width() / 4f + 1;
+            final float br = mFrame.right - mFrame.width() / 4f;
             final float bb = mFrame.bottom - mFrame.height() / 10f;
             if (mBoltFrame.left != bl || mBoltFrame.top != bt
                     || mBoltFrame.right != br || mBoltFrame.bottom != bb) {
@@ -176,7 +174,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
                         mBoltFrame.top + mBoltPoints[1] * mBoltFrame.height());
             }
 
-            float boltPct = (mBoltFrame.bottom - levelTop) / (mBoltFrame.bottom - mBoltFrame.top);
+            float boltPct = (mFrame.bottom - levelTop) / (mFrame.bottom - mFrame.top);
             boltPct = Math.min(Math.max(boltPct, 0), 1);
             if (boltPct <= BOLT_LEVEL_THRESHOLD) {
                 // draw the bolt if opaque
@@ -290,7 +288,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
     @Override
     public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mBarHeight = getResources().getDimensionPixelSize(com.android.settingslib.R.dimen.battery_height);
+        mHeight = getResources().getDimensionPixelSize(com.android.settingslib.R.dimen.battery_height);
         mBarWidth = getResources().getDimensionPixelSize(com.android.settingslib.R.dimen.battery_width);
         mBarSpaceWidth = (int) (14 * metrics.density + 0.5f);
         mPercentOffsetY = (int) (0.8 * metrics.density + 0.5f);

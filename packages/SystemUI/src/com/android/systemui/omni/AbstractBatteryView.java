@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -81,6 +82,9 @@ public class AbstractBatteryView extends View implements IBatteryView,
     private int mIconTint = Color.WHITE;
     private TextView mBatteryPercentView;
     private int mTextColor;
+    protected int mInverseFrameColor;
+    protected DashPathEffect mPathEffect;
+    protected boolean mDottedLine;
 
     @Override
     public void onAttachedToWindow() {
@@ -131,7 +135,6 @@ public class AbstractBatteryView extends View implements IBatteryView,
         mChargeColor = mFrameColor;
         mBoltPoints = loadBoltPoints();
         mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBoltPaint.setColor(mFrameColor);
 
         Context dualToneDarkTheme = new ContextThemeWrapper(context,
                 Utils.getThemeAttr(context, R.attr.darkIconTheme));
@@ -148,6 +151,8 @@ public class AbstractBatteryView extends View implements IBatteryView,
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextSize = getResources().getDimensionPixelSize(R.dimen.omni_battery_level_text_size);
         mTextPaint.setTextSize(mTextSize);
+
+        mPathEffect = new DashPathEffect(new float[]{3,2},0);
     }
 
     @Override
@@ -228,8 +233,8 @@ public class AbstractBatteryView extends View implements IBatteryView,
         return false;
     }
 
-    protected float[] loadBoltPoints() {
-        final int[] pts = getResources().getIntArray(com.android.settingslib.R.array.batterymeter_bolt_points);
+    private float[] loadBoltPoints() {
+        final int[] pts = getResources().getIntArray(getBoltPointResource());
         int maxX = 0, maxY = 0;
         for (int i = 0; i < pts.length; i += 2) {
             maxX = Math.max(maxX, pts[i]);
@@ -278,6 +283,8 @@ public class AbstractBatteryView extends View implements IBatteryView,
                 mDarkModeFillColor);
         int background = getColorForDarkIntensity(intensity, mLightModeBackgroundColor,
                 mDarkModeBackgroundColor);
+        mInverseFrameColor = getColorForDarkIntensity(intensity, mDarkModeBackgroundColor,
+                mLightModeBackgroundColor);
         mFrameColor = background;
         mChargeColor = foreground;
         mIconTint = foreground;
@@ -312,5 +319,14 @@ public class AbstractBatteryView extends View implements IBatteryView,
         if (mBatteryPercentView != null) {
             mBatteryPercentView.setTextColor(color);
         }
+    }
+
+    protected int getBoltPointResource() {
+        return com.android.settingslib.R.array.batterymeter_bolt_points;
+    }
+
+    @Override
+    public void setDottedLine(boolean value) {
+        mDottedLine = value;
     }
 }

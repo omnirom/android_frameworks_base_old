@@ -4440,6 +4440,12 @@ public final class Settings {
                 "statusbar_battery_charging_color_enable";
 
         /**
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_DOTTED_LINE =
+                "statusbar_battery_dotted_line";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -4673,6 +4679,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_CHARGING_IMAGE);
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_CHARGING_COLOR);
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_CHARGING_COLOR_ENABLE);
+            PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_DOTTED_LINE);
             PRIVATE_SETTINGS.add(BUTTON_BACK_KILL_TIMEOUT);
             PRIVATE_SETTINGS.add(BUTTON_BACK_KILL_ENABLE);
         }

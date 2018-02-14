@@ -35,4 +35,6 @@ public interface IBatteryView  {
     void loadDimens();
 
     void setPercentTextView(TextView percentTextView);
+
+    void setDottedLine(boolean value);
 }

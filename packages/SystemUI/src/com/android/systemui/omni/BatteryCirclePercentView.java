@@ -211,6 +211,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
             mTextWidth = bounds.width();
             mTextHeight = bounds.height();
         }
+        mBatteryPaint.setPathEffect(mDottedLine ? mPathEffect : null);
     }
 
     private void updatePercentFontSize() {
