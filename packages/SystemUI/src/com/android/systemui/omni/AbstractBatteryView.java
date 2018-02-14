@@ -81,6 +81,7 @@ public class AbstractBatteryView extends View implements IBatteryView,
     private int mIconTint = Color.WHITE;
     private TextView mBatteryPercentView;
     private int mTextColor;
+    protected int mInverseFrameColor;
 
     @Override
     public void onAttachedToWindow() {
@@ -278,6 +279,8 @@ public class AbstractBatteryView extends View implements IBatteryView,
                 mDarkModeFillColor);
         int background = getColorForDarkIntensity(intensity, mLightModeBackgroundColor,
                 mDarkModeBackgroundColor);
+        mInverseFrameColor = getColorForDarkIntensity(intensity, mDarkModeBackgroundColor,
+                mLightModeBackgroundColor);
         mFrameColor = background;
         mChargeColor = foreground;
         mIconTint = foreground;
