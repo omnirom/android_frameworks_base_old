@@ -59,7 +59,6 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
     private int mHeight;
     private int mWidth;
     private int mPercentOffsetY;
-    private int mBoltWidth;
 
     private final Path mBoltPath = new Path();
 
@@ -104,7 +103,6 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mWidth = (isWideDisplay() ? mTextWidth : 0) + mBarSpaceWidth;
-        mHeight = getMeasuredHeight();
         setMeasuredDimension(mWidth, mHeight);
     }
 
@@ -156,13 +154,12 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         mShapePath.addRoundRect(mFrame, radius, radius, Direction.CW);
         mShapePath.addRect(mButtonFrame, Direction.CW);
 
-        // TODO
-        /*if (showChargingImage()) {
+        if (showChargingImage()) {
             // define the bolt shape
-            final float bl = mFrame.left + mFrame.width() / 4f + 1;
+            final float bl = mFrame.left + mFrame.width() / 6f;
             final float bt = mFrame.top + mFrame.height() / 6f;
-            final float br = mFrame.right - mFrame.width() / 4f + 1;
-            final float bb = mFrame.bottom - mFrame.height() / 10f;
+            final float br = mFrame.right - mFrame.width() / 4f;
+            final float bb = mFrame.bottom - mFrame.height() / 6f;
             if (mBoltFrame.left != bl || mBoltFrame.top != bt
                     || mBoltFrame.right != br || mBoltFrame.bottom != bb) {
                 mBoltFrame.set(bl, bt, br, bb);
@@ -180,7 +177,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
                         mBoltFrame.top + mBoltPoints[1] * mBoltFrame.height());
             }
 
-            float boltPct = (mBoltFrame.bottom - levelTop) / (mBoltFrame.bottom - mBoltFrame.top);
+            float boltPct = (mFrame.left + levelTop) / (mFrame.right - mFrame.left);
             boltPct = Math.min(Math.max(boltPct, 0), 1);
             if (boltPct <= BOLT_LEVEL_THRESHOLD) {
                 // draw the bolt if opaque
@@ -189,7 +186,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
                 // otherwise cut the bolt out of the overall shape
                 mShapePath.op(mBoltPath, Path.Op.DIFFERENCE);
             }
-        }*/
+        }
 
         RectF bounds = null;
         String percentage = null;
@@ -291,13 +288,18 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         // bar width is hardcoded  android:layout_width="14.5dp"
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         mBarWidth = (int) (18 * metrics.density + 0.5f);
+        mHeight = getResources().getDimensionPixelSize(com.android.settingslib.R.dimen.battery_height);
         mBarSpaceWidth = (int) (20 * metrics.density + 0.5f);
         mBarHeight = (int) (10 * metrics.density + 0.5f);
         mPercentOffsetY = (int) (0.8 * metrics.density + 0.5f);
-        mBoltWidth = (int) (8 * metrics.density + 0.5f);
     }
 
     private float getRadiusRatio() {
         return RADIUS_RATIO;
+    }
+
+    @Override
+    protected int getBoltPointResource() {
+        return R.array.batterymeter_inverted_bolt_points;
     }
 }

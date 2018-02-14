@@ -57,6 +57,7 @@ public class BatteryViewManager implements TunerService.Tunable {
     private int mBatteryEnable = 1;
     private TextView mBatteryPercentView;
     private final String mSlotBattery;
+    private boolean mDottedLine;
 
     private ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
@@ -116,14 +117,16 @@ public class BatteryViewManager implements TunerService.Tunable {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.STATUSBAR_BATTERY_CHARGING_COLOR_ENABLE), false,
                 mSettingsObserver, UserHandle.USER_ALL);
-
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.STATUSBAR_BATTERY_DOTTED_LINE), false,
+                mSettingsObserver, UserHandle.USER_ALL);
         update();
 
         Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
     }
 
     private void switchBatteryStyle(int style, boolean showPercent, boolean percentInside, boolean chargingImage,
-            int chargingColor, boolean chargingColorEnable) {
+            int chargingColor, boolean chargingColorEnable, boolean dottedLine) {
         if (style >= mBatteryStyleList.size()) {
             return;
         }
@@ -134,6 +137,7 @@ public class BatteryViewManager implements TunerService.Tunable {
         mChargingImage = chargingImage;
         mChargingColor = chargingColor;
         mChargingColorEnable = chargingColorEnable;
+        mDottedLine = dottedLine;
         if (mCurrentBatteryView != null) {
             mContainerView.removeView((View) mCurrentBatteryView);
         }
@@ -157,6 +161,7 @@ public class BatteryViewManager implements TunerService.Tunable {
         mCurrentBatteryView.setChargingImage(mChargingImage);
         mCurrentBatteryView.setChargingColor(mChargingColor);
         mCurrentBatteryView.setChargingColorEnable(mChargingColorEnable);
+        mCurrentBatteryView.setDottedLine(mDottedLine);
         mCurrentBatteryView.applyStyle();
     }
 
@@ -176,11 +181,13 @@ public class BatteryViewManager implements TunerService.Tunable {
                     UserHandle.USER_CURRENT);
         final boolean chargingColorEnable = Settings.System.getIntForUser(mContext.getContentResolver(),
                     Settings.System.STATUSBAR_BATTERY_CHARGING_COLOR_ENABLE, 0, UserHandle.USER_CURRENT) == 1;
+        final boolean dottedLine = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.STATUSBAR_BATTERY_DOTTED_LINE, 0, UserHandle.USER_CURRENT) == 1;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 switchBatteryStyle(batteryStyle, showPercent, percentInside, chargingImage,
-                        chargingColor, chargingColorEnable);
+                        chargingColor, chargingColorEnable, dottedLine);
             }
         });
     }
