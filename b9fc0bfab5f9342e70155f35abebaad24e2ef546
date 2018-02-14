@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46914280_a45dc64d",
+        "filename": "services/core/java/com/android/server/policy/PhoneWindowManager.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 873,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-02-14T11:29:46Z",
+      "side": 1,
+      "message": "LOL why add a new one ....",
+      "revId": "b9fc0bfab5f9342e70155f35abebaad24e2ef546",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
