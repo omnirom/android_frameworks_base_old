@@ -38,6 +38,7 @@ import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.KeyDisableTile;
 import com.android.systemui.qs.tiles.LocationTile;
+import com.android.systemui.qs.tiles.NavbarDisableTile;
 import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
 import com.android.systemui.qs.tiles.PictureInPictureTile;
@@ -75,6 +76,7 @@ public class QSFactoryImpl implements QSFactory {
         else if (tileSpec.equals("user")) return new UserTile(mHost);
         else if (tileSpec.equals("battery")) return new BatterySaverTile(mHost);
         else if (tileSpec.equals("saver")) return new DataSaverTile(mHost);
+        else if (tileSpec.equals("navbardisable")) return new NavbarDisableTile(mHost);
         else if (tileSpec.equals("night")) return new NightDisplayTile(mHost);
         else if (tileSpec.equals("nfc")) return new NfcTile(mHost);
         else if (tileSpec.equals("adb_network")) return new AdbOverNetworkTile(mHost);
