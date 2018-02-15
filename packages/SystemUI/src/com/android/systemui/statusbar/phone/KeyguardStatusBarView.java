@@ -348,7 +348,7 @@ public class KeyguardStatusBarView extends RelativeLayout
 
         applyDarkness(R.id.signal_cluster, tintArea, intensity, iconColor);
         applyDarkness(R.id.clock, tintArea, intensity, iconColor);
-        applyDarkness(R.id.battery_style, tintArea, intensity, iconColor);
+        applyDarkness(R.id.battery, tintArea, intensity, iconColor);
 
         // Reload user avatar
         ((UserInfoControllerImpl) Dependency.get(UserInfoController.class))

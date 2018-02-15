@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 <com.android.systemui.omni.BatteryDroidView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/battery_style"
+    android:id="@+id/battery"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
     android:layout_marginBottom="@dimen/battery_margin_bottom" />
