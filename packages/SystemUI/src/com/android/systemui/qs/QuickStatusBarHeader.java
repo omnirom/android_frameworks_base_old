@@ -94,7 +94,6 @@ public class QuickStatusBarHeader extends FrameLayout implements StatusBarHeader
 
         applyDarkness(R.id.battery, tintArea, intensity, colorForeground);
         applyDarkness(R.id.clock, tintArea, intensity, colorForeground);
-        applyDarkness(R.id.battery_style, tintArea, intensity, colorForeground);
 
         mActivityStarter = Dependency.get(ActivityStarter.class);
 
