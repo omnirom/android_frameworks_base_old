@@ -353,24 +353,6 @@ public class Clock extends TextView implements DemoMode, CommandQueue.Callbacks,
 
         SpannableStringBuilder formatted = new SpannableStringBuilder(result);
 
-        if (mAmPmStyle != AM_PM_STYLE_NORMAL) {
-            int magic1 = result.indexOf(MAGIC1);
-            int magic2 = result.indexOf(MAGIC2);
-            if (magic1 >= 0 && magic2 > magic1) {
-                if (mAmPmStyle == AM_PM_STYLE_GONE) {
-                    formatted.delete(magic1, magic2+1);
-                } else {
-                    if (mAmPmStyle == AM_PM_STYLE_SMALL) {
-                        CharacterStyle style = new RelativeSizeSpan(0.7f);
-                        formatted.setSpan(style, magic1, magic2,
-                                          Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
-                    }
-                    formatted.delete(magic2, magic2 + 1);
-                    formatted.delete(magic1, magic1 + 1);
-                }
-            }
-        }
-
         if (mClockDateDisplay != CLOCK_DATE_DISPLAY_NORMAL) {
             if (dateString != null) {
                 int dateStringLen = dateString.length();
@@ -385,6 +367,24 @@ public class Clock extends TextView implements DemoMode, CommandQueue.Callbacks,
                                 timeStringOffset + dateStringLen,
                                 Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
                     }
+                }
+            }
+        }
+
+        if (mAmPmStyle != AM_PM_STYLE_NORMAL) {
+            int magic1 = result.indexOf(MAGIC1);
+            int magic2 = result.indexOf(MAGIC2);
+            if (magic1 >= 0 && magic2 > magic1) {
+                if (mAmPmStyle == AM_PM_STYLE_GONE) {
+                    formatted.delete(magic1, magic2+1);
+                } else {
+                    if (mAmPmStyle == AM_PM_STYLE_SMALL) {
+                        CharacterStyle style = new RelativeSizeSpan(0.7f);
+                        formatted.setSpan(style, magic1, magic2,
+                                          Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                    }
+                    formatted.delete(magic2, magic2 + 1);
+                    formatted.delete(magic1, magic1 + 1);
                 }
             }
         }
