@@ -33,7 +33,7 @@
         android:layout_marginVertical="15dp"
         android:layout_gravity="center_horizontal"
         android:textAppearance="@style/TextAppearance.Toast"
-        android:textColor="@color/primary_text_default_material_light"
+        android:textColor="@color/omni_text4"
         />
 
 </LinearLayout>
