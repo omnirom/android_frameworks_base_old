@@ -100,8 +100,8 @@ public class BatteryDroidView extends AbstractBatteryView {
         mBatteryPaint.setStyle(Paint.Style.STROKE);
         mBatteryPaint.setPathEffect(null);
 
-        applyStyle();
         loadDimens();
+        applyStyle();
 
         mDroid = getResources().getDrawable(R.drawable.status_bar_logo);
     }
@@ -115,7 +115,7 @@ public class BatteryDroidView extends AbstractBatteryView {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mWidth = (isWideDisplay() ? (mTextWidth + mStrokeWidth) : 0) + mCircleWidth;
         mHeight = mCircleWidth;
-        setMeasuredDimension(mWidth, mHeight);
+        setMeasuredDimension(mWidth, mHeight - 3);
     }
 
     @Override
@@ -123,9 +123,10 @@ public class BatteryDroidView extends AbstractBatteryView {
         final int level = mLevel;
         if (level == -1) return;
 
-        mFrame.set(mStrokeWidth/2, mStrokeWidth/2, mWidth - mStrokeWidth/2, mHeight - mStrokeWidth/2);
+        mFrame.set(mStrokeWidth, mStrokeWidth, mHeight - mStrokeWidth,
+                mHeight - mStrokeWidth);
         // must be larger to fill all parts of the round rect
-        mCircleFrame.set(-mCircleOffset , -mCircleOffset, mWidth + mCircleOffset, mHeight + mCircleOffset);
+        mCircleFrame.set(-mCircleOffset, -mCircleOffset, mWidth + mCircleOffset, mHeight + mCircleOffset);
 
         // pad circle percentage to 100% once it reaches 97%
         // for one, the circle looks odd with a too small gap,
@@ -139,7 +140,7 @@ public class BatteryDroidView extends AbstractBatteryView {
         }
 
         if (mWithImage) {
-            mDroid.setBounds(-mStrokeWidth/2, -mStrokeWidth/2, mWidth + mStrokeWidth/2, mHeight + mStrokeWidth/2);
+            mDroid.setBounds(-mStrokeWidth, -mStrokeWidth, mWidth + mStrokeWidth, mHeight + mStrokeWidth);
             mDroid.draw(c);
             // for better contrast since this is drawn on top of green logo
             mFrameColor = mInverseFrameColor;
@@ -228,7 +229,7 @@ public class BatteryDroidView extends AbstractBatteryView {
             Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
             mTextPaint.setTypeface(font);
             mTextPaint.setTextAlign(Paint.Align.CENTER);
-            mTextSize = (int)(mCircleWidth * 0.6f);
+            mTextSize = (int)(mCircleWidth * 0.6);
             mTextPaint.setTextSize(mTextSize);
             Rect bounds = new Rect();
             String text = "100";
@@ -254,7 +255,7 @@ public class BatteryDroidView extends AbstractBatteryView {
     private void updatePercentFontSize() {
         final int level = mLevel;
         if (mPercentInside) {
-            mTextSize = (int)(mCircleWidth * (level == 100 ?  0.5f : 0.6f));
+            mTextSize = (int)(mCircleWidth * (level == 100 ?  0.5f : 0.6));
             mTextPaint.setTextSize(mTextSize);
         } else {
             updateExtraPercentFontSize();
@@ -264,12 +265,12 @@ public class BatteryDroidView extends AbstractBatteryView {
     @Override
     public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mCircleWidth = (int) (16 * metrics.density + 0.5f);
-        mStrokeWidth = (int) (mCircleWidth / 6.5f);
+        mCircleWidth = (int) (16 * metrics.density);
+        mStrokeWidth = (int) (mCircleWidth / 8f);
         mBatteryPaint.setStrokeWidth(mStrokeWidth);
         mFramePaint.setStrokeWidth(mStrokeWidth);
-        mPercentOffsetY = (int) (0.5 * metrics.density + 0.5f);
-        mCircleOffset = 8 * metrics.density + 0.5f;
+        mPercentOffsetY = (int) (0.5 * metrics.density);
+        mCircleOffset = 8 * metrics.density;
     }
 
     private float getRadiusRatio() {
