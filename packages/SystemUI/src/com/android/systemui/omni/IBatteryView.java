@@ -32,9 +32,11 @@ public interface IBatteryView  {
 
     void setFillColor(int color);
 
-    void loadDimens();
+    void doUpdateStyle();
 
     void setPercentTextView(TextView percentTextView);
 
     void setDottedLine(boolean value);
+
+    boolean isWithTopMargin();
 }
