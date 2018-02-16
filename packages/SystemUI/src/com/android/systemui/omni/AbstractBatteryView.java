@@ -288,7 +288,6 @@ public class AbstractBatteryView extends View implements IBatteryView,
         mFrameColor = background;
         mChargeColor = foreground;
         mIconTint = foreground;
-        mBoltPaint.setColor(foreground);
         setTextColor(foreground);
         postInvalidate();
     }

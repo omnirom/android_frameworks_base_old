@@ -154,7 +154,12 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         mShapePath.addRoundRect(mFrame, radius, radius, Direction.CW);
         mShapePath.addRect(mButtonFrame, Direction.CW);
 
+        float boltPct = (mFrame.left + levelTop) / (mFrame.right - mFrame.left);
+        boltPct = Math.min(Math.max(boltPct, 0), 1);
+        boolean pctOpaque = boltPct > BOLT_LEVEL_THRESHOLD;
+
         if (showChargingImage()) {
+            mBoltPaint.setColor(getCurrentColor(level));
             // define the bolt shape
             final float bl = mFrame.left + mFrame.width() / 6f;
             final float bt = mFrame.top + mFrame.height() / 6f;
@@ -177,9 +182,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
                         mBoltFrame.top + mBoltPoints[1] * mBoltFrame.height());
             }
 
-            float boltPct = (mFrame.left + levelTop) / (mFrame.right - mFrame.left);
-            boltPct = Math.min(Math.max(boltPct, 0), 1);
-            if (boltPct <= BOLT_LEVEL_THRESHOLD) {
+            if (!pctOpaque) {
                 // draw the bolt if opaque
                 c.drawPath(mBoltPath, mBoltPaint);
             } else {
@@ -192,13 +195,10 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         String percentage = null;
         float textHeight = 0f;
         float textOffset = 0f;
-        boolean pctOpaque = false;
 
         if (mShowPercent) {
             updatePercentFontSize();
-            if (!mPercentInside) {
-                mTextPaint.setColor(getCurrentColor(level));
-            }
+            mTextPaint.setColor(getCurrentColor(level));
 
             if (mPercentInside) {
                 if (!showChargingImage()) {
@@ -216,7 +216,6 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
             if (percentage != null) {
                 if (mPercentInside) {
                     if (!showChargingImage()) {
-                        pctOpaque = levelTop > bounds.centerX() - mTextWidth / 2;
                         if (pctOpaque) {
                             mTextPath.reset();
                             mTextPaint.getTextPath(percentage, 0, percentage.length(), bounds.centerX(),
