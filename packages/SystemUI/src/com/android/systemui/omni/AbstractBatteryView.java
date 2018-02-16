@@ -44,7 +44,6 @@ import com.android.settingslib.Utils;
 
 import com.android.systemui.R;
 import com.android.systemui.Dependency;
-import com.android.systemui.FontSizeUtils;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.IconLogger;
@@ -268,11 +267,7 @@ public class AbstractBatteryView extends View implements IBatteryView,
         requestLayout();
     }
 
-    @Override
     public void loadDimens() {
-        if (mBatteryPercentView != null) {
-            FontSizeUtils.updateFontSize(mBatteryPercentView, R.dimen.qs_time_expanded_size);
-        }
     }
 
     @Override
@@ -327,5 +322,16 @@ public class AbstractBatteryView extends View implements IBatteryView,
     @Override
     public void setDottedLine(boolean value) {
         mDottedLine = value;
+    }
+
+    @Override
+    public void doUpdateStyle() {
+        loadDimens();
+        applyStyle();
+    }
+
+    @Override
+    public boolean isWithTopMargin() {
+        return false;
     }
 }

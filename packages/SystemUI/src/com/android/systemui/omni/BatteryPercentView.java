@@ -59,7 +59,7 @@ public class BatteryPercentView extends AbstractBatteryView {
 
     public BatteryPercentView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        loadDimens();
+        doUpdateStyle();
     }
 
     @Override
