@@ -89,8 +89,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
         mBatteryPaint.setStyle(Paint.Style.STROKE);
         mBatteryPaint.setPathEffect(null);
 
-        applyStyle();
-        loadDimens();
+        doUpdateStyle();
     }
 
     @Override
@@ -226,10 +225,15 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
     @Override
     public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mCircleWidth = (int) (16 * metrics.density + 0.5f);
+        mCircleWidth = (int) (18 * metrics.density + 0.5f);
         mStrokeWidth = (int) (mCircleWidth / 6.5f);
         mBatteryPaint.setStrokeWidth(mStrokeWidth);
         mFramePaint.setStrokeWidth(mStrokeWidth);
-        mPercentOffsetY = (int) (0.5 * metrics.density + 0.5f);
+        mPercentOffsetY = (int) (0.4 * metrics.density + 0.5f);
+    }
+
+    @Override
+    public boolean isWithTopMargin() {
+        return true;
     }
 }

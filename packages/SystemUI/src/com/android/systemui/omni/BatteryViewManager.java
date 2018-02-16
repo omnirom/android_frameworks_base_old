@@ -34,6 +34,7 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.Dependency;
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.IconLogger;
 import com.android.systemui.tuner.TunerService;
@@ -144,10 +145,15 @@ public class BatteryViewManager implements TunerService.Tunable {
 
         mCurrentBatteryView = mBatteryStyleList.get(mBatteryStyle);
         applyStyle();
-        mContainerView.addView((View) mCurrentBatteryView,
-                new ViewGroup.LayoutParams(
+
+        int top = mContext.getResources().getDimensionPixelSize(R.dimen.battery_margin_top);
+        ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT));
+                        ViewGroup.LayoutParams.MATCH_PARENT);
+        if (mCurrentBatteryView.isWithTopMargin()) {
+            lp.setMargins(0, top, 0, 0);
+        }
+        mContainerView.addView((View) mCurrentBatteryView, lp);
         // percent only is done with mBatteryPercentView but we
         // still need a BatteryView as container to update level
         // and colors - just hidden
@@ -200,8 +206,10 @@ public class BatteryViewManager implements TunerService.Tunable {
 
     public void onDensityOrFontScaleChanged() {
         if (mCurrentBatteryView != null) {
-            mCurrentBatteryView.loadDimens();
-            mCurrentBatteryView.applyStyle();
+            mCurrentBatteryView.doUpdateStyle();
+            if (mBatteryPercentView != null) {
+                FontSizeUtils.updateFontSize(mBatteryPercentView, R.dimen.qs_time_expanded_size);
+            }
             ((View) mCurrentBatteryView).requestLayout();
             ((View) mCurrentBatteryView).postInvalidate();
         }
