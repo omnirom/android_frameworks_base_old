@@ -89,8 +89,8 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
         mBatteryPaint.setStyle(Paint.Style.STROKE);
         mBatteryPaint.setPathEffect(null);
 
-        applyStyle();
         loadDimens();
+        applyStyle();
     }
 
     @Override
@@ -98,7 +98,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mWidth = (isWideDisplay() ? (mTextWidth + mStrokeWidth) : 0) + mCircleWidth;
         mHeight = mCircleWidth;
-        setMeasuredDimension(mWidth, mHeight);
+        setMeasuredDimension(mWidth, mHeight - 2);
     }
 
     @Override
@@ -106,8 +106,8 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
         final int level = mLevel;
         if (level == -1) return;
 
-        mFrame.set(mStrokeWidth * 0.6f, mStrokeWidth * 0.6f, mHeight - mStrokeWidth * 0.6f,
-                mHeight - mStrokeWidth * 0.6f);
+        mFrame.set(mStrokeWidth, mStrokeWidth, mHeight - mStrokeWidth,
+                mHeight - mStrokeWidth);
 
         mBatteryPaint.setColor(getCurrentColor(level));
         mFramePaint.setColor(mFrameColor);
@@ -190,7 +190,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
             Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
             mTextPaint.setTypeface(font);
             mTextPaint.setTextAlign(Paint.Align.CENTER);
-            mTextSize = (int)(mCircleWidth * 0.5f);
+            mTextSize = (int)(mCircleWidth * 0.55f);
             mTextPaint.setTextSize(mTextSize);
             Rect bounds = new Rect();
             String text = "100";
@@ -216,7 +216,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
     private void updatePercentFontSize() {
         final int level = mLevel;
         if (mPercentInside) {
-            mTextSize = (int)(mCircleWidth * (level == 100 ?  0.4f : 0.5f));
+            mTextSize = (int)(mCircleWidth * (level == 100 ?  0.4f : 0.55f));
             mTextPaint.setTextSize(mTextSize);
         } else {
             updateExtraPercentFontSize();
@@ -226,10 +226,10 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
     @Override
     public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mCircleWidth = (int) (16 * metrics.density + 0.5f);
-        mStrokeWidth = (int) (mCircleWidth / 6.5f);
+        mCircleWidth = (int) (18 * metrics.density);
+        mStrokeWidth = (int) (mCircleWidth / 9f);
         mBatteryPaint.setStrokeWidth(mStrokeWidth);
         mFramePaint.setStrokeWidth(mStrokeWidth);
-        mPercentOffsetY = (int) (0.5 * metrics.density + 0.5f);
+        mPercentOffsetY = (int) (0.5 * metrics.density);
     }
 }
