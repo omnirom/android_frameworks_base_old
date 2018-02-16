@@ -94,8 +94,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
         mBatteryPaint.setStrokeWidth(0);
         mBatteryPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
-        applyStyle();
-        loadDimens();
+        doUpdateStyle();
     }
 
     @Override
