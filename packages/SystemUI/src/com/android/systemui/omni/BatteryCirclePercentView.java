@@ -129,8 +129,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
         c.drawArc(mFrame, 270, 3.6f * padLevel, false, mBatteryPaint);
 
         if (showChargingImage()) {
-            int boltColor = getCurrentColor(level);
-            mBoltPaint.setColor(boltColor);
+            mBoltPaint.setColor(getCurrentColor(level));
             // define the bolt shape
             final float bl = mFrame.left + mFrame.width() / 3f;
             final float bt = mFrame.top + mFrame.height() / 4f;

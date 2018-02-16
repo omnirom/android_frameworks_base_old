@@ -152,6 +152,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
         mShapePath.addRect(mButtonFrame, Direction.CW);
 
         if (showChargingImage()) {
+            mBoltPaint.setColor(getCurrentColor(level));
             // define the bolt shape
             final float bl = mFrame.left + mFrame.width() / 4f;
             final float bt = mFrame.top + mFrame.height() / 6f;
@@ -192,9 +193,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
 
         if (mShowPercent) {
             updatePercentFontSize();
-            if (!mPercentInside) {
-                mTextPaint.setColor(getCurrentColor(level));
-            }
+            mTextPaint.setColor(getCurrentColor(level));
             float textHeight = 0f;
 
             if (mPercentInside) {
