@@ -145,6 +145,11 @@
     <string name="accessibility_quick_settings_key_disable_on">Keys disabled.</string>
     <string name="accessibility_quick_settings_key_disable_off">Keys allowed.</string>
 
+    <!-- navbar disable QS Tile -->
+    <string name="quick_settings_navbar_disable_label">Disable navbar</string>
+    <string name="accessibility_quick_settings_navbar_disable_on">Navbar disabled.</string>
+    <string name="accessibility_quick_settings_navbar_disable_off">Navbar enabled.</string>
+
     <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_connection_hspap">HSPA+</string>
 </resources>
