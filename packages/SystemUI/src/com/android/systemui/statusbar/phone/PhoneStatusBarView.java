@@ -78,7 +78,8 @@ public class PhoneStatusBarView extends PanelBar {
     public void onFinishInflate() {
         mBarTransitions.init();
         LinearLayout batteryContainer = (LinearLayout) findViewById(R.id.battery_container);
-        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer);
+        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer,
+                BatteryViewManager.BATTERY_LOCATION_STATUSBAR);
     }
 
     @Override

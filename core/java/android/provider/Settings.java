@@ -4431,6 +4431,7 @@ public final class Settings {
          */
         public static final String STATUSBAR_BATTERY_CHARGING_COLOR =
                 "statusbar_battery_charging_color";
+
         /**
          * enable color when charging
          *
@@ -4444,6 +4445,14 @@ public final class Settings {
          */
         public static final String STATUSBAR_BATTERY_DOTTED_LINE =
                 "statusbar_battery_dotted_line";
+
+        /**
+         * force show percent on keyguard and qspanel
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_FORCE_PERCENT =
+                "statusbar_battery_force_percent";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -4682,6 +4691,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_DOTTED_LINE);
             PRIVATE_SETTINGS.add(BUTTON_BACK_KILL_TIMEOUT);
             PRIVATE_SETTINGS.add(BUTTON_BACK_KILL_ENABLE);
+            PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_FORCE_PERCENT);
         }
 
         /**

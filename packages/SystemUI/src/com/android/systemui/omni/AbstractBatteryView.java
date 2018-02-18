@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.IconLogger;
 
 import java.text.NumberFormat;
+import java.util.Locale;
 
 public class AbstractBatteryView extends View implements IBatteryView,
         BatteryController.BatteryStateChangeCallback,
@@ -80,7 +81,6 @@ public class AbstractBatteryView extends View implements IBatteryView,
     private final int[] mColors;
     private int mIconTint = Color.WHITE;
     private TextView mBatteryPercentView;
-    private int mTextColor;
     protected int mInverseFrameColor;
     protected DashPathEffect mPathEffect;
     protected boolean mDottedLine;
@@ -131,7 +131,6 @@ public class AbstractBatteryView extends View implements IBatteryView,
         mFrameColor = getResources().getColor(R.color.meter_background_color);
         mCriticalLevel = getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
-        mChargeColor = mFrameColor;
         mBoltPoints = loadBoltPoints();
         mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -281,9 +280,7 @@ public class AbstractBatteryView extends View implements IBatteryView,
         mInverseFrameColor = getColorForDarkIntensity(intensity, mDarkModeBackgroundColor,
                 mLightModeBackgroundColor);
         mFrameColor = background;
-        mChargeColor = foreground;
         mIconTint = foreground;
-        setTextColor(foreground);
         postInvalidate();
     }
 
@@ -297,21 +294,13 @@ public class AbstractBatteryView extends View implements IBatteryView,
 
     public void setPercentTextView(TextView percentTextView) {
         mBatteryPercentView = percentTextView;
-        setTextColor(mTextColor);
         updatePercentText();
     }
 
     private void updatePercentText() {
         if (mBatteryPercentView != null) {
-            mBatteryPercentView.setText(
-                    NumberFormat.getPercentInstance().format(mLevel / 100f));
-        }
-    }
-
-    private void setTextColor(int color) {
-        mTextColor = color;
-        if (mBatteryPercentView != null) {
-            mBatteryPercentView.setTextColor(color);
+            mBatteryPercentView.setTextColor(getCurrentColor(mLevel));
+            mBatteryPercentView.setText(getPercentText());
         }
     }
 
@@ -333,5 +322,9 @@ public class AbstractBatteryView extends View implements IBatteryView,
     @Override
     public boolean isWithTopMargin() {
         return false;
+    }
+
+    protected String getPercentText() {
+        return NumberFormat.getPercentInstance(Locale.US).format(mLevel / 100f);
     }
 }
