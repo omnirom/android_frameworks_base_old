@@ -40,8 +40,6 @@ import android.util.DisplayMetrics;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController;
 
-import java.text.NumberFormat;
-
 public class BatteryPercentView extends AbstractBatteryView {
     public static final String TAG = BatteryPercentView.class.getSimpleName();
 
@@ -81,7 +79,7 @@ public class BatteryPercentView extends AbstractBatteryView {
         float textHeight = 0f;
         float textOffset = 0f;
         RectF bounds = null;
-        String percentage = NumberFormat.getPercentInstance().format((double) level / 100.0);
+        String percentage = getPercentText();
         textHeight = mTextPaint.descent() - mTextPaint.ascent();
         textOffset = (textHeight / 2) - mTextPaint.descent() + mPercentOffsetY;
         bounds = new RectF(0, 0, mWidth, mHeight);

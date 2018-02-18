@@ -85,7 +85,8 @@ public class QuickStatusBarHeader extends FrameLayout implements StatusBarHeader
         updateResources();
 
         LinearLayout batteryContainer = (LinearLayout) findViewById(R.id.battery_container);
-        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer);
+        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer,
+                BatteryViewManager.BATTERY_LOCATION_QSPANEL);
 
         // Set the light/dark theming on the header status UI to match the current theme.
         int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
