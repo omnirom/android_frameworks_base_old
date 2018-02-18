@@ -59,6 +59,12 @@ public class BatteryViewManager implements TunerService.Tunable {
     private TextView mBatteryPercentView;
     private final String mSlotBattery;
     private boolean mDottedLine;
+    private boolean mForceShowPercent;
+    private int mLocation = BATTERY_LOCATION_STATUSBAR;
+
+    public static final int BATTERY_LOCATION_STATUSBAR = 0;
+    public static final int BATTERY_LOCATION_KEYGUARD = 1;
+    public static final int BATTERY_LOCATION_QSPANEL = 2;
 
     private ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
@@ -67,9 +73,10 @@ public class BatteryViewManager implements TunerService.Tunable {
         }
     };
 
-    public BatteryViewManager(Context context, LinearLayout mContainer) {
+    public BatteryViewManager(Context context, LinearLayout mContainer, int location) {
         mContext = context;
         mContainerView = mContainer;
+        mLocation = location;
         mHandler = new Handler();
         mSlotBattery = context.getString(
                 com.android.internal.R.string.status_bar_battery);
@@ -121,19 +128,21 @@ public class BatteryViewManager implements TunerService.Tunable {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.STATUSBAR_BATTERY_DOTTED_LINE), false,
                 mSettingsObserver, UserHandle.USER_ALL);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.STATUSBAR_BATTERY_FORCE_PERCENT), false,
+                mSettingsObserver, UserHandle.USER_ALL);
         update();
 
         Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
     }
 
-    private void switchBatteryStyle(int style, boolean showPercent, boolean percentInside, boolean chargingImage,
+    private void switchBatteryStyle(int style, boolean percentInside, boolean chargingImage,
             int chargingColor, boolean chargingColorEnable, boolean dottedLine) {
         if (style >= mBatteryStyleList.size()) {
             return;
         }
 
         mBatteryStyle = style;
-        mShowPercent = showPercent;
         mPercentInside = percentInside;
         mChargingImage = chargingImage;
         mChargingColor = chargingColor;
@@ -150,7 +159,7 @@ public class BatteryViewManager implements TunerService.Tunable {
         ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.MATCH_PARENT);
-        if (mCurrentBatteryView.isWithTopMargin()) {
+        if (mCurrentBatteryView.isWithTopMargin() && mLocation != BATTERY_LOCATION_KEYGUARD) {
             lp.setMargins(0, top, 0, 0);
         }
         mContainerView.addView((View) mCurrentBatteryView, lp);
@@ -176,23 +185,25 @@ public class BatteryViewManager implements TunerService.Tunable {
                 Settings.System.STATUSBAR_BATTERY_STYLE, 0, UserHandle.USER_CURRENT);
         final int systemShowPercent = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.SHOW_BATTERY_PERCENT, 0, UserHandle.USER_CURRENT);
-        final boolean showPercent = Settings.System.getIntForUser(mContext.getContentResolver(),
+        mShowPercent = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.STATUSBAR_BATTERY_PERCENT, systemShowPercent, UserHandle.USER_CURRENT) != 0;
         final boolean percentInside = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.STATUSBAR_BATTERY_PERCENT_INSIDE, 0, UserHandle.USER_CURRENT) != 0;
         final boolean chargingImage = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.STATUSBAR_BATTERY_CHARGING_IMAGE, 0, UserHandle.USER_CURRENT) == 1;
+                Settings.System.STATUSBAR_BATTERY_CHARGING_IMAGE, 0, UserHandle.USER_CURRENT) == 1;
         final int chargingColor = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.STATUSBAR_BATTERY_CHARGING_COLOR, mContext.getResources().getColor(R.color.meter_background_color),
-                    UserHandle.USER_CURRENT);
+                Settings.System.STATUSBAR_BATTERY_CHARGING_COLOR, mContext.getResources().getColor(R.color.meter_background_color), UserHandle.USER_CURRENT);
         final boolean chargingColorEnable = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.STATUSBAR_BATTERY_CHARGING_COLOR_ENABLE, 0, UserHandle.USER_CURRENT) == 1;
+                Settings.System.STATUSBAR_BATTERY_CHARGING_COLOR_ENABLE, 0, UserHandle.USER_CURRENT) == 1;
         final boolean dottedLine = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.STATUSBAR_BATTERY_DOTTED_LINE, 0, UserHandle.USER_CURRENT) == 1;
+                Settings.System.STATUSBAR_BATTERY_DOTTED_LINE, 0, UserHandle.USER_CURRENT) == 1;
+        mForceShowPercent = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUSBAR_BATTERY_FORCE_PERCENT, 0, UserHandle.USER_CURRENT) == 1;
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                switchBatteryStyle(batteryStyle, showPercent, percentInside, chargingImage,
+                switchBatteryStyle(batteryStyle, percentInside, chargingImage,
                         chargingColor, chargingColorEnable, dottedLine);
             }
         });
@@ -222,8 +233,11 @@ public class BatteryViewManager implements TunerService.Tunable {
     }
 
     private void updateShowPercent() {
+        if (mCurrentBatteryView == null) {
+            return;
+        }
         final boolean showing = mBatteryPercentView != null;
-        if (mShowPercent || mBatteryStyle == 3) {
+        if (isShowPercent() || mBatteryStyle == 3) {
             if (!showing) {
                 mBatteryPercentView = loadPercentView();
                 mContainerView.addView(mBatteryPercentView,
@@ -249,5 +263,9 @@ public class BatteryViewManager implements TunerService.Tunable {
             Dependency.get(IconLogger.class).onIconVisibility(mSlotBattery, !hidden);
             mContainerView.setVisibility(hidden ? View.GONE : View.VISIBLE);
         }
+    }
+
+    private boolean isShowPercent() {
+        return (mForceShowPercent && mLocation != BATTERY_LOCATION_STATUSBAR) || mShowPercent;
     }
 }

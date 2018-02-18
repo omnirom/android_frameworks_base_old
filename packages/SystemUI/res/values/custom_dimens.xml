@@ -40,5 +40,5 @@
 
     <dimen name="omni_battery_level_text_size_small">12sp</dimen>
     <dimen name="omni_battery_level_text_size">14sp</dimen>
-    <dimen name="battery_margin_top">0.5dp</dimen>
+    <dimen name="battery_margin_top">0.8dp</dimen>
 </resources>

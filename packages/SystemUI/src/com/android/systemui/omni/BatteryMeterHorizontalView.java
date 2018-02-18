@@ -42,8 +42,6 @@ import android.util.DisplayMetrics;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController;
 
-import java.text.NumberFormat;
-
 public class BatteryMeterHorizontalView extends AbstractBatteryView {
     public static final String TAG = BatteryMeterHorizontalView.class.getSimpleName();
 
@@ -207,7 +205,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
                     bounds = new RectF(0, 0, mBarWidth - buttonHeight, mHeight);
                 }
             } else {
-                percentage = NumberFormat.getPercentInstance().format((double) level / 100.0);
+                percentage = getPercentText();
                 textHeight = mTextPaint.descent() - mTextPaint.ascent();
                 textOffset = (textHeight / 2) - mTextPaint.descent() + mPercentOffsetY;
                 bounds = new RectF(mBarSpaceWidth, 0, mWidth, mHeight);
