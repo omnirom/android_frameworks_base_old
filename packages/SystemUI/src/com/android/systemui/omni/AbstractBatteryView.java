@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.IconLogger;
 
 import java.text.NumberFormat;
+import java.util.Locale;
 
 public class AbstractBatteryView extends View implements IBatteryView,
         BatteryController.BatteryStateChangeCallback,
@@ -303,8 +304,7 @@ public class AbstractBatteryView extends View implements IBatteryView,
 
     private void updatePercentText() {
         if (mBatteryPercentView != null) {
-            mBatteryPercentView.setText(
-                    NumberFormat.getPercentInstance().format(mLevel / 100f));
+            mBatteryPercentView.setText(getPercentText());
         }
     }
 
@@ -333,5 +333,9 @@ public class AbstractBatteryView extends View implements IBatteryView,
     @Override
     public boolean isWithTopMargin() {
         return false;
+    }
+
+    protected String getPercentText() {
+        return NumberFormat.getPercentInstance(Locale.US).format(mLevel / 100f);
     }
 }

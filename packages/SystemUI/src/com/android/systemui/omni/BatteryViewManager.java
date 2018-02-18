@@ -59,6 +59,12 @@ public class BatteryViewManager implements TunerService.Tunable {
     private TextView mBatteryPercentView;
     private final String mSlotBattery;
     private boolean mDottedLine;
+    private boolean mForceShowPercent;
+    private int mLocation = BATTERY_LOCATION_STATUSBAR;
+
+    public static final int BATTERY_LOCATION_STATUSBAR = 0;
+    public static final int BATTERY_LOCATION_KEYGUARD = 1;
+    public static final int BATTERY_LOCATION_QSPANEL = 2;
 
     private ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
@@ -67,9 +73,10 @@ public class BatteryViewManager implements TunerService.Tunable {
         }
     };
 
-    public BatteryViewManager(Context context, LinearLayout mContainer) {
+    public BatteryViewManager(Context context, LinearLayout mContainer, int location) {
         mContext = context;
         mContainerView = mContainer;
+        mLocation = location;
         mHandler = new Handler();
         mSlotBattery = context.getString(
                 com.android.internal.R.string.status_bar_battery);
@@ -150,7 +157,7 @@ public class BatteryViewManager implements TunerService.Tunable {
         ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.MATCH_PARENT);
-        if (mCurrentBatteryView.isWithTopMargin()) {
+        if (mCurrentBatteryView.isWithTopMargin() && mLocation != BATTERY_LOCATION_KEYGUARD) {
             lp.setMargins(0, top, 0, 0);
         }
         mContainerView.addView((View) mCurrentBatteryView, lp);
@@ -222,8 +229,11 @@ public class BatteryViewManager implements TunerService.Tunable {
     }
 
     private void updateShowPercent() {
+        if (mCurrentBatteryView == null) {
+            return;
+        }
         final boolean showing = mBatteryPercentView != null;
-        if (mShowPercent || mBatteryStyle == 3) {
+        if (mShowPercent || mBatteryStyle == 3 || mForceShowPercent) {
             if (!showing) {
                 mBatteryPercentView = loadPercentView();
                 mContainerView.addView(mBatteryPercentView,
@@ -249,5 +259,10 @@ public class BatteryViewManager implements TunerService.Tunable {
             Dependency.get(IconLogger.class).onIconVisibility(mSlotBattery, !hidden);
             mContainerView.setVisibility(hidden ? View.GONE : View.VISIBLE);
         }
+    }
+
+    public void setForceShowPercent(boolean enable) {
+        mForceShowPercent = enable;
+        updateShowPercent();
     }
 }

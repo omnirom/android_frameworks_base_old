@@ -40,8 +40,6 @@ import android.util.DisplayMetrics;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController;
 
-import java.text.NumberFormat;
-
 public class BatteryCirclePercentView extends AbstractBatteryView  {
     public static final String TAG = BatteryCirclePercentView.class.getSimpleName();
 
@@ -168,7 +166,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
                     bounds = new RectF(0, 0, mWidth, mHeight);
                 }
             } else {
-                percentage = NumberFormat.getPercentInstance().format((double) level / 100.0);
+                percentage = getPercentText();
                 textOffset = mTextHeight / 2 - mPercentOffsetY;
                 bounds = new RectF(mCircleWidth + 3 * mStrokeWidth, 0, mWidth, mHeight);
             }
