@@ -46,6 +46,7 @@ import com.android.systemui.omni.StatusBarHeaderMachine;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.SignalClusterView;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 
 
@@ -67,6 +68,9 @@ public class QuickStatusBarHeader extends FrameLayout implements StatusBarHeader
     private ImageView mBackgroundImage;
     private Drawable mCurrentBackground;
     private BatteryViewManager mBatteryViewManager;
+
+    private Clock mClock;
+    private Clock mLeftClock;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -97,12 +101,26 @@ public class QuickStatusBarHeader extends FrameLayout implements StatusBarHeader
         applyDarkness(R.id.clock, tintArea, intensity, colorForeground);
         applyDarkness(R.id.battery_style, tintArea, intensity, colorForeground);
 
+        mClock = findViewById(R.id.clock);
+        ((Clock)mClock).setIsQshb(true);
+        mLeftClock = findViewById(R.id.left_clock);
+        ((Clock)mLeftClock).setIsQshb(true);
+
         mActivityStarter = Dependency.get(ActivityStarter.class);
 
         mQuickQsPanelScroller = (HorizontalScrollView) findViewById(R.id.quick_qs_panel_scroll);
         mQuickQsPanelScroller.setHorizontalScrollBarEnabled(false);
 
         mBackgroundImage = (ImageView) findViewById(R.id.qs_header_image);
+    }
+
+    public void updateQsbhClock() {
+        if (mClock != null) {
+            ((Clock)mClock).updateSettings();
+        }
+        if (mLeftClock != null) {
+            ((Clock)mLeftClock).updateSettings();
+        }
     }
 
     private void applyDarkness(int id, Rect tintArea, float intensity, int color) {
