@@ -105,6 +105,7 @@ public class Clock extends TextView implements DemoMode, CommandQueue.Callbacks,
     private final boolean mShowDark;
     private boolean mShowSeconds;
     private Handler mSecondsHandler;
+    private boolean mForceHideDate;
 
     public Clock(Context context) {
         this(context, null);
@@ -126,6 +127,10 @@ public class Clock extends TextView implements DemoMode, CommandQueue.Callbacks,
         } finally {
             a.recycle();
         }
+    }
+
+    public void setForceHideDate(boolean enabled) {
+        mForceHideDate = enabled;
     }
 
     @Override
@@ -327,7 +332,7 @@ public class Clock extends TextView implements DemoMode, CommandQueue.Callbacks,
         String timeResult = sdf.format(mCalendar.getTime());
         String dateResult = "";
 
-        if (mClockDateDisplay != CLOCK_DATE_DISPLAY_GONE) {
+        if (mClockDateDisplay != CLOCK_DATE_DISPLAY_GONE && !mForceHideDate) {
             Date now = new Date();
 
             if (mClockDateFormat == null || mClockDateFormat.isEmpty()) {
@@ -358,7 +363,7 @@ public class Clock extends TextView implements DemoMode, CommandQueue.Callbacks,
                 int dateStringLen = dateString.length();
                 int timeStringOffset = (mClockDatePosition == STYLE_DATE_RIGHT)
                         ? timeResult.length() + 1 : 0;
-                if (mClockDateDisplay == CLOCK_DATE_DISPLAY_GONE) {
+                if (mClockDateDisplay == CLOCK_DATE_DISPLAY_GONE || mForceHideDate) {
                     formatted.delete(0, dateStringLen);
                 } else {
                     if (mClockDateDisplay == CLOCK_DATE_DISPLAY_SMALL) {

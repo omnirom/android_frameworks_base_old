@@ -27,6 +27,16 @@
     android:paddingEnd="8dp"
     android:orientation="horizontal">
 
+    <com.android.systemui.statusbar.policy.ClockLeft
+        android:id="@+id/left_clock"
+        android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:singleLine="true"
+        android:paddingEnd="4dp"
+        android:gravity="center_vertical|start"
+        systemui:showDark="false"
+        />
 
     <com.android.keyguard.CarrierText
         android:id="@+id/qs_carrier_text"
