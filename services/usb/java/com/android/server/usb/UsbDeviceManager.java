@@ -169,6 +169,7 @@ public class UsbDeviceManager {
     private Intent mBroadcastedIntent;
     private boolean mPendingBootBroadcast;
     private static Set<Integer> sBlackListedInterfaces;
+    private boolean mManualModeChange;
 
     static {
         sBlackListedInterfaces = new HashSet<>();
@@ -649,9 +650,12 @@ public class UsbDeviceManager {
         }
 
         private boolean trySetEnabledFunctions(String functions, boolean forceRestart) {
-            if (functions == null || applyAdbFunction(functions)
-                    .equals(UsbManager.USB_FUNCTION_NONE)) {
+            if ((functions == null || applyAdbFunction(functions)
+                    .equals(UsbManager.USB_FUNCTION_NONE)) && !mManualModeChange) {
                 functions = getDefaultFunctions();
+                if (functions != UsbManager.USB_FUNCTION_NONE) {
+                    mUsbDataUnlocked = true;
+                }
             }
             functions = applyAdbFunction(functions);
 
@@ -975,7 +979,9 @@ public class UsbDeviceManager {
                     break;
                 case MSG_SET_CURRENT_FUNCTIONS:
                     String functions = (String) msg.obj;
+                    mManualModeChange = true;
                     setEnabledFunctions(functions, false, msg.arg1 == 1);
+                    mManualModeChange = false;
                     break;
                 case MSG_UPDATE_USER_RESTRICTIONS:
                     // Restart the USB stack if USB transfer is enabled but no longer allowed.
@@ -1236,15 +1242,16 @@ public class UsbDeviceManager {
         }
 
         private String getDefaultFunctions() {
-            String func = SystemProperties.get(getPersistProp(true),
-                    UsbManager.USB_FUNCTION_NONE);
-            // if ADB is enabled, reset functions to ADB
-            // else enable MTP as usual.
-            if (UsbManager.containsFunction(func, UsbManager.USB_FUNCTION_ADB)) {
-                return UsbManager.USB_FUNCTION_ADB;
-            } else {
-                return UsbManager.USB_FUNCTION_MTP;
+            String func = Settings.Global.getString(mContentResolver,
+                    Settings.Global.USB_DEFAULT_CONFIGURATION);
+            if (DEBUG) Slog.i(TAG, "getDefaultFunctions settings = " + func);
+            if (func == null) {
+                func = SystemProperties.get(getPersistProp(true),
+                        UsbManager.USB_FUNCTION_NONE);
+                if (DEBUG) Slog.i(TAG, "getDefaultFunctions property = " + func);
+
             }
+            return func;
         }
 
         public void dump(IndentingPrintWriter pw) {
