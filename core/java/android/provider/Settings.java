@@ -10886,6 +10886,11 @@ public final class Settings {
         public static final String SCREEN_ON_ANIMATION = "screen_on_animation";
 
         /**
+         * @hide
+         */
+        public static final String USB_DEFAULT_CONFIGURATION = "usb_default_configuration";
+
+        /**
          * Flag to enable use of RefactoredBackupManagerService.
          *
          * @hide
