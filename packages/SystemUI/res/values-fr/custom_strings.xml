@@ -79,11 +79,11 @@
   <string name="omnijaws_service_disabled">Le service est désactivé</string>
   <string name="omnijaws_detail_header">Météo</string>
   <string name="omnijaws_label_default">Météo</string>
-  <string name="omnijaws_current_text">Maintenant</string>
+  <string name="omnijaws_current_text">Actuellement</string>
   <string name="omnijaws_package_not_available">OmniJaws indisponible</string>
-  <string name="omnijaws_service_last_update">Dernière mise à jour :</string>
+  <string name="omnijaws_service_last_update">Dernière actualisation :</string>
   <!-- PiP Tile -->
-  <string name="quick_settings_pip_label">Picture-in-picture (PiP)</string>
+  <string name="quick_settings_pip_label">PiP</string>
   <string name="quick_settings_pip_tile_app_na">L\'app ne prend pas en charge le PiP</string>
   <string name="quick_settings_screenshot_label">Capture d’écran</string>
   <string name="quick_settings_region_screenshot_label">Capture d’écran partielle</string>

@@ -19,14 +19,57 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">Käynnistä uudelleen</string>
+  <string name="global_action_reboot_more">Käynnistä uudelleen\u2026</string>
+  <string name="global_action_reboot_sub">Järjestelmä</string>
+  <string name="global_action_reboot_recovery">Recovery-tila</string>
+  <string name="global_action_reboot_bootloader">Bootloader-tila</string>
+  <string name="global_action_dnaa">Älä näytä uudelleen</string>
+  <string name="global_action_settings">Asetukset</string>
+  <string name="qs_menu_item_columns">Sarakkeet</string>
+  <string name="qs_menu_item_columns_landscape">Sarakkeet vaakatilassa</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Nollaa</string>
+  <string name="qs_menu_item_rows">Rivit</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="lockscreen_default">Oletus</string>
+  <string name="lockscreen_hidden">Ei mitään</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
   <!-- Screenrecord Notification Ticker -->
   <!-- Screenrecord notification title -->
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Pysäytä</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <!-- Screen record notification error title -->
+  <string name="screenrecord_hide_hint">Piilota vihje</string>
+  <string name="screenrecord_show_hint">Näytä vihje</string>
+  <string name="quick_settings_network_adb_enabled_label">Käytössä</string>
+  <string name="quick_settings_network_adb_disabled_label">Pois käytöstä</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="omnijaws_service_error">Virhe</string>
+  <string name="omnijaws_service_unkown">Ei säätietoja</string>
+  <string name="omnijaws_service_error_long">Virhe ladattaessa säätietoja</string>
+  <string name="omnijaws_service_disabled">Palvelu ei ole käytössä</string>
+  <string name="omnijaws_detail_header">Sää</string>
+  <string name="omnijaws_label_default">Sää</string>
+  <string name="omnijaws_current_text">Nyt</string>
+  <string name="omnijaws_package_not_available">OmniJaws ei saatavilla</string>
+  <string name="omnijaws_service_last_update">Päivitetty viimeksi:</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">PiP</string>
+  <string name="quick_settings_pip_tile_app_na">Sovellus ei tue PiP</string>
+  <string name="quick_settings_screenshot_label">Kuvakaappaus</string>
+  <string name="quick_settings_region_screenshot_label">Osittainen kuvakaappaus</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
   <!-- Heads Up QS Tile -->
   <!-- Screenrecord QS tile -->

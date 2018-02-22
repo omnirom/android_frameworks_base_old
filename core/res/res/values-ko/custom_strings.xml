@@ -20,9 +20,19 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">부트로더로 다시 시작</string>
+  <string name="reboot_to_bootloader_message">부트로더 모드로 다시 시작하는 중\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">복구 모드로 다시 시작</string>
+  <string name="reboot_to_recovery_message">복구 모드로 다시 시작하는 중\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">시스템 다시 시작</string>
+  <string name="reboot_system_message">시스템을 다시 시작하는 중\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">패키지 서명 속이기</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">앱이 다른 앱인 것처럼 작동하도록 허용합니다. 악의적인 애플리케이션이 이 기능을 통해 개인 애플리케이션 데이터에 접근할 수도 있습니다. 주의해서 권한을 허용하세요!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">화면 고정을 해제하려면 뒤로 가기 버튼을 길게 누르세요.</string>
+  <string name="app_unpin_message">앱 고정이 해제됨</string>
 </resources>

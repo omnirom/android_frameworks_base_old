@@ -19,15 +19,84 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">다시 시작</string>
+  <string name="global_action_reboot_more">다시 시작\u2026</string>
+  <string name="global_action_reboot_sub">시스템</string>
+  <string name="global_action_reboot_recovery">복구 모드</string>
+  <string name="global_action_reboot_bootloader">부트로더</string>
+  <string name="global_action_dismissable_dialog_text">고급 다시 시작 기능이 꺼져 있습니다.\n기기를 다시 시작하시겠습니까\u003f</string>
+  <string name="global_action_dnaa">다시 보지 않기</string>
+  <string name="global_action_settings">설정</string>
+  <string name="qs_menu_item_columns">열</string>
+  <string name="qs_menu_item_columns_landscape">가로 모드 열</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">재설정</string>
+  <string name="qs_menu_item_titles">레이블 표시</string>
+  <string name="qs_menu_item_rows">행</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="tuner_quick_settings">빠른 설정</string>
+  <string name="tuner_show_brightness_mode">화면 밝기 모드 스위치 표시</string>
+  <string name="tuner_show_brightness_new">화면 밝기 슬라이더 표시</string>
+  <string name="lockscreen_default">기본값</string>
+  <string name="lockscreen_hidden">없음</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">화면이 녹화되는 중</string>
+  <string name="screenrecord_notif_final_ticker">화면이 성공적으로 녹화됨</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">화면 녹화 중</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">중지</string>
+  <string name="screenrecord_notif_completed">화면이 성공적으로 녹화됨</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">포인터 표시</string>
+  <string name="screenrecord_notif_pointer_off">포인터 숨기기</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">화면을 녹화할 수 없음</string>
+  <string name="notification_channel_screenrecord">화면 녹화</string>
+  <string name="screenrecord_hide_hint">힌트 숨기기</string>
+  <string name="screenrecord_show_hint">힌트 표시</string>
+  <string name="quick_settings_network_adb_enabled_label">사용</string>
+  <string name="quick_settings_network_adb_disabled_label">사용 안 함</string>
+  <string name="quick_settings_network_adb_label">네트워크를 통한 ADB</string>
+  <string name="quick_settings_network_adb_toast">USB 디버깅이 꺼져 있음</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="omnijaws_service_error">오류</string>
+  <string name="omnijaws_service_unkown">날씨 데이터 없음</string>
+  <string name="omnijaws_service_error_long">날씨 데이터를 불러올 수 없음</string>
+  <string name="omnijaws_service_disabled">서비스가 꺼져 있음</string>
+  <string name="omnijaws_detail_header">날씨</string>
+  <string name="omnijaws_label_default">날씨</string>
+  <string name="omnijaws_current_text">지금</string>
+  <string name="omnijaws_package_not_available">OmniJaws가 설치되어 있지 않음</string>
+  <string name="omnijaws_service_last_update">마지막 업데이트:</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">PIP</string>
+  <string name="quick_settings_pip_tile_app_na">앱이 PIP 모드를 지원하지 않음</string>
+  <string name="quick_settings_screenshot_label">스크린샷</string>
+  <string name="quick_settings_region_screenshot_label">부분 스크린샷</string>
+  <string name="quick_settings_caffeine_label">카페인</string>
+  <string name="accessibility_quick_settings_caffeine_off">카페인 끄기</string>
+  <string name="accessibility_quick_settings_caffeine_on">카페인 켜기</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">위치 보고: 배터리 절약 모드.</string>
+  <string name="accessibility_quick_settings_location_gps_only">위치 보고: 기기 전용 모드.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">위치 보고: 높은 정확성 모드.</string>
   <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">헤드업 알림</string>
   <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">화면 녹화</string>
+  <string name="quick_settings_screenrecord_lq_label">저품질 화면 녹화</string>
+  <string name="quick_settings_screenrecord_mq_label">중품질 화면 녹화</string>
+  <string name="quick_settings_screenrecord_hq_label">고품질 화면 녹화</string>
 </resources>

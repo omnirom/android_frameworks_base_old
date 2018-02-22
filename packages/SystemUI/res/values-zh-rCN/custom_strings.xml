@@ -53,16 +53,20 @@
   <string name="custom_hint">从启动器提取图标</string>
   <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">屏幕正在被录制</string>
+  <string name="screenrecord_notif_final_ticker">已成功录制屏幕</string>
   <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">正在录制屏幕</string>
   <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">停止录制</string>
+  <string name="screenrecord_notif_completed">已成功录制屏幕</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">显示指针</string>
   <string name="screenrecord_notif_pointer_off">隐藏指针</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">无法录制屏幕</string>
   <string name="notification_channel_screenrecord">屏幕录像</string>
+  <string name="screenrecord_hide_hint">隐藏提示</string>
+  <string name="screenrecord_show_hint">显示提示</string>
   <string name="quick_settings_network_adb_enabled_label">启用</string>
   <string name="quick_settings_network_adb_disabled_label">禁用</string>
   <string name="quick_settings_network_adb_label">网络 ADB 调试</string>
@@ -82,6 +86,7 @@
   <string name="quick_settings_pip_label">PiP</string>
   <string name="quick_settings_pip_tile_app_na">应用程序不支持PiP</string>
   <string name="quick_settings_screenshot_label">屏幕截图</string>
+  <string name="quick_settings_region_screenshot_label">部分截图</string>
   <string name="quick_settings_caffeine_label">Caffeine</string>
   <string name="accessibility_quick_settings_caffeine_off">Caffeine关闭</string>
   <string name="accessibility_quick_settings_caffeine_on">Caffeine开启</string>
@@ -91,5 +96,14 @@
   <string name="accessibility_quick_settings_location_gps_only">位置信息：仅限设备。</string>
   <string name="accessibility_quick_settings_location_high_accuracy">位置信息：高精确度。</string>
   <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">置顶通知</string>
+  <string name="accessibility_quick_settings_heads_up_off">顶部通知已禁用</string>
+  <string name="accessibility_quick_settings_heads_up_on">顶部通知已启用</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">顶部通知已禁用</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">顶部通知已启用</string>
   <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">屏幕录像</string>
+  <string name="quick_settings_screenrecord_lq_label">屏幕录像 LQ</string>
+  <string name="quick_settings_screenrecord_mq_label">屏幕录像 MQ</string>
+  <string name="quick_settings_screenrecord_hq_label">屏幕录像 HQ</string>
 </resources>
