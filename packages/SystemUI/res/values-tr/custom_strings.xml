@@ -72,7 +72,7 @@
   <string name="quick_settings_network_adb_label">Ağ üzerinden ADB</string>
   <string name="quick_settings_network_adb_toast">USB hatâ ayıklama fa’âl değil</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
-  <string name="screen_pinning_description_back">Bu iptal edilene kadar gösterilir. İptal etmek için Geri düğmesine dokunun ve basılı tutun.</string>
+  <string name="screen_pinning_description_back">Sabitleme kaldırılana kadar uygulama ekranda görünecektir. Sabitlemeyi kaldırmak için Geri düğmesine dokunun ve basılı tutun.</string>
   <string name="omnijaws_service_error">Hatâ</string>
   <string name="omnijaws_service_unkown">Hava durumu verisi yok</string>
   <string name="omnijaws_service_error_long">Hava durumu verisi yüklenemedi</string>
@@ -86,7 +86,7 @@
   <string name="quick_settings_pip_label">Resim içinde resim</string>
   <string name="quick_settings_pip_tile_app_na">Uygulama resim içinde resim modunu desteklemiyor</string>
   <string name="quick_settings_screenshot_label">Ekran resmi</string>
-  <string name="quick_settings_region_screenshot_label">Kısmî ekran görüntüsü</string>
+  <string name="quick_settings_region_screenshot_label">Kısmî ekran resmi</string>
   <string name="quick_settings_caffeine_label">Caffeine</string>
   <string name="accessibility_quick_settings_caffeine_off">Caffeine kapalı</string>
   <string name="accessibility_quick_settings_caffeine_on">Caffeine açık</string>

@@ -20,9 +20,19 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">Käynnistä Bootloader-tilaan</string>
+  <string name="reboot_to_bootloader_message">Käynnistetään Bootloader-tilaan\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">Käynnistä recovery-tilaan</string>
+  <string name="reboot_to_recovery_message">Käynnistetään recovery-tilaan\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">Käynnistä järjestelmä uudelleen</string>
+  <string name="reboot_system_message">Käynnistetään järjestelmä uudelleen\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Huijaa paketin allekirjoitusta</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Sallii sovellusten esittää olevan eri sovellus. Haitalliset sovellukset saattavat käytttää tätä päästäkseen käsiksi yksityisiin sovellustietoihin. Anna tämä oikeus vain harkitusti!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">Irrottaaksesi tämän näytön, kosketa ja pidä Takaisin-näppäintä pohjassa.</string>
+  <string name="app_unpin_message">Sovellus irroitettu</string>
 </resources>

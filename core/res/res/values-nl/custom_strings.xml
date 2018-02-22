@@ -24,7 +24,10 @@
   <string name="reboot_to_bootloader_message">Opnieuw opstarten naar bootloader\u2026</string>
   <!-- advanced reboot to recovery. -->
   <string name="reboot_to_recovery_title">Herstarten in recovery</string>
+  <string name="reboot_to_recovery_message">Herstarten naar recovery\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">Herstart systeem</string>
+  <string name="reboot_system_message">Systeem herstarten\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->

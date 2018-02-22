@@ -19,11 +19,35 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot_sub">System</string>
+  <string name="global_action_reboot_recovery">Gjenoppretting</string>
+  <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_dnaa">Ikke vis igjen</string>
+  <string name="qs_menu_item_columns_landscape">Kolonneutforming</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="qs_menu_item_scroll">Hurtigvalgrull</string>
+  <string name="tuner_quick_settings">Hurtiginnstillinger</string>
+  <string name="lockscreen_default">Standard</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Skjermen blir tatt opp</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Filmer skjermen</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Stopp</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Vis peker</string>
+  <string name="screenrecord_notif_pointer_off">Skjul peker</string>
   <!-- Screen record notification error title -->
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <!-- PiP Tile -->

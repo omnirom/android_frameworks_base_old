@@ -31,8 +31,8 @@
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Paket imzasını taklit et</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-  <string name="permdesc_fakePackageSignature">Uygulamaya farklı bir uygulama gibi davranma izni verir. Zararlı uygulamalar bunu hususî uygulama verilerine erişmek için kullanabilir. Bu izni çok dikkatli bir şekilde verin!</string>
+  <string name="permdesc_fakePackageSignature">Uygulamaya farklı bir uygulama gibi davranma izni verir. Zararlı uygulamalar bunu husûsî uygulama verilerine erişmek için kullanabilir. Bu izni çok dikkatli bir şekilde verin!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
-  <string name="lock_to_app_toast_back">Bu ekran sabitlemesini iptal etmek için, Geri düğmesine dokunun ve basılı tutun.</string>
-  <string name="app_unpin_message">Uygulama sabitlemesi iptal edildi</string>
+  <string name="lock_to_app_toast_back">Bu ekran sabitlemesini kaldırmak için, Geri düğmesine dokunun ve basılı tutun.</string>
+  <string name="app_unpin_message">Uygulama sabitlemesi kaldırıldı</string>
 </resources>

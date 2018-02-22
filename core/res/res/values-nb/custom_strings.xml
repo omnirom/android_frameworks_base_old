@@ -25,6 +25,9 @@
   <string name="reboot_to_recovery_title">Omstart til gjenoppretting</string>
   <!-- advanced reboot system -->
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Forfalske pakke signatur</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Tillater appen å late som å være en annen app. Skadelige programmer kan bruke dette til å få tilgang til privat programdata. Tillat dette med forsiktighet!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">For å løsne denne skjermen, trykk og hold Tilbake-knappen.</string>
 </resources>

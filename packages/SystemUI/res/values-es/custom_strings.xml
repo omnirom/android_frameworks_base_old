@@ -53,16 +53,20 @@
   <string name="custom_hint">Desliza desde el icono para lanzar</string>
   <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">La pantalla está siendo grabada</string>
+  <string name="screenrecord_notif_final_ticker">Pantalla grababa con éxito</string>
   <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Grabando pantalla</string>
   <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Detener</string>
+  <string name="screenrecord_notif_completed">Pantalla grababa con éxito</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Mostrar puntero</string>
   <string name="screenrecord_notif_pointer_off">Ocultar puntero</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">No se puede grabar la pantalla</string>
   <string name="notification_channel_screenrecord">Grabaciones de pantalla</string>
+  <string name="screenrecord_hide_hint">Ocultar pista</string>
+  <string name="screenrecord_show_hint">Mostrar pista</string>
   <string name="quick_settings_network_adb_enabled_label">Habilitado</string>
   <string name="quick_settings_network_adb_disabled_label">Deshabilitado</string>
   <string name="quick_settings_network_adb_label">ADB sobre red</string>
@@ -82,10 +86,24 @@
   <string name="quick_settings_pip_label">PiP</string>
   <string name="quick_settings_pip_tile_app_na">La aplicación no soporta PiP</string>
   <string name="quick_settings_screenshot_label">Captura de pantalla</string>
+  <string name="quick_settings_region_screenshot_label">Captura de pantalla parcial</string>
   <string name="quick_settings_caffeine_label">Cafeína</string>
   <string name="accessibility_quick_settings_caffeine_off">Cafeína activo</string>
   <string name="accessibility_quick_settings_caffeine_on">Cafeína inactivo</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Informe de ubicación: Modo de ahorro de batería.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Informe de ubicación: modo solo dispositivo.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Informe de ubicación: modo de alta precisión.</string>
   <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Notificaciones flotantes</string>
+  <string name="accessibility_quick_settings_heads_up_off">Notificaciones flotantes deshabilitadas.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Notificaciones flotantes permitidas.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Notificaciones flotantes desactivadas.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Notificaciones flotantes activadas.</string>
   <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Grabar pantalla</string>
+  <string name="quick_settings_screenrecord_lq_label">Grabar pantalla LQ</string>
+  <string name="quick_settings_screenrecord_mq_label">Grabar pantalla MQ</string>
+  <string name="quick_settings_screenrecord_hq_label">Grabar pantalla HQ</string>
 </resources>
