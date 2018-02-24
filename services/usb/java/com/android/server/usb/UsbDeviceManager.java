@@ -1245,7 +1245,7 @@ public class UsbDeviceManager {
             if (UsbManager.containsFunction(func, UsbManager.USB_FUNCTION_ADB)) {
                 return UsbManager.USB_FUNCTION_ADB;
             } else {
-                return UsbManager.USB_FUNCTION_NONE;
+                return UsbManager.USB_FUNCTION_MTP;
             }
         }
 
@@ -1259,7 +1259,10 @@ public class UsbDeviceManager {
                 return getDefaultFunctionsSystem();
             }
             if (DEBUG) Slog.i(TAG, "getDefaultFunctions settings = " + func);
-            if (!func.equals(UsbManager.USB_FUNCTION_NONE)) {
+            if (func.equals(UsbManager.USB_FUNCTION_NONE)) {
+                mUsbDataUnlocked = false;
+                func = UsbManager.USB_FUNCTION_MTP;
+            } else {
                 mUsbDataUnlocked = true;
             }
             return func;
