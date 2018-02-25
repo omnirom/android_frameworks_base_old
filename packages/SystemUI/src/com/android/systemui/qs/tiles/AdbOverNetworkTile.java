@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
@@ -58,6 +59,9 @@ public class AdbOverNetworkTile extends QSTileImpl<BooleanState> {
         if (!isAdbEnabled()) {
            Toast.makeText(mContext, mContext.getString(
                     R.string.quick_settings_network_adb_toast), Toast.LENGTH_LONG).show();
+        } else if (isOnSecureKeyguard()) {
+           Toast.makeText(mContext, mContext.getString(
+                    R.string.quick_settings_network_secure_toast), Toast.LENGTH_LONG).show();
         } else {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
                     Settings.Secure.ADB_PORT, isAdbNetworkEnabled() ? -1 : 5555,
@@ -128,6 +132,12 @@ public class AdbOverNetworkTile extends QSTileImpl<BooleanState> {
     private boolean isAdbNetworkEnabled() {
         return Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.ADB_PORT, 0, UserHandle.USER_CURRENT) > 0;
+    }
+
+    private boolean isOnSecureKeyguard() {
+        KeyguardManager keyguardManager = (KeyguardManager)
+                mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        return keyguardManager.isKeyguardLocked() && keyguardManager.isKeyguardSecure();
     }
 
     private ContentObserver mObserver = new ContentObserver(mHandler) {
