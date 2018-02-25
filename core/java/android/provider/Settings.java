@@ -10891,6 +10891,11 @@ public final class Settings {
         public static final String USB_DEFAULT_CONFIGURATION = "usb_default_configuration";
 
         /**
+         * @hide
+         */
+        public static final String USB_PARANOIA_CONNECT = "usb_paranoia_connect";
+
+        /**
          * Flag to enable use of RefactoredBackupManagerService.
          *
          * @hide
