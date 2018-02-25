@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ad5dbaab_f875c935",
+        "filename": "services/core/java/com/android/server/locksettings/LockSettingsStorage.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-02-25T13:02:58Z",
+      "side": 1,
+      "message": "actually - the name of the variable is completely wrong\nthis does not \"skip\" secure discard but DONT skip\nso either change logic or use a better name",
+      "revId": "7323853442b0af4ccc7846d17d443de12c667ad5",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
