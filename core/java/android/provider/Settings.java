@@ -4455,6 +4455,11 @@ public final class Settings {
                 "statusbar_battery_force_percent";
 
         /**
+         * @hide
+         */
+        public static final String BUTTON_HOME_WAKE_SCREEN = "button_home_wake_screen";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -4692,6 +4697,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(BUTTON_BACK_KILL_TIMEOUT);
             PRIVATE_SETTINGS.add(BUTTON_BACK_KILL_ENABLE);
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_FORCE_PERCENT);
+            PRIVATE_SETTINGS.add(BUTTON_HOME_WAKE_SCREEN);
         }
 
         /**

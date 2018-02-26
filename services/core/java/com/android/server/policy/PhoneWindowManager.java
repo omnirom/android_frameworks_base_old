@@ -828,6 +828,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mDoubleTapOnHomeBehaviorCustom;
     private DeviceKeyHandler mDeviceKeyHandler;
     private boolean mHardwareKeysDisable;
+    private boolean mHomeWake;
     private int mUserRotationAngles = -1;
     private boolean mVolumeWakeSupport;
     private int mLongPressOnMenuBehavior;
@@ -1103,6 +1104,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BUTTON_BACK_KILL_ENABLE), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_HOME_WAKE_SCREEN), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -2632,6 +2636,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             mVolumeWakeSupport = Settings.System.getIntForUser(resolver,
                     Settings.System.VOLUME_BUTTON_WAKE, 0,
+                    UserHandle.USER_CURRENT) != 0;
+
+            mHomeWake = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_HOME_WAKE_SCREEN, 0,
                     UserHandle.USER_CURRENT) != 0;
 
             mVolumeMusicControl = Settings.System.getIntForUser(resolver,
@@ -6461,7 +6469,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int result;
         boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
                 || event.isWakeKey()
-                || isCustomWakeKey(keyCode);
+                || isCustomWakeKey(keyCode)
+                || isHomeWakeKey(keyCode);
 
         if (interactive || (isInjected && !isWakeKey)) {
             // When the device is interactive or the key is injected pass the
@@ -6970,6 +6979,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * is always considered a wake key.
      */
     private boolean isWakeKeyWhenScreenOff(int keyCode) {
+        if (isHomeWakeKey(keyCode)){
+            return true;
+        }
+
         if (isCustomWakeKey(keyCode)){
             return true;
         }
@@ -9245,6 +9258,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mAppSwitchConsumed = true;
         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
         performKeyAction(mLongPressOnAppSwitchBehavior);
+    }
+
+    private boolean isHomeWakeKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_HOME:
+                if (DEBUG_WAKEUP) Log.i(TAG, "isOffscreenWakeKey: mHomeWake " + mHomeWake);
+                return mHomeWake;
+        }
+        return false;
     }
 
     private boolean isCustomWakeKey(int keyCode) {
