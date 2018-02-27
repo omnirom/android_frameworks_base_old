@@ -66,4 +66,7 @@
   <java-symbol type="bool" name="config_notificationTinting_override" />
 
   <java-symbol type="string" name="def_wireless_charging_started_sound" />
+
+  <!-- System fonts -->
+  <java-symbol type="array" name="config_fontPackages" />
 </resources>
