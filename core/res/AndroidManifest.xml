@@ -3578,6 +3578,13 @@
     <permission android:name="android.permission.INSTANT_APP_FOREGROUND_SERVICE"
         android:protectionLevel="signature|development|instant|appop" />
 
+    <!-- Allows an application to access the font manager
+         @hide -->
+    <permission android:name="android.permission.ACCESS_FONT_MANAGER"
+        android:label="@string/permlab_accessFontManager"
+        android:description="@string/permdesc_accessFontManager"
+        android:protectionLevel="signatureOrSystem" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
