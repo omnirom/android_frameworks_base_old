@@ -224,7 +224,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
     public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         mCircleWidth = (int) (17 * metrics.density + 0.5f);
-        mStrokeWidth = (int) (mCircleWidth / 6.5f);
+        mStrokeWidth = (int) (mCircleWidth / 9f);
         mBatteryPaint.setStrokeWidth(mStrokeWidth);
         mFramePaint.setStrokeWidth(mStrokeWidth);
         mPercentOffsetY = (int) (0.4 * metrics.density + 0.5f);
