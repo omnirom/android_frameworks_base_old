@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a408b2b_6770c32d",
+        "filename": "core/java/android/app/Notification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2822,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-02-28T17:18:23Z",
+      "side": 1,
+      "message": "To make it as easy to see I would simply comment out that\nand just add mInNightMode\u003dtrue",
+      "revId": "5aec2543b81b556b23eb61a8d2f9b15d5c18b4f3",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
