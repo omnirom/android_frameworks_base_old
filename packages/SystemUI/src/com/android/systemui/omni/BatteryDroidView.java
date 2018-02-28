@@ -98,7 +98,7 @@ public class BatteryDroidView extends AbstractBatteryView {
         mBatteryPaint.setStyle(Paint.Style.STROKE);
         mBatteryPaint.setPathEffect(null);
 
-        mDroid = getResources().getDrawable(R.drawable.status_bar_logo);
+        mDroid = getResources().getDrawable(R.drawable.omni_logo_borderless);
 
         doUpdateStyle();
     }
@@ -261,8 +261,8 @@ public class BatteryDroidView extends AbstractBatteryView {
     @Override
     public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mCircleWidth = (int) (17 * metrics.density + 0.5f);
-        mStrokeWidth = (int) (mCircleWidth / 6.5f);
+        mCircleWidth = (int) (16 * metrics.density + 0.5f);
+        mStrokeWidth = (int) (mCircleWidth / 7f);
         mBatteryPaint.setStrokeWidth(mStrokeWidth);
         mFramePaint.setStrokeWidth(mStrokeWidth);
         mPercentOffsetY = (int) (0.4 * metrics.density + 0.5f);
