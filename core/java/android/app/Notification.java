@@ -33,7 +33,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ShortcutInfo;
 import android.content.res.ColorStateList;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -2819,9 +2818,11 @@ public class Notification implements Parcelable
             mTintActionButtons = res.getBoolean(R.bool.config_tintNotificationActionButtons);
 
             if (res.getBoolean(R.bool.config_enableNightMode)) {
-                Configuration currentConfig = res.getConfiguration();
+                // UI_MODE_NIGHT doesnt seem to be ready, so just listen to config
+                mInNightMode = true;
+                /*Configuration currentConfig = res.getConfiguration();
                 mInNightMode = (currentConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
-                        == Configuration.UI_MODE_NIGHT_YES;
+                        == Configuration.UI_MODE_NIGHT_YES;*/
             }
 
             if (toAdopt == null) {
