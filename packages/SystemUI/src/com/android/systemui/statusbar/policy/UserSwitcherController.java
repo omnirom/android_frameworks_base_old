@@ -142,9 +142,9 @@ public class UserSwitcherController {
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(SIMPLE_USER_SWITCHER_GLOBAL_SETTING), true,
                 mSettingsObserver);
-        mContext.getContentResolver().registerContentObserver(
+        /*mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.ADD_USERS_WHEN_LOCKED), true,
-                mSettingsObserver);
+                mSettingsObserver);*/
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(
                         Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED),
@@ -623,8 +623,8 @@ public class UserSwitcherController {
         public void onChange(boolean selfChange) {
             mSimpleUserSwitcher = Settings.Global.getInt(mContext.getContentResolver(),
                     SIMPLE_USER_SWITCHER_GLOBAL_SETTING, 0) != 0;
-            mAddUsersWhenLocked = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0;
+            /*mAddUsersWhenLocked = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0;*/
             refreshUsers(UserHandle.USER_NULL);
         };
     };
