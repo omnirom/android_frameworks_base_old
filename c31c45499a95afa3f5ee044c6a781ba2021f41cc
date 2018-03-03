@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3333ec59_9bfdc30c",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationPanelView.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-03-03T21:45:54Z",
+      "side": 1,
+      "message": "unneeded change",
+      "revId": "c31c45499a95afa3f5ee044c6a781ba2021f41cc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
