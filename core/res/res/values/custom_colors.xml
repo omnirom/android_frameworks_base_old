@@ -19,18 +19,18 @@
 */
 -->
 <resources>
-    <color name="omni_color1">@color/black</color>
-    <color name="omni_color2">@color/black</color>
-    <color name="omni_color3">@color/black</color>
-    <color name="omni_color4">@color/black</color>
-    <color name="omni_color5">@color/black</color>
-    <color name="omni_color6">@color/black</color>
-    <color name="omni_color7">@color/black</color>
-    <color name="omni_color8">@color/black</color>
-    <color name="omni_color9">@color/black</color>
-    <color name="omni_text1">@color/black</color>
-    <color name="omni_text2">@color/black</color>
-    <color name="omni_text3">@color/black</color>
+    <color name="omni_color1">@color/primary_device_default_settings_light</color>
+    <color name="omni_color2">@color/secondary_device_default_settings_light</color>
+    <color name="omni_color3">@color/accent_device_default_light</color>
+    <color name="omni_color4">@color/accent_device_default_dark</color>
+    <color name="omni_color5">@color/accent_device_default_dark</color>
+    <color name="omni_color6">#8A000000</color>
+    <color name="omni_color7">@color/background_floating_material_light</color>
+    <color name="omni_color8"></color>
+    <color name="omni_color9">#E6EEEEEE</color>
+    <color name="omni_text1">@color/primary_text_material_light</color>
+    <color name="omni_text2">@color/secondary_text_material_light</color>
+    <color name="omni_text3">@color/secondary_text_material_light</color>
     <color name="omni_text4">#de000000</color>
 
     <!-- Moved here from Settings (Omni) -->
