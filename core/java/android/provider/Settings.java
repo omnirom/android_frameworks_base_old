@@ -7861,6 +7861,12 @@ public final class Settings {
         public static final String LOCK_QS_DISABLED = "lockscreen_qs_disabled";
 
         /**
+         * @hide
+         */
+        public static final String TORCH_DOUBLE_TAP_POWER_GESTURE_ENABLED =
+                "torch_double_tap_power_gesture_enabled";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
