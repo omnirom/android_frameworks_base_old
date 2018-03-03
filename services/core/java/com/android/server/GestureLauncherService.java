@@ -64,7 +64,7 @@ public class GestureLauncherService extends SystemService {
      * Time in milliseconds in which the power button must be pressed twice so it will be considered
      * as a camera launch.
      */
-    @VisibleForTesting static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
+    @VisibleForTesting static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 400;
 
     /**
      * Interval in milliseconds in which the power button must be depressed in succession to be
@@ -129,6 +129,9 @@ public class GestureLauncherService extends SystemService {
     private long mLastPowerDown;
     private int mPowerButtonConsecutiveTaps;
 
+    // omni additions start
+    private boolean mTorchDoubleTapPowerEnabled;
+
     public GestureLauncherService(Context context) {
         this(context, new MetricsLogger());
     }
@@ -159,6 +162,7 @@ public class GestureLauncherService extends SystemService {
                     "GestureLauncherService");
             updateCameraRegistered();
             updateCameraDoubleTapPowerEnabled();
+            updateTorchDoubleTapPowerEnabled();
 
             mUserId = ActivityManager.getCurrentUser();
             mContext.registerReceiver(mUserReceiver, new IntentFilter(Intent.ACTION_USER_SWITCHED));
@@ -175,6 +179,9 @@ public class GestureLauncherService extends SystemService {
                 false, mSettingObserver, mUserId);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED),
+                false, mSettingObserver, mUserId);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.TORCH_DOUBLE_TAP_POWER_GESTURE_ENABLED),
                 false, mSettingObserver, mUserId);
     }
 
@@ -198,6 +205,13 @@ public class GestureLauncherService extends SystemService {
         boolean enabled = isCameraDoubleTapPowerSettingEnabled(mContext, mUserId);
         synchronized (this) {
             mCameraDoubleTapPowerEnabled = enabled;
+        }
+    }
+
+    private void updateTorchDoubleTapPowerEnabled() {
+        boolean enabled = isTorchDoubleTapPowerSettingEnabled(mContext, mUserId);
+        synchronized (this) {
+            mTorchDoubleTapPowerEnabled = enabled;
         }
     }
 
@@ -325,6 +339,11 @@ public class GestureLauncherService extends SystemService {
                         Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED_DEFAULT, userId) != 0);
     }
 
+    public static boolean isTorchDoubleTapPowerSettingEnabled(Context context, int userId) {
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                        Settings.Secure.TORCH_DOUBLE_TAP_POWER_GESTURE_ENABLED, 0, userId) != 0;
+    }
+
     /**
      * Whether to enable the camera launch gesture.
      */
@@ -350,8 +369,7 @@ public class GestureLauncherService extends SystemService {
      * Whether GestureLauncherService should be enabled according to system properties.
      */
     public static boolean isGestureLauncherEnabled(Resources resources) {
-        return isCameraLaunchEnabled(resources) || isCameraDoubleTapPowerEnabled(resources) ||
-                isCameraLiftTriggerEnabled(resources);
+        return true;
     }
 
     public boolean interceptPowerKeyDown(KeyEvent event, boolean interactive,
@@ -361,7 +379,7 @@ public class GestureLauncherService extends SystemService {
         long powerTapInterval;
         synchronized (this) {
             powerTapInterval = event.getEventTime() - mLastPowerDown;
-            if (mCameraDoubleTapPowerEnabled
+            if ((mCameraDoubleTapPowerEnabled || mTorchDoubleTapPowerEnabled)
                     && powerTapInterval < CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS) {
                 launched = true;
                 intercept = interactive;
@@ -378,18 +396,26 @@ public class GestureLauncherService extends SystemService {
                     " consecutive power button taps detected");
         }
         if (launched) {
-            Slog.i(TAG, "Power button double tap gesture detected, launching camera. Interval="
+            if (mTorchDoubleTapPowerEnabled) {
+                Slog.i(TAG, "Power button double tap gesture detected, toggle torch. Interval="
                     + powerTapInterval + "ms");
-            launched = handleCameraGesture(false /* useWakelock */,
-                    StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
-            if (launched) {
-                mMetricsLogger.action(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE,
+            } else if (mCameraDoubleTapPowerEnabled) {
+                Slog.i(TAG, "Power button double tap gesture detected, launching camera. Interval="
+                        + powerTapInterval + "ms");
+                launched = handleCameraGesture(false /* useWakelock */,
+                        StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
+                if (launched) {
+                    mMetricsLogger.action(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE,
                         (int) powerTapInterval);
+                }
             }
         }
         mMetricsLogger.histogram("power_consecutive_short_tap_count", mPowerButtonConsecutiveTaps);
         mMetricsLogger.histogram("power_double_tap_interval", (int) powerTapInterval);
         outLaunched.value = launched;
+        if (mTorchDoubleTapPowerEnabled) {
+            return launched;
+        }
         return intercept && launched;
     }
 
@@ -437,6 +463,7 @@ public class GestureLauncherService extends SystemService {
                 registerContentObservers();
                 updateCameraRegistered();
                 updateCameraDoubleTapPowerEnabled();
+                updateTorchDoubleTapPowerEnabled();
             }
         }
     };
@@ -446,6 +473,7 @@ public class GestureLauncherService extends SystemService {
             if (userId == mUserId) {
                 updateCameraRegistered();
                 updateCameraDoubleTapPowerEnabled();
+                updateTorchDoubleTapPowerEnabled();
             }
         }
     };
