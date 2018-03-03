@@ -1429,11 +1429,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         GestureLauncherService gestureService = LocalServices.getService(
                 GestureLauncherService.class);
         boolean gesturedServiceIntercepted = false;
+        boolean gestureCameraLaunch = true;
         if (gestureService != null) {
+            final boolean torchPowerGestureEnabled = gestureService.isTorchDoubleTapPowerSettingEnabled(mContext, mCurrentUserId);
             gesturedServiceIntercepted = gestureService.interceptPowerKeyDown(event, interactive,
                     mTmpBoolean);
-            if (mTmpBoolean.value && mRequestedOrGoingToSleep) {
-                mCameraGestureTriggeredDuringGoingToSleep = true;
+            // torch it
+            if (gesturedServiceIntercepted && torchPowerGestureEnabled) {
+                IStatusBarService service = getStatusBarService();
+                if (service != null) {
+                    try {
+                        service.toggleCameraFlash();
+                    } catch (RemoteException e) {
+                        // do nothing.
+                    }
+                }
+            // camera
+            } else {
+                if (mTmpBoolean.value && mRequestedOrGoingToSleep) {
+                    mCameraGestureTriggeredDuringGoingToSleep = true;
+                }
             }
         }
 
