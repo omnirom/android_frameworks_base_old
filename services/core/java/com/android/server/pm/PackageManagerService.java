@@ -575,7 +575,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final String PACKAGE_SCHEME = "package";
 
-    private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
+    private static final String[] PACKAGE_OVERLAY_DIRS = { "/system/overlay", "/vendor/overlay" };
 
     private static final String PRODUCT_OVERLAY_DIR = "/product/overlay";
 
@@ -2619,13 +2619,15 @@ public class PackageManagerService extends IPackageManager.Stub
             // Collect vendor/product overlay packages. (Do this before scanning any apps.)
             // For security and version matching reason, only consider
             // overlay packages if they reside in the right directory.
-            scanDirTracedLI(new File(VENDOR_OVERLAY_DIR),
-                    mDefParseFlags
+            for (String overlayDir : PACKAGE_OVERLAY_DIRS) {
+                scanDirTracedLI(new File(overlayDir), mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
                     scanFlags
                     | SCAN_AS_SYSTEM
                     | SCAN_AS_VENDOR,
                     0);
+            }
+
             scanDirTracedLI(new File(PRODUCT_OVERLAY_DIR),
                     mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
