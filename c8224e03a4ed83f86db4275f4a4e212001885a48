@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "507e3526_783609d0",
+        "filename": "packages/SystemUI/res-keyguard/layout/keyguard_status_view.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-03-04T12:17:35Z",
+      "side": 1,
+      "message": "add the same battery container here as for normal lock screen layout",
+      "revId": "c8224e03a4ed83f86db4275f4a4e212001885a48",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "43ec14df_b9db109d",
+        "filename": "packages/SystemUI/src/com/android/keyguard/KeyguardStatusView.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-03-04T12:17:35Z",
+      "side": 1,
+      "message": "add BatteryViewManager",
+      "revId": "c8224e03a4ed83f86db4275f4a4e212001885a48",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
