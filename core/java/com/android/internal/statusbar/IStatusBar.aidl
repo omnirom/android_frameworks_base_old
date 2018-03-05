@@ -127,5 +127,6 @@ oneway interface IStatusBar
     void showShutdownUi(boolean isReboot, String reason, boolean rebootCustom);
 
     void toggleCameraFlash();
+    void toggleCameraFlashWithParams(int params);
 
 }
