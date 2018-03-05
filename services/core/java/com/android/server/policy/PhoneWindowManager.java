@@ -1439,7 +1439,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 IStatusBarService service = getStatusBarService();
                 if (service != null) {
                     try {
-                        service.toggleCameraFlash();
+                        service.toggleCameraFlashWithParams(1);
                     } catch (RemoteException e) {
                         // do nothing.
                     }
