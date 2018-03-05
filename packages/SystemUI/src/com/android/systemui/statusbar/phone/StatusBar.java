@@ -3192,6 +3192,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void toggleCameraFlash() {
+        toggleCameraFlashWithParams(0);
+    }
+
+    @Override
+    public void toggleCameraFlashWithParams(int params) {
         if (DEBUG) {
             Log.d(TAG, "Toggling camera flashlight");
         }
@@ -3199,6 +3204,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mFlashlightController.initFlashLight();
             if (mFlashlightController.hasFlashlight() && mFlashlightController.isAvailable()) {
                 mFlashlightController.setFlashlight(!mFlashlightController.isEnabled());
+                if (params != 0) {
+                    vibrateForCameraGesture();
+                }
             }
         }
     }
