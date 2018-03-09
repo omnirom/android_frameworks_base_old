@@ -278,6 +278,9 @@
                 <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter android:priority="0">
+                <action android:name="com.android.settings.action.SETTINGS" />
+            </intent-filter>
             <meta-data android:name="com.android.settings.category"
                        android:value="com.android.settings.category.ia.omni" />
             <meta-data android:name="com.android.settings.summary"
