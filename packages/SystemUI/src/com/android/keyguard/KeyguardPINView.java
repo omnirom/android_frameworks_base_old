@@ -167,6 +167,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         } else {
             mPasswordEntry.setQuickUnlockListener(null);
         }
+
+        setButtonVisibility(getOkButton(), !quickUnlock);
     }
 
     @Override
