@@ -106,6 +106,7 @@ public class Clock extends TextView implements DemoMode, CommandQueue.Callbacks,
     private boolean mShowSeconds;
     private Handler mSecondsHandler;
     private boolean mForceHideDate;
+    protected boolean mForceHide;
 
     public Clock(Context context) {
         this(context, null);
@@ -131,6 +132,10 @@ public class Clock extends TextView implements DemoMode, CommandQueue.Callbacks,
 
     public void setForceHideDate(boolean enabled) {
         mForceHideDate = enabled;
+    }
+
+    public void setForceHide(boolean enabled) {
+        mForceHide = enabled;
     }
 
     @Override
@@ -209,9 +214,9 @@ public class Clock extends TextView implements DemoMode, CommandQueue.Callbacks,
         updateClockVisibility();
     }
 
-    protected void updateClockVisibility() {
+    public void updateClockVisibility() {
         boolean visible = mClockStyle == STYLE_CLOCK_RIGHT && mShowClock
-                && mClockVisibleByPolicy && mClockVisibleByUser;
+                && mClockVisibleByPolicy && mClockVisibleByUser && !mForceHide;
         Dependency.get(IconLogger.class).onIconVisibility("clock", visible);
         setVisibility(visible ? View.VISIBLE : View.GONE);
     }
