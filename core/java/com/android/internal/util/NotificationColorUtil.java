@@ -40,6 +40,8 @@ import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.R;
+
 import java.util.Arrays;
 import java.util.WeakHashMap;
 
@@ -489,6 +491,8 @@ public class NotificationColorUtil {
         final int resolvedColor = resolveColor(context, notificationColor);
 
         int color = resolvedColor;
+
+        isDark = isDark || getDarkNotificationTinting(context);
         color = NotificationColorUtil.ensureTextContrast(color, backgroundColor, isDark);
 
         if (color != resolvedColor) {
@@ -621,6 +625,30 @@ public class NotificationColorUtil {
 
     public static boolean isColorLight(int backgroundColor) {
         return calculateLuminance(backgroundColor) > 0.5f;
+    }
+
+    public static boolean getDarkNotificationTinting(Context context) {
+        boolean darkNotificationTinting = context.getResources().getBoolean(
+                R.bool.config_useDarkBgNotificationIconTextTinting);
+        boolean override = context.getResources().getBoolean(
+                R.bool.config_notificationTinting_override);
+        if (override) {
+            darkNotificationTinting = context.getResources().getBoolean(
+                    R.bool.config_useDarkBgNotificationTinting_override);
+        }
+        return darkNotificationTinting;
+    }
+
+    public static boolean getNightModeNotification(Context context) {
+        boolean nightModeNotification = context.getResources().getBoolean(
+                R.bool.config_enableNightMode);
+        boolean override = context.getResources().getBoolean(
+                R.bool.config_notificationTinting_override);
+        if (override) {
+            nightModeNotification = context.getResources().getBoolean(
+                    R.bool.config_useDarkBgNotificationTinting_override);
+        }
+        return nightModeNotification;
     }
 
     /**
