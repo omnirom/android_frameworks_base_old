@@ -59,7 +59,11 @@
   <!-- back kill -->
   <java-symbol type="integer" name="config_backKillTimeout" />
   <java-symbol type="string" name="app_killed_message" />
+
   <!-- Poor man theme force tint -->
   <java-symbol type="bool" name="config_useDarkBgNotificationIconTextTinting" />
+  <java-symbol type="bool" name="config_useDarkBgNotificationTinting_override" />
+  <java-symbol type="bool" name="config_notificationTinting_override" />
+
   <java-symbol type="string" name="def_wireless_charging_started_sound" />
 </resources>
