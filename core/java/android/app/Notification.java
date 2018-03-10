@@ -2824,7 +2824,7 @@ public class Notification implements Parcelable
                         == Configuration.UI_MODE_NIGHT_YES;
             }
             // UI_MODE_NIGHT doesnt seem to be ready, so just listen to config
-            mInNightMode = res.getBoolean(R.bool.config_enableNightMode);
+            mInNightMode = getActiveEnableNightMode();
 
             if (toAdopt == null) {
                 mN = new Notification();
@@ -2875,6 +2875,15 @@ public class Notification implements Parcelable
                 }
 
             }
+        }
+
+        private boolean getActiveEnableNightMode() {
+            Resources res = mContext.getResources();
+            boolean override = res.getBoolean(R.bool.config_notificationTinting_override);
+            if (override) {
+                return res.getBoolean(R.bool.config_useDarkBgNotificationTinting_override);
+            }
+            return res.getBoolean(R.bool.config_enableNightMode);
         }
 
         private NotificationColorUtil getColorUtil() {
@@ -4797,13 +4806,21 @@ public class Notification implements Parcelable
 
         private CharSequence processLegacyText(CharSequence charSequence, boolean ambient) {
             boolean isAlreadyLightText = isLegacy() || textColorsNeedInversion();
-            boolean wantLightText = ambient || mContext.getResources().getBoolean(
-                    R.bool.config_useDarkBgNotificationIconTextTinting);
+            boolean wantLightText = ambient || getActiveDarkBgNotificationIconTinting();
             if (isAlreadyLightText != wantLightText) {
                 return getColorUtil().invertCharSequenceColors(charSequence);
             } else {
                 return charSequence;
             }
+        }
+
+        private boolean getActiveDarkBgNotificationIconTinting() {
+            Resources res = mContext.getResources();
+            boolean override = res.getBoolean(R.bool.config_notificationTinting_override);
+            if (override) {
+                return res.getBoolean(R.bool.config_useDarkBgNotificationTinting_override);
+            }
+            return res.getBoolean(R.bool.config_useDarkBgNotificationIconTextTinting);
         }
 
         /**
