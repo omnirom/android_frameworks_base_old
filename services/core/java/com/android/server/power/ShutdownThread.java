@@ -189,7 +189,7 @@ public final class ShutdownThread extends Thread {
             if (sConfirmDialog != null) {
                 sConfirmDialog.dismiss();
             }
-            sConfirmDialog = new AlertDialog.Builder(context)
+            sConfirmDialog = new AlertDialog.Builder(context, android.R.style.Theme_DeviceDefault_Light_Dialog)
                     .setTitle(mRebootSafeMode
                             ? com.android.internal.R.string.reboot_safemode_title
                             : com.android.internal.R.string.power_off)
