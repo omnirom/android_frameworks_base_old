@@ -72,7 +72,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     // omni additions start
     private View mOmniLogo;
     private boolean mShowLogo;
-    private boolean mShowNetworkTraffic;
     private final Handler mHandler = new Handler();
     private NetworkTraffic mNetworkTraffic;
     private View mClock;
@@ -295,13 +294,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             animateHide(mOmniLogo, animate, true);
         }
 
-
         if (((Clock)mLeftClock).isEnabled()) {
             animateHide(mLeftClock, animate, true);
-        }
-
-        if (mShowNetworkTraffic) {
-            animateHide(mNetworkTraffic, animate, true);
         }
     }
 
