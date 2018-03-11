@@ -1487,6 +1487,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mKeyguardUserSwitcher.onDensityOrFontScaleChanged();
         }
         mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
+        if (mKeyguardStatusBar != null) mKeyguardStatusBar.onDensityOrFontScaleChanged();
 
         reevaluateStyles();
     }

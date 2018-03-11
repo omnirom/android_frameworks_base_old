@@ -362,4 +362,8 @@ public class KeyguardStatusBarView extends RelativeLayout
             ((DarkReceiver) v).onDarkChanged(tintArea, intensity, color);
         }
     }
+
+    public void onDensityOrFontScaleChanged() {
+        mBatteryViewManager.onDensityOrFontScaleChanged();
+    }
 }
