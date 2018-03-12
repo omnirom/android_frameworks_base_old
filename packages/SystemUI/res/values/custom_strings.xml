@@ -157,4 +157,6 @@
     <string name="qs_show_battery">Show battery</string>
     <string name="qs_show_carrier">Show carrier names</string>
     <string name="qs_show_clock">Show clock</string>
+    <string name="qs_show_mini">Mini mode</string>
+    <string name="qs_header">Header</string>
 </resources>
