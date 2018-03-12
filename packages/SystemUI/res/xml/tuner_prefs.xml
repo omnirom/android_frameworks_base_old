@@ -37,6 +37,9 @@
             android:title="@string/tuner_show_brightness_side_buttons"
             sysui:defValue="true" />
 
+        <PreferenceCategory
+            android:title="@string/qs_header" />
+
         <com.android.systemui.tuner.TunerSwitch
             android:key="qs_show_carrier"
             android:title="@string/qs_show_carrier"
@@ -52,6 +55,10 @@
             android:title="@string/qs_show_battery"
             sysui:defValue="true" />
 
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_show_mini"
+            android:title="@string/qs_show_mini"
+            sysui:defValue="false" />
     </PreferenceScreen>
     
     <PreferenceScreen

@@ -49,6 +49,7 @@
     <include layout="@layout/quick_status_bar_header_system_icons" />
 
     <com.android.systemui.qs.HorizontalClippingLinearLayout
+            android:id="@+id/quick_qs_panel_scroll_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
