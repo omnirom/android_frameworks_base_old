@@ -47,7 +47,7 @@ import java.util.Collection;
  * Version of QSPanel that only shows N Quick Tiles in the QS Header.
  */
 public class QuickQSPanel extends QSPanel {
-
+    private static final String TAG = "QuickQSPanel";
     public static int NUM_QUICK_TILES_DEFAULT = 6;
     public static final int NUM_QUICK_TILES_ALL = 666;
 
@@ -135,6 +135,9 @@ public class QuickQSPanel extends QSPanel {
         if (key.equals(QS_SHOW_BRIGHTNESS_MODE)) {
             super.onTuningChanged(key, "0");
         }
+        if (key.equals(QS_SHOW_BRIGHTNESS_SIDE_BUTTONS)) {
+            super.onTuningChanged(key, "0");
+        }
     }
 
     @Override
@@ -172,16 +175,10 @@ public class QuickQSPanel extends QSPanel {
     }
 
     private void updateColumns() {
-        final Resources res = mContext.getResources();
-        boolean isPortrait = res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-        int columns = Settings.System.getIntForUser(
-                mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS, NUM_QUICK_TILES_DEFAULT,
+        int qsColumns = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QS_QUICKBAR_COLUMNS, NUM_QUICK_TILES_DEFAULT,
                 UserHandle.USER_CURRENT);
-        int columnsLandscape = Settings.System.getIntForUser(
-                mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS_LANDSCAPE, NUM_QUICK_TILES_DEFAULT,
-                UserHandle.USER_CURRENT);
-
-        setMaxTiles(isPortrait ? columns : columnsLandscape);
+        setMaxTiles(qsColumns);
         ((HeaderTileLayout) mTileLayout).updateTileGaps(mMaxTiles);
     }
 
@@ -332,13 +329,19 @@ public class QuickQSPanel extends QSPanel {
                 panelWidth = mScreenWidth;
             }
             panelWidth -= 2 * mStartMargin;
-            int tileGap = (panelWidth - mTileSize * numTiles) / (numTiles - 1);
+            int tileGap = Math.max(0, (panelWidth - mTileSize * numTiles) / (numTiles - 1));
+            int maxTileSize =  tileGap != 0 ? mTileSize : (panelWidth / numTiles);
             final int N = getChildCount();
             for (int i = 0; i < N; i++) {
                 if (getChildAt(i) instanceof Space) {
                     Space s = (Space) getChildAt(i);
                     LayoutParams params = (LayoutParams) s.getLayoutParams();
                     params.width = tileGap;
+                }
+                if (getChildAt(i) instanceof QSTileView) {
+                    QSTileView s = (QSTileView) getChildAt(i);
+                    LayoutParams params = (LayoutParams) s.getLayoutParams();
+                    params.width = maxTileSize;
                 }
             }
         }
