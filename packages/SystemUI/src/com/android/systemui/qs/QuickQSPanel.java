@@ -28,7 +28,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.Space;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -47,7 +46,7 @@ import java.util.Collection;
  * Version of QSPanel that only shows N Quick Tiles in the QS Header.
  */
 public class QuickQSPanel extends QSPanel {
-
+    private static final String TAG = "QuickQSPanel";
     public static int NUM_QUICK_TILES_DEFAULT = 6;
     public static final int NUM_QUICK_TILES_ALL = 666;
 
@@ -135,6 +134,9 @@ public class QuickQSPanel extends QSPanel {
         if (key.equals(QS_SHOW_BRIGHTNESS_MODE)) {
             super.onTuningChanged(key, "0");
         }
+        if (key.equals(QS_SHOW_BRIGHTNESS_SIDE_BUTTONS)) {
+            super.onTuningChanged(key, "0");
+        }
     }
 
     @Override
@@ -172,16 +174,10 @@ public class QuickQSPanel extends QSPanel {
     }
 
     private void updateColumns() {
-        final Resources res = mContext.getResources();
-        boolean isPortrait = res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-        int columns = Settings.System.getIntForUser(
-                mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS, NUM_QUICK_TILES_DEFAULT,
+        int qsColumns = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QS_QUICKBAR_COLUMNS, NUM_QUICK_TILES_DEFAULT,
                 UserHandle.USER_CURRENT);
-        int columnsLandscape = Settings.System.getIntForUser(
-                mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS_LANDSCAPE, NUM_QUICK_TILES_DEFAULT,
-                UserHandle.USER_CURRENT);
-
-        setMaxTiles(isPortrait ? columns : columnsLandscape);
+        setMaxTiles(qsColumns);
         ((HeaderTileLayout) mTileLayout).updateTileGaps(mMaxTiles);
     }
 
@@ -206,6 +202,7 @@ public class QuickQSPanel extends QSPanel {
         private int mTileSize;
         private int mScreenWidth;
         private int mStartMargin;
+        private int mMaxTileSize;
 
         public HeaderTileLayout(Context context) {
             super(context);
@@ -228,28 +225,13 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public void addTile(TileRecord tile) {
-            if (getChildCount() != 0) {
-                // Add a spacer.
-                addView(new Space(mContext), getChildCount(), generateSpaceParams());
-            }
             addView(tile.tileView, getChildCount(), generateLayoutParams());
             mRecords.add(tile);
             tile.tile.setListening(this, mListening);
         }
 
-        private LayoutParams generateSpaceParams() {
-            //int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-            //LayoutParams lp = new LayoutParams(0, size);
-            //lp.weight = 1;
-            LayoutParams lp = new LayoutParams(mTileSize, mTileSize);
-            lp.gravity = Gravity.CENTER;
-            return lp;
-        }
-
         private LayoutParams generateLayoutParams() {
-            //int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-            //LayoutParams lp = new LayoutParams(size, size);
-            LayoutParams lp = new LayoutParams(mTileSize, mTileSize);
+            LayoutParams lp = new LayoutParams(mMaxTileSize, mTileSize);
             lp.gravity = Gravity.CENTER;
             return lp;
         }
@@ -259,10 +241,6 @@ public class QuickQSPanel extends QSPanel {
             int childIndex = getChildIndex(tile.tileView);
             // Remove the tile.
             removeViewAt(childIndex);
-            if (getChildCount() != 0) {
-                // Remove its spacer as well.
-                removeViewAt(childIndex);
-            }
             mRecords.remove(tile);
             tile.tile.setListening(this, false);
         }
@@ -285,6 +263,7 @@ public class QuickQSPanel extends QSPanel {
         @Override
         public boolean updateResources() {
             mTileSize = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+            mMaxTileSize = mTileSize;
             mStartMargin = mContext.getResources()
                     .getDimensionPixelSize(R.dimen.qs_scroller_margin);
             return false;
@@ -332,13 +311,11 @@ public class QuickQSPanel extends QSPanel {
                 panelWidth = mScreenWidth;
             }
             panelWidth -= 2 * mStartMargin;
-            int tileGap = (panelWidth - mTileSize * numTiles) / (numTiles - 1);
+            mMaxTileSize =  panelWidth / numTiles;
             final int N = getChildCount();
             for (int i = 0; i < N; i++) {
-                if (getChildAt(i) instanceof Space) {
-                    Space s = (Space) getChildAt(i);
-                    LayoutParams params = (LayoutParams) s.getLayoutParams();
-                    params.width = tileGap;
+                if (getChildAt(i) instanceof QSTileView) {
+                    getChildAt(i).setLayoutParams(generateLayoutParams());
                 }
             }
         }
