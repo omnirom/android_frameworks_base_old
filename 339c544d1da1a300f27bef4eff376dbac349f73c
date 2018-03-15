@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "234e7364_3b521207",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 4386,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-03-15T02:37:12Z",
+      "side": 1,
+      "message": "must be added to PRIVATE_SETTINGS arrary below too - just check other examples",
+      "revId": "339c544d1da1a300f27bef4eff376dbac349f73c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bb3609c_5e1887db",
+        "filename": "services/core/java/com/android/server/fingerprint/ClientMonitor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-03-15T02:37:12Z",
+      "side": 1,
+      "message": "wrong indentation - must be 2 tabs",
+      "revId": "339c544d1da1a300f27bef4eff376dbac349f73c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
