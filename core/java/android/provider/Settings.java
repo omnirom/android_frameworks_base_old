@@ -9275,6 +9275,10 @@ public final class Settings {
         public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
 
         /**
+        * Omnirom: auto disable wifi device
+        */
+        public static final String ENABLE_WIFI_AUTO_DISABLE = "enable_wifi_auto_disable";
+        /**
          * Value to specify if Wi-Fi Wakeup is available.
          *
          * Wi-Fi Wakeup will only operate if it's available
