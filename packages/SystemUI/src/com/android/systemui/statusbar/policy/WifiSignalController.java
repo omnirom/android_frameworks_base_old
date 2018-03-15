@@ -23,7 +23,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.AsyncTask;
+import android.provider.Settings;
 import android.util.Log;
+import android.content.ContentResolver;
+import android.net.wifi.WifiInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
@@ -41,11 +45,13 @@ public class WifiSignalController extends
     private final AsyncChannel mWifiChannel;
     private final boolean mHasMobileData;
     private final WifiStatusTracker mWifiTracker;
+    private final ContentResolver mContentResolver;
 
     public WifiSignalController(Context context, boolean hasMobileData,
             CallbackHandler callbackHandler, NetworkControllerImpl networkController) {
         super("WifiSignalController", context, NetworkCapabilities.TRANSPORT_WIFI,
                 callbackHandler, networkController);
+        mContentResolver = context.getContentResolver();
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mWifiTracker = new WifiStatusTracker(mWifiManager);
         mHasMobileData = hasMobileData;
@@ -94,6 +100,31 @@ public class WifiSignalController extends
         callback.setWifiIndicators(mCurrentState.enabled, statusIcon, qsIcon,
                 ssidPresent && mCurrentState.activityIn, ssidPresent && mCurrentState.activityOut,
                 wifiDesc, mCurrentState.isTransient);
+
+        boolean auto_disable_wifi = mCurrentState.enabled && !mCurrentState.connected
+                && (Settings.Global.getInt(mContentResolver, Settings.Global.ENABLE_WIFI_AUTO_DISABLE, 0) != 0);
+
+        if(auto_disable_wifi){
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    new AsyncTask<Void, Void, Void>() {
+                        @Override
+                        protected Void doInBackground(Void... args) {
+                            if (mWifiManager.isWifiEnabled()) {
+                                WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
+                                if( wifiInfo.getNetworkId() == -1 ){
+                                    mWifiManager.setWifiEnabled(false);
+                                }
+                            }
+
+                            return null;
+                        }
+                    }.execute();
+                }
+            }, 60000); // Wait a minute
+        }
     }
 
     /**
