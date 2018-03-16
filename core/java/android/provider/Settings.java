@@ -11026,6 +11026,11 @@ public final class Settings {
         public static final String USB_PARANOIA_CONNECT = "usb_paranoia_connect";
 
         /**
+         * @hide
+         */
+        public static final String WAKE_WHEN_PLUGGED_OR_UNPLUGGED = "wake_when_plugged_or_unplugged";
+
+        /**
          * Flag to enable use of RefactoredBackupManagerService.
          *
          * @hide
