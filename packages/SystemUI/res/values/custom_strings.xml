@@ -159,4 +159,8 @@
     <string name="qs_show_clock">Show clock</string>
     <string name="qs_show_mini">Mini mode</string>
     <string name="qs_header">Header</string>
+
+    <string name="quick_settings_google_assist_label">Assistant</string>
+    <string name="quick_settings_google_voice_assist_label">Voice assist</string>
+    <string name="quick_settings_google_now_label">Google feed</string>
 </resources>
