@@ -83,4 +83,6 @@ interface IStatusBarService
      */
     void toggleCameraFlash();
     void toggleCameraFlashWithParams(int params);
+
+    void startAssist(in Bundle args);
 }
