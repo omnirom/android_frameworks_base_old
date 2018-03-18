@@ -799,7 +799,7 @@ public class AudioService extends IAudioService.Stub
         intentFilter.addAction(Intent.ACTION_USER_FOREGROUND);
         intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-
+        intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         // TODO merge orientation and rotation
         mMonitorOrientation = SystemProperties.getBoolean("ro.audio.monitorOrientation", false);
@@ -6001,6 +6001,20 @@ public class AudioService extends IAudioService.Stub
             } else if (action.equals(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION) ||
                     action.equals(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)) {
                 handleAudioEffectBroadcast(context, intent);
+            } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
+                // Only run when headset is inserted and is enabled at settings
+                int plugged = intent.getIntExtra("state", 0);
+
+                boolean headsetPlug = Settings.System.getIntForUser(
+                        context.getContentResolver(), Settings.System.HEADSET_PLUG_ENABLED,0, UserHandle.USER_CURRENT) == 1;
+
+                if (plugged == 1 && headsetPlug) {
+                    // Run default music app
+                    Intent headsetPlugIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                            Intent.CATEGORY_APP_MUSIC);
+                    headsetPlugIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivityAsUser(headsetPlugIntent, UserHandle.CURRENT);
+                }
             }
         }
     } // end class AudioServiceBroadcastReceiver
