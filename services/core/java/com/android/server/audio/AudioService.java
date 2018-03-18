@@ -136,13 +136,16 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * The implementation of the volume manager service.
@@ -799,7 +802,7 @@ public class AudioService extends IAudioService.Stub
         intentFilter.addAction(Intent.ACTION_USER_FOREGROUND);
         intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-
+        intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         // TODO merge orientation and rotation
         mMonitorOrientation = SystemProperties.getBoolean("ro.audio.monitorOrientation", false);
@@ -6001,8 +6004,44 @@ public class AudioService extends IAudioService.Stub
             } else if (action.equals(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION) ||
                     action.equals(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)) {
                 handleAudioEffectBroadcast(context, intent);
+            } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
+                int plugged = intent.getIntExtra("state", 0);
+
+                if (plugged == 1) { // Only run when headset is inserted
+                    String headsetPlugAction = Settings.System.getStringForUser(
+                            context.getContentResolver(), Settings.System.HEADSET_PLUG_ACTION, UserHandle.USER_CURRENT);
+
+                    if(headsetPlugAction.equals("SYSTEM_DEFAULT")){
+                        // Run default music app
+                        Intent headsetPlugIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                                Intent.CATEGORY_APP_MUSIC);
+                        headsetPlugIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivityAsUser(headsetPlugIntent, UserHandle.CURRENT);
+                    } else if (headsetPlugAction.equals("APP_LIST")) {
+                        String apps = Settings.System.getStringForUser(context.getContentResolver(),
+                                Settings.System.HEADSET_PLUG_APP_LIST, UserHandle.USER_CURRENT);
+
+                        if (!TextUtils.isEmpty(apps)) {
+                            Set<String> app_list = new HashSet<String>(Arrays.asList(apps.split("\\|")));
+                            if(app_list.size() == 1) { // Is there is only one just run it
+                                String package_uri = app_list.iterator().next();
+
+                                try {
+                                    Intent headsetPlugIntent = Intent.parseUri(package_uri, 0);
+                                    headsetPlugIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    context.startActivityAsUser(headsetPlugIntent, UserHandle.CURRENT);
+                                } catch (URISyntaxException e) {
+                                    e.printStackTrace();
+                                }
+                            } /*else {
+
+                            }*/
+                        }
+                    }
+                }
             }
         }
+
     } // end class AudioServiceBroadcastReceiver
 
     private class AudioServiceUserRestrictionsListener implements UserRestrictionsListener {

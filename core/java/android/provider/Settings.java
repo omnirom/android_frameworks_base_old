@@ -3748,6 +3748,15 @@ public final class Settings {
         public static final String DOCK_SOUNDS_ENABLED = Global.DOCK_SOUNDS_ENABLED;
 
         /**
+         * Action when headset is plugged.
+         * @hide
+         */
+        public static final String HEADSET_PLUG_ACTION = "headset_plug_action";
+        public static final String HEADSET_PLUG_APP_LIST = "headset_plug_app_list";
+        public static final String HEADSET_PLUG_MUSIC_ACTIVE = "headset_plug_music_active";
+        public static final String HEADSET_PLUG_APP_RUNNING = "headset_plug_app_running";
+
+        /**
          * Whether to play sounds when the keyguard is shown and dismissed.
          * @hide
          */
