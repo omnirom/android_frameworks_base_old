@@ -20,19 +20,19 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
-  <string name="reboot_to_bootloader_title">Reiniciar bootloader</string>
-  <string name="reboot_to_bootloader_message">Reiniciar para bootloader\u2026</string>
+  <string name="reboot_to_bootloader_title">Reiniciar para o bootloader</string>
+  <string name="reboot_to_bootloader_message">A reiniciar para o modo bootloader\u2026</string>
   <!-- advanced reboot to recovery. -->
-  <string name="reboot_to_recovery_title">Reiniciar recovery</string>
-  <string name="reboot_to_recovery_message">Reiniciar para recovery\u2026</string>
+  <string name="reboot_to_recovery_title">Reiniciar para a recuperação</string>
+  <string name="reboot_to_recovery_message">A reiniciar para o modo de recuperação\u2026</string>
   <!-- advanced reboot system -->
   <string name="reboot_system_title">Reiniciar o sistema</string>
-  <string name="reboot_system_message">A reiniciar sistema\u2026</string>
+  <string name="reboot_system_message">A reiniciar o sistema\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-  <string name="permlab_fakePackageSignature">Imitar a assinatura dos pacotes</string>
+  <string name="permlab_fakePackageSignature">Falsificar a assinatura de pacotes</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-  <string name="permdesc_fakePackageSignature">Permitir que a aplicação finja ser outra diferente. Aplicações maliciosas podem usar esta funcionalidade para aceder a dados privados. Conceda esta permissão com cautela!</string>
+  <string name="permdesc_fakePackageSignature">Permite que a aplicação finja ser uma aplicação diferente. Aplicações maliciosas podem usar esta funcionalidade para aceder a dados privados. Conceda esta permissão com cautela!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
-  <string name="lock_to_app_toast_back">Para desafixar este ecrã, pressione e segure a tecla Voltar.</string>
-  <string name="app_unpin_message">App desagregado</string>
+  <string name="lock_to_app_toast_back">Para soltar este ecrã, toque e segure o botão Anterior.</string>
+  <string name="app_unpin_message">Aplicação soltada</string>
 </resources>

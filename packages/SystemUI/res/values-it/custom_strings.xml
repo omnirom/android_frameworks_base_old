@@ -28,7 +28,7 @@
   <string name="global_action_dnaa">Non mostrare più</string>
   <string name="global_action_settings">Impostazioni</string>
   <string name="qs_menu_item_columns">Colonne</string>
-  <string name="qs_menu_item_columns_landscape">Colonne in modalità landscape</string>
+  <string name="qs_menu_item_columns_landscape">Colonne in modalità orizzontale</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
@@ -45,7 +45,7 @@
   <string name="qs_menu_item_rows_four">4</string>
   <string name="qs_menu_item_scroll">Scorrimento barra di scelta rapida</string>
   <string name="tuner_quick_settings">Impostazioni rapide</string>
-  <string name="tuner_show_brightness_mode">Mostra il toggle per la luminosità automatica vicino allo slider</string>
+  <string name="tuner_show_brightness_mode">Mostra la mattonella (toggle) per la luminosità automatica vicino al cursore</string>
   <string name="tuner_show_brightness_new">Mostra il cursore di luminosità</string>
   <string name="lockscreen_default">Predefinito</string>
   <string name="lockscreen_hidden">Nessuno</string>
@@ -64,8 +64,8 @@
   <string name="screenrecord_notif_pointer_off">Nascondi puntatore</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Impossibile registrare lo schermo</string>
-  <string name="notification_channel_screenrecord">Registrazioni dello schermo</string>
-  <string name="screenrecord_hide_hint">Nascondi suggerimento</string>
+  <string name="notification_channel_screenrecord">Registrazione dello schermo</string>
+  <string name="screenrecord_hide_hint">Nascondi i suggerimenti</string>
   <string name="screenrecord_show_hint">Mostra suggerimento</string>
   <string name="quick_settings_network_adb_enabled_label">Abilitato</string>
   <string name="quick_settings_network_adb_disabled_label">Disabilitato</string>
@@ -79,24 +79,24 @@
   <string name="omnijaws_service_disabled">Servizio disabilitato</string>
   <string name="omnijaws_detail_header">Meteo</string>
   <string name="omnijaws_label_default">Meteo</string>
-  <string name="omnijaws_current_text">Ora</string>
+  <string name="omnijaws_current_text">Adesso</string>
   <string name="omnijaws_package_not_available">OmniJaws non disponibile</string>
   <string name="omnijaws_service_last_update">Ultimo aggiornamento:</string>
   <!-- PiP Tile -->
   <string name="quick_settings_pip_label">PiP</string>
   <string name="quick_settings_pip_tile_app_na">L\'app non supporta il PiP</string>
-  <string name="quick_settings_screenshot_label">Screenshot</string>
-  <string name="quick_settings_region_screenshot_label">Screenshot parziale</string>
+  <string name="quick_settings_screenshot_label">Immagine dello schermo</string>
+  <string name="quick_settings_region_screenshot_label">Immagine dello schermo parziale</string>
   <string name="quick_settings_caffeine_label">Caffeina</string>
-  <string name="accessibility_quick_settings_caffeine_off">Caffeina off</string>
-  <string name="accessibility_quick_settings_caffeine_on">Caffeina on</string>
+  <string name="accessibility_quick_settings_caffeine_off">Caffeina disattivata</string>
+  <string name="accessibility_quick_settings_caffeine_on">Caffeina attivata</string>
   <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
   <string name="accessibility_quick_settings_location_battery_saving">Geolocalizzazione: modalità risparmio energetico.</string>
   <string name="accessibility_quick_settings_location_gps_only">Geolocalizzazione: modalità solo Gps.</string>
   <string name="accessibility_quick_settings_location_high_accuracy">Geolocalizzazione: modalità alta precisione.</string>
   <!-- Heads Up QS Tile -->
-  <string name="quick_settings_heads_up_label">Notifiche peek</string>
+  <string name="quick_settings_heads_up_label">Notifiche Peek</string>
   <string name="accessibility_quick_settings_heads_up_off">Le notifiche peek sono disattivate.</string>
   <string name="accessibility_quick_settings_heads_up_on">Notifiche peek permesse.</string>
   <string name="accessibility_quick_settings_heads_up_changed_off">Notifiche peek disattivate.</string>
