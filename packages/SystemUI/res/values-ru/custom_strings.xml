@@ -50,7 +50,7 @@
   <string name="lockscreen_default">По умолчанию</string>
   <string name="lockscreen_hidden">Нет</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-  <string name="custom_hint">Свайп от значка, чтобы запустить</string>
+  <string name="custom_hint">Проведите пальцем по значку, чтобы запустить</string>
   <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Идёт запись экрана</string>
   <string name="screenrecord_notif_final_ticker">Запись экрана сохранена</string>
@@ -97,10 +97,10 @@
   <string name="accessibility_quick_settings_location_high_accuracy">Режим местоположения: высокая точность.</string>
   <!-- Heads Up QS Tile -->
   <string name="quick_settings_heads_up_label">Всплывающие уведомления</string>
-  <string name="accessibility_quick_settings_heads_up_off">Всплывающие уведомления отключены.</string>
-  <string name="accessibility_quick_settings_heads_up_on">Всплывающие уведомления разрешены.</string>
-  <string name="accessibility_quick_settings_heads_up_changed_off">Всплывающие уведомления запрещены.</string>
-  <string name="accessibility_quick_settings_heads_up_changed_on">Всплывающие уведомления разрешены.</string>
+  <string name="accessibility_quick_settings_heads_up_off">Всплывающие уведомления выкл.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Всплывающие уведомления вкл.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Всплывающие уведомления выключены.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Всплывающие уведомления включены.</string>
   <!-- Screenrecord QS tile -->
   <string name="quick_settings_screenrecord_label">Запись экрана</string>
   <string name="quick_settings_screenrecord_lq_label">Низкое качество</string>

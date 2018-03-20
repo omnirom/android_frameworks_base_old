@@ -19,10 +19,13 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">Start på nytt</string>
   <string name="global_action_reboot_sub">System</string>
   <string name="global_action_reboot_recovery">Gjenoppretting</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
   <string name="global_action_dnaa">Ikke vis igjen</string>
+  <string name="global_action_settings">Innstillinger</string>
+  <string name="qs_menu_item_columns">Kolonner</string>
   <string name="qs_menu_item_columns_landscape">Kolonneutforming</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
@@ -31,6 +34,8 @@
   <string name="qs_menu_item_columns_seven">7</string>
   <string name="qs_menu_item_columns_eight">8</string>
   <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Tilbakestill</string>
+  <string name="qs_menu_item_rows">Rader</string>
   <string name="qs_menu_item_rows_one">1</string>
   <string name="qs_menu_item_rows_two">2</string>
   <string name="qs_menu_item_rows_three">3</string>
@@ -38,6 +43,7 @@
   <string name="qs_menu_item_scroll">Hurtigvalgrull</string>
   <string name="tuner_quick_settings">Hurtiginnstillinger</string>
   <string name="lockscreen_default">Standard</string>
+  <string name="lockscreen_hidden">Stille</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
   <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Skjermen blir tatt opp</string>
@@ -49,9 +55,36 @@
   <string name="screenrecord_notif_pointer_on">Vis peker</string>
   <string name="screenrecord_notif_pointer_off">Skjul peker</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Kunne ikke ta opp skjermen</string>
+  <string name="quick_settings_network_adb_enabled_label">Aktivert</string>
+  <string name="quick_settings_network_adb_disabled_label">Deaktivert</string>
+  <string name="quick_settings_network_adb_label">ADB over nettverk</string>
+  <string name="quick_settings_network_adb_toast">USB-feilsøking er ikke aktivert</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Dette holder appen oppe helt til du løsner den igjen. Trykk og hold Tilbake-knappen for å løsne.</string>
+  <string name="omnijaws_service_error">Feil</string>
+  <string name="omnijaws_service_unkown">Ingen værdata</string>
+  <string name="omnijaws_service_error_long">Feil ved henting av værdata</string>
+  <string name="omnijaws_service_disabled">Tjeneste er deaktivert</string>
+  <string name="omnijaws_detail_header">Vær</string>
+  <string name="omnijaws_label_default">Vær</string>
+  <string name="omnijaws_current_text">Nå</string>
+  <string name="omnijaws_package_not_available">OmniJaws ikke tilgjengelig</string>
+  <string name="omnijaws_service_last_update">Siste oppdatering:</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_screenshot_label">Skjermdump</string>
+  <string name="quick_settings_caffeine_label">Koffein</string>
+  <string name="accessibility_quick_settings_caffeine_off">Koffein av</string>
+  <string name="accessibility_quick_settings_caffeine_on">Koffein på</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Posisjoneringsrapportering: Batterisparing.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Posisjoneringsrapportering: Bare sensoren.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Posisjoneringsrapportering: Stor nøyaktighet.</string>
   <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Snikktitt på varsler</string>
+  <string name="accessibility_quick_settings_heads_up_off">Sniktitt på varsler deaktivert.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Sniktitt på varsler aktivert.</string>
   <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Skjermopptak</string>
 </resources>

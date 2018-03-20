@@ -24,6 +24,7 @@
   <string name="global_action_reboot_sub">Järjestelmä</string>
   <string name="global_action_reboot_recovery">Recovery-tila</string>
   <string name="global_action_reboot_bootloader">Bootloader-tila</string>
+  <string name="global_action_dismissable_dialog_text">Edistynyt uudelleenkäynnistys ei ole käytössä.\nHaluatko käynnistää uudelleen\u003f</string>
   <string name="global_action_dnaa">Älä näytä uudelleen</string>
   <string name="global_action_settings">Asetukset</string>
   <string name="qs_menu_item_columns">Sarakkeet</string>
@@ -36,19 +37,30 @@
   <string name="qs_menu_item_columns_eight">8</string>
   <string name="qs_menu_item_columns_nine">9</string>
   <string name="qs_menu_item_reset">Nollaa</string>
+  <string name="qs_menu_item_titles">Näytä nimikkeet</string>
   <string name="qs_menu_item_rows">Rivit</string>
   <string name="qs_menu_item_rows_one">1</string>
   <string name="qs_menu_item_rows_two">2</string>
   <string name="qs_menu_item_rows_three">3</string>
   <string name="qs_menu_item_rows_four">4</string>
+  <string name="tuner_quick_settings">Pika-asetukset</string>
+  <string name="tuner_show_brightness_mode">Näytä kirkkaustilan vaihtaja</string>
+  <string name="tuner_show_brightness_new">Näytä kirkkauden liukusäädin</string>
   <string name="lockscreen_default">Oletus</string>
   <string name="lockscreen_hidden">Ei mitään</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
+  <string name="custom_hint">Pyyhkäise kuvakkeesta käynnistääksesi</string>
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Näyttöä nauhoitetaan</string>
+  <string name="screenrecord_notif_final_ticker">Näytön nauhoitus onnistui</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Nauhoitetaan näyttöä</string>
   <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Pysäytä</string>
+  <string name="screenrecord_notif_completed">Näytön nauhoitus onnistui</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Näytä osoitin</string>
+  <string name="screenrecord_notif_pointer_off">Piilota osoitin</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_hide_hint">Piilota vihje</string>
   <string name="screenrecord_show_hint">Näytä vihje</string>
@@ -71,6 +83,13 @@
   <string name="quick_settings_region_screenshot_label">Osittainen kuvakaappaus</string>
   <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Sijainnin raportointi: virransäästö-tila.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Sijainnin raportointi: vain sensorit -tila.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Sijainnin raportointi: korkea tarkkuus -tila.</string>
   <!-- Heads Up QS Tile -->
   <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Näytön nauhoitus</string>
+  <string name="quick_settings_screenrecord_lq_label">Näytön nauhoitus LQ</string>
+  <string name="quick_settings_screenrecord_mq_label">Näytön nauhoitus MQ</string>
+  <string name="quick_settings_screenrecord_hq_label">Näytön nauhoitus HQ</string>
 </resources>
