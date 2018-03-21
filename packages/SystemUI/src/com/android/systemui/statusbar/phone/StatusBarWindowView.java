@@ -23,6 +23,7 @@ import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
 import android.app.StatusBarManager;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -757,6 +758,16 @@ public class StatusBarWindowView extends FrameLayout implements Tunable {
         public void reportActivityRelaunched() {
         }
     };
+
+    public void setStatusBarWindowViewOptions() {
+        ContentResolver resolver = mContext.getContentResolver();
+        int qsQuickPulldownValue = Settings.System.getIntForUser(resolver,
+                Settings.System.STATUS_BAR_QUICK_QS_PULLDOWN, 0, UserHandle.USER_CURRENT);
+
+        if (mNotificationPanel != null) {
+            mNotificationPanel.setQsQuickPulldown(qsQuickPulldownValue);
+        }
+    }
 
     public void updateSettings() {
         boolean doubleTapToSleepEnabled = Settings.System.getIntForUser(
