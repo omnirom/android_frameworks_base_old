@@ -195,6 +195,8 @@ public class NotificationPanelView extends PanelView implements
     private boolean mQsExpandImmediate;
     private boolean mTwoFingerQsExpandPossible;
 
+    private int mOneFingerQuickSettingsIntercept;
+
     /**
      * If we are in a panel collapsing motion, we reset scrollY of our scroll view but still
      * need to take this into account in our panel height calculation.
@@ -1017,7 +1019,25 @@ public class NotificationPanelView extends PanelView implements
                 && (event.isButtonPressed(MotionEvent.BUTTON_SECONDARY)
                         || event.isButtonPressed(MotionEvent.BUTTON_TERTIARY));
 
-        return twoFingerDrag || stylusButtonClickDrag || mouseButtonClickDrag;
+        final float w = getMeasuredWidth();
+        final float x = event.getX();
+        float region = w * 1.f / 3.f; // TODO overlay region fraction?
+        boolean showQsOverride = false;
+
+        switch (mOneFingerQuickSettingsIntercept) {
+            case 1: // Right side pulldown
+                showQsOverride = isLayoutRtl() ? x < region : w - region < x;
+                break;
+            case 2: // Left side pulldowngit cherry-pick --continue"
+                showQsOverride = isLayoutRtl() ? w - region < x : x < region;
+                break;
+            case 3: // Always
+                showQsOverride = true;
+                break;
+        }
+        showQsOverride &= mStatusBarState == StatusBarState.SHADE;
+
+        return showQsOverride || twoFingerDrag || stylusButtonClickDrag || mouseButtonClickDrag;
     }
 
     private void handleQsDown(MotionEvent event) {
@@ -2917,5 +2937,11 @@ public class NotificationPanelView extends PanelView implements
 
     public void updateDoubleTapToSleep(boolean doubleTapToSleepEnabled) {
         mDoubleTapToSleepEnabled = doubleTapToSleepEnabled;
+    }
+
+    public void updateSettings() {
+        mOneFingerQuickSettingsIntercept = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
+                0, UserHandle.USER_CURRENT);
     }
 }

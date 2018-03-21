@@ -4596,6 +4596,15 @@ public final class Settings {
         private static final Validator OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD_VALIDATOR =
                 ANY_INTEGER_VALIDATOR;
 
+        /** Whether to allow one finger quick settings expansion on the right side of the statusbar.
+         *
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_QUICK_QS_PULLDOWN = "status_bar_quick_qs_pulldown";
+
+        private static final Validator OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
@@ -4712,7 +4721,8 @@ public final class Settings {
             OMNI_NETWORK_TRAFFIC_ENABLE,
             OMNI_NETWORK_TRAFFIC_STATE,
             OMNI_NETWORK_TRAFFIC_AUTOHIDE,
-            OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD
+            OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD,
+            OMNI_STATUS_BAR_QUICK_QS_PULLDOWN
         };
 
         /**
@@ -4878,6 +4888,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_NETWORK_TRAFFIC_STATE);
             PRIVATE_SETTINGS.add(OMNI_NETWORK_TRAFFIC_AUTOHIDE);
             PRIVATE_SETTINGS.add(OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD);
+            PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN);
         }
 
         /**
@@ -5050,6 +5061,8 @@ public final class Settings {
                     OMNI_NETWORK_TRAFFIC_AUTOHIDE_VALIDATOR);
             VALIDATORS.put(OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD,
                     OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD_VALIDATOR);
+            VALIDATORS.put(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
+                    OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR);
         }
 
         /**
