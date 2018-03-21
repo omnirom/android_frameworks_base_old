@@ -900,6 +900,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             int showNavBar = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_SHOW,
                     -1, mCurrentUserId);
+            int qsQuickPulldownValue = Settings.System.getInt(
+                    mContext.getContentResolver(), Settings.System.STATUS_BAR_QUICK_QS_PULLDOWN, 0);
+
             if (showNavBar != -1){
                 boolean showNavBarBool = showNavBar == 1;
                 if (showNavBarBool !=  mShowNavBar){
@@ -923,6 +926,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mLockscreenMediaMetadata = Settings.System.getIntForUser(mContext.getContentResolver(),
                     Settings.System.LOCKSCREEN_HIDE_MEDIA_METADATA, 0, mCurrentUserId) == 0;
             if (mNotificationPanel != null) {
+                mNotificationPanel.setQsQuickPulldown(qsQuickPulldownValue);
                 mNotificationPanel.updateSettings();
             }
         }
