@@ -54,6 +54,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -876,6 +877,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.LOCK_QS_DISABLED),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_QUICK_QS_PULLDOWN),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -900,6 +904,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             int showNavBar = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_SHOW,
                     -1, mCurrentUserId);
+            int qsQuickPulldownValue = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.STATUS_BAR_QUICK_QS_PULLDOWN, 0,
+                UserHandle.USER_CURRENT);
+
             if (showNavBar != -1){
                 boolean showNavBarBool = showNavBar == 1;
                 if (showNavBarBool !=  mShowNavBar){
@@ -923,10 +931,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             mLockscreenMediaMetadata = Settings.System.getIntForUser(mContext.getContentResolver(),
                     Settings.System.LOCKSCREEN_HIDE_MEDIA_METADATA, 0, mCurrentUserId) == 0;
             if (mNotificationPanel != null) {
+                mNotificationPanel.setQsQuickPulldown(qsQuickPulldownValue);
                 mNotificationPanel.updateSettings();
             }
         }
     }
+
     private OmniSettingsObserver mOmniSettingsObserver;
     private boolean mOmniSwitchRecents;
     private int mRecentsStyle;
