@@ -54,6 +54,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -876,6 +877,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.LOCK_QS_DISABLED),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_QUICK_QS_PULLDOWN),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -887,6 +891,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Settings.System.FORCE_AMBIENT_FOR_MEDIA))) {
                 setForceAmbient();
                 return;
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_QUICK_QS_PULLDOWN))) {
+                setStatusBarWindowViewOptions();
             }
             update();
         }
@@ -925,6 +932,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mNotificationPanel != null) {
                 mNotificationPanel.updateSettings();
             }
+            setStatusBarWindowViewOptions();
+        }
+    }
+
+    private void setStatusBarWindowViewOptions() {
+        if (mStatusBarWindow != null) {
+            mStatusBarWindow.updateSettings();
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver;
