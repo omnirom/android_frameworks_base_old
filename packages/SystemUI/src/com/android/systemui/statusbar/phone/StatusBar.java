@@ -661,6 +661,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.OMNI_LOCKSCREEN_HIDE_MEDIA),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_STATUS_BAR_QUICK_QS_PULLDOWN),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -680,6 +683,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mHideLockscreenArtwork = Settings.System.getIntForUser(mContext.getContentResolver(),
                     Settings.System.OMNI_LOCKSCREEN_HIDE_MEDIA, 0,
                     UserHandle.USER_CURRENT) != 0;
+            if (mNotificationPanel != null) {
+                mNotificationPanel.updateSettings();
+            }
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver;
