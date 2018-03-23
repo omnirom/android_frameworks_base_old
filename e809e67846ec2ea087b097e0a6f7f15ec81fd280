@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd7e9c60_a9f37f77",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 896,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-03-23T15:55:41Z",
+      "side": 1,
+      "message": "call mNotificationPanel here right away or just handle it in the global updateSettings below",
+      "revId": "e809e67846ec2ea087b097e0a6f7f15ec81fd280",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8a0f965_e2f8dfd7",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarWindowView.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 776,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-03-23T15:55:41Z",
+      "side": 1,
+      "message": "you could already call mNotificationPanel from StatusBar then we would not need to change that file at all",
+      "revId": "e809e67846ec2ea087b097e0a6f7f15ec81fd280",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
