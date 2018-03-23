@@ -16,6 +16,24 @@
       "revId": "32eeae7eb55a44300dc5961fd6585eafaeb878b2",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3848ccdc_5a849e5e",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 903,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-03-23T16:50:38Z",
+      "side": 1,
+      "message": "but you can remove this too if you do it in updateSettings of the NotificationPanelView - so you ONLY need the register line to add in this file",
+      "parentUuid": "42fb0e10_3a8ee533",
+      "revId": "32eeae7eb55a44300dc5961fd6585eafaeb878b2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
