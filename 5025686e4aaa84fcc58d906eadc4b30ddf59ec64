@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a5161a3a_198b6739",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 6084,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-03-23T01:20:56Z",
+      "side": 1,
+      "message": "now need to add new one - add to the existing OmniSettingsObserver",
+      "revId": "5025686e4aaa84fcc58d906eadc4b30ddf59ec64",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "10362540_442e972e",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarWindowView.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-03-23T01:20:56Z",
+      "side": 1,
+      "message": "unneeded. In StatusBar there is already\n\n            if (mNotificationPanel !\u003d null) {\n                mNotificationPanel.updateSettings();\n            }\nso add this to updateSettings",
+      "revId": "5025686e4aaa84fcc58d906eadc4b30ddf59ec64",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
