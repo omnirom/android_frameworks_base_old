@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "42fb0e10_3a8ee533",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 903,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-03-23T16:48:29Z",
+      "side": 1,
+      "message": "you still need to register for it! And just small nitpick - indentation is 2x4 for continues lines",
+      "revId": "32eeae7eb55a44300dc5961fd6585eafaeb878b2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
