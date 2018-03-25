@@ -156,8 +156,13 @@ public class PackageParser {
     private static final String PROPERTY_CHILD_PACKAGES_ENABLED =
             "persist.sys.child_packages_enabled";
 
+    private static final String PROPERTY_FORCE_MAX_ASPECT_RATIO_ENABLED =
+            "persist.sys.force_max_aspect_ratio.enabled";
+
     private static final boolean MULTI_PACKAGE_APK_ENABLED = Build.IS_DEBUGGABLE &&
             SystemProperties.getBoolean(PROPERTY_CHILD_PACKAGES_ENABLED, false);
+
+    private static final boolean FORCE_MAX_ASPECT_RATIO_ENABLED = SystemProperties.getBoolean(PROPERTY_FORCE_MAX_ASPECT_RATIO_ENABLED, false);
 
     private static final int MAX_PACKAGES_PER_APK = 5;
 
@@ -4386,11 +4391,15 @@ public class PackageParser {
                 a.info.flags |= FLAG_ALWAYS_FOCUSABLE;
             }
 
-            if (sa.hasValue(R.styleable.AndroidManifestActivity_maxAspectRatio)
-                    && sa.getType(R.styleable.AndroidManifestActivity_maxAspectRatio)
-                    == TypedValue.TYPE_FLOAT) {
-                a.setMaxAspectRatio(sa.getFloat(R.styleable.AndroidManifestActivity_maxAspectRatio,
-                        0 /*default*/));
+            if(!FORCE_MAX_ASPECT_RATIO_ENABLED) {
+                if (sa.hasValue(R.styleable.AndroidManifestActivity_maxAspectRatio)
+                        && sa.getType(R.styleable.AndroidManifestActivity_maxAspectRatio)
+                        == TypedValue.TYPE_FLOAT) {
+                    a.setMaxAspectRatio(sa.getFloat(R.styleable.AndroidManifestActivity_maxAspectRatio,
+                            0 /*default*/));
+                }
+            } else {
+                a.setMaxAspectRatio(2.1f);
             }
 
             a.info.lockTaskLaunchMode =
