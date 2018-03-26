@@ -92,6 +92,9 @@ public class NfcTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        if (getAdapter() == null) {
+            return;
+        }
         if (state.slash == null) {
             state.slash = new SlashState();
         }
