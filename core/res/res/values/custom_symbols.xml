@@ -66,4 +66,6 @@
   <java-symbol type="bool" name="config_notificationTinting_override" />
 
   <java-symbol type="string" name="def_wireless_charging_started_sound" />
+
+  <java-symbol type="integer" name="config_RecentsClearAllLocation" />
 </resources>

@@ -765,6 +765,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // What we do when the user double-taps on home
     private int mDoubleTapOnHomeBehavior;
 
+    // What we do when the user select AOSP Recent Tweaks
+    private int mRecentsClearAllLocation;
+
     // Allowed theater mode wake actions
     private boolean mAllowTheaterModeWakeFromKey;
     private boolean mAllowTheaterModeWakeFromPowerKey;
@@ -2452,6 +2455,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mNavBarOpacityMode = res.getInteger(
                 com.android.internal.R.integer.config_navBarOpacityMode);
+
+        mRecentsClearAllLocation = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_RecentsClearAllLocation);
 
         mLongPressOnMenuBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longPressOnMenuBehavior);
