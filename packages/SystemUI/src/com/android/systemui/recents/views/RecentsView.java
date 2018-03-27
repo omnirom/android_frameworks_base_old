@@ -535,6 +535,11 @@ public class RecentsView extends FrameLayout {
                 params.topMargin = 2*(mContext.getResources().
                     getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height));
             }
+            // place fab based on system insets
+            params.bottomMargin = mSystemInsets.bottom + mContext.getResources().
+                    getDimensionPixelSize(R.dimen.floating_action_button_margin_bottom);
+            params.rightMargin = mSystemInsets.right + mContext.getResources().
+                    getDimensionPixelSize(R.dimen.floating_action_button_margin_side);
             switch (clearRecentsLocation) {
                 case 0:
                     params.gravity = Gravity.TOP | Gravity.RIGHT;
