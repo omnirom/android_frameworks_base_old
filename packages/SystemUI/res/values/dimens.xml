@@ -721,7 +721,7 @@
          will be additionally offset by the bottom system insets since it goes under the nav bar
          in certain orientations. -->
     <dimen name="recents_layout_initial_top_offset_phone_port">128dp</dimen>
-    <dimen name="recents_layout_initial_bottom_offset_phone_port">80dp</dimen>
+    <dimen name="recents_layout_initial_bottom_offset_phone_port">130dp</dimen>
     <dimen name="recents_layout_initial_top_offset_phone_land">72dp</dimen>
     <dimen name="recents_layout_initial_bottom_offset_phone_land">72dp</dimen>
     <dimen name="recents_layout_initial_top_offset_tablet">160dp</dimen>
