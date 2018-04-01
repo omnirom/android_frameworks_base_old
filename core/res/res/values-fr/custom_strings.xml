@@ -35,4 +35,6 @@
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">Pour déverrouiller l\'écran, touchez et maintenez la touche retour.</string>
   <string name="app_unpin_message">Application des-épinglée</string>
+  <!-- back kill -->
+  <string name="app_killed_message">Application arrêtée</string>
 </resources>

@@ -35,4 +35,5 @@
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">Zurück-Taste drücken und halten um diesen Bildschirm zu lösen.</string>
   <string name="app_unpin_message">App gelöst</string>
+  <!-- back kill -->
 </resources>

@@ -47,6 +47,7 @@
   <string name="tuner_quick_settings">Быстрые настройки</string>
   <string name="tuner_show_brightness_mode">Отображать переключатель режима подсветки</string>
   <string name="tuner_show_brightness_new">Отображать ползунок яркости</string>
+  <string name="tuner_show_brightness_side_buttons">Отображать боковые кнопки регулятора яркости</string>
   <string name="lockscreen_default">По умолчанию</string>
   <string name="lockscreen_hidden">Нет</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -106,4 +107,28 @@
   <string name="quick_settings_screenrecord_lq_label">Низкое качество</string>
   <string name="quick_settings_screenrecord_mq_label">Среднее качество</string>
   <string name="quick_settings_screenrecord_hq_label">Высокое качество</string>
+  <string name="preview">Предпросмотр</string>
+  <string name="keycode">Ключевой код</string>
+  <string name="start">Начало</string>
+  <string name="center">В середине</string>
+  <string name="end">Конец</string>
+  <string name="space">Разделитель</string>
+  <string name="select_button">Выберите кнопку для добавления</string>
+  <string name="add_button">Добавить кнопку</string>
+  <string name="save">Сохранить</string>
+  <string name="reset">Сброс</string>
+  <string name="navbar_editor_title">Редактор</string>
+  <!-- key disable QS Tile -->
+  <!-- navbar disable QS Tile -->
+  <string name="quick_settings_navbar_disable_label">Отключить панель навигации</string>
+  <string name="accessibility_quick_settings_navbar_disable_on">Включить панель навигации</string>
+  <string name="accessibility_quick_settings_navbar_disable_off">Панель навигации отключена.</string>
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="qs_show_battery">Отображать значок батареи</string>
+  <string name="qs_show_carrier">Отображать название оператора</string>
+  <string name="qs_show_clock">Показывать часы</string>
+  <string name="qs_header">Заголовок</string>
+  <string name="quick_settings_google_assist_label">Ассистент</string>
+  <string name="quick_settings_google_voice_assist_label">Голосовой ассистент</string>
 </resources>

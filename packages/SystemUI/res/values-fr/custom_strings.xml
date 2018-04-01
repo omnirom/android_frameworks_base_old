@@ -106,4 +106,9 @@
   <string name="quick_settings_screenrecord_lq_label">Enregistrement d\'écran basse qualité</string>
   <string name="quick_settings_screenrecord_mq_label">Enregistrement d\'écran qualité moyenne</string>
   <string name="quick_settings_screenrecord_hq_label">Enregistrement d\'écran haute qualité</string>
+  <string name="left">Gauche</string>
+  <string name="right">Droite</string>
+  <!-- key disable QS Tile -->
+  <!-- navbar disable QS Tile -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
 </resources>

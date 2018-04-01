@@ -35,4 +35,6 @@
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">Bu ekran sabitlemesini kaldırmak için, Geri düğmesine dokunun ve basılı tutun.</string>
   <string name="app_unpin_message">Uygulama sabitlemesi kaldırıldı</string>
+  <!-- back kill -->
+  <string name="app_killed_message">Uygulama sonlandırıldı</string>
 </resources>

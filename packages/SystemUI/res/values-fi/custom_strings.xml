@@ -66,6 +66,8 @@
   <string name="screenrecord_show_hint">Näytä vihje</string>
   <string name="quick_settings_network_adb_enabled_label">Käytössä</string>
   <string name="quick_settings_network_adb_disabled_label">Pois käytöstä</string>
+  <string name="quick_settings_network_adb_label">ADB verkon yli</string>
+  <string name="quick_settings_network_adb_toast">USB virheenkorjaus ei ole käytössä</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="omnijaws_service_error">Virhe</string>
   <string name="omnijaws_service_unkown">Ei säätietoja</string>
@@ -92,4 +94,19 @@
   <string name="quick_settings_screenrecord_lq_label">Näytön nauhoitus LQ</string>
   <string name="quick_settings_screenrecord_mq_label">Näytön nauhoitus MQ</string>
   <string name="quick_settings_screenrecord_hq_label">Näytön nauhoitus HQ</string>
+  <string name="preview">Esikatselu</string>
+  <string name="no_home_title">Kotinäppäintä ei löytynyt</string>
+  <string name="select_button">Valitse lisättävä näppäin</string>
+  <string name="add_button">Lisää näppäin</string>
+  <string name="save">Tallenna</string>
+  <string name="reset">Nollaa</string>
+  <string name="navbar_editor_summary">Määritä navigointipalkki</string>
+  <!-- key disable QS Tile -->
+  <!-- navbar disable QS Tile -->
+  <string name="quick_settings_navbar_disable_label">Poista navigointipalkki käytöstä</string>
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="qs_show_battery">Näytä akku</string>
+  <string name="qs_show_carrier">Näytä operaattorien nimet</string>
+  <string name="qs_show_clock">Näytä kello</string>
 </resources>

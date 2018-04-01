@@ -35,4 +35,6 @@
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">按住并拖动以解除锁定。</string>
   <string name="app_unpin_message">应用程序取消固定</string>
+  <!-- back kill -->
+  <string name="app_killed_message">应用程序已被终止</string>
 </resources>

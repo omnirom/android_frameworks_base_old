@@ -20,9 +20,12 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">Ponovni zagon v \'bootloader\'</string>
+  <string name="reboot_to_bootloader_message">Zaustavitev v \'bootloader\' \u2026</string>
   <!-- advanced reboot to recovery. -->
   <!-- advanced reboot system -->
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <!-- back kill -->
 </resources>

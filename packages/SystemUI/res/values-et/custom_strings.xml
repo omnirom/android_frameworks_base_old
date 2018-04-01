@@ -44,9 +44,11 @@
   <string name="qs_menu_item_rows_three">3</string>
   <string name="qs_menu_item_rows_four">4</string>
   <string name="qs_menu_item_scroll">Kiirriba kerimine</string>
+  <string name="qs_menu_item_qs_columns">Kiirriba veerud</string>
   <string name="tuner_quick_settings">Kiirseaded</string>
   <string name="tuner_show_brightness_mode">Kuva heledusrežiimi lülitit</string>
   <string name="tuner_show_brightness_new">Kuva heledusliugurit</string>
+  <string name="tuner_show_brightness_side_buttons">Kuva heleduse liuguri küljenuppe</string>
   <string name="lockscreen_default">Vaikimisi</string>
   <string name="lockscreen_hidden">Puudub</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -106,4 +108,41 @@
   <string name="quick_settings_screenrecord_lq_label">Kuva lindistamine madala kv.</string>
   <string name="quick_settings_screenrecord_mq_label">Kuva lindistamine keskmise kv.</string>
   <string name="quick_settings_screenrecord_hq_label">Kuva lindistamine kõrge kv.</string>
+  <string name="preview">Eelvaade</string>
+  <string name="keycode">Nupukood</string>
+  <string name="no_home_title">Kodunuppu ei leitud</string>
+  <string name="no_home_message">Kodunupp on vajalik selles seadmes navigeerimiseks. Palun lisa kodunupp enne salvestamist.</string>
+  <string name="clipboard_description">Lõikelaud võimaldab üksusi otse lõikelauda lohistada. Üksusi saab ka otse välja lohistada, kui need on olemas.</string>
+  <string name="keycode_description">Nupukoodiga nupud võimaldavad klaviatuuriklahvide lisamist navigatsiooniribale. Vajutades need emuleerivad valitud klaviatuuriklahvi. Kõigepealt tuleb valida nupu jaoks klahv, seejärel nupul kuvatav pilt.</string>
+  <string name="start">Algus</string>
+  <string name="center">Keskkoht</string>
+  <string name="end">Lõpp</string>
+  <string name="space">Tühik</string>
+  <string name="menu_ime">Menüü/klaviatuurivahetaja</string>
+  <string name="select_button">Vali lisatav nupp</string>
+  <string name="add_button">Lisa nupp</string>
+  <string name="save">Salvesta</string>
+  <string name="reset">Lähtesta</string>
+  <string name="select_keycode">Vali klaviatuurinupp</string>
+  <string name="left">Vasakule</string>
+  <string name="right">Paremale</string>
+  <string name="navbar_editor_title">Redaktor</string>
+  <string name="navbar_editor_summary">Seadista navigatsiooniriba</string>
+  <!-- key disable QS Tile -->
+  <string name="quick_settings_key_disable_label">Keela nupud</string>
+  <string name="accessibility_quick_settings_key_disable_on">Nupud keelatud.</string>
+  <string name="accessibility_quick_settings_key_disable_off">Nupud lubatud.</string>
+  <!-- navbar disable QS Tile -->
+  <string name="quick_settings_navbar_disable_label">Keela navigatsiooniriba</string>
+  <string name="accessibility_quick_settings_navbar_disable_on">Navigatsiooniriba keelatud.</string>
+  <string name="accessibility_quick_settings_navbar_disable_off">Navigatsiooniriba lubatud.</string>
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="qs_show_battery">Näita akut</string>
+  <string name="qs_show_carrier">Näita teenusepakkujate nimesid</string>
+  <string name="qs_show_clock">Näita kella</string>
+  <string name="qs_show_mini">Minirežiim</string>
+  <string name="qs_header">Päis</string>
+  <string name="quick_settings_google_assist_label">Abirakendus</string>
+  <string name="quick_settings_google_voice_assist_label">Hääle abirakendus</string>
 </resources>

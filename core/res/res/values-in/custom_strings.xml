@@ -35,4 +35,5 @@
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">Untuk melepas pin layar ini, sentuh dan tahan tombol Kembali.</string>
   <string name="app_unpin_message">Apl dilepas</string>
+  <!-- back kill -->
 </resources>
