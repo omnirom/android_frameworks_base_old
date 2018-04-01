@@ -87,4 +87,7 @@
   <string name="accessibility_quick_settings_heads_up_on">Sniktitt på varsler aktivert.</string>
   <!-- Screenrecord QS tile -->
   <string name="quick_settings_screenrecord_label">Skjermopptak</string>
+  <!-- key disable QS Tile -->
+  <!-- navbar disable QS Tile -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
 </resources>

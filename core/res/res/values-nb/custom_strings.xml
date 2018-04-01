@@ -30,4 +30,5 @@
   <string name="permdesc_fakePackageSignature">Tillater appen å late som å være en annen app. Skadelige programmer kan bruke dette til å få tilgang til privat programdata. Tillat dette med forsiktighet!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">For å løsne denne skjermen, trykk og hold Tilbake-knappen.</string>
+  <!-- back kill -->
 </resources>

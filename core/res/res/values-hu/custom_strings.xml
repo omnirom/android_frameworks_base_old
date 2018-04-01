@@ -35,4 +35,6 @@
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">A képernyő rögzítésének feloldásához, érintse meg és tartsa nyomva a Vissza gombot.</string>
   <string name="app_unpin_message">Rögzítés visszavonva</string>
+  <!-- back kill -->
+  <string name="app_killed_message">Alkalmazás leállítva</string>
 </resources>

@@ -44,9 +44,11 @@
   <string name="qs_menu_item_rows_three">3</string>
   <string name="qs_menu_item_rows_four">4</string>
   <string name="qs_menu_item_scroll">Posuvník rychlé nabídky</string>
+  <string name="qs_menu_item_qs_columns">Sloupce panelu rychlého nastavení</string>
   <string name="tuner_quick_settings">Rychlé nastavení</string>
   <string name="tuner_show_brightness_mode">Zobrazit přepínač režimu jasu</string>
   <string name="tuner_show_brightness_new">Zobrazit posuvník jasu</string>
+  <string name="tuner_show_brightness_side_buttons">Zobrazit boční tlačítka posuvníku jasu</string>
   <string name="lockscreen_default">Výchozí</string>
   <string name="lockscreen_hidden">Nic</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -106,4 +108,41 @@
   <string name="quick_settings_screenrecord_lq_label">Nahrávání obrazovky LQ</string>
   <string name="quick_settings_screenrecord_mq_label">Nahrávání obrazovky MQ</string>
   <string name="quick_settings_screenrecord_hq_label">Nahrávání obrazovky HQ</string>
+  <string name="preview">Náhled</string>
+  <string name="keycode">Klíčový kód</string>
+  <string name="no_home_title">Tlačítko Domů nebylo nalezeno</string>
+  <string name="no_home_message">K ovládání tohoto zařízení je zapotřebí tlačítko Domů. Před uložením přidejte tlačítko Domů.</string>
+  <string name="clipboard_description">Schránka umožňuje přetažení položek přímo do schránky. Položky lze také přetáhnout přímo ze schránky, pokud jsou k dispozici.</string>
+  <string name="keycode_description">Klíčový kod tlačítek umožňuje, aby tlačítka klávesnice byly přidány do navigačního panelu. Po stisknutí emulují vybrané tlačítka klávesnice. Nejprve musí být pro tlačítko vybrán klíč, následovaný obrázkem, který má být zobrazen na tlačítku.</string>
+  <string name="start">Spustit</string>
+  <string name="center">Uprostřed</string>
+  <string name="end">Ukončit</string>
+  <string name="space">Mezerník</string>
+  <string name="menu_ime">Nabídka / Přepínač klávesnice</string>
+  <string name="select_button">Vyberte tlačítko pro přidání</string>
+  <string name="add_button">Přidat tlačítko</string>
+  <string name="save">Uložit</string>
+  <string name="reset">Resetovat</string>
+  <string name="select_keycode">Vyberte tlačítko klávesnice</string>
+  <string name="left">Vlevo</string>
+  <string name="right">Vpravo</string>
+  <string name="navbar_editor_title">Editor</string>
+  <string name="navbar_editor_summary">Konfigurace navigačního panelu</string>
+  <!-- key disable QS Tile -->
+  <string name="quick_settings_key_disable_label">Zakázat tlačítka</string>
+  <string name="accessibility_quick_settings_key_disable_on">Tlačítka jsou zakázána.</string>
+  <string name="accessibility_quick_settings_key_disable_off">Tlačítka jsou povolena.</string>
+  <!-- navbar disable QS Tile -->
+  <string name="quick_settings_navbar_disable_label">Zakázat navigační panel</string>
+  <string name="accessibility_quick_settings_navbar_disable_on">Navigační panel je zakázán.</string>
+  <string name="accessibility_quick_settings_navbar_disable_off">Navigační panel je povolen.</string>
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="qs_show_battery">Zobrazit baterii</string>
+  <string name="qs_show_carrier">Zobrazit názvy operátora</string>
+  <string name="qs_show_clock">Zobrazit hodiny</string>
+  <string name="qs_show_mini">Minimální režim</string>
+  <string name="qs_header">Záhlaví</string>
+  <string name="quick_settings_google_assist_label">Asistence</string>
+  <string name="quick_settings_google_voice_assist_label">Hlasová asistence</string>
 </resources>

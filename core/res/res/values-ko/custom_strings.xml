@@ -35,4 +35,5 @@
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">화면 고정을 해제하려면 뒤로 가기 버튼을 길게 누르세요.</string>
   <string name="app_unpin_message">앱 고정이 해제됨</string>
+  <!-- back kill -->
 </resources>

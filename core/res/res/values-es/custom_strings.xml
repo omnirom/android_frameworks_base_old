@@ -35,4 +35,6 @@
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">Para deseleccionar esta pantalla, toca y mantén pulsado.</string>
   <string name="app_unpin_message">App deseleccionada</string>
+  <!-- back kill -->
+  <string name="app_killed_message">App Terminada</string>
 </resources>

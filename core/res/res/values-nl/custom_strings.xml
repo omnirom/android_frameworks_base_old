@@ -31,4 +31,5 @@
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <!-- back kill -->
 </resources>

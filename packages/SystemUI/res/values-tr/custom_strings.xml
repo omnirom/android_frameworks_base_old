@@ -44,9 +44,11 @@
   <string name="qs_menu_item_rows_three">3</string>
   <string name="qs_menu_item_rows_four">4</string>
   <string name="qs_menu_item_scroll">Hızlı çubuk kaydırması</string>
+  <string name="qs_menu_item_qs_columns">Hızlı çubuk sütunları</string>
   <string name="tuner_quick_settings">Hızlı ayarlar</string>
   <string name="tuner_show_brightness_mode">Parlaklık modu düğmesini göster</string>
   <string name="tuner_show_brightness_new">Parlaklık kaydırıcısını göster</string>
+  <string name="tuner_show_brightness_side_buttons">Parlaklık kaydırıcısının yan düğmelerini göster</string>
   <string name="lockscreen_default">Varsayılan</string>
   <string name="lockscreen_hidden">Hiçbiri</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -106,4 +108,41 @@
   <string name="quick_settings_screenrecord_lq_label">Düşük kalitede ekran kaydı</string>
   <string name="quick_settings_screenrecord_mq_label">Vasat kalitede ekran kaydı</string>
   <string name="quick_settings_screenrecord_hq_label">Yüksek kalitede ekran kaydı</string>
+  <string name="preview">Ön izleme</string>
+  <string name="keycode">Tuş kodu</string>
+  <string name="no_home_title">Ana ekran düğmesi bulunmadı</string>
+  <string name="no_home_message">Bu cihazda gezinmeniz için bir ana ekran düğmesine ihtiyacınız var. Kaydetmeden evvel lütfen bir ana ekran düğmesi ilâve edin.</string>
+  <string name="clipboard_description">Pano unsurların doğrudan panoya sürüklenmesine imkan sağlar. Unsurlar panoda mevcûdsa doğrudan pano dışına da sürüklenebilir.</string>
+  <string name="keycode_description">Tuş kodu düğmeleri klavye tuşlarının Gezinti Çubuğuna ilâve edilmesine imkân sağlar. Dokunulduğunda seçili klavye tuşunu taklit eder. Düğme üzerinde gösterilecek olan bir resimden sonra düğme için bir tuş seçilmeli.</string>
+  <string name="start">Başlat</string>
+  <string name="center">Merkez</string>
+  <string name="end">Sonlandır</string>
+  <string name="space">Ara kısım</string>
+  <string name="menu_ime">Menü veyâ Klavye Değiştirici</string>
+  <string name="select_button">İlâve edilecek düğmeyi seçin</string>
+  <string name="add_button">Düğme ilâve edin</string>
+  <string name="save">Kaydet</string>
+  <string name="reset">Sıfırla</string>
+  <string name="select_keycode">Klavye Düğmesi Seçin</string>
+  <string name="left">Sol</string>
+  <string name="right">Sağ</string>
+  <string name="navbar_editor_title">Düzenleyici</string>
+  <string name="navbar_editor_summary">Gezinti çubuğunu ayarlayın</string>
+  <!-- key disable QS Tile -->
+  <string name="quick_settings_key_disable_label">Tuşları devre dışı bırak</string>
+  <string name="accessibility_quick_settings_key_disable_on">Tuşlar devre dışı bırakıldı.</string>
+  <string name="accessibility_quick_settings_key_disable_off">Tuşlara izin verildi.</string>
+  <!-- navbar disable QS Tile -->
+  <string name="quick_settings_navbar_disable_label">Gezinti çubuğunu devre dışı bırak</string>
+  <string name="accessibility_quick_settings_navbar_disable_on">Gezinti çubuğu devre dışı bırakıldı.</string>
+  <string name="accessibility_quick_settings_navbar_disable_off">Gezinti çubuğu fa\'âl hâle getirildi.</string>
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="qs_show_battery">Pili göster</string>
+  <string name="qs_show_carrier">Operatör isimlerini göster</string>
+  <string name="qs_show_clock">Saati göster</string>
+  <string name="qs_show_mini">Ufak mod</string>
+  <string name="qs_header">Başlık</string>
+  <string name="quick_settings_google_assist_label">Google Assistant</string>
+  <string name="quick_settings_google_voice_assist_label">Sesli yardımcı</string>
 </resources>

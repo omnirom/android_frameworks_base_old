@@ -44,9 +44,11 @@
   <string name="qs_menu_item_rows_three">3</string>
   <string name="qs_menu_item_rows_four">4</string>
   <string name="qs_menu_item_scroll">Gyorsbeállítások sáv görgetése</string>
+  <string name="qs_menu_item_qs_columns">Gyorsbeállítási oszlopok</string>
   <string name="tuner_quick_settings">Gyorsbeállítások</string>
   <string name="tuner_show_brightness_mode">Fényerő üzemmódok közötti váltás megjelenítése</string>
   <string name="tuner_show_brightness_new">Fényerő csúszka megjelenítése</string>
+  <string name="tuner_show_brightness_side_buttons">A fényerő csúszka oldalsó gombjainak megjelenítése</string>
   <string name="lockscreen_default">Alapértelmezett</string>
   <string name="lockscreen_hidden">Nincs</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -106,4 +108,41 @@
   <string name="quick_settings_screenrecord_lq_label">Képernyő felvétel LQ</string>
   <string name="quick_settings_screenrecord_mq_label">Képernyő felvétel MQ</string>
   <string name="quick_settings_screenrecord_hq_label">Képernyő felvétel HQ</string>
+  <string name="preview">Előnézet</string>
+  <string name="keycode">Kulcskód</string>
+  <string name="no_home_title">Nincs kezdőlap gomb</string>
+  <string name="no_home_message">A készüléken való navigáláshoz kezdőlap gomb szükséges. Kérjük, adjon hozzá egy kezdőlap gombot a mentés előtt.</string>
+  <string name="clipboard_description">A Vágólap lehetővé teszi az elemek közvetlenül a vágólapra húzását. Az elemek közvetlenül a vágólapról is áthúzhatók, ha jelen vannak.</string>
+  <string name="keycode_description">A kulcskód gombok lehetővé teszik, hogy a billentyűzet gombjait hozzáadja a navigációs sávhoz. Megnyomásuk esetén a kiválasztott billentyűt emulálják. Először a kulcsot kell kiválasztani a gombhoz, majd a gombon megjelenő képet.</string>
+  <string name="start">Kezdete</string>
+  <string name="center">Középen</string>
+  <string name="end">Vége</string>
+  <string name="space">Távtartó</string>
+  <string name="menu_ime">Menü / Billentyűzet váltó</string>
+  <string name="select_button">Válassza ki a hozzáadni kívánt gombot</string>
+  <string name="add_button">Gomb hozzáadása</string>
+  <string name="save">Mentés</string>
+  <string name="reset">Visszaállítás</string>
+  <string name="select_keycode">Válassza ki a billentyűzet gombot</string>
+  <string name="left">Bal</string>
+  <string name="right">Jobb</string>
+  <string name="navbar_editor_title">Szerkesztő</string>
+  <string name="navbar_editor_summary">Navigációs sáv beállítása</string>
+  <!-- key disable QS Tile -->
+  <string name="quick_settings_key_disable_label">Gombok letiltása</string>
+  <string name="accessibility_quick_settings_key_disable_on">Gombok letiltva.</string>
+  <string name="accessibility_quick_settings_key_disable_off">Gombok engedélyezve.</string>
+  <!-- navbar disable QS Tile -->
+  <string name="quick_settings_navbar_disable_label">Navigációs sáv letiltása</string>
+  <string name="accessibility_quick_settings_navbar_disable_on">Navigációs sáv letiltva.</string>
+  <string name="accessibility_quick_settings_navbar_disable_off">Navigációs sáv engedélyezve.</string>
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="qs_show_battery">Akkumulátor megjelenítése</string>
+  <string name="qs_show_carrier">Szolgáltatói nevek megjelenítése</string>
+  <string name="qs_show_clock">Óra megjelenítése</string>
+  <string name="qs_show_mini">Mini mód</string>
+  <string name="qs_header">Fejléc</string>
+  <string name="quick_settings_google_assist_label">Segéd</string>
+  <string name="quick_settings_google_voice_assist_label">Hangsegéd</string>
 </resources>

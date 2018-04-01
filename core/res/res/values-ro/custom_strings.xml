@@ -35,4 +35,5 @@
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">Pentru a anula fixarea acestui ecran, țineți apăsat butonul Înapoi.</string>
   <string name="app_unpin_message">Aplicația nu mai este fixată</string>
+  <!-- back kill -->
 </resources>

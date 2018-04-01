@@ -92,4 +92,7 @@
   <string name="accessibility_quick_settings_location_high_accuracy">Raportare locație: precizie ridicată.</string>
   <!-- Heads Up QS Tile -->
   <!-- Screenrecord QS tile -->
+  <!-- key disable QS Tile -->
+  <!-- navbar disable QS Tile -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
 </resources>
