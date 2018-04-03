@@ -4475,6 +4475,13 @@ public final class Settings {
                 "statusbar_battery_force_percent";
 
         /**
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_LOW_COLOR_ENABLE =
+                "statusbar_battery_low_color_enable";
+
+        /**
          * Show or hide clock
          * 0 - hide
          * 1 - show (default)
