@@ -84,6 +84,7 @@ public class AbstractBatteryView extends View implements IBatteryView,
     protected int mInverseFrameColor;
     protected DashPathEffect mPathEffect;
     protected boolean mDottedLine;
+    protected boolean mLowPercentColorEnabled = true;
 
     @Override
     public void onAttachedToWindow() {
@@ -183,6 +184,11 @@ public class AbstractBatteryView extends View implements IBatteryView,
         mChargeColorEnable = value;
     }
 
+    @Override
+    public void setLowPercentColorEnabled(boolean value) {
+        mLowPercentColorEnabled = value;
+    }
+
     protected boolean isWideDisplay() {
         return mShowPercent && !mPercentInside;
     }
@@ -203,21 +209,23 @@ public class AbstractBatteryView extends View implements IBatteryView,
         if (mPowerSaveEnabled) {
             return mIconTint;
         }
-        int thresh, color = 0;
-        for (int i = 0; i < mColors.length; i += 2) {
-            thresh = mColors[i];
-            color = mColors[i + 1];
-            if (level <= thresh) {
+        if (mLowPercentColorEnabled) {
+            int thresh, color = 0;
+            for (int i = 0; i < mColors.length; i += 2) {
+                thresh = mColors[i];
+                color = mColors[i + 1];
+                if (level <= thresh) {
 
-                // Respect tinting for "normal" level
-                if (i == mColors.length - 2) {
-                    return mIconTint;
-                } else {
-                    return color;
+                    // Respect tinting for "normal" level
+                    if (i == mColors.length - 2) {
+                        return mIconTint;
+                    } else {
+                        return color;
+                    }
                 }
             }
         }
-        return color;
+        return mIconTint;
     }
 
     @Override

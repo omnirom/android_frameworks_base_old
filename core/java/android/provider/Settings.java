@@ -4475,6 +4475,13 @@ public final class Settings {
                 "statusbar_battery_force_percent";
 
         /**
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_LOW_COLOR_ENABLE =
+                "statusbar_battery_low_color_enable";
+
+        /**
          * Show or hide clock
          * 0 - hide
          * 1 - show (default)
@@ -4822,6 +4829,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_CHARGING_COLOR);
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_CHARGING_COLOR_ENABLE);
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_DOTTED_LINE);
+            PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_LOW_COLOR_ENABLE);
             PRIVATE_SETTINGS.add(BUTTON_BACK_KILL_TIMEOUT);
             PRIVATE_SETTINGS.add(BUTTON_BACK_KILL_ENABLE);
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_FORCE_PERCENT);
