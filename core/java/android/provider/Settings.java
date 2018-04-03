@@ -4585,7 +4585,14 @@ public final class Settings {
          * location of the clear all recents button
          * @hide
          */
-        public static final String  RECENTS_CLEAR_ALL_LOCATION = "recents_clear_all_location";
+        public static final String RECENTS_CLEAR_ALL_LOCATION = "recents_clear_all_location";
+
+        /**
+         *
+         * @hide
+         */
+        public static final String BATTERY_SAVER_SYSTEM_BAR_COLOR_ENABLE =
+                "battery_saver_system_bars_color_enable";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -4844,6 +4851,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(FINGERPRINT_SUCCESS_VIB);
             PRIVATE_SETTINGS.add(STATUS_BAR_QUICK_QS_PULLDOWN);
             PRIVATE_SETTINGS.add(LOCKSCREEN_PIN_SCRAMBLE_LAYOUT);
+            PRIVATE_SETTINGS.add(BATTERY_SAVER_SYSTEM_BAR_COLOR_ENABLE);
         }
 
         /**
