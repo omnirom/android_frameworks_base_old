@@ -4602,6 +4602,12 @@ public final class Settings {
         public static final String FONT_PACKAGES = "font_packages";
 
         /**
+         *
+         * @hide
+         */
+        public static final String BATTERY_SAVER_SYSTEM_BAR_COLOR_ENABLE = "battery_saver_system_bars_color_enable";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -4860,6 +4866,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(LOCKSCREEN_PIN_SCRAMBLE_LAYOUT);
             PRIVATE_SETTINGS.add(FONT_INFO);
             PRIVATE_SETTINGS.add(FONT_PACKAGES);
+            PRIVATE_SETTINGS.add(BATTERY_SAVER_SYSTEM_BAR_COLOR_ENABLE);
         }
 
         /**

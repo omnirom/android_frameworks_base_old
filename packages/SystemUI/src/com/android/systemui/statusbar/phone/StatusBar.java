@@ -879,6 +879,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_QUICK_QS_PULLDOWN),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BATTERY_SAVER_SYSTEM_BAR_COLOR_ENABLE),
+                    false, this, UserHandle.USER_ALL);
+
         }
 
         @Override
@@ -928,6 +932,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mNotificationPanel != null) {
                 mNotificationPanel.updateSettings();
             }
+            checkBarModes();
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver;
@@ -3560,8 +3565,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean powerSave = mBatteryController.isPowerSave();
         final boolean anim = !mNoAnimationOnNextBarModeChange && mDeviceInteractive
                 && windowState != WINDOW_STATE_HIDDEN && !powerSave;
+
         if (powerSave && getBarState() == StatusBarState.SHADE) {
-            mode = MODE_WARNING;
+            final boolean enableBarColor = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.BATTERY_SAVER_SYSTEM_BAR_COLOR_ENABLE, 1, mCurrentUserId) == 1;
+            if (enableBarColor) {
+                mode = MODE_WARNING;
+            }
         }
         transitions.transitionTo(mode, anim);
     }
