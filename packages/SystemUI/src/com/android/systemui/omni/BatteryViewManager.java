@@ -61,6 +61,7 @@ public class BatteryViewManager implements TunerService.Tunable {
     private boolean mDottedLine;
     private boolean mForceShowPercent;
     private int mLocation = BATTERY_LOCATION_STATUSBAR;
+    private boolean mLowPercentColorEnabled = true;
 
     public static final int BATTERY_LOCATION_STATUSBAR = 0;
     public static final int BATTERY_LOCATION_KEYGUARD = 1;
@@ -132,6 +133,9 @@ public class BatteryViewManager implements TunerService.Tunable {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.STATUSBAR_BATTERY_FORCE_PERCENT), false,
                 mSettingsObserver, UserHandle.USER_ALL);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.STATUSBAR_BATTERY_LOW_COLOR_ENABLE), false,
+                mSettingsObserver, UserHandle.USER_ALL);
         update();
 
         Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
@@ -180,6 +184,7 @@ public class BatteryViewManager implements TunerService.Tunable {
         mCurrentBatteryView.setChargingColor(mChargingColor);
         mCurrentBatteryView.setChargingColorEnable(mLocation != BATTERY_LOCATION_AMBIENT && mChargingColorEnable);
         mCurrentBatteryView.setDottedLine(mDottedLine);
+        mCurrentBatteryView.setLowPercentColorEnabled(mLowPercentColorEnabled);
         mCurrentBatteryView.applyStyle();
     }
 
@@ -202,6 +207,8 @@ public class BatteryViewManager implements TunerService.Tunable {
                 Settings.System.STATUSBAR_BATTERY_DOTTED_LINE, 0, UserHandle.USER_CURRENT) == 1;
         mForceShowPercent = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.STATUSBAR_BATTERY_FORCE_PERCENT, 0, UserHandle.USER_CURRENT) == 1;
+        mLowPercentColorEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUSBAR_BATTERY_LOW_COLOR_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
 
         mHandler.post(new Runnable() {
             @Override
