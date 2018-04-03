@@ -87,4 +87,8 @@
     <string name="qs_menu_item_rows_three">3</string>
     <string name="qs_menu_item_rows_four">4</string>
 
+    <string name="tuner_quick_settings">Quick settings</string>
+    <string name="tuner_show_brightness_new">Show brightness slider</string>
+    <string name="tuner_brightness_position_bottom">Brightness slider on bottom</string>
+
 </resources>
