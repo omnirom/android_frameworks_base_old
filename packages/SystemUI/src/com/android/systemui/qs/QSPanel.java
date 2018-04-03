@@ -60,6 +60,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     public static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
     public static final String QS_SHOW_BRIGHTNESS_MODE = "qs_show_brightness_mode";
     public static final String QS_SHOW_BRIGHTNESS_SIDE_BUTTONS = "qs_show_brightness_side_buttons";
+    public static final String QS_BRIGHTNESS_POSITION_BOTTOM = "qs_brightness_position_bottom";
 
     protected final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
@@ -161,6 +162,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         Dependency.get(TunerService.class).addTunable(this, QS_SHOW_BRIGHTNESS);
         Dependency.get(TunerService.class).addTunable(this, QS_SHOW_BRIGHTNESS_MODE);
         Dependency.get(TunerService.class).addTunable(this, QS_SHOW_BRIGHTNESS_SIDE_BUTTONS);
+        Dependency.get(TunerService.class).addTunable(this, QS_BRIGHTNESS_POSITION_BOTTOM);
         if (mHost != null) {
             setTiles(mHost.getTiles());
         }
@@ -205,6 +207,25 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             mBrightnessController.showSideButtons(mBrightnessSliderSideButtons);
             updateBrightnessMirror();
         }
+        if (QS_BRIGHTNESS_POSITION_BOTTOM.equals(key)) {
+            if (newValue == null || Integer.parseInt(newValue) == 0) {
+                removeView(mBrightnessView);
+                addView(mBrightnessView, 0);
+            } else {
+                removeView(mBrightnessView);
+                addView(mBrightnessView, getBrightnessViewPositionBottom());
+            }
+        }
+    }
+
+    private int getBrightnessViewPositionBottom() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getChildAt(i);
+            if (v == mPageIndicator) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     public void openDetails(String subPanel) {
