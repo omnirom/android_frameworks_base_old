@@ -64,7 +64,7 @@ public class AbstractBatteryView extends View implements IBatteryView,
     protected int mFrameColor;
     protected int mChargeColor;
     protected final float[] mBoltPoints;
-    protected boolean mChargingImage;
+    protected boolean mChargingImage = true;
     protected int mDarkModeBackgroundColor;
     protected int mDarkModeFillColor;
     protected int mLightModeBackgroundColor;
