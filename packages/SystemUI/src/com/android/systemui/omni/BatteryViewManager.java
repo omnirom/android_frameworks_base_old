@@ -198,7 +198,7 @@ public class BatteryViewManager implements TunerService.Tunable {
         final boolean percentInside = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.STATUSBAR_BATTERY_PERCENT_INSIDE, 0, UserHandle.USER_CURRENT) != 0;
         final boolean chargingImage = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.STATUSBAR_BATTERY_CHARGING_IMAGE, 0, UserHandle.USER_CURRENT) == 1;
+                Settings.System.STATUSBAR_BATTERY_CHARGING_IMAGE, 1, UserHandle.USER_CURRENT) == 1;
         final int chargingColor = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.STATUSBAR_BATTERY_CHARGING_COLOR, mContext.getResources().getColor(R.color.meter_background_color), UserHandle.USER_CURRENT);
         final boolean chargingColorEnable = Settings.System.getIntForUser(mContext.getContentResolver(),
