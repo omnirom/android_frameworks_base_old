@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8dc8e6d9_c1ea462b",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 4601,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-04-04T15:44:27Z",
+      "side": 1,
+      "message": "add it to PRIVATE_SETTINGS below",
+      "revId": "00b93f9abcf57627f85c5dcbd9009ca1bf5647c0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4c9c4b20_974d48d4",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 970,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-04-04T15:44:27Z",
+      "side": 1,
+      "message": "replace tab with space please",
+      "revId": "00b93f9abcf57627f85c5dcbd9009ca1bf5647c0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7cbc0989_141317cf",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 6262,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-04-04T15:44:27Z",
+      "side": 1,
+      "message": "indent is not correct must be 2 x 4 spaces here",
+      "revId": "00b93f9abcf57627f85c5dcbd9009ca1bf5647c0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
