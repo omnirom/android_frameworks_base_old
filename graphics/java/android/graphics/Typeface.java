@@ -1152,11 +1152,13 @@ public class Typeface {
     }
 
     private static File getThemeFontConfigLocation() {
-        return new File("/data/system/theme/fonts/");
+        return getSystemFontConfigLocation();
+        //return new File("/data/system/theme/fonts/");
     }
 
     private static File getThemeFontDirLocation() {
-        return new File("/data/system/theme/fonts/");
+        return getSystemFontDirLocation();
+        //return new File("/data/system/theme/fonts/");
     }
 
     @Override
