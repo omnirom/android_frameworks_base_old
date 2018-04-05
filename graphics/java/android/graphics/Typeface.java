@@ -35,6 +35,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.ResultReceiver;
+import android.os.SystemProperties;
+import android.os.storage.StorageManager;
 import android.provider.FontRequest;
 import android.provider.FontsContract;
 import android.text.FontConfig;
@@ -1000,9 +1002,11 @@ public class Typeface {
      * This should only be called once, from the static class initializer block.
      */
     private static void init() {
+        Log.e(TAG, "init");
         // Load font config and initialize Minikin state
         File systemFontConfigLocation = getSystemFontConfigLocation();
         File themeFontConfigLocation = getThemeFontConfigLocation();
+        Log.e(TAG, "themeFontConfigLocation = " + themeFontConfigLocation);
 
         File systemConfigFile = new File(systemFontConfigLocation, FONTS_CONFIG);
         File themeConfigFile = new File(themeFontConfigLocation, FONTS_CONFIG);
@@ -1152,10 +1156,22 @@ public class Typeface {
     }
 
     private static File getThemeFontConfigLocation() {
+        if (StorageManager.isNonDefaultBlockEncrypted()) {
+            final String status = SystemProperties.get("vold.decrypt");
+            if (!status.equals("trigger_restart_framework")) {
+                return getSystemFontConfigLocation();
+            }
+        }
         return new File("/data/system/theme/fonts/");
     }
 
     private static File getThemeFontDirLocation() {
+        if (StorageManager.isNonDefaultBlockEncrypted()) {
+            final String status = SystemProperties.get("vold.decrypt");
+            if (!status.equals("trigger_restart_framework")) {
+                return getSystemFontDirLocation();
+            }
+        }
         return new File("/data/system/theme/fonts/");
     }
 
