@@ -657,7 +657,8 @@ public class TaskStack {
      * Removes all tasks from the stack.
      */
     public void removeAllTasks(boolean notifyStackChanges) {
-        ArrayList<Task> tasks = mStackTaskList.getTasks();
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.addAll(mStackTaskList.getTasks());
         for (int i = tasks.size() - 1; i >= 0; i--) {
             Task t = tasks.get(i);
             removeTaskImpl(mStackTaskList, t);
