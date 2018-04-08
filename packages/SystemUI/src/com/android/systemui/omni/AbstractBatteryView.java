@@ -328,11 +328,6 @@ public class AbstractBatteryView extends View implements IBatteryView,
         applyStyle();
     }
 
-    @Override
-    public boolean isWithTopMargin() {
-        return false;
-    }
-
     protected String getPercentText() {
         return NumberFormat.getPercentInstance(Locale.US).format(mLevel / 100f);
     }
