@@ -229,9 +229,4 @@ public class BatteryCirclePercentView extends AbstractBatteryView  {
         mFramePaint.setStrokeWidth(mStrokeWidth);
         mPercentOffsetY = (int) (0.4 * metrics.density + 0.5f);
     }
-
-    @Override
-    public boolean isWithTopMargin() {
-        return true;
-    }
 }
