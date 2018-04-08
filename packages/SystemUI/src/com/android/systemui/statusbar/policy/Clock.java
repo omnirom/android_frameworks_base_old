@@ -128,6 +128,7 @@ public class Clock extends TextView implements DemoMode, CommandQueue.Callbacks,
         } finally {
             a.recycle();
         }
+        setIncludeFontPadding(false);
     }
 
     public void setForceHideDate(boolean enabled) {

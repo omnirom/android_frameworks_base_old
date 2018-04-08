@@ -38,7 +38,5 @@ public interface IBatteryView  {
 
     void setDottedLine(boolean value);
 
-    boolean isWithTopMargin();
-
     void setLowPercentColorEnabled(boolean value);
 }
