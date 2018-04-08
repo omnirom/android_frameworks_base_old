@@ -272,9 +272,4 @@ public class BatteryDroidView extends AbstractBatteryView {
     private float getRadiusRatio() {
         return RADIUS_RATIO;
     }
-
-    @Override
-    public boolean isWithTopMargin() {
-        return true;
-    }
 }
