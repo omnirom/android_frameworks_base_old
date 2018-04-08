@@ -55,7 +55,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
     private int mBarSpaceWidth;
     private int mHeight;
     private int mWidth;
-    private int mPercentOffsetY;
+    private int mTextHeight;
 
     private final Path mBoltPath = new Path();
 
@@ -191,19 +191,16 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
         if (mShowPercent) {
             updatePercentFontSize();
             mTextPaint.setColor(getCurrentColor(level));
-            float textHeight = 0f;
 
             if (mPercentInside) {
                 if (!showChargingImage()) {
                     percentage = level == 100 ? null : String.valueOf(level);
-                    textHeight = mTextPaint.descent() - mTextPaint.ascent();
-                    textOffset = (textHeight / 2) - mTextPaint.descent() + mPercentOffsetY;
-                    bounds = new RectF(0, 0, mWidth, mHeight);
+                    textOffset = mTextHeight / 2;
+                    bounds = new RectF(0, buttonHeight, mWidth, mHeight);
                 }
             } else {
                 percentage = getPercentText();
-                textHeight = mTextPaint.descent() - mTextPaint.ascent();
-                textOffset = (textHeight / 2) - mTextPaint.descent() + mPercentOffsetY;
+                textOffset = mTextHeight / 2;
                 bounds = new RectF(mBarSpaceWidth, 0, mWidth, mHeight);
             }
             if (percentage != null) {
@@ -256,6 +253,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
             String text = "100";
             mTextPaint.getTextBounds(text, 0, text.length(), bounds);
             mTextWidth = bounds.width();
+            mTextHeight = bounds.height();
         } else {
             Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
             mTextPaint.setTypeface(font);
@@ -267,6 +265,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
             String text = level == 100 ? "100%" : ".00%";
             mTextPaint.getTextBounds(text, 0, text.length(), bounds);
             mTextWidth = bounds.width();
+            mTextHeight = bounds.height();
         }
     }
 
@@ -284,10 +283,9 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
     @Override
     public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mHeight = getResources().getDimensionPixelSize(com.android.settingslib.R.dimen.battery_height);
+        mHeight = (int) (15 * metrics.density + 0.5f);
         mBarWidth = getResources().getDimensionPixelSize(com.android.settingslib.R.dimen.battery_width);
         mBarSpaceWidth = (int) (14 * metrics.density + 0.5f);
-        mPercentOffsetY = (int) (0.8 * metrics.density + 0.5f);
     }
 
     private float getRadiusRatio() {

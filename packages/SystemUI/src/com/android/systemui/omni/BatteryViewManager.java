@@ -164,8 +164,7 @@ public class BatteryViewManager implements TunerService.Tunable {
         ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.MATCH_PARENT);
-        if (mCurrentBatteryView.isWithTopMargin()
-                && mLocation != BATTERY_LOCATION_KEYGUARD
+        if (mLocation != BATTERY_LOCATION_KEYGUARD
                 && mLocation != BATTERY_LOCATION_AMBIENT) {
             lp.setMargins(0, top, 0, 0);
         }
@@ -237,9 +236,11 @@ public class BatteryViewManager implements TunerService.Tunable {
     }
 
     private TextView loadPercentView() {
-        return (TextView) LayoutInflater.from(mContext)
+        TextView v = (TextView) LayoutInflater.from(mContext)
                 .inflate(mBatteryStyle == 3 ? R.layout.battery_percentage_view :
                 R.layout.battery_percentage_view_with_gap, null);
+        v.setIncludeFontPadding(false);
+        return v;
     }
 
     private void updateShowPercent() {
