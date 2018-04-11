@@ -916,7 +916,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS_MODE),
                     false, this, UserHandle.USER_ALL);
-
+           mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_PANEL_BG_ALPHA),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -974,6 +976,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                         1, mCurrentUserId) == 1);
             }
             checkBarModes();
+
+            Drawable mQsBackGround = mContext.getDrawable(R.drawable.qs_background_primary);
+            int mQsBackGroundAlpha = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.QS_PANEL_BG_ALPHA, 221,
+                    UserHandle.USER_CURRENT);
+
+            mQsBackGround.setAlpha(mQsBackGroundAlpha);
+            mQSPanel.setBackground(mQsBackGround);
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver;
@@ -987,6 +997,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void start() {
+
         mNetworkController = Dependency.get(NetworkController.class);
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);

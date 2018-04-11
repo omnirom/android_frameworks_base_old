@@ -21,6 +21,11 @@ import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.graphics.drawable.Drawable;
+
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
@@ -57,6 +62,14 @@ public class QSContainerImpl extends FrameLayout {
 
         setClickable(true);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+
+        Drawable mQsBackGround = getContext().getDrawable(R.drawable.qs_background_primary);
+        int mQsBackGroundAlpha = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.QS_PANEL_BG_ALPHA, 221,
+                UserHandle.USER_CURRENT);
+
+        mQsBackGround.setAlpha(mQsBackGroundAlpha);
+        setBackground(mQsBackGround);
     }
 
     @Override
