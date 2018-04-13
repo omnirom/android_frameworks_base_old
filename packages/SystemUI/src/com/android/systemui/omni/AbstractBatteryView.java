@@ -57,7 +57,7 @@ public class AbstractBatteryView extends View implements IBatteryView,
     public static final String TAG = AbstractBatteryView.class.getSimpleName();
 
     protected BatteryController mBatteryController;
-    protected boolean mPowerSaveEnabled;
+    private boolean mPowerSaveEnabled;
     protected boolean mShowPercent;
     protected boolean mPercentInside;
     protected final int mCriticalLevel;
@@ -230,7 +230,8 @@ public class AbstractBatteryView extends View implements IBatteryView,
 
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
-        mPowerSaveEnabled = mBatteryController.isPowerSave();
+        mPowerSaveEnabled = isPowerSave;
+        updatePercentText();
         postInvalidate();
     }
 
