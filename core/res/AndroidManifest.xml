@@ -613,6 +613,7 @@
     <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_HIDE_OVERLAY" />
     <protected-broadcast android:name="com.android.systemui.ACTION_DISMISS_KEYGUARD" />
     <protected-broadcast android:name="org.omnirom.omnirecord.ACTION_START" />
+    <protected-broadcast android:name="com.android.server.ACTION_FONT_CHANGED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
