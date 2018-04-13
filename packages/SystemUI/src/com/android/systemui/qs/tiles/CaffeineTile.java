@@ -173,6 +173,9 @@ public class CaffeineTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        if (mWakeLock == null) {
+            return;
+        }
         state.value = mWakeLock.isHeld();
         if (state.slash == null) {
             state.slash = new SlashState();

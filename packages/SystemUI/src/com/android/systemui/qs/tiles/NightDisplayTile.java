@@ -75,6 +75,9 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        if (mController == null) {
+            return;
+        }
         final boolean isActivated = mController.isActivated();
         state.value = isActivated;
         state.label = state.contentDescription =
@@ -96,6 +99,9 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
     @Override
     protected void handleSetListening(boolean listening) {
+        if (mController == null) {
+            return;
+        }
         mIsListening = listening;
         if (listening) {
             mController.setListener(this);
