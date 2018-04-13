@@ -139,6 +139,9 @@ public class AdbOverNetworkTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleSetListening(boolean listening) {
+        if (mObserver == null) {
+            return;
+        }
         if (mListening != listening) {
             mListening = listening;
             if (listening) {
