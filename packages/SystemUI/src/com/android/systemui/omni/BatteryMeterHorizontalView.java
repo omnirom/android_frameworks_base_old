@@ -115,7 +115,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         float drawFrac = (float) level / 100f;
         final int height = mHeight;
         final int width = mBarWidth;
-        final int buttonHeight = (int) (mBarHeight * mButtonHeightFraction);
+        final int buttonHeight = Math.round(mBarWidth * mButtonHeightFraction);
 
         final int insetTop = (height - mBarHeight) / 2;
         final int insetBottom = (height - mBarHeight) / 2;
@@ -146,7 +146,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
 
         // define the battery shape
         mShapePath.reset();
-        final float radius = getRadiusRatio() * mHeight;
+        final float radius = getRadiusRatio() * (mFrame.width() + buttonHeight);
         mShapePath.setFillType(FillType.WINDING);
         mShapePath.addRoundRect(mFrame, radius, radius, Direction.CW);
         mShapePath.addRect(mButtonFrame, Direction.CW);
@@ -199,8 +199,8 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
             if (mPercentInside) {
                 if (!showChargingImage()) {
                     percentage = level == 100 ? null : String.valueOf(level);
-                    textOffset = mTextHeight / 2;
-                    bounds = new RectF(0, 0, mBarWidth - buttonHeight, mHeight);
+                    textOffset = mTextPaint.getFontMetrics().ascent / 2;
+                    bounds = mFrame;
                 }
             } else {
                 percentage = getPercentText();
