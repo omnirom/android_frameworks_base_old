@@ -52,11 +52,11 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
     private float mButtonHeightFraction;
     private final Paint mFramePaint, mBatteryPaint;
     private int mBarWidth;
-    private int mBarSpaceWidth;
     private int mBarHeight;
     private int mHeight;
     private int mWidth;
     private int mTextHeight;
+    private int mPercentOffsetY;
 
     private final Path mBoltPath = new Path();
 
@@ -99,12 +99,11 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        mWidth = (isWideDisplay() ? mTextWidth : 0) + mBarSpaceWidth;
         setMeasuredDimension(mWidth, mHeight);
     }
 
     private int getBarInset() {
-        return (mBarSpaceWidth - mBarWidth) / 2;
+        return (mWidth - mBarWidth) / 2;
     }
 
     @Override
@@ -115,7 +114,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         float drawFrac = (float) level / 100f;
         final int height = mHeight;
         final int width = mBarWidth;
-        final int buttonHeight = (int) (mBarHeight * mButtonHeightFraction);
+        final int buttonHeight = Math.round(mBarWidth * mButtonHeightFraction);
 
         final int insetTop = (height - mBarHeight) / 2;
         final int insetBottom = (height - mBarHeight) / 2;
@@ -146,7 +145,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
 
         // define the battery shape
         mShapePath.reset();
-        final float radius = getRadiusRatio() * mHeight;
+        final float radius = getRadiusRatio() * (mFrame.width() + buttonHeight);
         mShapePath.setFillType(FillType.WINDING);
         mShapePath.addRoundRect(mFrame, radius, radius, Direction.CW);
         mShapePath.addRect(mButtonFrame, Direction.CW);
@@ -191,32 +190,18 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         RectF bounds = null;
         String percentage = null;
         float textOffset = 0f;
+        mTextPaint.setColor(getCurrentColor(level));
 
-        if (mShowPercent) {
-            updatePercentFontSize();
-            mTextPaint.setColor(getCurrentColor(level));
-
-            if (mPercentInside) {
-                if (!showChargingImage()) {
-                    percentage = level == 100 ? null : String.valueOf(level);
-                    textOffset = mTextHeight / 2;
-                    bounds = new RectF(0, 0, mBarWidth - buttonHeight, mHeight);
-                }
-            } else {
-                percentage = getPercentText();
-                textOffset = mTextHeight / 2;
-                bounds = new RectF(mBarSpaceWidth, 0, mWidth, mHeight);
-            }
-            if (percentage != null) {
-                if (mPercentInside) {
-                    if (!showChargingImage()) {
-                        if (pctOpaque) {
-                            mTextPath.reset();
-                            mTextPaint.getTextPath(percentage, 0, percentage.length(), bounds.centerX(),
-                                    bounds.centerY() + textOffset, mTextPath);
-                            mShapePath.op(mTextPath, Path.Op.DIFFERENCE);
-                        }
-                    }
+        if (!showChargingImage() && mPercentInside) {
+            if (level != 100) {
+                percentage = String.valueOf(level);
+                textOffset = mTextHeight / 2 - mPercentOffsetY;
+                bounds = mFrame;
+                if (pctOpaque) {
+                    mTextPath.reset();
+                    mTextPaint.getTextPath(percentage, 0, percentage.length(), bounds.centerX(),
+                            bounds.centerY() + textOffset, mTextPath);
+                    mShapePath.op(mTextPath, Path.Op.DIFFERENCE);
                 }
             }
         }
@@ -225,67 +210,41 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         c.drawPath(mShapePath, mFramePaint);
 
         // draw the battery shape, clipped to charging level
-        mFrame.right = levelTop;
+        RectF shapeFrame = new RectF(mFrame);
+        shapeFrame.right = levelTop;
         mClipPath.reset();
-        mClipPath.addRect(mFrame,  Path.Direction.CCW);
+        mClipPath.addRect(shapeFrame,  Path.Direction.CCW);
         mShapePath.op(mClipPath, Path.Op.INTERSECT);
         c.drawPath(mShapePath, mBatteryPaint);
 
-        if (mShowPercent && (!mPercentInside || !pctOpaque)) {
-            if (percentage != null) {
-                if (mPercentInside) {
-                    c.drawText(percentage, bounds.centerX(), bounds.centerY() + textOffset, mTextPaint);
-                } else {
-                    c.drawText(percentage, mWidth, bounds.centerY() + textOffset, mTextPaint);
-                }
-            }
+        if (percentage != null && !pctOpaque) {
+            c.drawText(percentage, bounds.centerX(), bounds.centerY() + textOffset, mTextPaint);
         }
     }
 
     @Override
     public void applyStyle() {
-        final int level = mLevel;
-        if (mPercentInside) {
-            Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
-            mTextPaint.setTextAlign(Paint.Align.CENTER);
-            mTextPaint.setTypeface(font);
-            DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
-            mTextSize = (int) (10 * metrics.density + 0.5f);
-            mTextPaint.setTextSize(mTextSize);
-            Rect bounds = new Rect();
-            String text = "100";
-            mTextPaint.getTextBounds(text, 0, text.length(), bounds);
-            mTextWidth = bounds.width();
-            mTextHeight = bounds.height();
-        } else {
-            Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
-            mTextPaint.setTypeface(font);
-            mTextPaint.setTextAlign(Paint.Align.RIGHT);
-            mTextSize = getResources().getDimensionPixelSize(level == 100 ?
-                    R.dimen.omni_battery_level_text_size_small : R.dimen.omni_battery_level_text_size);
-            mTextPaint.setTextSize(mTextSize);
-            Rect bounds = new Rect();
-            String text = level == 100 ? "100%" : ".00%";
-            mTextPaint.getTextBounds(text, 0, text.length(), bounds);
-            mTextWidth = bounds.width();
-            mTextHeight = bounds.height();
-        }
-    }
-
-    private void updatePercentFontSize() {
-        if (!mPercentInside) {
-            updateExtraPercentFontSize();
-        }
+        Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
+        mTextPaint.setTextAlign(Paint.Align.CENTER);
+        mTextPaint.setTypeface(font);
+        DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+        mTextSize = (int) (10 * metrics.density + 0.5f);
+        mTextPaint.setTextSize(mTextSize);
+        Rect bounds = new Rect();
+        String text = "99";
+        mTextPaint.getTextBounds(text, 0, text.length(), bounds);
+        mTextWidth = bounds.width();
+        mTextHeight = bounds.height();
     }
 
     @Override
     public void loadDimens() {
-        // bar width is hardcoded  android:layout_width="14.5dp"
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         mBarWidth = (int) (18 * metrics.density + 0.5f);
         mHeight = getResources().getDimensionPixelSize(com.android.settingslib.R.dimen.battery_height);
-        mBarSpaceWidth = (int) (20 * metrics.density + 0.5f);
+        mWidth = (int) (20 * metrics.density + 0.5f);
         mBarHeight = (int) (10 * metrics.density + 0.5f);
+        mPercentOffsetY = (int) (0.4 * metrics.density + 0.5f);
     }
 
     private float getRadiusRatio() {
