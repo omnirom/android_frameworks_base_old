@@ -332,4 +332,9 @@ public class AbstractBatteryView extends View implements IBatteryView,
     protected String getPercentText() {
         return NumberFormat.getPercentInstance(Locale.US).format(mLevel / 100f);
     }
+
+    @Override
+    public int getTopMargin() {
+        return mContext.getResources().getDimensionPixelSize(R.dimen.battery_margin_top);
+    }
 }

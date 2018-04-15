@@ -160,14 +160,11 @@ public class BatteryViewManager implements TunerService.Tunable {
         mCurrentBatteryView = mBatteryStyleList.get(mBatteryStyle);
         applyStyle();
 
-        int top = mContext.getResources().getDimensionPixelSize(R.dimen.battery_margin_top);
+        int top = mCurrentBatteryView.getTopMargin();
         ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.MATCH_PARENT);
-        if (mLocation != BATTERY_LOCATION_KEYGUARD
-                && mLocation != BATTERY_LOCATION_AMBIENT) {
-            lp.setMargins(0, top, 0, 0);
-        }
+        lp.setMargins(0, top, 0, 0);
         mContainerView.addView((View) mCurrentBatteryView, lp);
         // percent only is done with mBatteryPercentView but we
         // still need a BatteryView as container to update level

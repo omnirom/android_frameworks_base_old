@@ -115,7 +115,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         float drawFrac = (float) level / 100f;
         final int height = mHeight;
         final int width = mBarWidth;
-        final int buttonHeight = (int) (mBarHeight * mButtonHeightFraction);
+        final int buttonHeight = Math.round(mBarWidth * mButtonHeightFraction);
 
         final int insetTop = (height - mBarHeight) / 2;
         final int insetBottom = (height - mBarHeight) / 2;
@@ -146,7 +146,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
 
         // define the battery shape
         mShapePath.reset();
-        final float radius = getRadiusRatio() * mHeight;
+        final float radius = getRadiusRatio() * (mFrame.width() + buttonHeight);
         mShapePath.setFillType(FillType.WINDING);
         mShapePath.addRoundRect(mFrame, radius, radius, Direction.CW);
         mShapePath.addRect(mButtonFrame, Direction.CW);
