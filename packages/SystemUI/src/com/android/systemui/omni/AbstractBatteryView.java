@@ -58,7 +58,6 @@ public class AbstractBatteryView extends View implements IBatteryView,
 
     protected BatteryController mBatteryController;
     private boolean mPowerSaveEnabled;
-    protected boolean mShowPercent;
     protected boolean mPercentInside;
     protected final int mCriticalLevel;
     protected int mFrameColor;
@@ -145,12 +144,6 @@ public class AbstractBatteryView extends View implements IBatteryView,
         mLightModeFillColor = Utils.getColorAttr(dualToneLightTheme, R.attr.fillColor);
 
         mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        Typeface font = Typeface.create("sans-serif-medium", Typeface.BOLD);
-        mTextPaint.setTypeface(font);
-        mTextPaint.setTextAlign(Paint.Align.CENTER);
-        mTextSize = getResources().getDimensionPixelSize(R.dimen.omni_battery_level_text_size);
-        mTextPaint.setTextSize(mTextSize);
-
         mPathEffect = new DashPathEffect(new float[]{3,2},0);
     }
 
@@ -165,7 +158,6 @@ public class AbstractBatteryView extends View implements IBatteryView,
 
     @Override
     public void setPercentInside(boolean percentInside) {
-        mShowPercent = percentInside;
         mPercentInside = percentInside;
     }
 
@@ -187,10 +179,6 @@ public class AbstractBatteryView extends View implements IBatteryView,
     @Override
     public void setLowPercentColorEnabled(boolean value) {
         mLowPercentColorEnabled = value;
-    }
-
-    protected boolean isWideDisplay() {
-        return mShowPercent && !mPercentInside;
     }
 
     protected boolean showChargingImage() {
@@ -263,18 +251,6 @@ public class AbstractBatteryView extends View implements IBatteryView,
         return (int) ArgbEvaluator.getInstance().evaluate(darkIntensity, lightColor, darkColor);
     }
 
-    protected void updateExtraPercentFontSize() {
-        final int level = mLevel;
-        mTextSize = getResources().getDimensionPixelSize(level == 100 ?
-                R.dimen.omni_battery_level_text_size_small : R.dimen.omni_battery_level_text_size);
-        mTextPaint.setTextSize(mTextSize);
-        Rect bounds = new Rect();
-        String text = level == 100 ? "100%" : ".00%";
-        mTextPaint.getTextBounds(text, 0, text.length(), bounds);
-        mTextWidth = bounds.width();
-        requestLayout();
-    }
-
     public void loadDimens() {
     }
 
@@ -331,5 +307,10 @@ public class AbstractBatteryView extends View implements IBatteryView,
 
     protected String getPercentText() {
         return NumberFormat.getPercentInstance(Locale.US).format(mLevel / 100f);
+    }
+
+    @Override
+    public int getTopMargin() {
+        return mContext.getResources().getDimensionPixelSize(R.dimen.battery_margin_top);
     }
 }

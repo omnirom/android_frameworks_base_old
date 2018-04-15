@@ -110,8 +110,6 @@ public class BatteryDroidView extends AbstractBatteryView {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        mWidth = (isWideDisplay() ? (mTextWidth + mStrokeWidth) : 0) + mCircleWidth;
-        mHeight = mCircleWidth;
         setMeasuredDimension(mWidth, mHeight);
     }
 
@@ -189,79 +187,37 @@ public class BatteryDroidView extends AbstractBatteryView {
             c.drawPath(mBoltPath, mBoltPaint);
         }
 
-        if (mShowPercent) {
-            updatePercentFontSize();
-            mTextPaint.setColor(getCurrentColor(level));
-
-            float textOffset = 0f;
-            RectF bounds = null;
-            String percentage = null;
-
-            if (mPercentInside) {
-                if (!showChargingImage()) {
-                    percentage = level == 100 ? null : String.valueOf(level);
-                    textOffset = mTextHeight / 2 - mPercentOffsetY;
-                    bounds = new RectF(0, 0, mWidth, mHeight);
-                }
-            } else {
-                percentage = getPercentText();
-                textOffset = mTextHeight / 2 - mPercentOffsetY;
-                bounds = new RectF(mCircleWidth + 3 * mStrokeWidth, 0, mWidth, mHeight);
-            }
-            if (percentage != null) {
-                if (mPercentInside) {
-                    c.drawText(percentage, bounds.centerX(), bounds.centerY() + textOffset, mTextPaint);
-                } else {
-                    c.drawText(percentage, mWidth, bounds.centerY() + textOffset, mTextPaint);
-                }
+        if (!showChargingImage() && mPercentInside) {
+            if (level != 100) {
+                String percentage = String.valueOf(level);
+                float textOffset = mTextHeight / 2 - mPercentOffsetY;
+                RectF bounds = new RectF(0, 0, mWidth, mHeight);
+                mTextPaint.setColor(getCurrentColor(level));
+                c.drawText(percentage, bounds.centerX(), bounds.centerY() + textOffset, mTextPaint);
             }
         }
     }
 
     @Override
     public void applyStyle() {
-        final int level = mLevel;
-        if (mPercentInside) {
-            Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
-            mTextPaint.setTypeface(font);
-            mTextPaint.setTextAlign(Paint.Align.CENTER);
-            mTextSize = (int)(mCircleWidth * 0.6f);
-            mTextPaint.setTextSize(mTextSize);
-            Rect bounds = new Rect();
-            String text = "100";
-            mTextPaint.getTextBounds(text, 0, text.length(), bounds);
-            mTextWidth = bounds.width();
-            mTextHeight = bounds.height();
-        } else {
-            Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
-            mTextPaint.setTypeface(font);
-            mTextPaint.setTextAlign(Paint.Align.RIGHT);
-            mTextSize = getResources().getDimensionPixelSize(level == 100 ?
-                    R.dimen.omni_battery_level_text_size_small : R.dimen.omni_battery_level_text_size);
-            mTextPaint.setTextSize(mTextSize);
-            Rect bounds = new Rect();
-            String text = level == 100 ? "100%" : ".00%";
-            mTextPaint.getTextBounds(text, 0, text.length(), bounds);
-            mTextWidth = bounds.width();
-            mTextHeight = bounds.height();
-        }
+        Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
+        mTextPaint.setTypeface(font);
+        mTextPaint.setTextAlign(Paint.Align.CENTER);
+        mTextSize = (int)(mCircleWidth * 0.6f);
+        mTextPaint.setTextSize(mTextSize);
+        Rect bounds = new Rect();
+        String text = "99";
+        mTextPaint.getTextBounds(text, 0, text.length(), bounds);
+        mTextWidth = bounds.width();
+        mTextHeight = bounds.height();
         mBatteryPaint.setPathEffect(mDottedLine ? mPathEffect : null);
-    }
-
-    private void updatePercentFontSize() {
-        final int level = mLevel;
-        if (mPercentInside) {
-            mTextSize = (int)(mCircleWidth * (level == 100 ?  0.5f : 0.6f));
-            mTextPaint.setTextSize(mTextSize);
-        } else {
-            updateExtraPercentFontSize();
-        }
     }
 
     @Override
     public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         mCircleWidth = (int) (16 * metrics.density + 0.5f);
+        mHeight = mWidth = mCircleWidth;
         mStrokeWidth = (int) (mCircleWidth / 7f);
         mBatteryPaint.setStrokeWidth(mStrokeWidth);
         mFramePaint.setStrokeWidth(mStrokeWidth);
