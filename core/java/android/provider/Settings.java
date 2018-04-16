@@ -4905,6 +4905,15 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * @hide
+         */
+        public static final String OMNI_LONG_PRESS_POWER_TORCH =
+                "long_press_power_torch";
+
+        private static final Validator OMNI_LONG_PRESS_POWER_TORCH_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5018,6 +5027,7 @@ public final class Settings {
             OMNI_DOZE_BRIGHTNESS,
             OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
             OMNI_FINGERPRINT_SUCCESS_VIB,
+            OMNI_LONG_PRESS_POWER_TORCH,
         };
 
         /**
@@ -5181,6 +5191,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_DOZE_BRIGHTNESS);
             PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN);
             PRIVATE_SETTINGS.add(OMNI_FINGERPRINT_SUCCESS_VIB);
+            PRIVATE_SETTINGS.add(OMNI_LONG_PRESS_POWER_TORCH);
         }
 
         /**
@@ -5345,6 +5356,7 @@ public final class Settings {
                     OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR);
             VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB,
                     OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR);
+            VALIDATORS.put(OMNI_LONG_PRESS_POWER_TORCH, OMNI_LONG_PRESS_POWER_TORCH_VALIDATOR);
         }
 
         /**
