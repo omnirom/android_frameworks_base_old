@@ -5425,6 +5425,11 @@ public final class Settings {
         public static final String OMNI_STATUS_BAR_BT_BATTERY = "status_bar_bt_battery";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_LONG_PRESS_POWER_TORCH = "long_press_power_torch";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5460,7 +5465,8 @@ public final class Settings {
             OMNI_SHOW_CPU_OVERLAY,
             OMNI_LOCKSCREEN_WEATHER_ENABLED,
             OMNI_USE_OLD_MOBILETYPE,
-            OMNI_STATUS_BAR_BT_BATTERY
+            OMNI_STATUS_BAR_BT_BATTERY,
+            OMNI_LONG_PRESS_POWER_TORCH
         };
 
         /**
@@ -5506,6 +5512,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_STATUS_BAR_BT_BATTERY, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_LONG_PRESS_POWER_TORCH, 0);
         }
     }
 

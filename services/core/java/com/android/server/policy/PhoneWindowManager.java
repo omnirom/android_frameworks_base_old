@@ -275,6 +275,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM = 3;
     static final int LONG_PRESS_POWER_GO_TO_VOICE_ASSIST = 4;
     static final int LONG_PRESS_POWER_ASSISTANT = 5; // Settings.Secure.ASSISTANT
+    static final int LONG_PRESS_POWER_TORCH = 6;
 
     // must match: config_veryLongPresOnPowerBehavior in config.xml
     static final int VERY_LONG_PRESS_POWER_NOTHING = 0;
@@ -643,6 +644,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_LAUNCH_ASSIST_LONG_PRESS = 24;
     private static final int MSG_POWER_VERY_LONG_PRESS = 25;
     private static final int MSG_RINGER_TOGGLE_CHORD = 26;
+    private static final int MSG_TOGGLE_TORCH = 27;
 
     // omni additions start
     private boolean mOmniSwitchRecents;
@@ -652,6 +654,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private Sensor mProximitySensor;
     private boolean mProxiWakeupCheckEnabled;
     private boolean mProxiListenerEnabled;
+    private boolean mLongPressPowerTorch;
+
+    private static final int KEY_ACTION_TOGGLE_TORCH = 9;
     private SystemKeyEventHandler mAppSwitchKeyHandler = new SystemKeyEventHandler(
             () -> toggleRecentApps(),
             () -> TaskUtils.toggleLastApp(mContext, UserHandle.myUserId()),
@@ -738,6 +743,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case MSG_RINGER_TOGGLE_CHORD:
                     handleRingerChordGesture();
                     break;
+                case MSG_TOGGLE_TORCH:
+                    performKeyAction(KEY_ACTION_TOGGLE_TORCH);
+                    break;
             }
         }
     }
@@ -804,6 +812,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.OMNI_NAVIGATION_BAR_RECENTS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_LONG_PRESS_POWER_TORCH), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -1019,9 +1030,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             } else {
-                wakeUpFromPowerKey(event.getDownTime());
 
-                if (mSupportLongPressPowerWhenNonInteractive && hasLongPressOnPowerBehavior()) {
+                if (mLongPressPowerTorch || (mSupportLongPressPowerWhenNonInteractive && hasLongPressOnPowerBehavior())) {
+                    if (getResolvedLongPressOnPowerBehavior() != LONG_PRESS_POWER_TORCH) {
+                        wakeUpFromPowerKey(event.getDownTime());
+                    }
                     if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
                         powerLongPress();
                     } else {
@@ -1039,6 +1052,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
                     mBeganFromNonInteractive = true;
                 } else {
+                    wakeUpFromPowerKey(event.getDownTime());
                     final int maxCount = getMaxMultiPressPowerCount();
 
                     if (maxCount <= 1) {
@@ -1098,6 +1112,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mPowerKeyHandled) {
             mPowerKeyHandled = true;
             mHandler.removeMessages(MSG_POWER_LONG_PRESS);
+            // See if we deferred screen wake because long press power for torch is enabled
+            if (getResolvedLongPressOnPowerBehavior() == LONG_PRESS_POWER_TORCH
+                    && (!isScreenOn() || isDozeMode())) {
+                wakeUpFromPowerKey(SystemClock.uptimeMillis());
+            }
         }
         if (hasVeryLongPressOnPowerBehavior()) {
             mHandler.removeMessages(MSG_POWER_VERY_LONG_PRESS);
@@ -1295,6 +1314,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 final int powerKeyDeviceId = Integer.MIN_VALUE;
                 launchAssistAction(null, powerKeyDeviceId);
                 break;
+            case LONG_PRESS_POWER_TORCH:
+                mPowerKeyHandled = true;
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, false,
+                        "Power - Long Press - Toggle Torch");
+                // Toggle torch state asynchronously to help protect against
+                // a misbehaving cameraservice from blocking systemui.
+                mHandler.removeMessages(MSG_TOGGLE_TORCH);
+                Message msg = mHandler.obtainMessage(MSG_TOGGLE_TORCH);
+                msg.setAsynchronous(true);
+                msg.sendToTarget();
+                break;
         }
     }
 
@@ -1347,6 +1377,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int getResolvedLongPressOnPowerBehavior() {
         if (FactoryTest.isLongPressOnPowerOffEnabled()) {
             return LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
+        }
+        if (mLongPressPowerTorch && (!isScreenOn() || isDozeMode())) {
+            return LONG_PRESS_POWER_TORCH;
         }
         return mLongPressOnPowerBehavior;
     }
@@ -2138,6 +2171,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mOmniSwitchRecents = Settings.System.getIntForUser(resolver,
                     Settings.System.OMNI_NAVIGATION_BAR_RECENTS, 0,
                     UserHandle.USER_CURRENT) == 1;
+            mLongPressPowerTorch = Settings.System.getIntForUser(resolver,
+                    Settings.System.OMNI_LONG_PRESS_POWER_TORCH, 0,
+                    UserHandle.USER_CURRENT) != 0;
         }
         if (updateRotation) {
             updateRotation(true);
@@ -5873,4 +5909,35 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
     };
+
+    private boolean isDozeMode() {
+        IDreamManager dreamManager = getDreamManager();
+        try {
+            if (dreamManager != null && dreamManager.isDozing()) {
+                return true;
+            }
+        } catch (RemoteException e) {
+            return false;
+        }
+        return false;
+    }
+
+    private void performKeyAction(int behavior) {
+        if (DEBUG_INPUT){
+            Slog.d(TAG, "performKeyAction " + behavior);
+        }
+        switch (behavior) {
+            case KEY_ACTION_TOGGLE_TORCH: {
+                IStatusBarService service = getStatusBarService();
+                if (service != null) {
+                    try {
+                        service.toggleCameraFlash();
+                    } catch (RemoteException e) {
+                        // do nothing.
+                    }
+                }
+                break;
+            }
+        }
+    }
 }
