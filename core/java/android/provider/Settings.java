@@ -5846,6 +5846,11 @@ public final class Settings {
         public static final String OMNI_GESTURE_HANDLE_SMALL = "navbar_gesture_handle_small";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_LONG_PRESS_POWER_TORCH = "long_press_power_torch";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5882,6 +5887,7 @@ public final class Settings {
             OMNI_MONET_DISABLE,
             OMNI_TASKBAR_DISABLE,
             OMNI_GESTURE_HANDLE_SMALL,
+            OMNI_LONG_PRESS_POWER_TORCH,
         };
 
         /**
@@ -5928,6 +5934,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_MONET_DISABLE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_TASKBAR_DISABLE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_GESTURE_HANDLE_SMALL, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_LONG_PRESS_POWER_TORCH, 0);
         }
     }
 
