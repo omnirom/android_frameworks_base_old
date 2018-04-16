@@ -289,6 +289,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM = 3;
     static final int LONG_PRESS_POWER_GO_TO_VOICE_ASSIST = 4;
     static final int LONG_PRESS_POWER_ASSISTANT = 5; // Settings.Secure.ASSISTANT
+    static final int LONG_PRESS_POWER_TORCH = 6;
 
     // must match: config_veryLongPresOnPowerBehavior in config.xml
     static final int VERY_LONG_PRESS_POWER_NOTHING = 0;
@@ -687,6 +688,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_LAUNCH_ASSIST = 23;
     private static final int MSG_RINGER_TOGGLE_CHORD = 24;
     private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 25;
+    private static final int MSG_TOGGLE_TORCH = 26;
 
     // omni additions start
     private DeviceKeyHandler mDeviceKeyHandler;
@@ -695,6 +697,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private Sensor mProximitySensor;
     private boolean mProxiWakeupCheckEnabled;
     private boolean mProxiListenerEnabled;
+    private boolean mLongPressPowerTorch;
+
+    private static final int KEY_ACTION_TOGGLE_TORCH = 9;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -771,6 +776,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case MSG_SWITCH_KEYBOARD_LAYOUT:
                     handleSwitchKeyboardLayout(msg.arg1, msg.arg2);
                     break;
+                case MSG_TOGGLE_TORCH:
+                    performKeyAction(KEY_ACTION_TOGGLE_TORCH);
+                    break;
             }
         }
     }
@@ -834,6 +842,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_LONG_PRESS_POWER_TORCH), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -988,7 +999,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 || handledByPowerManager || mKeyCombinationManager.isPowerKeyIntercepted();
         if (!mPowerKeyHandled) {
             if (!interactive) {
-                wakeUpFromPowerKey(event.getDownTime());
+                if (!mLongPressPowerTorch) {
+                    wakeUpFromPowerKey(event.getDownTime());
+                }
             }
         } else {
             // handled by another power key policy.
@@ -1093,6 +1106,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 }
             }
+        } else if (mLongPressPowerTorch && beganFromNonInteractive) {
+            wakeUpFromPowerKey(eventTime);
         }
     }
 
@@ -1310,6 +1325,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 launchAssistAction(null, powerKeyDeviceId, eventTime,
                         AssistUtils.INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS);
                 break;
+            case LONG_PRESS_POWER_TORCH:
+                mPowerKeyHandled = true;
+                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, false,
+                        "Power - Long Press - Toggle Torch");
+                // Toggle torch state asynchronously to help protect against
+                // a misbehaving cameraservice from blocking systemui.
+                mHandler.removeMessages(MSG_TOGGLE_TORCH);
+                Message msg = mHandler.obtainMessage(MSG_TOGGLE_TORCH);
+                msg.setAsynchronous(true);
+                msg.sendToTarget();
+                break;
         }
     }
 
@@ -1362,6 +1388,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int getResolvedLongPressOnPowerBehavior() {
         if (FactoryTest.isLongPressOnPowerOffEnabled()) {
             return LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
+        }
+        if (mLongPressPowerTorch && (!isScreenOn() || isDozeMode())) {
+            return LONG_PRESS_POWER_TORCH;
         }
 
         // If the config indicates the assistant behavior but the device isn't yet provisioned, show
@@ -2515,10 +2544,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         void onLongPress(long eventTime) {
-            if (mSingleKeyGestureDetector.beganFromNonInteractive()
-                    && !mSupportLongPressPowerWhenNonInteractive) {
-                Slog.v(TAG, "Not support long press power when device is not interactive.");
-                return;
+            if (mSingleKeyGestureDetector.beganFromNonInteractive() || isFlashLightIsOn()) {
+                if (mLongPressPowerTorch) {
+                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, false,
+                    "Power - Long Press - Torch");
+                    performKeyAction(KEY_ACTION_TOGGLE_TORCH);
+                    return;
+                }
+                if (!mSupportLongPressPowerWhenNonInteractive) {
+                    Slog.v(TAG, "Not support long press power when device is not interactive.");
+                    return;
+                }
             }
 
             powerLongPress(eventTime);
@@ -2727,6 +2763,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             mProxiWakeupCheckEnabled = Settings.System.getIntForUser(resolver,
                     Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED, 0,
+                    UserHandle.USER_CURRENT) != 0;
+            mLongPressPowerTorch = Settings.System.getIntForUser(resolver,
+                    Settings.System.OMNI_LONG_PRESS_POWER_TORCH, 0,
                     UserHandle.USER_CURRENT) != 0;
         }
         if (updateRotation) {
@@ -6595,4 +6634,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
     };
+
+    private boolean isFlashLightIsOn() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.FLASHLIGHT_ENABLED, 0) != 0;
+    }
+
+     private boolean isDozeMode() {
+        IDreamManager dreamManager = getDreamManager();
+        try {
+            if (dreamManager != null && dreamManager.isDozing()) {
+                return true;
+            }
+        } catch (RemoteException e) {
+            return false;
+        }
+        return false;
+    }
+
+    private void performKeyAction(int behavior) {
+        if (DEBUG_INPUT){
+            Slog.d(TAG, "performKeyAction " + behavior);
+        }
+        switch (behavior) {
+            case KEY_ACTION_TOGGLE_TORCH: {
+                IStatusBarService service = getStatusBarService();
+                if (service != null) {
+                    try {
+                        service.toggleCameraFlash();
+                    } catch (RemoteException e) {
+                        // do nothing.
+                    }
+                }
+                break;
+            }
+        }
+    }
 }
