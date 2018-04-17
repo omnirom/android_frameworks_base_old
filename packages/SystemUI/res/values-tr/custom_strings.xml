@@ -112,7 +112,7 @@
   <string name="keycode">Tuş kodu</string>
   <string name="no_home_title">Ana ekran düğmesi bulunmadı</string>
   <string name="no_home_message">Bu cihazda gezinmeniz için bir ana ekran düğmesine ihtiyacınız var. Kaydetmeden evvel lütfen bir ana ekran düğmesi ilâve edin.</string>
-  <string name="clipboard_description">Pano unsurların doğrudan panoya sürüklenmesine imkan sağlar. Unsurlar panoda mevcûdsa doğrudan pano dışına da sürüklenebilir.</string>
+  <string name="clipboard_description">Pano unsurların doğrudan panoya sürüklenmesine imkân sağlar. Unsurlar panoda mevcûdsa doğrudan pano dışına da sürüklenebilir.</string>
   <string name="keycode_description">Tuş kodu düğmeleri klavye tuşlarının Gezinti Çubuğuna ilâve edilmesine imkân sağlar. Dokunulduğunda seçili klavye tuşunu taklit eder. Düğme üzerinde gösterilecek olan bir resimden sonra düğme için bir tuş seçilmeli.</string>
   <string name="start">Başlat</string>
   <string name="center">Merkez</string>

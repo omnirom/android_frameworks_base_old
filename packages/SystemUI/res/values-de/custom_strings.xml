@@ -106,7 +106,18 @@
   <string name="quick_settings_screenrecord_lq_label">Bildschirmaufnahme LQ</string>
   <string name="quick_settings_screenrecord_mq_label">Bildschirmaufnahme MQ</string>
   <string name="quick_settings_screenrecord_hq_label">Bildschirmaufnahme HQ</string>
+  <string name="preview">Vorschau</string>
+  <string name="save">Speichern</string>
+  <string name="left">Links</string>
+  <string name="right">Rechts</string>
   <!-- key disable QS Tile -->
+  <string name="quick_settings_key_disable_label">Tasten deaktivieren</string>
+  <string name="accessibility_quick_settings_key_disable_on">Tasten deaktiviert.</string>
   <!-- navbar disable QS Tile -->
   <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="qs_show_battery">Akku anzeigen</string>
+  <string name="qs_show_clock">Uhr anzeigen</string>
+  <string name="quick_settings_google_assist_label">Assistent</string>
+  <string name="quick_settings_google_voice_assist_label">Sprachassistent</string>
 </resources>

@@ -74,11 +74,52 @@
   <string name="quick_settings_network_adb_label">ADB através da rede</string>
   <string name="quick_settings_network_adb_toast">Depuração USB não está habilitada</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Isso vai manté-lo em vista até você soltar. Toque e segure Voltar para liberar.</string>
+  <string name="omnijaws_service_error">Erro</string>
+  <string name="omnijaws_service_unkown">Sem dados meteorológicos</string>
+  <string name="omnijaws_service_error_long">Erro ao carregar dados meteorológicos</string>
+  <string name="omnijaws_service_disabled">Serviço desativado</string>
+  <string name="omnijaws_detail_header">Clima</string>
+  <string name="omnijaws_label_default">Clima</string>
+  <string name="omnijaws_current_text">Agora</string>
+  <string name="omnijaws_package_not_available">OmniJaws não disponível</string>
+  <string name="omnijaws_service_last_update">Última atualização:</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">PiP</string>
+  <string name="quick_settings_pip_tile_app_na">O aplicativo não suporta PiP</string>
+  <string name="quick_settings_screenshot_label">Captura de tela</string>
+  <string name="quick_settings_region_screenshot_label">Captura de tela parcial</string>
+  <string name="quick_settings_caffeine_label">Cafeína</string>
+  <string name="accessibility_quick_settings_caffeine_off">Cafeína desligada</string>
+  <string name="accessibility_quick_settings_caffeine_on">Cafeína ligada</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Relatório de localização: modo de economia de bateria.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Relatório de localização: modo apenas sensores.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Relatório de localização: modo de alta precisão.</string>
   <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Notificações flutuantes</string>
+  <string name="accessibility_quick_settings_heads_up_off">Notificações flutuantes desativadas.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Notificações flutuantes ativadas.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Notificações flutuantes desligadas.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Notificações flutuantes ligadas.</string>
   <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Gravação de tela</string>
+  <string name="quick_settings_screenrecord_lq_label">Gravar tela baixa qualidade</string>
+  <string name="quick_settings_screenrecord_mq_label">Gravar tela média qualidade</string>
+  <string name="quick_settings_screenrecord_hq_label">Gravar tela alta qualidade</string>
+  <string name="preview">Pré-visualizar</string>
+  <string name="keycode">Código de tecla</string>
+  <string name="no_home_title">Nenhum botão Início encontrado</string>
+  <string name="left">Esquerda</string>
+  <string name="right">Direita</string>
   <!-- key disable QS Tile -->
   <!-- navbar disable QS Tile -->
   <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="qs_show_battery">Mostrar bateria</string>
+  <string name="qs_show_carrier">Mostrar nomes das operadoras</string>
+  <string name="qs_show_clock">Mostrar relógio</string>
+  <string name="qs_header">Cabeçalho</string>
+  <string name="quick_settings_google_voice_assist_label">Assistência de voz</string>
 </resources>
