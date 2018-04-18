@@ -24,6 +24,7 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tiles.AdbOverNetworkTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
+import com.android.systemui.qs.tiles.AODTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
 import com.android.systemui.qs.tiles.CaffeineTile;
@@ -66,6 +67,7 @@ public class QSFactoryImpl implements QSFactory {
 
     public QSTile createTile(String tileSpec) {
         if (tileSpec.equals("wifi")) return new WifiTile(mHost);
+        else if (tileSpec.equals("aod")) return new AODTile(mHost);
         else if (tileSpec.equals("bt")) return new BluetoothTile(mHost);
         else if (tileSpec.equals("cell")) return new CellularTile(mHost);
         else if (tileSpec.equals("dnd")) return new DndTile(mHost);
