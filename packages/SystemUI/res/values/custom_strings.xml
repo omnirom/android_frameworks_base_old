@@ -170,6 +170,8 @@
     <string name="accessibility_quick_settings_sync_changed_off">Sync turned off.</string>
     <string name="accessibility_quick_settings_sync_changed_on">Sync turned on.</string>
 
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
     <!-- Recents Panel -->
     <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
