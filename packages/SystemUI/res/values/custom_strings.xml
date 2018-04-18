@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="global_action_reboot">Restart</string>
+    <string name="global_action_reboot_more">Restart\u2026</string>
+    <string name="global_action_reboot_sub">System</string>
+    <string name="global_action_reboot_recovery">Recovery</string>
+    <string name="global_action_reboot_bootloader">Bootloader</string>
+    <string name="global_action_dismissable_dialog_text">Advanced restart is disabled.\nDo you want to restart\u003f</string>
+    <string name="global_action_dnaa">Do not show again</string>
+    <string name="global_action_settings">Settings</string>
+    <string name="summary_empty" translatable="false"></string>
+    <string name="qs_menu_item_columns">Columns</string>
+    <string name="qs_menu_item_columns_landscape">Columns landscape</string>
+    <string name="qs_menu_item_columns_three">3</string>
+    <string name="qs_menu_item_columns_four">4</string>
+    <string name="qs_menu_item_columns_five">5</string>
+    <string name="qs_menu_item_columns_six">6</string>
+    <string name="qs_menu_item_columns_seven">7</string>
+    <string name="qs_menu_item_columns_eight">8</string>
+    <string name="qs_menu_item_columns_nine">9</string>
+    <string name="qs_menu_item_reset">Reset</string>
+    <string name="qs_menu_item_titles">Show labels</string>
+    <string name="qs_menu_item_rows">Rows</string>
+    <string name="qs_menu_item_rows_one">1</string>
+    <string name="qs_menu_item_rows_two">2</string>
+    <string name="qs_menu_item_rows_three">3</string>
+    <string name="qs_menu_item_rows_four">4</string>
+    <string name="qs_menu_item_scroll">Quickbar scroll</string>
+    <string name="qs_menu_item_qs_columns">Quickbar columns</string>
+
+    <string name="tuner_quick_settings">Quick settings</string>
+    <string name="tuner_show_brightness_mode">Show brightness mode switch</string>
+    <string name="tuner_show_brightness_new">Show brightness slider</string>
+    <string name="tuner_show_brightness_side_buttons">Show brightness slider side buttons</string>
+    <string name="tuner_brightness_position_bottom">Brightness slider on bottom</string>
+
+    <string name="lockscreen_default">Default</string>
+    <string name="lockscreen_hidden">None</string>
+    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
+    <string name="custom_hint">Swipe from icon to launch</string>
+    <!-- Screenrecord Notification Ticker -->
+    <string name="screenrecord_notif_ticker">Screen is being recorded</string>
+    <string name="screenrecord_notif_final_ticker">Screen recorded successfully</string>
+    <!-- Screenrecord notification title -->
+    <string name="screenrecord_notif_title">Recording screen</string>
+    <!-- Screenrecord notification action: Stop -->
+    <string name="screenrecord_notif_stop">Stop</string>
+    <string name="screenrecord_notif_completed">Screen recorded successfully</string>
+    <!-- Screenrecord notification action: show/hide pointer -->
+    <string name="screenrecord_notif_pointer_on">Show pointer</string>
+    <string name="screenrecord_notif_pointer_off">Hide pointer</string>
+    <!-- Screen record notification error title -->
+    <string name="screenrecord_notif_error">Unable to record screen</string>
+    <string name="notification_channel_screenrecord">Screenrecords</string>
+    <string name="screenrecord_hide_hint">Hide hint</string>
+    <string name="screenrecord_show_hint">Show hint</string>
+
+    <string name="quick_settings_network_adb_enabled_label">Enabled</string>
+    <string name="quick_settings_network_adb_disabled_label">Disabled</string>
+    <string name="quick_settings_network_adb_label">ADB over network</string>
+    <string name="quick_settings_network_adb_toast">USB debugging is not enabled</string>
+    <!-- Screen pinning dialog description when in accessibility mode. -->
+    <string name="screen_pinning_description_back">This keeps it in view until you unpin. Touch and hold Back to unpin.</string>
+
+    <string name="omnijaws_service_error">Error</string>
+    <string name="omnijaws_service_unkown">No weather data</string>
+    <string name="omnijaws_service_error_long">Error loading weather data</string>
+    <string name="omnijaws_service_disabled">Service is disabled</string>
+    <string name="omnijaws_detail_header">Weather</string>
+    <string name="omnijaws_label_default">Weather</string>
+    <string name="omnijaws_current_text">Now</string>
+    <string name="omnijaws_package_not_available">OmniJaws not available</string>
+    <string name="omnijaws_service_last_update">Last update:</string>
+
+    <!-- PiP Tile -->
+    <string name="quick_settings_pip_label">PiP</string>
+    <string name="quick_settings_pip_tile_app_na">App does not support PiP</string>
+
+    <string name="quick_settings_screenshot_label">Screenshot</string>
+    <string name="quick_settings_region_screenshot_label">Partial screenshot</string>
+
+    <string name="quick_settings_caffeine_label">Caffeine</string>
+    <string name="accessibility_quick_settings_caffeine_off">Caffeine off</string>
+    <string name="accessibility_quick_settings_caffeine_on">Caffeine on</string>
+
+    <string name="status_bar_vpn">VPN</string>
+
+    <!-- Advance location quick setting tile -->
+    <string name="accessibility_quick_settings_location_battery_saving">Location reporting: battery saving mode.</string>
+    <string name="accessibility_quick_settings_location_gps_only">Location reporting: sensors only mode.</string>
+    <string name="accessibility_quick_settings_location_high_accuracy">Location reporting: high accuracy mode.</string>
+
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">Peek notifications</string>
+    <string name="accessibility_quick_settings_heads_up_off">Peek notifications disabled.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Peek notifications allowed.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Peek notifications turned off.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Peek notifications turned on.</string>
+
+    <!-- Screenrecord QS tile -->
+    <string name="quick_settings_screenrecord_label">Screenrecord</string>
+    <string name="quick_settings_screenrecord_lq_label">Screenrecord LQ</string>
+    <string name="quick_settings_screenrecord_mq_label">Screenrecord MQ</string>
+    <string name="quick_settings_screenrecord_hq_label">Screenrecord HQ</string>
+
+    <string name="preview">Preview</string>
+    <string name="keycode">Keycode</string>
+    <string name="no_home_title">No home button found</string>
+    <string name="no_home_message">A home button is required to be able to navigate this device. Please add a home button before saving.</string>
+    <string name="clipboard_description">The clipboard allows items to be dragged directly to the clipboard. Items can also be dragged directly out of the clipboard when present.</string>
+    <string name="keycode_description">Keycode buttons allow keyboard keys to be added to the navigation bar. When pressed they emulate the selected keyboard key. First the key must be selected for the button, followed by an image to be shown on the button.</string>
+    <string name="start">Start</string>
+    <string name="center">Center</string>
+    <string name="end">End</string>
+    <string name="space">Spacer</string>
+    <string name="menu_ime">Menu / Keyboard Switcher</string>
+    <string name="select_button">Select button to add</string>
+    <string name="add_button">Add button</string>
+    <string name="save">Save</string>
+    <string name="reset">Reset</string>
+    <string name="select_keycode">Select Keyboard Button</string>
+    <string name="left">Left</string>
+    <string name="right">Right</string>
+    <string name="navbar_editor_title">Editor</string>
+    <string name="navbar_editor_summary">Configure navigation bar</string>
+
+    <!-- key disable QS Tile -->
+    <string name="quick_settings_key_disable_label">Disable keys</string>
+    <string name="accessibility_quick_settings_key_disable_on">Keys disabled.</string>
+    <string name="accessibility_quick_settings_key_disable_off">Keys allowed.</string>
+
+    <!-- navbar disable QS Tile -->
+    <string name="quick_settings_navbar_disable_label">Disable navbar</string>
+    <string name="accessibility_quick_settings_navbar_disable_on">Navbar disabled.</string>
+    <string name="accessibility_quick_settings_navbar_disable_off">Navbar enabled.</string>
+
+    <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_connection_hspap">HSPA+</string>
+
+    <string name="qs_show_battery">Show battery</string>
+    <string name="qs_show_carrier">Show carrier names</string>
+    <string name="qs_show_clock">Show clock</string>
+    <string name="qs_show_mini">Mini mode</string>
+    <string name="qs_header">Header</string>
+
+    <string name="quick_settings_google_assist_label">Assistant</string>
+    <string name="quick_settings_google_voice_assist_label">Voice assist</string>
+    <string name="quick_settings_google_now_label">Google feed</string>
+
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Sync</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Sync turned off.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Sync turned on.</string>
+
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
+    <!-- Recents Panel -->
+    <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
+    <string name="clear_recents">Close all recent</string>
+</resources>
