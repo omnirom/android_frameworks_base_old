@@ -24,5 +24,7 @@
     <string name="global_action_reboot_sub">System</string>
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
 
 </resources>
