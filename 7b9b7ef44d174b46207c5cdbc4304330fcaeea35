@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b92d9bc4_ee6642c8",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 4703,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-04-18T13:01:48Z",
+      "side": 1,
+      "message": "those are all in system so they should be added to PRIVATE_SETTINGS below",
+      "revId": "7b9b7ef44d174b46207c5cdbc4304330fcaeea35",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
