@@ -24,6 +24,7 @@ import com.android.systemui.plugins.qs.*;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
+import com.android.systemui.qs.tiles.AODTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
 import com.android.systemui.qs.tiles.CastTile;
@@ -98,8 +99,11 @@ public class QSFactoryImpl implements QSFactory {
                 return new NightDisplayTile(mHost);
             case "nfc":
                 return new NfcTile(mHost);
+        // Omni tiles
+            case "aod":
+            	return new AODTile(mHost);
         }
-
+        
         // Intent tiles.
         if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(mHost, tileSpec);
         if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(mHost, tileSpec);
