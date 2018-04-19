@@ -65,7 +65,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_centerHorizontal="true"
                 android:visibility="gone"
-                android:layout_marginTop="@dimen/date_owner_info_margin"
+                android:layout_marginTop="@dimen/dozing_stack_padding"
                 android:layout_below="@id/keyguard_status_area" />
 
         </RelativeLayout>
