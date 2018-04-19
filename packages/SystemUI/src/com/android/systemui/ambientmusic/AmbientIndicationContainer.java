@@ -1,6 +1,7 @@
 package com.android.systemui.ambientmusic;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.media.MediaMetadata;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -63,7 +64,6 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
     public void setDozing(boolean dozing) {
         mDozing = dozing;
         setVisibility(dozing ? View.VISIBLE : View.INVISIBLE);
-        updatePosition();
     }
 
     public void setTickerMarquee(boolean enable) {
@@ -85,16 +85,13 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
         }
     }
 
+    public boolean isCleanLayout() {
+        return mForcedMediaDoze;
+    }
+
     public void setCleanLayout(int reason) {
         mForcedMediaDoze =
                 reason == DozeLog.PULSE_REASON_FORCED_MEDIA_NOTIFICATION;
-        updatePosition();
-    }
-
-    public void updatePosition() {
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) this.getLayoutParams();
-        lp.gravity = mForcedMediaDoze ? Gravity.CENTER : Gravity.BOTTOM;
-        this.setLayoutParams(lp);
     }
 
     public void setIndication(MediaMetadata mediaMetaData) {
@@ -118,9 +115,7 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
                 }
             }
         }
-        if (mScrollingInfo) {
-            // if we are already showing an Ambient Notification with track info,
-            // stop the current scrolling and start it delayed again for the next song
+        if (charSequence != null) {
             setTickerMarquee(true);
         }
         mText.setText(charSequence);
