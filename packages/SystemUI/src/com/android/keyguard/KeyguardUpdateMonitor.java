@@ -1213,7 +1213,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        if (!mFingerprintWakeAndUnlock) {
+        if (Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.FINGERPRINT_WAKE_UNLOCK,
+                mFingerprintWakeAndUnlock ? 1 : 0,
+                UserHandle.USER_CURRENT) != 0) {
             return (mKeyguardIsVisible || mBouncer || shouldListenForFingerprintAssistant() ||
                     (mKeyguardOccluded && mIsDreaming)) && mDeviceInteractive && !mGoingToSleep
                     && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())

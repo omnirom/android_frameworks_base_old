@@ -11106,6 +11106,11 @@ public final class Settings {
         public static final String WAKE_WHEN_PLUGGED_OR_UNPLUGGED = "wake_when_plugged_or_unplugged";
 
         /**
+         * @hide
+         */
+        public static final String FINGERPRINT_WAKE_UNLOCK = "fingerprint_wake_unlock";
+
+        /**
          * Flag to enable use of RefactoredBackupManagerService.
          *
          * @hide
