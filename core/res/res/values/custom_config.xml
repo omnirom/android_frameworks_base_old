@@ -63,4 +63,9 @@
     <bool name="config_FastChargingLedSupported">false</bool>
     <!-- Default value for led color when battery is low on charge -->
     <integer name="config_notificationsFastBatteryARGB">0x0000FF</integer>
+
+    <!-- Whether device has screen with higher aspect ratio -->
+    <bool name="config_haveHigherAspectRatioScreen">false</bool>
+    <!-- Aspect ratio of screen -->
+    <item name="config_screenAspectRatio" format="float" type="dimen">2.1</item>
 </resources>
