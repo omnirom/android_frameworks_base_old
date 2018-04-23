@@ -71,6 +71,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.util.omni.PackageUtils;
+
 public class FontService extends IFontService.Stub {
     private static final String TAG = "FontService";
     private static final File SYSTEM_THEME_DIR = new File(Environment.getDataSystemDirectory(),
@@ -141,14 +143,19 @@ public class FontService extends IFontService.Stub {
                     break;
                 case MESSAGE_PACKAGE_ADDED_OR_UPDATED:
                     packageName = (String) msg.obj;
-                    boolean isFontProvider = isPackageFontProvider(packageName);
-                    if (isFontProvider) {
-                        Log.e(TAG, packageName + " was added or updated. Adding or updating fonts");
-                        synchronized (mFontMap) {
-                            processFontPackage(packageName);
+                    if (PackageUtils.isAvailableApp(packageName, mContext)) {
+                        // Only process the event if the package is an available app 
+                        boolean isFontProvider = isPackageFontProvider(packageName);
+                        if (isFontProvider) {
+                            Log.e(TAG, packageName + " was added or updated. Adding or updating fonts");
+                            synchronized (mFontMap) {
+                                processFontPackage(packageName);
+                            }
                         }
-                    }
-                    break;
+                        break;
+		    }
+                    // Fall through to MESSAGE_PACKAGE_REMOVED if the package
+                    // is not an available app, i.e. disabled
                 case MESSAGE_PACKAGE_REMOVED:
                     packageName = (String) msg.obj;
                     boolean hadFonts = mFontMap.containsKey(packageName);
@@ -383,6 +390,7 @@ public class FontService extends IFontService.Stub {
 
     private boolean isPackageFontProvider(String packageName) {
         Context appContext = getAppContext(packageName);
+        if (appContext == null) return false;
         int id = appContext.getResources().getIdentifier(FONT_IDENTIFIER,
                 "bool",
                 appContext.getPackageName());
