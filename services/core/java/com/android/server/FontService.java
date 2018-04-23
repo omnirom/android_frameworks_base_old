@@ -383,6 +383,7 @@ public class FontService extends IFontService.Stub {
 
     private boolean isPackageFontProvider(String packageName) {
         Context appContext = getAppContext(packageName);
+        if (appContext == null) return false;
         int id = appContext.getResources().getIdentifier(FONT_IDENTIFIER,
                 "bool",
                 appContext.getPackageName());
