@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70168277_dd6aaf50",
+        "filename": "services/core/java/com/android/server/FontService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-04-25T23:47:57Z",
+      "side": 1,
+      "message": "I think we can make this even simpler - everything that returns false from isPackageFontProvider should be considered to be removed if it ever was in mFontMap. So you dont need the extra check just the move of the break",
+      "revId": "b7d0efba9d4a324a2a7b2cfc6f075f8169f3064b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
