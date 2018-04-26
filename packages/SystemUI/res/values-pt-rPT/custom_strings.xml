@@ -49,6 +49,7 @@
   <string name="tuner_show_brightness_mode">Mostrar o interruptor de modo de brilho</string>
   <string name="tuner_show_brightness_new">Mostrar o controlo deslizante de brilho</string>
   <string name="tuner_show_brightness_side_buttons">Mostrar botões laterais do controlo deslizante de brilho</string>
+  <string name="tuner_brightness_position_bottom">Controlo deslizante de brilho em baixo</string>
   <string name="lockscreen_default">Padrão</string>
   <string name="lockscreen_hidden">Nenhum</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -127,7 +128,7 @@
   <string name="left">Esquerda</string>
   <string name="right">Direita</string>
   <string name="navbar_editor_title">Editor</string>
-  <string name="navbar_editor_summary">Configurar os botões da barra de navegação</string>
+  <string name="navbar_editor_summary">Configurar a barra de navegação</string>
   <!-- key disable QS Tile -->
   <string name="quick_settings_key_disable_label">Desativar botões</string>
   <string name="accessibility_quick_settings_key_disable_on">Teclas desativadas.</string>
@@ -143,6 +144,17 @@
   <string name="qs_show_clock">Mostrar relógio</string>
   <string name="qs_show_mini">Modo mini</string>
   <string name="qs_header">Cabeçalho</string>
-  <string name="quick_settings_google_assist_label">Assistente Google</string>
+  <string name="quick_settings_google_assist_label">Assistente</string>
   <string name="quick_settings_google_voice_assist_label">Assistente de voz</string>
+  <string name="quick_settings_google_now_label">Google feed</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Sincronização</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Sincronização desligada.</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Sincronização ligada.</string>
+  <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">Ecrã sempre ligado</string>
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <string name="clear_recents">Fechar todas</string>
 </resources>

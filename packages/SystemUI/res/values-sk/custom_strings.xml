@@ -49,6 +49,7 @@
   <string name="tuner_show_brightness_mode">Zobraziť prepínač režimu jasu</string>
   <string name="tuner_show_brightness_new">Zobraziť posuvník jasu</string>
   <string name="tuner_show_brightness_side_buttons">Zobraziť bočné tlačidlá posuvníka jasu</string>
+  <string name="tuner_brightness_position_bottom">Posuvník jasu v spodnej časti</string>
   <string name="lockscreen_default">Predvolené</string>
   <string name="lockscreen_hidden">Nič</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -143,6 +144,17 @@
   <string name="qs_show_clock">Zobraziť hodiny</string>
   <string name="qs_show_mini">Minimálny režim</string>
   <string name="qs_header">Záhlavie</string>
-  <string name="quick_settings_google_assist_label">Asistencia</string>
+  <string name="quick_settings_google_assist_label">Asistent</string>
   <string name="quick_settings_google_voice_assist_label">Hlasový asistent</string>
+  <string name="quick_settings_google_now_label">Google feed</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Synchronizácia</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Synchronizácia vypnutá</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Synchronizácia zapnutá</string>
+  <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">AOD</string>
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <string name="clear_recents">Zatvorenie všetkých nedávnych</string>
 </resources>

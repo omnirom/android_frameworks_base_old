@@ -122,4 +122,9 @@
   <string name="qs_show_clock">Mostrar relógio</string>
   <string name="qs_header">Cabeçalho</string>
   <string name="quick_settings_google_voice_assist_label">Assistência de voz</string>
+  <!-- Sync QS tile -->
+  <!-- AOD QS tile -->
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
 </resources>

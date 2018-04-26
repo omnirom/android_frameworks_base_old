@@ -49,6 +49,7 @@
   <string name="tuner_show_brightness_mode">Montrer le bouton pour changer le mode de luminosité</string>
   <string name="tuner_show_brightness_new">Afficher le curseur de luminosité</string>
   <string name="tuner_show_brightness_side_buttons">Afficher les boutons à côté du curseur de luminosité</string>
+  <string name="tuner_brightness_position_bottom">Curseur de luminosité en bas</string>
   <string name="lockscreen_default">Par défaut</string>
   <string name="lockscreen_hidden">Aucun</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -112,9 +113,12 @@
   <string name="keycode">Keycode</string>
   <string name="no_home_title">Pas de bouton d\'accueil trouvé</string>
   <string name="no_home_message">Un bouton d\'accueil est requis pour naviguer sur l\'appareil. Ajoutez, s\'il vous plaît, un bouton d\'accueil avant de sauvegarder.</string>
+  <string name="clipboard_description">Le presse-papiers permet aux éléments d\'être glisser directement dans le presse-papiers. Les éléments peuvent également être déplacés directement à partir du presse-papiers lorsqu’ils sont présents.</string>
+  <string name="keycode_description">Les boutons keycode permet aux touches du clavier d\'être ajouté à la barre de navigation. Quand on appuie dessus elles émulent la touche de clavier sélectionnée. La première touche doit être sélectionnée pour le bouton, suivie par une image qui sera affichée sur le bouton.</string>
   <string name="start">Commencer</string>
   <string name="center">Centrer</string>
   <string name="end">Fin</string>
+  <string name="space">Barre d\'espace</string>
   <string name="menu_ime">Basculeur Menu / Clavier</string>
   <string name="select_button">Sélectionné le bouton à ajouter</string>
   <string name="add_button">Ajouter un bouton</string>
@@ -140,6 +144,16 @@
   <string name="qs_show_clock">Afficher l\'horloge</string>
   <string name="qs_show_mini">Mode Mini</string>
   <string name="qs_header">En-tête</string>
-  <string name="quick_settings_google_assist_label">Assistance</string>
+  <string name="quick_settings_google_assist_label">Assistant</string>
   <string name="quick_settings_google_voice_assist_label">Assistance vocale</string>
+  <string name="quick_settings_google_now_label">Google feed</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Sync</string>
+  <string name="accessibility_quick_settings_sync_changed_off">La synchronisation a été désactivée.</string>
+  <string name="accessibility_quick_settings_sync_changed_on">La synchronisation est activée.</string>
+  <!-- AOD QS tile -->
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <string name="clear_recents">Fermer les notifications récentes</string>
 </resources>

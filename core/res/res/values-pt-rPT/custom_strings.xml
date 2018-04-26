@@ -37,4 +37,8 @@
   <string name="app_unpin_message">Aplicação solta</string>
   <!-- back kill -->
   <string name="app_killed_message">Aplicação terminada</string>
+  <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_accessFontManager">aceder ao gestor de tipos de letra</string>
+  <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_accessFontManager">Permite que uma aplicação aceda ao gestor de tipos de letra.</string>
 </resources>

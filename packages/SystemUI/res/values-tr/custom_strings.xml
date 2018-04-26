@@ -49,6 +49,7 @@
   <string name="tuner_show_brightness_mode">Parlaklık modu düğmesini göster</string>
   <string name="tuner_show_brightness_new">Parlaklık kaydırıcısını göster</string>
   <string name="tuner_show_brightness_side_buttons">Parlaklık kaydırıcısının yan düğmelerini göster</string>
+  <string name="tuner_brightness_position_bottom">Parlaklık kaydırıcısı altta</string>
   <string name="lockscreen_default">Varsayılan</string>
   <string name="lockscreen_hidden">Hiçbiri</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -113,7 +114,7 @@
   <string name="no_home_title">Ana ekran düğmesi bulunmadı</string>
   <string name="no_home_message">Bu cihazda gezinmeniz için bir ana ekran düğmesine ihtiyacınız var. Kaydetmeden evvel lütfen bir ana ekran düğmesi ilâve edin.</string>
   <string name="clipboard_description">Pano unsurların doğrudan panoya sürüklenmesine imkân sağlar. Unsurlar panoda mevcûdsa doğrudan pano dışına da sürüklenebilir.</string>
-  <string name="keycode_description">Tuş kodu düğmeleri klavye tuşlarının Gezinti Çubuğuna ilâve edilmesine imkân sağlar. Dokunulduğunda seçili klavye tuşunu taklit eder. Düğme üzerinde gösterilecek olan bir resimden sonra düğme için bir tuş seçilmeli.</string>
+  <string name="keycode_description">Tuş kodu düğmeleri klavye tuşlarının gezinti çubuğuna ilâve edilmesine imkân sağlar. Dokunulduğunda seçili klavye tuşunu taklit eder. Düğme üzerinde gösterilecek olan bir resimden sonra düğme için bir tuş seçilmeli.</string>
   <string name="start">Başlat</string>
   <string name="center">Merkez</string>
   <string name="end">Sonlandır</string>
@@ -143,6 +144,17 @@
   <string name="qs_show_clock">Saati göster</string>
   <string name="qs_show_mini">Ufak mod</string>
   <string name="qs_header">Başlık</string>
-  <string name="quick_settings_google_assist_label">Google Assistant</string>
+  <string name="quick_settings_google_assist_label">Yardımcı</string>
   <string name="quick_settings_google_voice_assist_label">Sesli yardımcı</string>
+  <string name="quick_settings_google_now_label">Google haber kaynağı</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Eşitleme</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Eşitleme kapatıldı.</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Eşitleme açıldı.</string>
+  <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">AOD</string>
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <string name="clear_recents">Hepsini temizle</string>
 </resources>

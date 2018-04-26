@@ -90,4 +90,9 @@
   <!-- key disable QS Tile -->
   <!-- navbar disable QS Tile -->
   <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <!-- Sync QS tile -->
+  <!-- AOD QS tile -->
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
 </resources>

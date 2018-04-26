@@ -19,18 +19,142 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">Herstarten</string>
+  <string name="global_action_reboot_more">Herstarten\u2026</string>
+  <string name="global_action_reboot_sub">Systeem</string>
+  <string name="global_action_reboot_recovery">Recovery</string>
+  <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_dismissable_dialog_text">Geavanceerd herstarten staat uit.\nWilt U herstarten\u003f</string>
+  <string name="global_action_dnaa">Niet opnieuw tonen</string>
+  <string name="global_action_settings">Instellingen</string>
+  <string name="qs_menu_item_columns">Kolommen</string>
+  <string name="qs_menu_item_columns_landscape">Kolommen landschap</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Resetten</string>
+  <string name="qs_menu_item_titles">Labels weergeven</string>
+  <string name="qs_menu_item_rows">Rijen</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="qs_menu_item_scroll">Scroll snelkoppelingen</string>
+  <string name="qs_menu_item_qs_columns">Snelkoppelingen kolommen</string>
+  <string name="tuner_quick_settings">Snelle instellingen</string>
+  <string name="tuner_show_brightness_mode">Toon helderheid modus-schakelaar</string>
+  <string name="tuner_show_brightness_new">Toon helderheidschuifregelaar</string>
+  <string name="tuner_show_brightness_side_buttons">Toon helderheidschuifregelaar zijknoppen</string>
+  <string name="tuner_brightness_position_bottom">Helderheidschuifregelaar onderaan</string>
+  <string name="lockscreen_default">Standaard</string>
+  <string name="lockscreen_hidden">Geen</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
+  <string name="custom_hint">Swipe van pictogram om te lanceren</string>
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Scherm wordt opgenomen</string>
+  <string name="screenrecord_notif_final_ticker">Scherm met succes opgenomen</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Scherm opnemen</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Stop</string>
+  <string name="screenrecord_notif_completed">Scherm met succes opgenomen</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Aanwijzer weergeven</string>
+  <string name="screenrecord_notif_pointer_off">Aanwijzer verbergen</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Scherm opname mislukt</string>
+  <string name="notification_channel_screenrecord">Schermopnames</string>
+  <string name="screenrecord_hide_hint">Tips verbergen</string>
+  <string name="screenrecord_show_hint">Toon tips</string>
+  <string name="quick_settings_network_adb_enabled_label">Ingeschakeld</string>
+  <string name="quick_settings_network_adb_disabled_label">Uitgeschakeld</string>
+  <string name="quick_settings_network_adb_label">ADB over netwerk</string>
+  <string name="quick_settings_network_adb_toast">USB-foutopsporing is niet ingeschakeld</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Dit zorgt ervoor dat het scherm blijft staan tot u hem weer losmaakt. Druk en houd terug in om hem los te maken.</string>
+  <string name="omnijaws_service_error">Fout</string>
+  <string name="omnijaws_service_unkown">Geen weergegevens</string>
+  <string name="omnijaws_service_error_long">Fout bij het laden van weergegevens</string>
+  <string name="omnijaws_service_disabled">Service is uitgeschakeld</string>
+  <string name="omnijaws_detail_header">Weer</string>
+  <string name="omnijaws_label_default">Weer</string>
+  <string name="omnijaws_current_text">Nu</string>
+  <string name="omnijaws_package_not_available">OmniJaws niet beschikbaar</string>
+  <string name="omnijaws_service_last_update">Laatst bijgewerkt:</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">PiP</string>
+  <string name="quick_settings_pip_tile_app_na">App biedt geen ondersteuning voor PiP</string>
+  <string name="quick_settings_screenshot_label">Schermafbeelding</string>
+  <string name="quick_settings_region_screenshot_label">Gedeeltelijke schermafbeelding</string>
+  <string name="quick_settings_caffeine_label">Cafeïne</string>
+  <string name="accessibility_quick_settings_caffeine_off">Cafeïne uitgeschakeld</string>
+  <string name="accessibility_quick_settings_caffeine_on">Cafeïne ingeschakeld</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Locatierapportage: accubesparingsmodus.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Locatierapportage: alleen apparaat.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Locatierapportage: hoge nauwkeurigheidsmodus.</string>
   <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Heads-up meldingen</string>
+  <string name="accessibility_quick_settings_heads_up_off">Heads-up meldingen uitgeschakeld.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Heads-up meldingen toegestaan.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Heads-up meldingen uitgeschakeld.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Heads-up meldingen ingeschakeld.</string>
   <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Schermopname</string>
+  <string name="quick_settings_screenrecord_lq_label">Schermopname LQ</string>
+  <string name="quick_settings_screenrecord_mq_label">Schermopname MQ</string>
+  <string name="quick_settings_screenrecord_hq_label">Schermopname HQ</string>
+  <string name="preview">Voorbeeldweergave</string>
+  <string name="keycode">Keycode</string>
+  <string name="no_home_title">Geen startknop gevonden</string>
+  <string name="no_home_message">Een startknop is vereist om dit toestel te besturen. Voeg alstublieft een startknop toe alvorens op te slaan.</string>
+  <string name="clipboard_description">Het klembord staat doe that items rechtstreeks naar het klembord worden gesleept. Items kunnen ook direct vanuit het klembord worden gesleept indien aanwezig.</string>
+  <string name="keycode_description">Keycode knoppen staan toe dat toetsenbord toetsen aan de navigatiebalk worden toegevoegd. Wanneer ze ingedrukt worden, emuleren ze de gekozen toetsenbord toets. Eerst moet de sleutel geselecteerd worden voor de toets, gevolgd door een afbeelding die getoond word op de knop.</string>
+  <string name="start">Begin</string>
+  <string name="center">Midden</string>
+  <string name="end">Einde</string>
+  <string name="space">Tussenlaag</string>
+  <string name="menu_ime">Menu / Toetsenbord Verwisselaar</string>
+  <string name="select_button">Selecteer knop om toe te voegen</string>
+  <string name="add_button">Knop toevoegen</string>
+  <string name="save">Opslaan</string>
+  <string name="reset">Opnieuw instellen</string>
+  <string name="select_keycode">Selecteer toetsenbord knop</string>
+  <string name="left">Links</string>
+  <string name="right">Rechts</string>
+  <string name="navbar_editor_title">Editor</string>
+  <string name="navbar_editor_summary">Navigatiebalk instellen</string>
   <!-- key disable QS Tile -->
+  <string name="quick_settings_key_disable_label">Knoppen uitschakelen</string>
+  <string name="accessibility_quick_settings_key_disable_on">Sleutels uitgeschakeld.</string>
+  <string name="accessibility_quick_settings_key_disable_off">Sleutels toegestaan.</string>
   <!-- navbar disable QS Tile -->
+  <string name="quick_settings_navbar_disable_label">Navbar uitschakelen</string>
+  <string name="accessibility_quick_settings_navbar_disable_on">Navbar uitgeschakeld.</string>
+  <string name="accessibility_quick_settings_navbar_disable_off">Navbar ingeschakeld.</string>
   <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="qs_show_battery">Batterij weergeven</string>
+  <string name="qs_show_carrier">Providernaam weergeven</string>
+  <string name="qs_show_clock">Klok weergeven</string>
+  <string name="qs_show_mini">Mini-modus</string>
+  <string name="qs_header">Kop</string>
+  <string name="quick_settings_google_assist_label">Assistent</string>
+  <string name="quick_settings_google_voice_assist_label">Stem assistent</string>
+  <string name="quick_settings_google_now_label">Google feed</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Sync</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Sync uitgeschakeld.</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Sync ingeschakeld.</string>
+  <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">AOD</string>
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <string name="clear_recents">Sluit alle recente</string>
 </resources>

@@ -20,10 +20,25 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">重開機至 bootloader</string>
+  <string name="reboot_to_bootloader_message">重新開機到 bootloader\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">重新開機至 Recovery</string>
+  <string name="reboot_to_recovery_message">重新開機到 recovery\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">重新開機系統</string>
+  <string name="reboot_system_message">重新開機系統\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">偽裝安裝包簽名</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">允許應用程式假裝為另一過一個不同的應用程式。惡意應用程式可能藉此取得應用程式的資料。請小心授予權限!</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">按住返回鍵取消螢幕固定</string>
+  <string name="app_unpin_message">應用程式已取消固定</string>
   <!-- back kill -->
+  <string name="app_killed_message">應用程式已終止</string>
+  <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_accessFontManager">存取字型管理</string>
+  <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_accessFontManager">允許應用程式存取字型管理。</string>
 </resources>

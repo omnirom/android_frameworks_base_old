@@ -49,6 +49,7 @@
   <string name="tuner_show_brightness_mode">Fényerő üzemmódok közötti váltás megjelenítése</string>
   <string name="tuner_show_brightness_new">Fényerő csúszka megjelenítése</string>
   <string name="tuner_show_brightness_side_buttons">A fényerő csúszka oldalsó gombjainak megjelenítése</string>
+  <string name="tuner_brightness_position_bottom">A fényerőcsúszka alul</string>
   <string name="lockscreen_default">Alapértelmezett</string>
   <string name="lockscreen_hidden">Nincs</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -112,7 +113,7 @@
   <string name="keycode">Kulcskód</string>
   <string name="no_home_title">Nincs kezdőlap gomb</string>
   <string name="no_home_message">A készüléken való navigáláshoz kezdőlap gomb szükséges. Kérjük, adjon hozzá egy kezdőlap gombot a mentés előtt.</string>
-  <string name="clipboard_description">A Vágólap lehetővé teszi az elemek közvetlenül a vágólapra húzását. Az elemek közvetlenül a vágólapról is áthúzhatók, ha jelen vannak.</string>
+  <string name="clipboard_description">A vágólap lehetővé teszi az elemek közvetlenül a vágólapra húzását. Az elemek közvetlenül a vágólapról is áthúzhatók, ha jelen vannak.</string>
   <string name="keycode_description">A kulcskód gombok lehetővé teszik, hogy a billentyűzet gombjait hozzáadja a navigációs sávhoz. Megnyomásuk esetén a kiválasztott billentyűt emulálják. Először a kulcsot kell kiválasztani a gombhoz, majd a gombon megjelenő képet.</string>
   <string name="start">Kezdete</string>
   <string name="center">Középen</string>
@@ -143,6 +144,17 @@
   <string name="qs_show_clock">Óra megjelenítése</string>
   <string name="qs_show_mini">Mini mód</string>
   <string name="qs_header">Fejléc</string>
-  <string name="quick_settings_google_assist_label">Segéd</string>
+  <string name="quick_settings_google_assist_label">Asszisztens</string>
   <string name="quick_settings_google_voice_assist_label">Hangsegéd</string>
+  <string name="quick_settings_google_now_label">Google hírfolyam</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Szinkr.</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Szinkr. kikapcsolva.</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Szinkr. bekapcsolva.</string>
+  <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">AOD</string>
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <string name="clear_recents">Az összes előzmény bezárása</string>
 </resources>

@@ -110,7 +110,6 @@
   <string name="preview">Vista previa</string>
   <string name="no_home_title">No se ha encontrado ningún botón de inicio</string>
   <string name="no_home_message">Se requiere un botón de inicio para poder navegar por este dispositivo. Por favor agregue un botón de inicio antes de guardar.</string>
-  <string name="clipboard_description">El portapapeles permite que los elementos se arrastren directamente. Los elementos también se pueden arrastrar directamente desde el portapapeles cuando estén presentes.</string>
   <string name="start">Inicio</string>
   <string name="center">Centrado</string>
   <string name="end">Fin</string>
@@ -121,7 +120,6 @@
   <string name="left">Izquierda</string>
   <string name="right">Derecha</string>
   <string name="navbar_editor_title">Editor</string>
-  <string name="navbar_editor_summary">Configurar barra de navegación</string>
   <!-- key disable QS Tile -->
   <string name="quick_settings_key_disable_label">Desactivar teclas</string>
   <string name="accessibility_quick_settings_key_disable_on">Teclas desactivadas.</string>
@@ -136,4 +134,9 @@
   <string name="qs_show_clock">Mostrar reloj</string>
   <string name="qs_show_mini">Modo mini</string>
   <string name="qs_header">Cabecera</string>
+  <!-- Sync QS tile -->
+  <!-- AOD QS tile -->
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
 </resources>

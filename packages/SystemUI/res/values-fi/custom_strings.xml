@@ -100,7 +100,6 @@
   <string name="add_button">Lisää näppäin</string>
   <string name="save">Tallenna</string>
   <string name="reset">Nollaa</string>
-  <string name="navbar_editor_summary">Määritä navigointipalkki</string>
   <!-- key disable QS Tile -->
   <!-- navbar disable QS Tile -->
   <string name="quick_settings_navbar_disable_label">Poista navigointipalkki käytöstä</string>
@@ -109,4 +108,9 @@
   <string name="qs_show_battery">Näytä akku</string>
   <string name="qs_show_carrier">Näytä operaattorien nimet</string>
   <string name="qs_show_clock">Näytä kello</string>
+  <!-- Sync QS tile -->
+  <!-- AOD QS tile -->
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
 </resources>
