@@ -8024,6 +8024,13 @@ public final class Settings {
         public static final String LOCK_QS_DISABLED = "lockscreen_qs_disabled";
 
         /**
+         * Disable indicator text
+         *
+         * @hide
+         */
+        public static final String LOCK_HIDE_INDICATOR_DISPLAY = "lockscreen_hide_indicator_display";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
