@@ -4619,6 +4619,18 @@ public final class Settings {
         public static final String HIDE_LOCKSCREEN_ALARM = "hide_lockscreen_alarm";
 
         /**
+         * @hide
+         */
+        public static final String HIDE_LOCKSCREEN_STATUS_BAR = "hide_lockscreen_status_bar";
+
+        /**
+         * Hide lockscreen indicator text
+         *
+         * @hide
+         */
+        public static final String HIDE_LOCKSCREEN_INDICATOR_DISPLAY = "hide_lockscreen_indicator_display";
+
+        /**
          * Hold current font name and name of the originating package Uses "|" as a delimiter
          *
          * @hide
@@ -4956,6 +4968,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(HIDE_LOCKSCREEN_DATE);
             PRIVATE_SETTINGS.add(HIDE_LOCKSCREEN_CLOCK);
             PRIVATE_SETTINGS.add(HIDE_LOCKSCREEN_ALARM);
+            PRIVATE_SETTINGS.add(HIDE_LOCKSCREEN_STATUS_BAR);
+            PRIVATE_SETTINGS.add(HIDE_LOCKSCREEN_INDICATOR_DISPLAY);
             PRIVATE_SETTINGS.add(FONT_INFO);
             PRIVATE_SETTINGS.add(FONT_PACKAGES);
             PRIVATE_SETTINGS.add(LONG_PRESS_POWER_TORCH);
@@ -6395,11 +6409,6 @@ public final class Settings {
          */
         public static final String LOCK_SCREEN_ALLOW_REMOTE_INPUT =
                 "lock_screen_allow_remote_input";
-
-        /**
-         * @hide
-         */
-        public static final String LOCK_HIDE_STATUS_BAR = "lockscreen_hide_status_bar";
 
         /**
          * Set by the system to track if the user needs to see the call to action for
