@@ -123,4 +123,9 @@
   <string name="qs_show_carrier">Mostra nomi operatori</string>
   <string name="qs_show_clock">Mostra orologio</string>
   <string name="quick_settings_google_voice_assist_label">Assistente vocale</string>
+  <!-- Sync QS tile -->
+  <!-- AOD QS tile -->
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
 </resources>

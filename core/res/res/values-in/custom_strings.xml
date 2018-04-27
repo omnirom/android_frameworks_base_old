@@ -36,4 +36,6 @@
   <string name="lock_to_app_toast_back">Untuk melepas pin layar ini, sentuh dan tahan tombol Kembali.</string>
   <string name="app_unpin_message">Apl dilepas</string>
   <!-- back kill -->
+  <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
 </resources>

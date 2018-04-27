@@ -31,4 +31,6 @@
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">For å løsne denne skjermen, trykk og hold Tilbake-knappen.</string>
   <!-- back kill -->
+  <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
 </resources>

@@ -49,6 +49,7 @@
   <string name="tuner_show_brightness_mode">显示亮度模式开关</string>
   <string name="tuner_show_brightness_new">亮度滑块</string>
   <string name="tuner_show_brightness_side_buttons">显示亮度滑块侧面按钮</string>
+  <string name="tuner_brightness_position_bottom">底部的亮度滑块</string>
   <string name="lockscreen_default">默认</string>
   <string name="lockscreen_hidden">无</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -143,6 +144,17 @@
   <string name="qs_show_clock">显示时钟</string>
   <string name="qs_show_mini">迷你模式</string>
   <string name="qs_header">页眉</string>
-  <string name="quick_settings_google_assist_label">助手</string>
+  <string name="quick_settings_google_assist_label">助理</string>
   <string name="quick_settings_google_voice_assist_label">语音助手</string>
+  <string name="quick_settings_google_now_label">谷歌 feed</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">同步</string>
+  <string name="accessibility_quick_settings_sync_changed_off">同步已关闭</string>
+  <string name="accessibility_quick_settings_sync_changed_on">同步已打开</string>
+  <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">AOD</string>
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <string name="clear_recents">清除所有最近任务</string>
 </resources>

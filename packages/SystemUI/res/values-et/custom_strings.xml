@@ -49,6 +49,7 @@
   <string name="tuner_show_brightness_mode">Kuva heledusrežiimi lülitit</string>
   <string name="tuner_show_brightness_new">Kuva heledusliugurit</string>
   <string name="tuner_show_brightness_side_buttons">Kuva heleduse liuguri küljenuppe</string>
+  <string name="tuner_brightness_position_bottom">Heledusliugur all</string>
   <string name="lockscreen_default">Vaikimisi</string>
   <string name="lockscreen_hidden">Puudub</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -143,6 +144,17 @@
   <string name="qs_show_clock">Näita kella</string>
   <string name="qs_show_mini">Minirežiim</string>
   <string name="qs_header">Päis</string>
-  <string name="quick_settings_google_assist_label">Abirakendus</string>
+  <string name="quick_settings_google_assist_label">Assistent</string>
   <string name="quick_settings_google_voice_assist_label">Hääle abirakendus</string>
+  <string name="quick_settings_google_now_label">Google\'i voog</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Sünkr.</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Sünkroniseerimine välja lülitatud.</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Sünkroniseerimine sisse lülitatud.</string>
+  <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">Alati sees ekraan</string>
+  <!-- Recents Panel -->
+  <!-- The text for the button in the notification window-shade that clears
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <string name="clear_recents">Sulge kõik viimatised</string>
 </resources>
