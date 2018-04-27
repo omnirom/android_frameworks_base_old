@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7f52610e_ecd222a7",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 8031,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-04-27T00:11:22Z",
+      "side": 1,
+      "message": "after we added all the others to System it would be strange to add that in Secure :)\nPS: dont forget to add to PRIVATE_SETTINGS too",
+      "revId": "9368caa37e9809d31bb2000f413620fadca6d663",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c57bc42e_33107ded",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBottomAreaView.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 843,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-04-27T00:11:22Z",
+      "side": 1,
+      "message": "System",
+      "revId": "9368caa37e9809d31bb2000f413620fadca6d663",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ec70fccb_06b0e522",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBottomAreaView.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-04-27T00:11:22Z",
+      "side": 1,
+      "message": "System",
+      "revId": "9368caa37e9809d31bb2000f413620fadca6d663",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
