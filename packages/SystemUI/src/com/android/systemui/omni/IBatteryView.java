@@ -40,5 +40,7 @@ public interface IBatteryView  {
 
     void setLowPercentColorEnabled(boolean value);
 
+    void setPowerSaveBarColorEnabled(boolean value);
+
     int getTopMargin();
 }
