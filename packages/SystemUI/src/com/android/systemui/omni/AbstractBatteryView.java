@@ -84,6 +84,8 @@ public class AbstractBatteryView extends View implements IBatteryView,
     protected DashPathEffect mPathEffect;
     protected boolean mDottedLine;
     protected boolean mLowPercentColorEnabled = true;
+    protected boolean mPowerSaveBarColorEnabled = true;
+    protected int mLocation = BatteryViewManager.BATTERY_LOCATION_STATUSBAR;
 
     @Override
     public void onAttachedToWindow() {
@@ -181,6 +183,18 @@ public class AbstractBatteryView extends View implements IBatteryView,
         mLowPercentColorEnabled = value;
     }
 
+    @Override
+    public void setPowerSaveBarColorEnabled(boolean value) {
+        mPowerSaveBarColorEnabled = value;
+        updatePercentText();
+        postInvalidate();
+    }
+
+    @Override
+    public void setLocation(int location) {
+        mLocation = location;
+    }
+
     protected boolean showChargingImage() {
         return mCharging && mChargingImage;
     }
@@ -193,8 +207,9 @@ public class AbstractBatteryView extends View implements IBatteryView,
     }
 
     private int getColorForLevel(int level) {
-        // If we are in power save mode, always use the normal color.
-        if (mPowerSaveEnabled) {
+        // If we are in power save mode, always use the normal color
+        // but only if we also use the power save coloring of status bar
+        if (mLocation == BatteryViewManager.BATTERY_LOCATION_STATUSBAR && mPowerSaveEnabled && mPowerSaveBarColorEnabled) {
             return mIconTint;
         }
         if (mLowPercentColorEnabled) {
