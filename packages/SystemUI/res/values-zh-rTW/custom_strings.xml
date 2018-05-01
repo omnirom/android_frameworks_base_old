@@ -73,15 +73,23 @@
   <string name="quick_settings_network_adb_enabled_label">已啟用</string>
   <string name="quick_settings_network_adb_disabled_label">已關閉</string>
   <string name="quick_settings_network_adb_label">無線 ADB 偵錯</string>
+  <string name="quick_settings_network_adb_toast">未啟用 USB 偵錯</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">這會將目前畫面應用鎖定。長按返回鍵解鎖。</string>
   <string name="omnijaws_service_error">錯誤</string>
+  <string name="omnijaws_service_unkown">無天氣資料</string>
+  <string name="omnijaws_service_error_long">讀取天氣數據錯誤</string>
+  <string name="omnijaws_service_disabled">服務已禁用</string>
   <string name="omnijaws_detail_header">天氣</string>
   <string name="omnijaws_label_default">天氣</string>
   <string name="omnijaws_current_text">現在</string>
+  <string name="omnijaws_package_not_available">狀態欄天氣不可用</string>
   <string name="omnijaws_service_last_update">最近更新：</string>
   <!-- PiP Tile -->
   <string name="quick_settings_pip_label">畫中畫</string>
+  <string name="quick_settings_pip_tile_app_na">應用程式不支援畫中畫模式</string>
   <string name="quick_settings_screenshot_label">螢幕截圖</string>
+  <string name="quick_settings_region_screenshot_label">部分截圖</string>
   <string name="quick_settings_caffeine_label">暫停休眠</string>
   <string name="accessibility_quick_settings_caffeine_off">暫停休眠 關閉。</string>
   <string name="accessibility_quick_settings_caffeine_on">暫停休眠 開啟</string>
@@ -91,9 +99,22 @@
   <string name="accessibility_quick_settings_location_gps_only">定位：只限裝置。</string>
   <string name="accessibility_quick_settings_location_high_accuracy">定位：高精確度。</string>
   <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">迅速瀏覽通知</string>
+  <string name="accessibility_quick_settings_heads_up_off">「迅速瀏覽」已停用</string>
+  <string name="accessibility_quick_settings_heads_up_on">允許「迅速瀏覽」</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">「迅速瀏覽」已關閉</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">「迅速瀏覽」已開啟</string>
   <!-- Screenrecord QS tile -->
   <string name="quick_settings_screenrecord_label">螢幕錄影</string>
+  <string name="quick_settings_screenrecord_lq_label">螢幕錄影 低畫質</string>
+  <string name="quick_settings_screenrecord_mq_label">螢幕錄影 一般畫質</string>
+  <string name="quick_settings_screenrecord_hq_label">螢幕錄影 高畫質</string>
   <string name="preview">預覽</string>
+  <string name="keycode">Keycode</string>
+  <string name="no_home_title">找不到首頁鍵</string>
+  <string name="no_home_message">需要一個主頁鍵才能使用此裝置，請在儲存前增加一個主頁鍵</string>
+  <string name="clipboard_description">剪貼簿允許將專案直接拖動到剪貼簿。當存在時, 專案也可以直接從剪貼簿中拖出。</string>
+  <string name="keycode_description">Keycode 鍵允許將鍵盤鍵添加到導航欄中。按下它們將模擬選定的按鍵。首先必須為按鈕選擇鍵, 然後在按鈕上顯示一個圖像。</string>
   <string name="start">開始</string>
   <string name="center">中心</string>
   <string name="end">結束</string>

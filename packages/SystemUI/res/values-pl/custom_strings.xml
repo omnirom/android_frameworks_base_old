@@ -19,6 +19,36 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">Uruchom ponownie</string>
+  <string name="global_action_reboot_more">Uruchamianie ponownie\u2026</string>
+  <string name="global_action_reboot_sub">System</string>
+  <string name="global_action_reboot_recovery">Tryb Recovery</string>
+  <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_dismissable_dialog_text">Zaawansowany restart jest wyłączony.\nCzy chcesz uruchomić ponownie\u003f</string>
+  <string name="global_action_dnaa">Nie pokazuj ponownie</string>
+  <string name="global_action_settings">Ustawienia</string>
+  <string name="qs_menu_item_columns">Kolumny</string>
+  <string name="qs_menu_item_columns_landscape">Położenie kolumn</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Uruchom ponownie</string>
+  <string name="qs_menu_item_titles">Pokaż etykiety QS</string>
+  <string name="qs_menu_item_rows">Wiersze</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="qs_menu_item_scroll">Rozwijanie szybkich ustawień</string>
+  <string name="qs_menu_item_qs_columns">Kolumny szybkich ustawień</string>
+  <string name="tuner_quick_settings">Szybkie ustawienia</string>
+  <string name="tuner_show_brightness_mode">Pokaż przełącznik automatycznej jasności</string>
+  <string name="tuner_show_brightness_new">Pokaż suwak jasności ekranu</string>
+  <string name="lockscreen_default">Domyślnie</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
   <!-- Screenrecord Notification Ticker -->
   <!-- Screenrecord notification title -->

@@ -44,10 +44,12 @@
   <string name="qs_menu_item_rows_three">3</string>
   <string name="qs_menu_item_rows_four">4</string>
   <string name="qs_menu_item_scroll">Прокрутка плиток</string>
+  <string name="qs_menu_item_qs_columns">Столбцы быстрой панели</string>
   <string name="tuner_quick_settings">Быстрые настройки</string>
   <string name="tuner_show_brightness_mode">Отображать переключатель режима подсветки</string>
   <string name="tuner_show_brightness_new">Отображать ползунок яркости</string>
   <string name="tuner_show_brightness_side_buttons">Отображать боковые кнопки регулятора яркости</string>
+  <string name="tuner_brightness_position_bottom">Ползунок яркости внизу</string>
   <string name="lockscreen_default">По умолчанию</string>
   <string name="lockscreen_hidden">Нет</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -109,6 +111,9 @@
   <string name="quick_settings_screenrecord_hq_label">Высокое качество</string>
   <string name="preview">Предпросмотр</string>
   <string name="keycode">Ключевой код</string>
+  <string name="no_home_title">Не найдена кнопка \"Домой\"</string>
+  <string name="no_home_message">Для навигации по этому устройству требуется кнопка \"Домой\". Перед сохранением добавьте кнопку \"Домой\".</string>
+  <string name="clipboard_description">Буфер обмена позволяет перемещать элементы непосредственно в буфер обмена. Элементы также можно перетаскивать непосредственно из буфера обмена, когда они присутствуют.</string>
   <string name="start">В начале</string>
   <string name="center">В середине</string>
   <string name="end">В конце</string>
@@ -117,8 +122,14 @@
   <string name="add_button">Добавить кнопку</string>
   <string name="save">Сохранить</string>
   <string name="reset">Сброс</string>
+  <string name="left">Слева</string>
+  <string name="right">Справа</string>
   <string name="navbar_editor_title">Редактор</string>
+  <string name="navbar_editor_summary">Настройка панели навигации</string>
   <!-- key disable QS Tile -->
+  <string name="quick_settings_key_disable_label">Отключить кнопки</string>
+  <string name="accessibility_quick_settings_key_disable_on">Кнопки отключены.</string>
+  <string name="accessibility_quick_settings_key_disable_off">Кнопки включены.</string>
   <!-- navbar disable QS Tile -->
   <string name="quick_settings_navbar_disable_label">Отключить панель навигации</string>
   <string name="accessibility_quick_settings_navbar_disable_on">Панель навигации отключена.</string>
@@ -128,11 +139,19 @@
   <string name="qs_show_battery">Отображать значок батареи</string>
   <string name="qs_show_carrier">Отображать название оператора</string>
   <string name="qs_show_clock">Показывать часы</string>
+  <string name="qs_show_mini">Мини-режим</string>
   <string name="qs_header">Заголовок</string>
+  <string name="quick_settings_google_assist_label">Ассистент</string>
   <string name="quick_settings_google_voice_assist_label">Голосовой ассистент</string>
+  <string name="quick_settings_google_now_label">Лента Google</string>
   <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Синхронизация</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Синхронизация была отключена.</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Синхронизация была включена.</string>
   <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">AOD</string>
   <!-- Recents Panel -->
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <string name="clear_recents">Закрыть все недавние</string>
 </resources>

@@ -38,7 +38,7 @@
   <!-- back kill -->
   <string name="app_killed_message">Rakendus sundsuletud</string>
   <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-  <string name="permlab_accessFontManager">juurdepääs vorminguhaldurile</string>
+  <string name="permlab_accessFontManager">juurdepääs fondihaldurile</string>
   <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-  <string name="permdesc_accessFontManager">Võimaldab rakendusel vorminguhaldurile ligi pääseda.</string>
+  <string name="permdesc_accessFontManager">Võimaldab rakendusel fondihaldurile ligi pääseda.</string>
 </resources>
