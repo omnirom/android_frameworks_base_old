@@ -227,7 +227,7 @@ public class KeyguardStatusView extends GridLayout {
 
         refreshTime();
         refreshAlarmStatus(nextAlarm);
-        updateSettings(false);
+        updateSettings();
     }
 
     void refreshAlarmStatus(AlarmManager.AlarmClockInfo nextAlarm) {
@@ -276,7 +276,7 @@ public class KeyguardStatusView extends GridLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mInfoCallback);
-        updateSettings(false);
+        updateSettings();
     }
 
     @Override
@@ -307,7 +307,7 @@ public class KeyguardStatusView extends GridLayout {
         return false;
     }
 
-    private void updateSettings(boolean forceHide) {
+    private void updateSettings() {
         final ContentResolver resolver = getContext().getContentResolver();
         final Resources res = getContext().getResources();
         AlarmManager.AlarmClockInfo nextAlarm =
@@ -319,14 +319,9 @@ public class KeyguardStatusView extends GridLayout {
         boolean showDate = Settings.System.getIntForUser(resolver,
                 Settings.System.HIDE_LOCKSCREEN_DATE, 0, UserHandle.USER_CURRENT) == 0;
 
-        mClockView = (TextClock) findViewById(R.id.clock_view);
-        mClockView.setVisibility(showClock ? View.VISIBLE : View.GONE);
-
-        mDateView.setVisibility(showDate ? View.VISIBLE : View.GONE);
-        mDateView = (DateView) findViewById(R.id.date_view);
-
-        mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
-        mAlarmStatusView.setVisibility(showAlarm && nextAlarm != null ? View.VISIBLE : View.GONE);
+        mClockView.setVisibility((showClock || mDarkAmount == 1) ? View.VISIBLE : View.GONE);
+        mDateView.setVisibility((showDate || mDarkAmount == 1) ? View.VISIBLE : View.GONE);
+        mAlarmStatusView.setVisibility((showAlarm || mDarkAmount == 1) && nextAlarm != null ? View.VISIBLE : View.GONE);
     }
 
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
@@ -408,6 +403,7 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     private void updateDozeVisibleViews() {
+        updateSettings();
         for (View child : mVisibleInDoze) {
             if (!mForcedMediaDoze) {
                 child.setAlpha(mDarkAmount == 1 && mPulsing ? 0.8f : 1);
