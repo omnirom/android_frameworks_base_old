@@ -17,9 +17,11 @@
 
 <com.android.systemui.ambientmusic.AmbientIndicationContainer
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="bottom"
     android:id="@id/ambient_indication_container"
     android:layout="@layout/ambient_indication_inner"
+    sysui:layoutLand="@layout/ambient_indication_inner_land"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:forceHasOverlappingRendering="false" />

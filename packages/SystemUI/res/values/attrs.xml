@@ -107,6 +107,7 @@
 
     <declare-styleable name="AutoReinflateContainer">
         <attr name="android:layout" />
+        <attr name="layoutLand" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="HybridNotificationTheme">
