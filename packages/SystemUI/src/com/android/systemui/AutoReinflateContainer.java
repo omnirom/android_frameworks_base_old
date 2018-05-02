@@ -31,13 +31,16 @@ import java.util.List;
 
 /**
  * Custom {@link FrameLayout} that re-inflates when changes to {@link Configuration} happen.
- * Currently supports changes to density, asset path, and locale.
+ * Currently supports changes to density, asset path, orientation and locale.
  */
 public class AutoReinflateContainer extends FrameLayout implements
         ConfigurationController.ConfigurationListener {
 
     private final List<InflateListener> mInflateListeners = new ArrayList<>();
     private final int mLayout;
+    private int mLayoutLand;
+    private boolean mIsLandscape;
+    private int mCustomLayout;
 
     public AutoReinflateContainer(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -47,7 +50,12 @@ public class AutoReinflateContainer extends FrameLayout implements
             throw new IllegalArgumentException("AutoReinflateContainer must contain a layout");
         }
         mLayout = a.getResourceId(R.styleable.AutoReinflateContainer_android_layout, 0);
+        if (a.hasValue(R.styleable.AutoReinflateContainer_layoutLand)) {
+            mLayoutLand = a.getResourceId(R.styleable.AutoReinflateContainer_layoutLand, 0);
+        }
         a.recycle();
+        mIsLandscape = context.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
         inflateLayout();
     }
 
@@ -64,7 +72,11 @@ public class AutoReinflateContainer extends FrameLayout implements
     }
 
     protected void inflateLayoutImpl() {
-        LayoutInflater.from(getContext()).inflate(mLayout, this);
+        if (mCustomLayout != 0) {
+            LayoutInflater.from(getContext()).inflate(mCustomLayout, this);
+        } else {
+            LayoutInflater.from(getContext()).inflate((mIsLandscape && mLayoutLand != 0) ? mLayoutLand : mLayout, this);
+        }
     }
 
     public void inflateLayout() {
@@ -93,6 +105,17 @@ public class AutoReinflateContainer extends FrameLayout implements
 
     @Override
     public void onLocaleListChanged() {
+        inflateLayout();
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        mIsLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
+        inflateLayout();
+    }
+
+    public void setCustomLayout(int customLayout) {
+        mCustomLayout = customLayout;
         inflateLayout();
     }
 

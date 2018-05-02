@@ -194,7 +194,8 @@ public class KeyguardClockPositionAlgorithm {
         if (mAmbientContainerMinimal) {
             ambientContainerY = 0.5f * mHeight - (float) mAmbientContainerHeight / 2 + burnInPreventionOffsetY();
         } else {
-            float topY = 0.80f * mHeight;
+            // in landscape we have a horizontal layout that can go further down
+            float topY = (mIsLandscape ? 0.90f : 0.80f) * mHeight;
             ambientContainerY = topY + burnInPreventionOffsetY();
             if (ambientContainerY + mAmbientContainerHeight > mHeight) {
                 ambientContainerY = mHeight - mAmbientContainerHeight;
