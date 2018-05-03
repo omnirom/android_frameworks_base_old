@@ -57,6 +57,16 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/clock_view" />
 
+            <include layout="@layout/current_weather_view"
+                android:id="@+id/weather_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone"
+                android:layout_marginTop="@dimen/date_owner_info_margin"
+                android:layout_below="@id/keyguard_status_area"/>
+
             <LinearLayout
                 android:id="@+id/battery_container"
                 android:layout_width="wrap_content"
@@ -65,8 +75,8 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_centerHorizontal="true"
                 android:visibility="gone"
-                android:layout_marginTop="@dimen/dozing_stack_padding"
-                android:layout_below="@id/keyguard_status_area" />
+                android:layout_marginTop="@dimen/date_owner_info_margin"
+                android:layout_below="@id/weather_container" />
 
         </RelativeLayout>
 
