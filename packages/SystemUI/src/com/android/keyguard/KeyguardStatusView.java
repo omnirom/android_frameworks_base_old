@@ -49,6 +49,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ChargingView;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.omni.BatteryViewManager;
+import com.android.systemui.omni.CurrentWeatherView;
 import com.android.systemui.statusbar.policy.DateView;
 
 import java.util.Locale;
@@ -83,6 +84,7 @@ public class KeyguardStatusView extends GridLayout {
 
     private BatteryViewManager mBatteryViewManager;
     private LinearLayout mBatteryContainer;
+    private CurrentWeatherView mWeatherView;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -173,8 +175,9 @@ public class KeyguardStatusView extends GridLayout {
         mBatteryContainer = (LinearLayout) findViewById(R.id.battery_container);
         mBatteryViewManager = new BatteryViewManager(mContext, mBatteryContainer,
                 BatteryViewManager.BATTERY_LOCATION_AMBIENT);
+        mWeatherView = (CurrentWeatherView) findViewById(R.id.weather_container);
 
-        mVisibleInDoze = new View[]{mBatteryContainer, mClockView, mKeyguardStatusArea};
+        mVisibleInDoze = new View[]{mBatteryContainer, mClockView, mKeyguardStatusArea, mWeatherView};
         mTextColor = mClockView.getCurrentTextColor();
         mDateTextColor = mDateView.getCurrentTextColor();
         mAlarmTextColor = mAlarmStatusView.getCurrentTextColor();
@@ -227,7 +230,7 @@ public class KeyguardStatusView extends GridLayout {
 
         refreshTime();
         refreshAlarmStatus(nextAlarm);
-        updateSettings(false);
+        updateSettings();
     }
 
     void refreshAlarmStatus(AlarmManager.AlarmClockInfo nextAlarm) {
@@ -276,7 +279,7 @@ public class KeyguardStatusView extends GridLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mInfoCallback);
-        updateSettings(false);
+        updateSettings();
     }
 
     @Override
@@ -307,7 +310,7 @@ public class KeyguardStatusView extends GridLayout {
         return false;
     }
 
-    private void updateSettings(boolean forceHide) {
+    private void updateSettings() {
         final ContentResolver resolver = getContext().getContentResolver();
         final Resources res = getContext().getResources();
         AlarmManager.AlarmClockInfo nextAlarm =
@@ -318,15 +321,21 @@ public class KeyguardStatusView extends GridLayout {
                 Settings.System.HIDE_LOCKSCREEN_CLOCK, 0, UserHandle.USER_CURRENT) == 0;
         boolean showDate = Settings.System.getIntForUser(resolver,
                 Settings.System.HIDE_LOCKSCREEN_DATE, 0, UserHandle.USER_CURRENT) == 0;
+        boolean showWeather = Settings.System.getIntForUser(resolver,
+                Settings.System.LOCKSCREEN_WEATHER, 0, UserHandle.USER_CURRENT) == 1;
 
-        mClockView = (TextClock) findViewById(R.id.clock_view);
         mClockView.setVisibility(showClock ? View.VISIBLE : View.GONE);
-
         mDateView.setVisibility(showDate ? View.VISIBLE : View.GONE);
-        mDateView = (DateView) findViewById(R.id.date_view);
-
-        mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
         mAlarmStatusView.setVisibility(showAlarm && nextAlarm != null ? View.VISIBLE : View.GONE);
+
+        if (showWeather && mWeatherView.getVisibility() == View.GONE) {
+            mWeatherView.setVisibility(View.VISIBLE);
+            mWeatherView.enableUpdates();
+        }
+        if (!showWeather && mWeatherView.getVisibility() == View.VISIBLE) {
+            mWeatherView.setVisibility(View.GONE);
+            mWeatherView.disableUpdates();
+        }
     }
 
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
@@ -395,6 +404,7 @@ public class KeyguardStatusView extends GridLayout {
         int blendedAlarmColor = ColorUtils.blendARGB(mAlarmTextColor, Color.WHITE, darkAmount);
         mAlarmStatusView.setTextColor(blendedAlarmColor);
         mAlarmStatusView.setCompoundDrawableTintList(ColorStateList.valueOf(blendedAlarmColor));
+        mWeatherView.blendARGB(darkAmount);
     }
 
     public void setPulsing(boolean pulsing) {
@@ -408,6 +418,7 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     private void updateDozeVisibleViews() {
+        updateSettings();
         for (View child : mVisibleInDoze) {
             if (!mForcedMediaDoze) {
                 child.setAlpha(mDarkAmount == 1 && mPulsing ? 0.8f : 1);
