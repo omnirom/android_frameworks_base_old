@@ -70,6 +70,15 @@
 
         </RelativeLayout>
 
+        <include layout="@layout/current_weather_view"
+            android:id="@+id/weather_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_centerHorizontal="true"
+            android:visibility="gone"
+            android:layout_marginTop="@dimen/date_owner_info_margin" />
+
         <TextView
             android:id="@+id/owner_info"
             android:layout_marginLeft="16dp"

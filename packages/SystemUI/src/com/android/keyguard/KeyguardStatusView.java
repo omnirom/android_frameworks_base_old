@@ -49,6 +49,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ChargingView;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.omni.BatteryViewManager;
+import com.android.systemui.omni.CurrentWeatherView;
 import com.android.systemui.statusbar.policy.DateView;
 
 import java.util.Locale;
@@ -83,6 +84,7 @@ public class KeyguardStatusView extends GridLayout {
 
     private BatteryViewManager mBatteryViewManager;
     private LinearLayout mBatteryContainer;
+    private CurrentWeatherView mWeatherView;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -173,6 +175,7 @@ public class KeyguardStatusView extends GridLayout {
         mBatteryContainer = (LinearLayout) findViewById(R.id.battery_container);
         mBatteryViewManager = new BatteryViewManager(mContext, mBatteryContainer,
                 BatteryViewManager.BATTERY_LOCATION_AMBIENT);
+        mWeatherView = (CurrentWeatherView) findViewById(R.id.weather_container);
 
         mVisibleInDoze = new View[]{mBatteryContainer, mClockView, mKeyguardStatusArea};
         mTextColor = mClockView.getCurrentTextColor();
@@ -318,10 +321,21 @@ public class KeyguardStatusView extends GridLayout {
                 Settings.System.HIDE_LOCKSCREEN_CLOCK, 0, UserHandle.USER_CURRENT) == 0;
         boolean showDate = Settings.System.getIntForUser(resolver,
                 Settings.System.HIDE_LOCKSCREEN_DATE, 0, UserHandle.USER_CURRENT) == 0;
+        boolean showWeather = Settings.System.getIntForUser(resolver,
+                Settings.System.LOCKSCREEN_WEATHER, 0, UserHandle.USER_CURRENT) == 1;
 
         mClockView.setVisibility((showClock || mDarkAmount == 1) ? View.VISIBLE : View.GONE);
         mDateView.setVisibility((showDate || mDarkAmount == 1) ? View.VISIBLE : View.GONE);
         mAlarmStatusView.setVisibility((showAlarm || mDarkAmount == 1) && nextAlarm != null ? View.VISIBLE : View.GONE);
+
+        if (showWeather && mWeatherView.getVisibility() == View.GONE) {
+            mWeatherView.setVisibility(View.VISIBLE);
+            mWeatherView.enableUpdates();
+        }
+        if (!showWeather && mWeatherView.getVisibility() == View.VISIBLE) {
+            mWeatherView.setVisibility(View.GONE);
+            mWeatherView.disableUpdates();
+        }
     }
 
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
@@ -381,6 +395,9 @@ public class KeyguardStatusView extends GridLayout {
         }
         if (mOwnerInfo != null) {
             mOwnerInfo.setAlpha(dark ? 0 : 1);
+        }
+        if (mWeatherView != null) {
+            mWeatherView.setAlpha(dark ? 0 : 1);
         }
 
         updateDozeVisibleViews();
