@@ -242,9 +242,14 @@ public class BatteryViewManager implements TunerService.Tunable {
     }
 
     private TextView loadPercentView() {
+        int layoutRes = R.layout.battery_percentage_view_with_gap;
+        if (mLocation == BATTERY_LOCATION_AMBIENT) {
+            layoutRes = R.layout.battery_percentage_view_ambient;
+        } else if (mBatteryStyle == 3) {
+            layoutRes = R.layout.battery_percentage_view;
+        }
         TextView v = (TextView) LayoutInflater.from(mContext)
-                .inflate(mBatteryStyle == 3 ? R.layout.battery_percentage_view :
-                R.layout.battery_percentage_view_with_gap, null);
+                .inflate(layoutRes, null);
         v.setIncludeFontPadding(false);
         return v;
     }

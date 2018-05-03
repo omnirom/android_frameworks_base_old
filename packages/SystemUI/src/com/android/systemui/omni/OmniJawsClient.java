@@ -126,6 +126,7 @@ public class OmniJawsClient {
     public static interface OmniJawsObserver {
         public void weatherUpdated();
         public void weatherError(int errorReason);
+        default public void updateSettings() {};
     }
 
     private class WeatherUpdateReceiver extends BroadcastReceiver {
@@ -189,14 +190,32 @@ public class OmniJawsClient {
         mSettingsObserver.observe();
     }
 
+    public OmniJawsClient(Context context, boolean settingsObserver) {
+        mContext = context;
+        mObserver = new ArrayList<OmniJawsObserver>();
+        if (settingsObserver) {
+            mSettingsObserver = new OmniJawsSettingsObserver(mHandler);
+            mSettingsObserver.observe();
+        }
+    }
+
+    public void addSettingsObserver() {
+        if (mSettingsObserver == null) {
+            mSettingsObserver = new OmniJawsSettingsObserver(mHandler);
+            mSettingsObserver.observe();
+        }
+    }
+
     public void cleanupObserver() {
-        mSettingsObserver.unregister();
         if (mReceiver != null) {
             try {
                 mContext.unregisterReceiver(mReceiver);
             } catch (Exception e) {
             }
             mReceiver = null;
+        }
+        if (mSettingsObserver != null) {
+            mSettingsObserver.unregister();
         }
     }
 
@@ -453,6 +472,9 @@ public class OmniJawsClient {
             } else if (mSettingIconPackage == null || !iconPack.equals(mSettingIconPackage)) {
                 mSettingIconPackage = iconPack;
                 loadCustomIconPackage();
+            }
+            for (OmniJawsObserver observer : mObserver) {
+                observer.updateSettings();
             }
         }
     }
