@@ -833,7 +833,7 @@
     <dimen name="burn_in_prevention_offset_y">40dp</dimen>
 
     <!-- padding between the notification stack and the keyguard status view when dozing -->
-    <dimen name="dozing_stack_padding">10dp</dimen>
+    <dimen name="dozing_stack_padding">6dp</dimen>
 
     <dimen name="corner_size">16dp</dimen>
     <dimen name="top_padding">0dp</dimen>
