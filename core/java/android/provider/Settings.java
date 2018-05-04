@@ -4794,6 +4794,11 @@ public final class Settings {
         public static final String LOCKSCREEN_WEATHER = "lockscreen_weather";
 
         /**
+         * @hide
+         */
+        public static final String SYSTEM_PROXI_CHECK_ENABLED = "system_proxi_check_enabled";
+
+        /**
          * These are all public system settings
          *
          * @hide
@@ -4995,6 +5000,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(DIALER_OPENCNAM_ACCOUNT_SID);
             PRIVATE_SETTINGS.add(DIALER_OPENCNAM_AUTH_TOKEN);
             PRIVATE_SETTINGS.add(LOCKSCREEN_WEATHER);
+            PRIVATE_SETTINGS.add(SYSTEM_PROXI_CHECK_ENABLED);
         }
 
         /**
