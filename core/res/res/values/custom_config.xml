@@ -96,4 +96,8 @@
     <bool name="config_notificationTinting_override">false</bool>
 
     <string name="def_wireless_charging_started_sound" translatable="false">/system/media/audio/ui/WirelessChargingStarted.ogg</string>
+
+    <!-- make sure you enable this only if your device supports deep slepp
+    with active proximity sensor event listener -->
+    <bool name="config_proxiSensorWakupCheck">false</bool>
 </resources>
