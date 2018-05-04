@@ -15,6 +15,7 @@
 package com.android.internal.os;
 
 import android.content.Intent;
+import android.hardware.SensorEvent;
 import android.view.KeyEvent;
 import android.view.WindowManagerPolicy;
 
@@ -77,5 +78,13 @@ public interface DeviceKeyHandler {
     */
     default public void setWindowManagerPolicy(WindowManagerPolicy policy) {
         // empty by definition
+    }
+
+    default public String getCustomProxiSensor() {
+        return null;
+    }
+
+    default public boolean getCustomProxiIsNear(SensorEvent event) {
+        return false;
     }
 }
