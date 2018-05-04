@@ -162,6 +162,10 @@ import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.hdmi.HdmiControlManager;
@@ -294,6 +298,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG_SPLASH_SCREEN = false;
     static final boolean DEBUG_WAKEUP = false;
     static final boolean SHOW_SPLASH_SCREENS = true;
+    static final boolean DEBUG_PROXI_SENSOR = false;
 
     // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
     // No longer recommended for desk docks;
@@ -860,6 +865,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mClearedBecauseOfForceShow;
     private boolean mTopWindowIsKeyguard;
     private boolean mLongPressPowerTorch;
+    private boolean mProxyIsNear;
+    private SensorManager mSensorManager;
+    private Sensor mProximitySensor;
+    private boolean mProxiWakeupCheckEnabled;
+    private boolean mProxiListenerEnabled;
 
     // constants for rotation bits
     private static final int ROTATION_0_MODE = 1;
@@ -1129,6 +1139,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.LONG_PRESS_POWER_TORCH), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SYSTEM_PROXI_CHECK_ENABLED), false, this,
+                    UserHandle.USER_ALL);
+
             updateSettings();
         }
 
@@ -2442,6 +2456,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         + deviceKeyHandlerLib, e);
             }
         }
+        boolean supportPowerButtonProxyCheck = mContext.getResources().getBoolean(R.bool.config_proxiSensorWakupCheck);
+        if (supportPowerButtonProxyCheck) {
+            mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
+            if (mDeviceKeyHandler != null && mDeviceKeyHandler.getCustomProxiSensor() != null) {
+                String proxySensor = mDeviceKeyHandler.getCustomProxiSensor();
+                for (Sensor sensor : mSensorManager.getSensorList(Sensor.TYPE_ALL)) {
+                    if (proxySensor.equals(sensor.getStringType())) {
+                        mProximitySensor = sensor;
+                        if (DEBUG_PROXI_SENSOR) Log.i(TAG, "mProximitySensor = " + proxySensor);
+                    }
+                }
+            }
+            if (mProximitySensor == null) {
+                mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+                if (mProximitySensor != null) {
+                    if (DEBUG_PROXI_SENSOR) Log.i(TAG, "mProximitySensor = Sensor.TYPE_PROXIMITY");
+                }
+            }
+        }
     }
 
     /**
@@ -2705,6 +2738,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_CURRENT) != 0;
             mLongPressPowerTorch = Settings.System.getIntForUser(resolver,
                     Settings.System.LONG_PRESS_POWER_TORCH, 0,
+                    UserHandle.USER_CURRENT) != 0;
+            mProxiWakeupCheckEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.SYSTEM_PROXI_CHECK_ENABLED, 0,
                     UserHandle.USER_CURRENT) != 0;
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
@@ -6844,6 +6880,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 cancelPendingAccessibilityShortcutAction();
                 result &= ~ACTION_PASS_TO_USER;
                 isWakeKey = false; // wake-up will be handled separately
+                if (mProxiListenerEnabled && mProxyIsNear) {
+                    if (DEBUG_PROXI_SENSOR) Log.i(TAG, "KeyEvent.KEYCODE_POWER blocked because of mProxyIsNear");
+                    break;
+                }
                 if (down) {
                     interceptPowerKeyDown(event, interactive);
                 } else {
@@ -7045,6 +7085,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * is always considered a wake key.
      */
     private boolean isWakeKeyWhenScreenOff(int keyCode) {
+        if (mProxiListenerEnabled && mProxyIsNear) {
+            if (DEBUG_PROXI_SENSOR) Log.i(TAG, "isWakeKeyWhenScreenOff blocked because of mProxyIsNear - keyCode = " + keyCode);
+            return false;
+        }
         if (isCustomWakeKey(keyCode)){
             return true;
         }
@@ -7421,6 +7465,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onFinishedWakingUp();
         }
+
+        if (mProxiWakeupCheckEnabled && mProximitySensor != null) {
+            if (DEBUG_PROXI_SENSOR) Log.i(TAG, "unregisterListener");
+            mSensorManager.unregisterListener(mProximitySensorListener, mProximitySensor);
+            mProxyIsNear = false;
+            mProxiListenerEnabled = false;
+        }
     }
 
     private void wakeUpFromPowerKey(long eventTime) {
@@ -7485,6 +7536,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mHomePressed) {
             mHomeConsumed = false;
             mHomePressed = false;
+        }
+
+        if (mProxiWakeupCheckEnabled && mProximitySensor != null && !mProxiListenerEnabled) {
+            mProxyIsNear = false;
+            if (DEBUG_PROXI_SENSOR) Log.i(TAG, "registerListener");
+            mSensorManager.registerListener(mProximitySensorListener, mProximitySensor,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+            mProxiListenerEnabled = true;
         }
     }
 
@@ -9558,4 +9617,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         return false;
     }
+
+    private SensorEventListener mProximitySensorListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (mDeviceKeyHandler != null && mDeviceKeyHandler.getCustomProxiSensor() != null) {
+                mProxyIsNear = mDeviceKeyHandler.getCustomProxiIsNear(event);
+            } else {
+                mProxyIsNear = event.values[0] < mProximitySensor.getMaximumRange();
+            }
+            if (DEBUG_PROXI_SENSOR) Log.i(TAG, "mProxyIsNear = " + mProxyIsNear);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    };
 }
