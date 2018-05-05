@@ -26,5 +26,5 @@
         android:textColor="?android:attr/textColorPrimary"
         android:gravity="center_vertical|start"
         android:importantForAccessibility="no"
-        android:paddingEnd="2dp"
+        android:paddingEnd="4dp"
         />

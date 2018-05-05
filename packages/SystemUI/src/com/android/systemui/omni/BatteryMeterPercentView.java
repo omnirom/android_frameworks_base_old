@@ -238,7 +238,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         mHeight = getResources().getDimensionPixelSize(com.android.settingslib.R.dimen.battery_height);
         mBarWidth = getResources().getDimensionPixelSize(com.android.settingslib.R.dimen.battery_width);
-        mWidth = (int) (14 * metrics.density + 0.5f);
+        mWidth = (int) (12 * metrics.density + 0.5f);
     }
 
     private float getRadiusRatio() {
