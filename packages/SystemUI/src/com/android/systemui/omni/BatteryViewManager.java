@@ -259,23 +259,20 @@ public class BatteryViewManager implements TunerService.Tunable {
             return;
         }
         final boolean showing = mBatteryPercentView != null;
+        if (showing) {
+            mContainerView.removeView(mBatteryPercentView);
+            mBatteryPercentView = null;
+        }
         if (isShowPercent() || mBatteryStyle == 3) {
-            if (!showing) {
-                mBatteryPercentView = loadPercentView();
-                ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT);
-                if (mLocation == BATTERY_LOCATION_AMBIENT) {
-                    int margin = mContext.getResources().getDimensionPixelSize(R.dimen.battery_margin_ambient);
-                    lp.setMargins(0, 0, margin, 0);
-                }
-                mContainerView.addView(mBatteryPercentView, 0, lp);
+            mBatteryPercentView = loadPercentView();
+            ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            if (mLocation == BATTERY_LOCATION_AMBIENT) {
+                int margin = mContext.getResources().getDimensionPixelSize(R.dimen.battery_margin_ambient);
+                lp.setMargins(0, 0, margin, 0);
             }
-        } else {
-            if (showing) {
-                mContainerView.removeView(mBatteryPercentView);
-                mBatteryPercentView = null;
-            }
+            mContainerView.addView(mBatteryPercentView, 0, lp);
         }
         mCurrentBatteryView.setPercentTextView(mBatteryPercentView);
     }
