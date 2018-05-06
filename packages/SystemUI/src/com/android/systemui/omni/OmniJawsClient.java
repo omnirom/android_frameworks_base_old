@@ -55,6 +55,8 @@ public class OmniJawsClient {
     private static final String ICON_PACKAGE_DEFAULT = "org.omnirom.omnijaws";
     private static final String ICON_PREFIX_DEFAULT = "outline";
     private static final String EXTRA_ERROR = "error";
+    public static final int EXTRA_ERROR_NETWORK = 0;
+    public static final int EXTRA_ERROR_LOCATION = 1;
     public static final int EXTRA_ERROR_DISABLED = 2;
 
     public static final String[] WEATHER_PROJECTION = new String[]{
