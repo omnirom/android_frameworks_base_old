@@ -73,6 +73,9 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private final Rect mLastFullscreenBounds = new Rect();
     private final Rect mLastDockedBounds = new Rect();
     private boolean mQsCustomizing;
+    private boolean mBatterySaverColors = true;
+    private boolean mBatterySaverColorsEnabled;
+    private boolean mIsPowerSave;
 
     public LightBarController(Context ctx) {
         mDarkModeColor = Color.valueOf(ctx.getColor(R.color.dark_mode_icon_color_single_tone));
@@ -175,7 +178,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private boolean isLight(int vis, int barMode, int flag) {
         boolean isTransparentBar = (barMode == MODE_TRANSPARENT
                 || barMode == MODE_LIGHTS_OUT_TRANSPARENT);
-        boolean allowLight = isTransparentBar && !mBatteryController.isPowerSave();
+        boolean allowLight = isTransparentBar && !mBatterySaverColorsEnabled;
         boolean light = (vis & flag) != 0;
         return allowLight && light;
     }
@@ -233,6 +236,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
+        mIsPowerSave = isPowerSave;
+        mBatterySaverColorsEnabled = mIsPowerSave && mBatterySaverColors;
         reevaluate();
     }
 
@@ -269,5 +274,11 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             mNavigationBarController.dump(fd, pw, args);
             pw.println();
         }
+    }
+
+    public void setBatterySaverColoring(boolean value) {
+        mBatterySaverColors = value;
+        mBatterySaverColorsEnabled = mIsPowerSave && mBatterySaverColors;
+        reevaluate();
     }
 }
