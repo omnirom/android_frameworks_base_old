@@ -50,6 +50,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.settingslib.Utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -114,13 +115,19 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
             return;
         }
         Drawable d = mWeatherClient.getWeatherConditionImage(weatherData.conditionCode);
+        mCurrentImage.setImageTintList((d instanceof VectorDrawable) ? ColorStateList.valueOf(getTintColor()) : null);
         mCurrentImage.setImageDrawable(d);
         mRightText.setText(weatherData.temp + " " + weatherData.tempUnits);
         mLeftText.setText(weatherData.city);
     }
 
+    private int getTintColor() {
+        return Utils.getColorAttr(mContext, R.attr.wallpaperTextColor);
+    }
+
     private void setErrorView() {
         Drawable d = mContext.getResources().getDrawable(R.drawable.ic_qs_weather_default_off_white);
+        mCurrentImage.setImageTintList((d instanceof VectorDrawable) ? ColorStateList.valueOf(getTintColor()) : null);
         mCurrentImage.setImageDrawable(d);
         mLeftText.setText("");
         mRightText.setText("");
@@ -160,7 +167,10 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
         if (darkAmount == 1) {
             mCurrentImage.setImageTintList(ColorStateList.valueOf(Color.WHITE));
         } else {
-            mCurrentImage.setImageTintList(null);
+            if (mWeatherClient != null) {
+                OmniJawsClient.WeatherInfo weatherData = mWeatherClient.getWeatherInfo();
+                updateWeatherData(weatherData);
+            }
         }
     }
 }
