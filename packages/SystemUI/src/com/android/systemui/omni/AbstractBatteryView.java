@@ -271,6 +271,9 @@ public class AbstractBatteryView extends View implements IBatteryView,
 
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        if (mLocation == BatteryViewManager.BATTERY_LOCATION_AMBIENT) {
+            return;
+        }
         mDarkIntensity = darkIntensity;
         float intensity = DarkIconDispatcher.isInArea(area, this) ? darkIntensity : 0;
         int foreground = getColorForDarkIntensity(intensity, mLightModeFillColor,
