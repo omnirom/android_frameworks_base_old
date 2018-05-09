@@ -83,7 +83,7 @@
   <string name="omnijaws_detail_header">Hava durumu</string>
   <string name="omnijaws_label_default">Hava durumu</string>
   <string name="omnijaws_current_text">Şu ân</string>
-  <string name="omnijaws_package_not_available">OmniJaws mevcûd değil</string>
+  <string name="omnijaws_package_not_available">OmniJaws müsait değil</string>
   <string name="omnijaws_service_last_update">Son güncelleme:</string>
   <!-- PiP Tile -->
   <string name="quick_settings_pip_label">Resim içinde resim</string>
@@ -131,12 +131,12 @@
   <string name="navbar_editor_summary">Gezinti çubuğunu ayarlayın</string>
   <!-- key disable QS Tile -->
   <string name="quick_settings_key_disable_label">Tuşları devre dışı bırak</string>
-  <string name="accessibility_quick_settings_key_disable_on">Tuşlar devre dışı bırakıldı.</string>
+  <string name="accessibility_quick_settings_key_disable_on">Tuşlar devre dışı.</string>
   <string name="accessibility_quick_settings_key_disable_off">Tuşlara izin verildi.</string>
   <!-- navbar disable QS Tile -->
   <string name="quick_settings_navbar_disable_label">Gezinti çubuğunu devre dışı bırak</string>
-  <string name="accessibility_quick_settings_navbar_disable_on">Gezinti çubuğu devre dışı bırakıldı.</string>
-  <string name="accessibility_quick_settings_navbar_disable_off">Gezinti çubuğu fa\'âl hâle getirildi.</string>
+  <string name="accessibility_quick_settings_navbar_disable_on">Gezinti çubuğu devre dışı.</string>
+  <string name="accessibility_quick_settings_navbar_disable_off">Gezinti çubuğu fa\'âl.</string>
   <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_data_connection_hspap">HSPA+</string>
   <string name="qs_show_battery">Pili göster</string>

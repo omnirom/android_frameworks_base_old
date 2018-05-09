@@ -26,7 +26,7 @@
   <string name="global_action_reboot_bootloader">Bootloader</string>
   <string name="global_action_dismissable_dialog_text">Reinicio avanzado esta deshabilitado.\n¿Quieres reiniciar?\u003f</string>
   <string name="global_action_dnaa">No volver a mostrar</string>
-  <string name="global_action_settings">Configuraciones</string>
+  <string name="global_action_settings">Ajustes</string>
   <string name="qs_menu_item_columns">Columnas</string>
   <string name="qs_menu_item_columns_landscape">Columnas en modo apaisado</string>
   <string name="qs_menu_item_columns_three">3</string>
@@ -44,10 +44,12 @@
   <string name="qs_menu_item_rows_three">3</string>
   <string name="qs_menu_item_rows_four">4</string>
   <string name="qs_menu_item_scroll">Barra de desplazamiento</string>
+  <string name="qs_menu_item_qs_columns">Columnas de la barra</string>
   <string name="tuner_quick_settings">Ajustes rápidos</string>
   <string name="tuner_show_brightness_mode">Mostrar interruptor de modo de brillo</string>
   <string name="tuner_show_brightness_new">Mostrar control deslizante de brillo</string>
   <string name="tuner_show_brightness_side_buttons">Mostrar botones de laterales del control de brillo</string>
+  <string name="tuner_brightness_position_bottom">Control deslizante de brillo en la parte inferior</string>
   <string name="lockscreen_default">Por defecto</string>
   <string name="lockscreen_hidden">Ninguno</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -89,8 +91,8 @@
   <string name="quick_settings_screenshot_label">Captura de pantalla</string>
   <string name="quick_settings_region_screenshot_label">Captura de pantalla parcial</string>
   <string name="quick_settings_caffeine_label">Cafeína</string>
-  <string name="accessibility_quick_settings_caffeine_off">Cafeína activo</string>
-  <string name="accessibility_quick_settings_caffeine_on">Cafeína inactivo</string>
+  <string name="accessibility_quick_settings_caffeine_off">Cafeína inactiva</string>
+  <string name="accessibility_quick_settings_caffeine_on">Cafeína activa</string>
   <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
   <string name="accessibility_quick_settings_location_battery_saving">Informe de ubicación: Modo de ahorro de batería.</string>
@@ -99,7 +101,7 @@
   <!-- Heads Up QS Tile -->
   <string name="quick_settings_heads_up_label">Notificaciones flotantes</string>
   <string name="accessibility_quick_settings_heads_up_off">Notificaciones flotantes deshabilitadas.</string>
-  <string name="accessibility_quick_settings_heads_up_on">Notificaciones flotantes permitidas.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Notificaciones flotantes habilitadas.</string>
   <string name="accessibility_quick_settings_heads_up_changed_off">Notificaciones flotantes desactivadas.</string>
   <string name="accessibility_quick_settings_heads_up_changed_on">Notificaciones flotantes activadas.</string>
   <!-- Screenrecord QS tile -->
@@ -108,8 +110,10 @@
   <string name="quick_settings_screenrecord_mq_label">Grabar pantalla MQ</string>
   <string name="quick_settings_screenrecord_hq_label">Grabar pantalla HQ</string>
   <string name="preview">Vista previa</string>
+  <string name="keycode">KeyCode</string>
   <string name="no_home_title">No se ha encontrado ningún botón de inicio</string>
   <string name="no_home_message">Se requiere un botón de inicio para poder navegar por este dispositivo. Por favor agregue un botón de inicio antes de guardar.</string>
+  <string name="clipboard_description">El portapapeles permite que los elementos se arrastren directamente. Los elementos también se pueden arrastrar directamente desde el portapapeles cuando estén presentes.</string>
   <string name="start">Inicio</string>
   <string name="center">Centrado</string>
   <string name="end">Fin</string>
@@ -136,6 +140,7 @@
   <string name="qs_header">Cabecera</string>
   <!-- Sync QS tile -->
   <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">AOD</string>
   <!-- Recents Panel -->
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
