@@ -176,4 +176,7 @@
     <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
     <string name="clear_recents">Close all recent</string>
+
+    <string name="quick_settings_roaming_title">Roaming indicator</string>
+    <string name="quick_settings_roaming_summary">Better hope you know what you are doing if you touch this</string>
 </resources>
