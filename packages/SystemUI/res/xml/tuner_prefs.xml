@@ -77,6 +77,10 @@
             android:title="@string/quick_settings_cellular_detail_title" />
 
         <com.android.systemui.tuner.StatusBarSwitch
+            android:key="roaming"
+            android:title="@string/quick_settings_roaming_title" />
+
+        <com.android.systemui.tuner.StatusBarSwitch
             android:key="airplane"
             android:title="@string/status_bar_airplane" />
 
