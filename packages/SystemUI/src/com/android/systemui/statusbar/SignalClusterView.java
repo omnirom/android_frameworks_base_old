@@ -66,6 +66,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     private static final String SLOT_WIFI = "wifi";
     private static final String SLOT_ETHERNET = "ethernet";
     private static final String SLOT_VPN = "vpn";
+    private static final String SLOT_ROAMING = "roaming";
 
     private final NetworkController mNetworkController;
     private final SecurityController mSecurityController;
@@ -119,6 +120,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     private boolean mActivityEnabled;
     private boolean mForceBlockWifi;
     private boolean mBlockVpn;
+    private boolean mBlockRoaming;
 
     private final IconLogger mIconLogger = Dependency.get(IconLogger.class);
 
@@ -174,13 +176,16 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         boolean blockWifi = blockList.contains(SLOT_WIFI);
         boolean blockEthernet = blockList.contains(SLOT_ETHERNET);
         boolean blockVpn = blockList.contains(SLOT_VPN);
+        boolean blockRoaming = blockList.contains(SLOT_ROAMING);
 
         if (blockAirplane != mBlockAirplane || blockMobile != mBlockMobile
-                || blockEthernet != mBlockEthernet || blockWifi != mBlockWifi) {
+                || blockEthernet != mBlockEthernet || blockWifi != mBlockWifi
+                || blockRoaming != mBlockRoaming) {
             mBlockAirplane = blockAirplane;
             mBlockMobile = blockMobile;
             mBlockEthernet = blockEthernet;
             mBlockWifi = blockWifi || mForceBlockWifi;
+            mBlockRoaming = blockRoaming;
             // Re-register to get new callbacks.
             mNetworkController.removeCallback(this);
             mNetworkController.addCallback(this);
@@ -318,7 +323,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         state.mMobileDescription = statusIcon.contentDescription;
         state.mMobileTypeDescription = typeContentDescription;
         state.mIsMobileTypeIconWide = statusType != 0 && isWide;
-        state.mRoaming = roaming;
+        state.mRoaming = roaming && !mBlockRoaming;
         state.mActivityIn = activityIn && mActivityEnabled;
         state.mActivityOut = activityOut && mActivityEnabled;
 
