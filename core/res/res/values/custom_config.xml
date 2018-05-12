@@ -61,4 +61,9 @@
     <!-- Component name of the combo network location provider. -->
     <string name="config_comboNetworkLocationProvider" translatable="false">@null</string>
 
+    <!-- Whether device has screen with higher aspect ratio -->
+    <bool name="config_haveHigherAspectRatioScreen">false</bool>
+    <!-- Aspect ratio of screen -->
+    <item name="config_screenAspectRatio" format="float" type="dimen">2.1</item>
+
 </resources>
