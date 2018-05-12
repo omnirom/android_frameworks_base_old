@@ -5613,6 +5613,16 @@ public final class Settings {
         public static final String OMNI_GESTURE_HANDLE_SMALL = "navbar_gesture_handle_small";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_ASPECT_RATIO_APPS_LIST = "aspect_ratio_apps_list";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_ASPECT_RATIO_APPS_ENABLED = "aspect_ratio_apps_enabled";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5673,7 +5683,9 @@ public final class Settings {
             OMNI_KEYGUARD_SHOW_BATTERY_TEMP,
             OMNI_GESTURE_HANDLE_HIDE,
             OMNI_GESTURE_HANDLE_ACTION,
-            OMNI_GESTURE_HANDLE_SMALL
+            OMNI_GESTURE_HANDLE_SMALL,
+            OMNI_ASPECT_RATIO_APPS_LIST,
+            OMNI_ASPECT_RATIO_APPS_ENABLED
         };
 
         /**
@@ -5746,6 +5758,8 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_GESTURE_HANDLE_HIDE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_GESTURE_HANDLE_ACTION, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_GESTURE_HANDLE_SMALL, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_ASPECT_RATIO_APPS_LIST, 2);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_ASPECT_RATIO_APPS_ENABLED, 0);
         }
     }
 
