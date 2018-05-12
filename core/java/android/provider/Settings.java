@@ -6174,6 +6174,16 @@ public final class Settings {
         public static final String OMNI_CUSTOM_FP_ICON_UPDATE = "custom_fingerprint_icon_update";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_ASPECT_RATIO_APPS_LIST = "aspect_ratio_apps_list";
+
+        /**
+         * @hide
+         */
+         public static final String OMNI_ASPECT_RATIO_APPS_ENABLED = "aspect_ratio_apps_enabled";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -6213,6 +6223,8 @@ public final class Settings {
             OMNI_LOCKSCREEN_CLOCK_COLORED,
             OMNI_USE_OLD_MOBILETYPE,
             OMNI_HIDE_ROAMING_ICON,
+            OMNI_ASPECT_RATIO_APPS_LIST,
+            OMNI_ASPECT_RATIO_APPS_ENABLED,
         };
 
         /**
@@ -6262,6 +6274,8 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_CLOCK_COLORED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_HIDE_ROAMING_ICON, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_ASPECT_RATIO_APPS_LIST, 2);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_ASPECT_RATIO_APPS_ENABLED, 0);
         }
     }
 
