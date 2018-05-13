@@ -66,6 +66,7 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
     private TextView mLeftText;
     private TextView mRightText;
     private int mTextColor;
+    private float mDarkAmount;
 
     public CurrentWeatherView(Context context) {
         this(context, null);
@@ -115,7 +116,8 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
             return;
         }
         Drawable d = mWeatherClient.getWeatherConditionImage(weatherData.conditionCode);
-        mCurrentImage.setImageTintList((d instanceof VectorDrawable) ? ColorStateList.valueOf(getTintColor()) : null);
+        d = d.mutate();
+        updateTint(d);
         mCurrentImage.setImageDrawable(d);
         mRightText.setText(weatherData.temp + " " + weatherData.tempUnits);
         mLeftText.setText(weatherData.city);
@@ -127,7 +129,7 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
 
     private void setErrorView() {
         Drawable d = mContext.getResources().getDrawable(R.drawable.ic_qs_weather_default_off_white);
-        mCurrentImage.setImageTintList((d instanceof VectorDrawable) ? ColorStateList.valueOf(getTintColor()) : null);
+        updateTint(d);
         mCurrentImage.setImageDrawable(d);
         mLeftText.setText("");
         mRightText.setText("");
@@ -169,16 +171,22 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
     }
 
     public void blendARGB(float darkAmount) {
+        mDarkAmount = darkAmount;
         mLeftText.setTextColor(ColorUtils.blendARGB(mTextColor, Color.WHITE, darkAmount));
         mRightText.setTextColor(ColorUtils.blendARGB(mTextColor, Color.WHITE, darkAmount));
-        if (darkAmount == 1) {
+
+        if (mWeatherClient != null) {
+            // update image with correct tint
+            OmniJawsClient.WeatherInfo weatherData = mWeatherClient.getWeatherInfo();
+            updateWeatherData(weatherData);
+        }
+    }
+
+    private void updateTint(Drawable d) {
+        if (mDarkAmount == 1) {
             mCurrentImage.setImageTintList(ColorStateList.valueOf(Color.WHITE));
         } else {
-            if (mWeatherClient != null) {
-                // update image with correct tint
-                OmniJawsClient.WeatherInfo weatherData = mWeatherClient.getWeatherInfo();
-                updateWeatherData(weatherData);
-            }
+            mCurrentImage.setImageTintList((d instanceof VectorDrawable) ? ColorStateList.valueOf(getTintColor()) : null);
         }
     }
 }
