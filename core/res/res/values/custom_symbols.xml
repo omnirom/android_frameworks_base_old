@@ -75,4 +75,20 @@
   <!-- Full screen aspect ratio -->
   <java-symbol type="bool" name="config_haveHigherAspectRatioScreen" />
   <java-symbol type="dimen" name="config_screenAspectRatio" />
+
+  <!-- Custom Analog clock -->
+  <java-symbol type="drawable" name="custom_clock_dial" />
+  <java-symbol type="drawable" name="custom_clock_dial_ambient" />
+  <java-symbol type="drawable" name="custom_clock_hand_hour" />
+  <java-symbol type="drawable" name="custom_clock_hand_minute" />
+  <java-symbol type="color" name="analog_clock_border_color" />
+  <java-symbol type="color" name="analog_clock_face_color" />
+  <java-symbol type="color" name="analog_clock_hand_hour_color" />
+  <java-symbol type="color" name="analog_clock_hand_minute_color" />
+
+  <!-- DeadPool Analog clock -->
+  <java-symbol type="drawable" name="deadpool_clock_dial" />
+  <java-symbol type="drawable" name="deadpool_clock_dial_ambient" />
+  <java-symbol type="drawable" name="deadpool_clock_hand_hour" />
+  <java-symbol type="drawable" name="deadpool_clock_hand_minute" />
 </resources>

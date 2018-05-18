@@ -4601,6 +4601,18 @@ public final class Settings {
         public static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
 
         /**
+         * Select which lockscreen date style to display
+         * @hide
+         */
+        public static final String LOCKSCREEN_DATE_SELECTION = "lockscreen_date_selection";
+
+        /**
+         * Select which lockscreen clock style to display
+         * @hide
+         */
+        public static final String LOCKSCREEN_CLOCK_SELECTION = "lockscreen_clock_selection";
+
+        /**
          * Hide lockscreen date
          * @hide
          */
@@ -4997,6 +5009,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(LOCKSCREEN_PIN_SCRAMBLE_LAYOUT);
             PRIVATE_SETTINGS.add(BATTERY_SAVER_SYSTEM_BAR_COLOR_ENABLE);
             PRIVATE_SETTINGS.add(STATUS_BAR_BRIGHTNESS_CONTROL);
+            PRIVATE_SETTINGS.add(LOCKSCREEN_DATE_SELECTION);
+            PRIVATE_SETTINGS.add(LOCKSCREEN_CLOCK_SELECTION);
             PRIVATE_SETTINGS.add(HIDE_LOCKSCREEN_DATE);
             PRIVATE_SETTINGS.add(HIDE_LOCKSCREEN_CLOCK);
             PRIVATE_SETTINGS.add(HIDE_LOCKSCREEN_ALARM);
