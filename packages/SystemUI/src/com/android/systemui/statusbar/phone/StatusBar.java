@@ -8028,4 +8028,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
     }
+
+    public void stopBrightnessControl() {
+        mHandler.removeCallbacks(mLongPressBrightnessChange);
+    }
 }

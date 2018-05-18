@@ -271,6 +271,7 @@ public class NotificationPanelView extends PanelView implements
         mDoubleTapGesture = new GestureDetector(mContext, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
+                mStatusBar.stopBrightnessControl();
                 OmniUtils.goToSleep(context);
                 return true;
             }
