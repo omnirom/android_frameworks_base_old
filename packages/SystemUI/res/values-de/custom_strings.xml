@@ -44,9 +44,11 @@
   <string name="qs_menu_item_rows_three">3</string>
   <string name="qs_menu_item_rows_four">4</string>
   <string name="qs_menu_item_scroll">Schnelles Scrollen</string>
+  <string name="qs_menu_item_qs_columns">Quickbar Spalten</string>
   <string name="tuner_quick_settings">Schnelleinstellungen</string>
   <string name="tuner_show_brightness_mode">Zeige Umschalter für Helligkeitsmodus</string>
   <string name="tuner_show_brightness_new">Zeige Helligkeitsregler</string>
+  <string name="tuner_brightness_position_bottom">Helligkeitsregler unten</string>
   <string name="lockscreen_default">Standard</string>
   <string name="lockscreen_hidden">Kein</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -120,8 +122,12 @@
   <string name="qs_show_clock">Uhr anzeigen</string>
   <string name="quick_settings_google_voice_assist_label">Sprachassistent</string>
   <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Synchronisierung</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Synchronisierung deaktiviert.</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Synchronisierung aktiviert.</string>
   <!-- AOD QS tile -->
   <!-- Recents Panel -->
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <string name="clear_recents">Alle Löschen</string>
 </resources>
