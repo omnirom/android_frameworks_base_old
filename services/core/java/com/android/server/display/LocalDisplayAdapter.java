@@ -184,7 +184,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         public LocalDisplayDevice(IBinder displayToken, int builtInDisplayId,
                 SurfaceControl.PhysicalDisplayInfo[] physicalDisplayInfos, int activeDisplayInfo,
                 int[] colorModes, int activeColorMode) {
-            super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + builtInDisplayId);
+            super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + builtInDisplayId,
+                  builtInDisplayId);
             mBuiltInDisplayId = builtInDisplayId;
             updatePhysicalDisplayInfoLocked(physicalDisplayInfos, activeDisplayInfo,
                     colorModes, activeColorMode);
@@ -411,7 +412,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.xDpi = phys.xDpi;
                     mInfo.yDpi = phys.yDpi;
                     mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
-                } else {
+                } else if (mBuiltInDisplayId >= SurfaceControl.BUILT_IN_DISPLAY_ID_HDMI &&
+                           mBuiltInDisplayId < SurfaceControl.BUILT_IN_DISPLAY_ID_EXT_MIN) {
                     mInfo.displayCutout = null;
                     mInfo.type = Display.TYPE_HDMI;
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
@@ -440,6 +442,26 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     if (res.getBoolean(com.android.internal.R.bool.config_localDisplaysPrivate)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE;
                     }
+                } else {
+                    mInfo.type = Display.TYPE_BUILT_IN;
+                    mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
+                    mInfo.name = getContext().getResources().getString(
+                            com.android.internal.R.string.display_manager_built_in_display_name);
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+
+                    if (SystemProperties.getBoolean(
+                                    "vendor.display.builtin_presentation", false)) {
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
+                    } else {
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE;
+                    }
+
+                    if (!SystemProperties.getBoolean(
+                                    "vendor.display.builtin_mirroring", false)) {
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
+                    }
+
+                    mInfo.setAssumedDensityForExternalDisplay(phys.width, phys.height);
                 }
             }
             return mInfo;
