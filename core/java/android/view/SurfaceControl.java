@@ -302,6 +302,15 @@ public class SurfaceControl implements Parcelable {
      */
     public static final int BUILT_IN_DISPLAY_ID_HDMI = 1;
 
+    /**
+     * Built-in physical display id: Additional Built-in display id range.
+     * HDMI display ID range will be HDMI ID to EXT_MIN ID.
+     * Built-in display ID range will bee EXT_MIN ID to EXT_MAX ID.
+     * Use only with {@link SurfaceControl#getBuiltInDisplay(int)}.
+     */
+    public static final int BUILT_IN_DISPLAY_ID_EXT_MIN = 5;
+    public static final int BUILT_IN_DISPLAY_ID_EXT_MAX = 7;
+
     /* Display power modes * /
 
     /**
