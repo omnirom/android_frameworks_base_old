@@ -4601,6 +4601,24 @@ public final class Settings {
         public static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
 
         /**
+         * Whether to display the wallpaper tint in recents
+         * @hide
+         */
+        public static final String WALLPAPER_RECENTS_TINT = "wallpaper_recents_tint";
+
+        /**
+         * Whether to display the wallpaper tint in the notification shade
+         * @hide
+         */
+        public static final String WALLPAPER_NOTIFICATION_SHADE_WALLPAPER_TINT = "wallpaper_notification_shade_wallpaper_tint";
+
+        /**
+         * Whether to display the wallpaper tint in the keyguard
+         * @hide
+         */
+        public static final String WALLPAPER_KEYGUARD_WALLPAPER_TINT = "wallpaper_keyguard_wallpaper_tint";
+
+        /**
          * Hide lockscreen date
          * @hide
          */
@@ -5021,6 +5039,9 @@ public final class Settings {
             PRIVATE_SETTINGS.add(LOCKSCREEN_PIN_SCRAMBLE_LAYOUT);
             PRIVATE_SETTINGS.add(BATTERY_SAVER_SYSTEM_BAR_COLOR_ENABLE);
             PRIVATE_SETTINGS.add(STATUS_BAR_BRIGHTNESS_CONTROL);
+            PRIVATE_SETTINGS.add(WALLPAPER_RECENTS_TINT);
+            PRIVATE_SETTINGS.add(WALLPAPER_NOTIFICATION_SHADE_WALLPAPER_TINT);
+            PRIVATE_SETTINGS.add(WALLPAPER_KEYGUARD_WALLPAPER_TINT);
             PRIVATE_SETTINGS.add(HIDE_LOCKSCREEN_DATE);
             PRIVATE_SETTINGS.add(HIDE_LOCKSCREEN_CLOCK);
             PRIVATE_SETTINGS.add(HIDE_LOCKSCREEN_ALARM);
