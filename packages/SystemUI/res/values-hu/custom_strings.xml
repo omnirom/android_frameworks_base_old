@@ -157,4 +157,9 @@
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
   <string name="clear_recents">Az összes előzmény bezárása</string>
+  <string name="quick_settings_roaming_title">Barangolásjelző</string>
+  <string name="quick_settings_roaming_summary">Jobb, ha tisztába van vele, hogy mit csinál, ha megérinti ezt</string>
+  <!-- Navigation bar dpad -->
+  <string name="accessibility_dpad_left">Kurzor balra</string>
+  <string name="accessibility_dpad_right">Kurzor jobbra</string>
 </resources>

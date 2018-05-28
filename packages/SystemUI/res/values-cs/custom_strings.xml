@@ -157,4 +157,9 @@
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
   <string name="clear_recents">Zavřít všechny nedávné</string>
+  <string name="quick_settings_roaming_title">Indikátor roamingu</string>
+  <string name="quick_settings_roaming_summary">Pokud se toho dotknete, pak doufám, že víte co děláte</string>
+  <!-- Navigation bar dpad -->
+  <string name="accessibility_dpad_left">Kurzor doleva</string>
+  <string name="accessibility_dpad_right">Kurzor doprava</string>
 </resources>

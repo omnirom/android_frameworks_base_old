@@ -47,9 +47,9 @@
   <string name="qs_menu_item_qs_columns">Hızlı çubuk sütunları</string>
   <string name="tuner_quick_settings">Hızlı ayarlar</string>
   <string name="tuner_show_brightness_mode">Parlaklık modu düğmesini göster</string>
-  <string name="tuner_show_brightness_new">Parlaklık kaydırıcısını göster</string>
-  <string name="tuner_show_brightness_side_buttons">Parlaklık kaydırıcısının yan düğmelerini göster</string>
-  <string name="tuner_brightness_position_bottom">Parlaklık kaydırıcısı altta</string>
+  <string name="tuner_show_brightness_new">Parlaklık kaydırağını göster</string>
+  <string name="tuner_show_brightness_side_buttons">Parlaklık kaydırağının yan düğmelerini göster</string>
+  <string name="tuner_brightness_position_bottom">Parlaklık kaydırağı altta</string>
   <string name="lockscreen_default">Varsayılan</string>
   <string name="lockscreen_hidden">Hiçbiri</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -157,4 +157,9 @@
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
   <string name="clear_recents">Hepsini temizle</string>
+  <string name="quick_settings_roaming_title">Dolaşım göstergesi</string>
+  <string name="quick_settings_roaming_summary">Şayet buna dokunursan inşallah ne yaptığını biliyorsundur</string>
+  <!-- Navigation bar dpad -->
+  <string name="accessibility_dpad_left">Soldaki işaretçi</string>
+  <string name="accessibility_dpad_right">Sağdaki işaretçi</string>
 </resources>

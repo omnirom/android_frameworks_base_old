@@ -48,6 +48,7 @@
   <string name="tuner_quick_settings">Schnelleinstellungen</string>
   <string name="tuner_show_brightness_mode">Zeige Umschalter für Helligkeitsmodus</string>
   <string name="tuner_show_brightness_new">Zeige Helligkeitsregler</string>
+  <string name="tuner_show_brightness_side_buttons">Zeige Helligkeitsregler-Seitenschaltflächen</string>
   <string name="tuner_brightness_position_bottom">Helligkeitsregler unten</string>
   <string name="lockscreen_default">Standard</string>
   <string name="lockscreen_hidden">Kein</string>
@@ -109,25 +110,50 @@
   <string name="quick_settings_screenrecord_mq_label">Bildschirmaufnahme MQ</string>
   <string name="quick_settings_screenrecord_hq_label">Bildschirmaufnahme HQ</string>
   <string name="preview">Vorschau</string>
+  <string name="keycode">Tastencode</string>
+  <string name="no_home_title">Keine \"Home\"-Taste gefunden</string>
+  <string name="no_home_message">Eine \"Home\"-Taste ist erforderlich, um dieses Gerät zu bedienen. Bitte fügen Sie eine \"Home\"-Taste vor dem Speichern hinzu.</string>
+  <string name="clipboard_description">Die Zwischenablage erlaubt es Elemente direkt in die Zwischenablage zu verschieben. Ebenso können vorhandene Elemente direkt aus der Zwischenablage gezogen werden.</string>
+  <string name="start">Start</string>
+  <string name="center">Mitte</string>
+  <string name="end">Ende</string>
+  <string name="space">Abstandhalter</string>
+  <string name="menu_ime">Menü / Tastatur-Umschalter</string>
+  <string name="select_button">Schaltfläche zum hinzufügen auswählen</string>
   <string name="save">Speichern</string>
+  <string name="reset">Zurücksetzen</string>
+  <string name="select_keycode">Tastaturauswahl-Schaltfläche</string>
   <string name="left">Links</string>
   <string name="right">Rechts</string>
+  <string name="navbar_editor_title">Editor</string>
+  <string name="navbar_editor_summary">Navigationsleiste konfigurieren</string>
   <!-- key disable QS Tile -->
   <string name="quick_settings_key_disable_label">Tasten deaktivieren</string>
   <string name="accessibility_quick_settings_key_disable_on">Tasten deaktiviert.</string>
   <!-- navbar disable QS Tile -->
+  <string name="quick_settings_navbar_disable_label">Navigationsleiste deaktivieren</string>
+  <string name="accessibility_quick_settings_navbar_disable_on">Navigationsleiste deaktiviert.</string>
+  <string name="accessibility_quick_settings_navbar_disable_off">Navigationsleiste aktiviert.</string>
   <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_data_connection_hspap">HSPA+</string>
   <string name="qs_show_battery">Akku anzeigen</string>
+  <string name="qs_show_carrier">Anbieter anzeigen</string>
   <string name="qs_show_clock">Uhr anzeigen</string>
+  <string name="qs_show_mini">Einfacher Modus</string>
+  <string name="qs_header">Kopfzeile</string>
+  <string name="quick_settings_google_assist_label">Assistent</string>
   <string name="quick_settings_google_voice_assist_label">Sprachassistent</string>
+  <string name="quick_settings_google_now_label">Google-Feed</string>
   <!-- Sync QS tile -->
   <string name="quick_settings_sync_label">Synchronisierung</string>
   <string name="accessibility_quick_settings_sync_changed_off">Synchronisierung deaktiviert.</string>
   <string name="accessibility_quick_settings_sync_changed_on">Synchronisierung aktiviert.</string>
   <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">AOD</string>
   <!-- Recents Panel -->
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
   <string name="clear_recents">Alle Löschen</string>
+  <string name="quick_settings_roaming_title">Roaming-Anzeige</string>
+  <!-- Navigation bar dpad -->
 </resources>

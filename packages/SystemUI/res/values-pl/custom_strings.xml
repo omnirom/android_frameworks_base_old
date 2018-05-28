@@ -28,7 +28,7 @@
   <string name="global_action_dnaa">Nie pokazuj ponownie</string>
   <string name="global_action_settings">Ustawienia</string>
   <string name="qs_menu_item_columns">Kolumny</string>
-  <string name="qs_menu_item_columns_landscape">Położenie kolumn</string>
+  <string name="qs_menu_item_columns_landscape">Kolumny poziomo</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
@@ -36,8 +36,8 @@
   <string name="qs_menu_item_columns_seven">7</string>
   <string name="qs_menu_item_columns_eight">8</string>
   <string name="qs_menu_item_columns_nine">9</string>
-  <string name="qs_menu_item_reset">Uruchom ponownie</string>
-  <string name="qs_menu_item_titles">Pokaż etykiety QS</string>
+  <string name="qs_menu_item_reset">Zresetuj</string>
+  <string name="qs_menu_item_titles">Pokaż etykiety</string>
   <string name="qs_menu_item_rows">Wiersze</string>
   <string name="qs_menu_item_rows_one">1</string>
   <string name="qs_menu_item_rows_two">2</string>
@@ -48,18 +48,68 @@
   <string name="tuner_quick_settings">Szybkie ustawienia</string>
   <string name="tuner_show_brightness_mode">Pokaż przełącznik automatycznej jasności</string>
   <string name="tuner_show_brightness_new">Pokaż suwak jasności ekranu</string>
+  <string name="tuner_show_brightness_side_buttons">Pokaż boczne przyciski suwaka jasności</string>
+  <string name="tuner_brightness_position_bottom">Suwak jasności na dole</string>
   <string name="lockscreen_default">Domyślnie</string>
+  <string name="lockscreen_hidden">Brak</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
+  <string name="custom_hint">Przesuń od ikony, aby uruchomić</string>
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Trwa nagrywanie ekranu</string>
+  <string name="screenrecord_notif_final_ticker">Nagrywanie zakończone</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Nagrywanie ekranu</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Zatrzymaj</string>
+  <string name="screenrecord_notif_completed">Nagrywanie zakończone</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Pokaż wskaźnik</string>
+  <string name="screenrecord_notif_pointer_off">Ukryj wskaźnik</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Nie można nagrać ekranu</string>
+  <string name="notification_channel_screenrecord">Nagrania ekranu</string>
+  <string name="screenrecord_hide_hint">Ukryj wskazówkę</string>
+  <string name="screenrecord_show_hint">Pokaż wskazówkę</string>
+  <string name="quick_settings_network_adb_enabled_label">Włączone</string>
+  <string name="quick_settings_network_adb_disabled_label">Wyłączone</string>
+  <string name="quick_settings_network_adb_label">ADB przez sieć</string>
+  <string name="quick_settings_network_adb_toast">Debugowanie USB jest wyłączone</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Trzyma na widoku dopóki nie odepniesz. Dotknij i przytrzymaj przycisk wstecz, aby odpiąć.</string>
+  <string name="omnijaws_service_error">Błąd</string>
+  <string name="omnijaws_service_unkown">Brak danych pogodowych</string>
+  <string name="omnijaws_service_error_long">Błąd ładowania danych pogody</string>
+  <string name="omnijaws_service_disabled">Usługa jest wyłączona</string>
+  <string name="omnijaws_detail_header">Pogoda</string>
+  <string name="omnijaws_label_default">Pogoda</string>
+  <string name="omnijaws_current_text">Teraz</string>
+  <string name="omnijaws_package_not_available">OmniJaws nie jest dostępny</string>
+  <string name="omnijaws_service_last_update">Ostatnia aktualizacja:</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">Obraz w Obrazie</string>
+  <string name="quick_settings_pip_tile_app_na">Aplikacja nie wspiera trybu Obraz w Obrazie</string>
+  <string name="quick_settings_screenshot_label">Zrzut ekranu</string>
+  <string name="quick_settings_region_screenshot_label">Częściowy zrzut ekranu</string>
+  <string name="quick_settings_caffeine_label">Kofeina</string>
+  <string name="accessibility_quick_settings_caffeine_off">Kofeina wył</string>
+  <string name="accessibility_quick_settings_caffeine_on">Kofeina wł</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Raportowanie lokalizacji: tryb oszczędzania energii.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Raportowanie lokalizacji: tylko czujniki.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Raportowanie lokalizacji: tryb wysokiej dokładności.</string>
   <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Podgląd powiadomień</string>
+  <string name="accessibility_quick_settings_heads_up_off">Podgląd powiadomień wyłączony.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Podgląd powiadomień dozwolony.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Podgląd powiadomień wyłączony.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Podgląd powiadomień włączony.</string>
   <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Nagrywanie ekranu</string>
+  <string name="quick_settings_screenrecord_lq_label">Nagrywanie ekranu LQ</string>
+  <string name="quick_settings_screenrecord_mq_label">Nagrywanie ekranu MQ</string>
+  <string name="quick_settings_screenrecord_hq_label">Nagrywanie ekranu HQ</string>
+  <string name="preview">Podgląd</string>
   <!-- key disable QS Tile -->
   <!-- navbar disable QS Tile -->
   <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -68,4 +118,5 @@
   <!-- Recents Panel -->
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <!-- Navigation bar dpad -->
 </resources>

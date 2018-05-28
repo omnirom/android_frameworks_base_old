@@ -157,4 +157,9 @@
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
   <string name="clear_recents">Chiudi tutte le app recenti</string>
+  <string name="quick_settings_roaming_title">Indicatore di roaming</string>
+  <string name="quick_settings_roaming_summary">Meglio che tu sappia cosa succederà se premerai questo</string>
+  <!-- Navigation bar dpad -->
+  <string name="accessibility_dpad_left">Cursore a sinistra</string>
+  <string name="accessibility_dpad_right">Cursore a destra</string>
 </resources>
