@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "899b9905_54197897",
+        "filename": "packages/SystemUI/src/com/android/keyguard/KeyguardStatusView.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-05-29T10:44:44Z",
+      "side": 1,
+      "message": "references all styles explicit here is ugly - this should be done like battery styles with a container that handles all of this",
+      "revId": "b87dd4049a7d0263c14c2eba92b5ee6ba413f51e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
