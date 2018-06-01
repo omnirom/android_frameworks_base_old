@@ -448,6 +448,8 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     // Persist property for LPP_PROFILE
     private final static String LPP_PROFILE = "persist.sys.gps.lpp";
 
+    // keeps track of the network connections and their types
+    private HashMap<Network, NetworkInfo> mNetworkToConnectionType = new HashMap<Network, NetworkInfo>(5);
 
     private final PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
@@ -881,13 +883,23 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             apnName = info.getExtraInfo();
         }
 
+        if (isConnected) {
+            mNetworkToConnectionType.put(network, info);
+        } else {
+            info = mNetworkToConnectionType.remove(network);
+            if (info != null) {
+                type = info.getType();
+            }
+        }
+
         if (DEBUG) {
             String message = String.format(
-                    "UpdateNetworkState, state=%s, connected=%s, info=%s, capabilities=%S",
-                    agpsDataConnStateAsString(),
+                    "UpdateNetworkState, type=%s, connected=%s, info=%s, capabilities=%S, network=%s",
+                    type,
                     isConnected,
                     info,
-                    mConnMgr.getNetworkCapabilities(network));
+                    mConnMgr.getNetworkCapabilities(network),
+                    network);
             Log.d(TAG, message);
         }
 
