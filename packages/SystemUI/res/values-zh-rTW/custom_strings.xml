@@ -157,5 +157,9 @@
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
   <string name="clear_recents">清除所有通知</string>
+  <string name="quick_settings_roaming_title">漫遊指示器</string>
+  <string name="quick_settings_roaming_summary">如果你想按這個，你最好知道你在幹麻</string>
   <!-- Navigation bar dpad -->
+  <string name="accessibility_dpad_left">游標向左</string>
+  <string name="accessibility_dpad_right">游標向右</string>
 </resources>

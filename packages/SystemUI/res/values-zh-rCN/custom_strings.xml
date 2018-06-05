@@ -28,7 +28,7 @@
   <string name="global_action_dnaa">不再提示</string>
   <string name="global_action_settings">设置</string>
   <string name="qs_menu_item_columns">列数</string>
-  <string name="qs_menu_item_columns_landscape">行数</string>
+  <string name="qs_menu_item_columns_landscape">列数（横向）</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
@@ -44,7 +44,7 @@
   <string name="qs_menu_item_rows_three">3</string>
   <string name="qs_menu_item_rows_four">4</string>
   <string name="qs_menu_item_scroll">滚动快捷工具栏</string>
-  <string name="qs_menu_item_qs_columns">Quickbar 列</string>
+  <string name="qs_menu_item_qs_columns">快速设置栏列数</string>
   <string name="tuner_quick_settings">快速设置</string>
   <string name="tuner_show_brightness_mode">显示亮度模式开关</string>
   <string name="tuner_show_brightness_new">亮度滑块</string>
@@ -90,16 +90,16 @@
   <string name="quick_settings_pip_tile_app_na">应用程序不支持画中画</string>
   <string name="quick_settings_screenshot_label">屏幕截图</string>
   <string name="quick_settings_region_screenshot_label">部分截图</string>
-  <string name="quick_settings_caffeine_label">Caffeine</string>
-  <string name="accessibility_quick_settings_caffeine_off">Caffeine关闭</string>
-  <string name="accessibility_quick_settings_caffeine_on">Caffeine开启</string>
+  <string name="quick_settings_caffeine_label">保持亮屏</string>
+  <string name="accessibility_quick_settings_caffeine_off">保持亮屏关闭</string>
+  <string name="accessibility_quick_settings_caffeine_on">保持亮屏开启</string>
   <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
   <string name="accessibility_quick_settings_location_battery_saving">位置信息：低耗电量。</string>
   <string name="accessibility_quick_settings_location_gps_only">位置信息：仅限设备。</string>
   <string name="accessibility_quick_settings_location_high_accuracy">位置信息：高精确度。</string>
   <!-- Heads Up QS Tile -->
-  <string name="quick_settings_heads_up_label">置顶通知</string>
+  <string name="quick_settings_heads_up_label">悬浮通知</string>
   <string name="accessibility_quick_settings_heads_up_off">顶部通知已禁用</string>
   <string name="accessibility_quick_settings_heads_up_on">顶部通知已启用</string>
   <string name="accessibility_quick_settings_heads_up_changed_off">顶部通知已禁用</string>

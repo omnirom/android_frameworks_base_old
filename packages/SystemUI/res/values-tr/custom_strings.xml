@@ -50,7 +50,7 @@
   <string name="tuner_show_brightness_new">Parlaklık kaydırağını göster</string>
   <string name="tuner_show_brightness_side_buttons">Parlaklık kaydırağının yan düğmelerini göster</string>
   <string name="tuner_brightness_position_bottom">Parlaklık kaydırağı altta</string>
-  <string name="lockscreen_default">Varsayılan</string>
+  <string name="lockscreen_default">Standart</string>
   <string name="lockscreen_hidden">Hiçbiri</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
   <string name="custom_hint">Başlatmak için simgeden kaydırın</string>
@@ -95,9 +95,9 @@
   <string name="accessibility_quick_settings_caffeine_on">Caffeine açık</string>
   <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
-  <string name="accessibility_quick_settings_location_battery_saving">Konum bildirimi: pil tasarrufu modu.</string>
-  <string name="accessibility_quick_settings_location_gps_only">Konum bildirimi: sadece sensörler modu.</string>
-  <string name="accessibility_quick_settings_location_high_accuracy">Konum bildirimi: yüksek hassâsiyyet modu.</string>
+  <string name="accessibility_quick_settings_location_battery_saving">Yer bildirimi: pil tasarrufu modu.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Yer bildirimi: sadece sensörler modu.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Yer bildirimi: yüksek hassâsiyyet modu.</string>
   <!-- Heads Up QS Tile -->
   <string name="quick_settings_heads_up_label">Ekran üstü bildirimleri</string>
   <string name="accessibility_quick_settings_heads_up_off">Ekran üstü bildirimleri devre dışı bırakıldı.</string>
@@ -109,7 +109,7 @@
   <string name="quick_settings_screenrecord_lq_label">Düşük kalitede ekran kaydı</string>
   <string name="quick_settings_screenrecord_mq_label">Vasat kalitede ekran kaydı</string>
   <string name="quick_settings_screenrecord_hq_label">Yüksek kalitede ekran kaydı</string>
-  <string name="preview">Ön izleme</string>
+  <string name="preview">İlk seyir</string>
   <string name="keycode">Tuş kodu</string>
   <string name="no_home_title">Ana ekran düğmesi bulunmadı</string>
   <string name="no_home_message">Bu cihazda gezinmeniz için bir ana ekran düğmesine ihtiyacınız var. Kaydetmeden evvel lütfen bir ana ekran düğmesi ilâve edin.</string>

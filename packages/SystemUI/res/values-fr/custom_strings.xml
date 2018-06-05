@@ -152,9 +152,14 @@
   <string name="accessibility_quick_settings_sync_changed_off">La synchronisation a été désactivée.</string>
   <string name="accessibility_quick_settings_sync_changed_on">La synchronisation est activée.</string>
   <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">AOD</string>
   <!-- Recents Panel -->
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
   <string name="clear_recents">Fermer les notifications récentes</string>
+  <string name="quick_settings_roaming_title">Indicateur d\'itinérance</string>
+  <string name="quick_settings_roaming_summary">J\'espère que vous savez ce que vous faites si vous touchez ceci</string>
   <!-- Navigation bar dpad -->
+  <string name="accessibility_dpad_left">Curseur à gauche</string>
+  <string name="accessibility_dpad_right">Curseur à droite</string>
 </resources>
