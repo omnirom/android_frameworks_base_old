@@ -52,6 +52,9 @@ import com.android.systemui.omni.BatteryViewManager;
 import com.android.systemui.omni.CurrentWeatherView;
 import com.android.systemui.statusbar.policy.DateView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 public class KeyguardStatusView extends GridLayout {
@@ -173,11 +176,24 @@ public class KeyguardStatusView extends GridLayout {
         mOwnerInfo = findViewById(R.id.owner_info);
         mKeyguardStatusArea = findViewById(R.id.keyguard_status_area);
         mBatteryContainer = (LinearLayout) findViewById(R.id.battery_container);
-        mBatteryViewManager = new BatteryViewManager(mContext, mBatteryContainer,
-                BatteryViewManager.BATTERY_LOCATION_AMBIENT);
+        if (mBatteryContainer != null) {
+            mBatteryViewManager = new BatteryViewManager(mContext, mBatteryContainer,
+                    BatteryViewManager.BATTERY_LOCATION_AMBIENT);
+        }
         mWeatherView = (CurrentWeatherView) findViewById(R.id.weather_container);
 
-        mVisibleInDoze = new View[]{mBatteryContainer, mClockView, mKeyguardStatusArea, mWeatherView};
+        List<View> visibleInDoze = new ArrayList<>();
+        if (mWeatherView != null) {
+            visibleInDoze.add(mWeatherView);
+        }
+        if (mBatteryContainer != null) {
+            visibleInDoze.add(mBatteryContainer);
+        }
+        visibleInDoze.add(mClockView);
+        visibleInDoze.add(mKeyguardStatusArea);
+
+        mVisibleInDoze = visibleInDoze.toArray(new View[visibleInDoze.size()]);
+
         mTextColor = mClockView.getCurrentTextColor();
         mDateTextColor = mDateView.getCurrentTextColor();
         mAlarmTextColor = mAlarmStatusView.getCurrentTextColor();
@@ -246,7 +262,11 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     public int getClockBottom() {
-        return mBatteryContainer.getBottom();
+        if (mBatteryContainer != null) {
+            return mBatteryContainer.getBottom();
+        } else {
+            return mKeyguardStatusArea.getBottom();
+        }
     }
 
     public float getClockTextSize() {
@@ -328,13 +348,15 @@ public class KeyguardStatusView extends GridLayout {
         mDateView.setVisibility(showDate ? View.VISIBLE : View.GONE);
         mAlarmStatusView.setVisibility(showAlarm && nextAlarm != null ? View.VISIBLE : View.GONE);
 
-        if (showWeather && mWeatherView.getVisibility() == View.GONE) {
-            mWeatherView.setVisibility(View.VISIBLE);
-            mWeatherView.enableUpdates();
-        }
-        if (!showWeather && mWeatherView.getVisibility() == View.VISIBLE) {
-            mWeatherView.setVisibility(View.GONE);
-            mWeatherView.disableUpdates();
+        if (mWeatherView != null) {
+            if (showWeather && mWeatherView.getVisibility() == View.GONE) {
+                mWeatherView.setVisibility(View.VISIBLE);
+                mWeatherView.enableUpdates();
+            }
+            if (!showWeather && mWeatherView.getVisibility() == View.VISIBLE) {
+                mWeatherView.setVisibility(View.GONE);
+                mWeatherView.disableUpdates();
+            }
         }
     }
 
@@ -398,13 +420,17 @@ public class KeyguardStatusView extends GridLayout {
         }
 
         updateDozeVisibleViews();
-        mBatteryViewManager.setBatteryVisibility(dark);
+        if (mBatteryViewManager != null) {
+            mBatteryViewManager.setBatteryVisibility(dark);
+        }
         mClockView.setTextColor(ColorUtils.blendARGB(mTextColor, Color.WHITE, darkAmount));
         mDateView.setTextColor(ColorUtils.blendARGB(mDateTextColor, Color.WHITE, darkAmount));
         int blendedAlarmColor = ColorUtils.blendARGB(mAlarmTextColor, Color.WHITE, darkAmount);
         mAlarmStatusView.setTextColor(blendedAlarmColor);
         mAlarmStatusView.setCompoundDrawableTintList(ColorStateList.valueOf(blendedAlarmColor));
-        mWeatherView.blendARGB(darkAmount);
+        if (mWeatherView != null) {
+            mWeatherView.blendARGB(darkAmount);
+        }
     }
 
     public void setPulsing(boolean pulsing) {
