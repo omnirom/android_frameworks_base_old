@@ -328,13 +328,15 @@ public class KeyguardStatusView extends GridLayout {
         mDateView.setVisibility(showDate ? View.VISIBLE : View.GONE);
         mAlarmStatusView.setVisibility(showAlarm && nextAlarm != null ? View.VISIBLE : View.GONE);
 
-        if (showWeather && mWeatherView.getVisibility() == View.GONE) {
-            mWeatherView.setVisibility(View.VISIBLE);
-            mWeatherView.enableUpdates();
-        }
-        if (!showWeather && mWeatherView.getVisibility() == View.VISIBLE) {
-            mWeatherView.setVisibility(View.GONE);
-            mWeatherView.disableUpdates();
+        if (mWeatherView != null) {
+            if (showWeather && mWeatherView.getVisibility() == View.GONE) {
+                mWeatherView.setVisibility(View.VISIBLE);
+                mWeatherView.enableUpdates();
+            }
+            if (!showWeather && mWeatherView.getVisibility() == View.VISIBLE) {
+                mWeatherView.setVisibility(View.GONE);
+                mWeatherView.disableUpdates();
+            }
         }
     }
 
