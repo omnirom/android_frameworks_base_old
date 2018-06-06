@@ -88,6 +88,7 @@ public class KeyguardStatusView extends GridLayout {
     private BatteryViewManager mBatteryViewManager;
     private LinearLayout mBatteryContainer;
     private CurrentWeatherView mWeatherView;
+    private View mClockViewContainer;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -181,6 +182,7 @@ public class KeyguardStatusView extends GridLayout {
                     BatteryViewManager.BATTERY_LOCATION_AMBIENT);
         }
         mWeatherView = (CurrentWeatherView) findViewById(R.id.weather_container);
+        mClockViewContainer = findViewById(R.id.clock_view_container);
 
         List<View> visibleInDoze = new ArrayList<>();
         if (mWeatherView != null) {
@@ -188,6 +190,9 @@ public class KeyguardStatusView extends GridLayout {
         }
         if (mBatteryContainer != null) {
             visibleInDoze.add(mBatteryContainer);
+        }
+        if (mClockViewContainer != null) {
+            visibleInDoze.add(mClockViewContainer);
         }
         visibleInDoze.add(mClockView);
         visibleInDoze.add(mKeyguardStatusArea);
