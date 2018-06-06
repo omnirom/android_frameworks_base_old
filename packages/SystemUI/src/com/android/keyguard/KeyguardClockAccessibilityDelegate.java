@@ -26,7 +26,7 @@ import android.widget.TextView;
 /**
  * Replaces fancy colons with regular colons. Only works on TextViews.
  */
-class KeyguardClockAccessibilityDelegate extends View.AccessibilityDelegate {
+public class KeyguardClockAccessibilityDelegate extends View.AccessibilityDelegate {
     private final String mFancyColon;
 
     public KeyguardClockAccessibilityDelegate(Context context) {
