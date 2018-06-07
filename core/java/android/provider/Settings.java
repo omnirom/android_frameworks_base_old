@@ -4670,6 +4670,11 @@ public final class Settings {
         public static final String HEADS_UP_TIMEOUT = "heads_up_timeout";
 
         /**
+         * @hide
+         */
+        public static final String LOCKSCREEN_CLOCK_STYLE = "lockscreen_clock_style";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -5033,6 +5038,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(NAVIGATION_BAR_MENU_ARROW_KEYS);
             PRIVATE_SETTINGS.add(HEADS_UP_NOTIFICATION_SNOOZE);
             PRIVATE_SETTINGS.add(HEADS_UP_TIMEOUT);
+            PRIVATE_SETTINGS.add(LOCKSCREEN_CLOCK_STYLE);
         }
 
         /**
