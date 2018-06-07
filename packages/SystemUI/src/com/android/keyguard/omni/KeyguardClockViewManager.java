@@ -17,7 +17,11 @@
 package com.android.keyguard.omni;
 
 import android.app.AlarmManager;
+import android.database.ContentObserver;
 import android.content.Context;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,17 +37,35 @@ public class KeyguardClockViewManager {
     private static final boolean DEBUG = true;
     private LinearLayout mContainerView;
     private Context mContext;
+    private Handler mHandler;
     private int mClockViewStyle;
     private List<IKeyguardClockView> mClockStyleList = new ArrayList<IKeyguardClockView>();
     private IKeyguardClockView mCurrentClockView;
 
+    private ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+    };
+
     public KeyguardClockViewManager(Context context, LinearLayout mContainer) {
         mContext = context;
         mContainerView = mContainer;
+        mHandler = new Handler();
         IKeyguardClockView view = (IKeyguardClockView) LayoutInflater.from(mContext).inflate(
                 R.layout.keyguard_digital_clock_view, mContainerView, false);
         mClockStyleList.add(view);
-        switchClockViewStyle(0);
+        
+        view = (IKeyguardClockView) LayoutInflater.from(mContext).inflate(
+                R.layout.keyguard_analog_clock_view, mContainerView, false);
+        mClockStyleList.add(view);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.LOCKSCREEN_CLOCK_STYLE), false,
+                mSettingsObserver, UserHandle.USER_ALL);
+
+        update();
     }
 
     private void switchClockViewStyle(int style) {
@@ -59,6 +81,12 @@ public class KeyguardClockViewManager {
 
         mCurrentClockView = mClockStyleList.get(mClockViewStyle);
         mContainerView.addView((View) mCurrentClockView);
+    }
+
+    public void update() {
+        final int style = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.LOCKSCREEN_CLOCK_STYLE, 0, UserHandle.USER_CURRENT);
+        switchClockViewStyle(style);
     }
 
     public void updateDozeVisibleViews() {
