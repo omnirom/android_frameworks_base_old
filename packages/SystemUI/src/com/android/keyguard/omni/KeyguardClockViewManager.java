@@ -43,7 +43,12 @@ public class KeyguardClockViewManager {
         IKeyguardClockView view = (IKeyguardClockView) LayoutInflater.from(mContext).inflate(
                 R.layout.keyguard_digital_clock_view, mContainerView, false);
         mClockStyleList.add(view);
-        switchClockViewStyle(0);
+        
+        view = (IKeyguardClockView) LayoutInflater.from(mContext).inflate(
+                R.layout.keyguard_analog_clock_view, mContainerView, false);
+        mClockStyleList.add(view);
+
+        switchClockViewStyle(1);
     }
 
     private void switchClockViewStyle(int style) {
