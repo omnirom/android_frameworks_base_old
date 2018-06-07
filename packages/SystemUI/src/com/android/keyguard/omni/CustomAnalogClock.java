@@ -159,6 +159,16 @@ public class CustomAnalogClock extends View {
     }
 
     @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+
+        if (isVisible) {
+            onTimeChanged();
+            invalidate();
+        }
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
