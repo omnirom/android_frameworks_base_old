@@ -17,30 +17,20 @@
 */
 -->
 
-<com.android.keyguard.omni.DigitialClockView
+<com.android.keyguard.omni.OmniAnalogClockView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <TextClock
+    <com.android.keyguard.omni.OmniAnalogClock
         android:id="@+id/clock_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_gravity="center_horizontal"
         android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
-        android:textColor="?attr/wallpaperTextColor"
-        android:singleLine="true"
-        style="@style/widget_big_thin"
-        android:format12Hour="@string/keyguard_widget_12_hours_format"
-        android:format24Hour="@string/keyguard_widget_24_hours_format"
-        android:layout_marginBottom="@dimen/bottom_text_spacing_digital" />
+        android:paddingBottom="@dimen/bottom_text_spacing_analog" />
 
-    <include layout="@layout/keyguard_status_area"
-        android:id="@+id/keyguard_status_area"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-</com.android.keyguard.omni.DigitialClockView>
+</com.android.keyguard.omni.OmniAnalogClockView>

@@ -54,34 +54,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class DigitialClockView extends LinearLayout implements IKeyguardClockView  {
-    private static final String TAG = "DigitialClockView";
+public class OmniAnalogClockView extends LinearLayout implements IKeyguardClockView  {
+    private static final String TAG = "OmniAnalogClockView";
 
-    private TextView mAlarmStatusView;
-    private DateView mDateView;
-    private TextClock mClockView;
-    private View mKeyguardStatusArea;
-    private int mTextColor;
-    private int mDateTextColor;
-    private int mAlarmTextColor;
+    private OmniAnalogClock mClockView;
     private View[] mVisibleInDoze;
     private boolean mForcedMediaDoze;
     private final AlarmManager mAlarmManager;
     private float mDarkAmount = 0;
     private boolean mPulsing;
 
-    private static final String FONT_FAMILY_LIGHT = "sans-serif-light";
-    private static final String FONT_FAMILY_MEDIUM = "sans-serif-medium";
-
-    public DigitialClockView(Context context) {
+    public OmniAnalogClockView(Context context) {
         this(context, null, 0);
     }
 
-    public DigitialClockView(Context context, AttributeSet attrs) {
+    public OmniAnalogClockView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public DigitialClockView(Context context, AttributeSet attrs, int defStyle) {
+    public OmniAnalogClockView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
@@ -89,10 +80,7 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mAlarmStatusView = findViewById(R.id.alarm_status);
-        mDateView = findViewById(R.id.date_view);
         mClockView = findViewById(R.id.clock_view);
-        mClockView.setShowCurrentUserTime(true);
         if (KeyguardClockAccessibilityDelegate.isNeeded(mContext)) {
             mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
         }
@@ -100,14 +88,7 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
 
         List<View> visibleInDoze = new ArrayList<>();
         visibleInDoze.add(mClockView);
-        visibleInDoze.add(mKeyguardStatusArea);
         mVisibleInDoze = visibleInDoze.toArray(new View[visibleInDoze.size()]);
-
-        mTextColor = mClockView.getCurrentTextColor();
-        mDateTextColor = mDateView.getCurrentTextColor();
-        mAlarmTextColor = mAlarmStatusView.getCurrentTextColor();
-
-        mClockView.setElegantTextHeight(false);
     }
 
     @Override
@@ -121,19 +102,16 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
             }
         }
     }
-    
+
     @Override
     public void setDark(float darkAmount) {
         if (mDarkAmount == darkAmount) {
             return;
         }
         mDarkAmount = darkAmount;
+        boolean dark = darkAmount == 1;
 
-        mClockView.setTextColor(ColorUtils.blendARGB(mTextColor, Color.WHITE, darkAmount));
-        mDateView.setTextColor(ColorUtils.blendARGB(mDateTextColor, Color.WHITE, darkAmount));
-        int blendedAlarmColor = ColorUtils.blendARGB(mAlarmTextColor, Color.WHITE, darkAmount);
-        mAlarmStatusView.setTextColor(blendedAlarmColor);
-        mAlarmStatusView.setCompoundDrawableTintList(ColorStateList.valueOf(blendedAlarmColor));
+        mClockView.setDark(dark);
     }
 
     @Override
@@ -150,39 +128,32 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
                 Settings.System.HIDE_LOCKSCREEN_DATE, 0, UserHandle.USER_CURRENT) == 0;
 
         mClockView.setVisibility(showClock ? View.VISIBLE : View.GONE);
-        mDateView.setVisibility(showDate ? View.VISIBLE : View.GONE);
-        mAlarmStatusView.setVisibility(showAlarm && nextAlarm != null ? View.VISIBLE : View.GONE);
+        mClockView.setShowAlarm(showAlarm);
+        mClockView.setShowDate(showDate);
     }
 
     @Override
     public void refreshAlarmStatus(AlarmManager.AlarmClockInfo nextAlarm) {
         if (nextAlarm != null) {
             String alarm = KeyguardStatusView.formatNextAlarm(mContext, nextAlarm);
-            mAlarmStatusView.setText(alarm);
-            mAlarmStatusView.setContentDescription(
-                    getResources().getString(R.string.keyguard_accessibility_next_alarm, alarm));
-            mAlarmStatusView.setVisibility(View.VISIBLE);
+            mClockView.setAlarmText(alarm);
         } else {
-            mAlarmStatusView.setVisibility(View.GONE);
+            mClockView.setAlarmText("");
         }
     }
 
     @Override
     public int getClockBottom() {
-        return mKeyguardStatusArea.getBottom();
+        return mClockView.getBottom();
     }
 
     @Override
     public float getClockTextSize() {
-        return mClockView.getTextSize();
+        return mClockView.getHeight();
     }
 
     @Override
     public void refreshTime() {
-        mDateView.setDatePattern(Patterns.dateViewSkel);
-
-        mClockView.setFormat12Hour(Patterns.clockView12);
-        mClockView.setFormat24Hour(Patterns.clockView24);
     }
 
     @Override
@@ -199,20 +170,11 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        Typeface tfLight = Typeface.create(FONT_FAMILY_LIGHT, Typeface.NORMAL);
-        Typeface tfMedium = Typeface.create(FONT_FAMILY_MEDIUM, Typeface.NORMAL);
-        mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                getResources().getDimensionPixelSize(R.dimen.widget_big_font_size));
-        mClockView.setTypeface(tfLight);
         // Some layouts like burmese have a different margin for the clock
         MarginLayoutParams layoutParams = (MarginLayoutParams) mClockView.getLayoutParams();
         layoutParams.bottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.bottom_text_spacing_digital);
         mClockView.setLayoutParams(layoutParams);
-        mDateView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
-        mDateView.setTypeface(tfMedium);
-        mAlarmStatusView.setTypeface(tfMedium);
     }
 
     @Override
@@ -228,7 +190,6 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
 
     @Override
     public void setEnableMarqueeImpl(boolean enabled) {
-        if (mAlarmStatusView != null) mAlarmStatusView.setSelected(enabled);
     }
 
     @Override
