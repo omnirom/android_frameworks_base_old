@@ -20,7 +20,7 @@
 <com.android.keyguard.omni.AnalogClockView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
@@ -31,7 +31,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="@dimen/bottom_text_spacing_analog" />
+        android:paddingBottom="@dimen/bottom_text_spacing_analog" />
 
     <include layout="@layout/keyguard_status_area"
         android:id="@+id/keyguard_status_area"
