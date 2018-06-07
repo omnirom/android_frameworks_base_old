@@ -159,6 +159,15 @@ public class CustomAnalogClock extends View {
     }
 
     @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+
+        if (isVisible) {
+            refreshTime();
+        }
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
@@ -283,9 +292,7 @@ public class CustomAnalogClock extends View {
                 mCalendar = new Time(TimeZone.getTimeZone(tz).getID());
             }
 
-            onTimeChanged();
-
-            invalidate();
+            refreshTime();
         }
     };
 
@@ -294,5 +301,10 @@ public class CustomAnalogClock extends View {
         String contentDescription = DateUtils.formatDateTime(mContext,
                 time.toMillis(false), flags);
         setContentDescription(contentDescription);
+    }
+
+    public void refreshTime() {
+        onTimeChanged();
+        invalidate();
     }
 }
