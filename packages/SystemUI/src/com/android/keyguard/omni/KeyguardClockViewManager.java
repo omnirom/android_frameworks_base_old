@@ -34,7 +34,6 @@ import java.util.ArrayList;
 
 public class KeyguardClockViewManager {
     private static final String TAG = "KeyguardClockViewManager";
-    private static final boolean DEBUG = true;
     private LinearLayout mContainerView;
     private Context mContext;
     private Handler mHandler;
@@ -59,6 +58,10 @@ public class KeyguardClockViewManager {
         
         view = (IKeyguardClockView) LayoutInflater.from(mContext).inflate(
                 R.layout.keyguard_analog_clock_view, mContainerView, false);
+        mClockStyleList.add(view);
+
+        view = (IKeyguardClockView) LayoutInflater.from(mContext).inflate(
+                R.layout.keyguard_omni_clock_view, mContainerView, false);
         mClockStyleList.add(view);
 
         mContext.getContentResolver().registerContentObserver(

@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.Locale;
 
 public class DigitialClockView extends LinearLayout implements IKeyguardClockView  {
-    private static final boolean DEBUG = true;
     private static final String TAG = "DigitialClockView";
 
     private TextView mAlarmStatusView;
@@ -229,7 +228,6 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
 
     @Override
     public void setEnableMarqueeImpl(boolean enabled) {
-        if (DEBUG) Log.v(TAG, (enabled ? "Enable" : "Disable") + " transport text marquee");
         if (mAlarmStatusView != null) mAlarmStatusView.setSelected(enabled);
     }
 
