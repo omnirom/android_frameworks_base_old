@@ -199,7 +199,13 @@ public class KeyguardStatusView extends GridLayout {
         if (mOwnerInfo != null) {
             mOwnerInfo.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
-           mOwnerInfo.setTypeface(tfMedium);
+            mOwnerInfo.setTypeface(tfMedium);
+        }
+        if (mWeatherView != null) {
+            mWeatherView.onDensityOrFontScaleChanged();
+        }
+        if (mBatteryViewManager != null) {
+            mBatteryViewManager.onDensityOrFontScaleChanged();
         }
     }
 

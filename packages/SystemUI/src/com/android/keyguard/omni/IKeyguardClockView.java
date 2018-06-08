@@ -33,4 +33,5 @@ public interface IKeyguardClockView  {
     void refresh();
     void setEnableMarqueeImpl(boolean enabled);
     void setPulsing(boolean pulsing);
+    void onDensityOrFontScaleChanged();
 }
