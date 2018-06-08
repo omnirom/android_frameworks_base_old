@@ -170,10 +170,17 @@ public class OmniAnalogClockView extends LinearLayout implements IKeyguardClockV
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        // Some layouts like burmese have a different margin for the clock
+        onDensityOrFontScaleChanged();
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        mClockView.onDensityOrFontScaleChanged();
         MarginLayoutParams layoutParams = (MarginLayoutParams) mClockView.getLayoutParams();
         layoutParams.bottomMargin = getResources().getDimensionPixelSize(
-                R.dimen.bottom_text_spacing_digital);
+                R.dimen.bottom_text_spacing_analog);
+        layoutParams.width = getResources().getDimensionPixelSize(R.dimen.analog_clock_size);
+        layoutParams.height = getResources().getDimensionPixelSize(R.dimen.analog_clock_size);
         mClockView.setLayoutParams(layoutParams);
     }
 

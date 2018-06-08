@@ -67,6 +67,7 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
     private TextView mRightText;
     private int mTextColor;
     private float mDarkAmount;
+    private boolean mUpdatesEnabled;
 
     public CurrentWeatherView(Context context) {
         this(context, null);
@@ -81,6 +82,9 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
     }
 
     public void enableUpdates() {
+        if (mUpdatesEnabled) {
+            return;
+        }
         if (DEBUG) Log.d(TAG, "enableUpdates");
         mWeatherClient = new OmniJawsClient(getContext(), false);
         if (mWeatherClient.isOmniJawsEnabled()) {
@@ -88,14 +92,19 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
             mWeatherClient.addSettingsObserver();
             mWeatherClient.addObserver(this);
             queryAndUpdateWeather();
+            mUpdatesEnabled = true;
         }
     }
 
     public void disableUpdates() {
+        if (!mUpdatesEnabled) {
+            return;
+        }
         if (DEBUG) Log.d(TAG, "disableUpdates");
         if (mWeatherClient != null) {
             mWeatherClient.removeObserver(this);
             mWeatherClient.cleanupObserver();
+            mUpdatesEnabled = false;
         }
     }
 
@@ -188,5 +197,16 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
         } else {
             mCurrentImage.setImageTintList((d instanceof VectorDrawable) ? ColorStateList.valueOf(getTintColor()) : null);
         }
+    }
+
+    public void onDensityOrFontScaleChanged() {
+        mLeftText.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
+        mRightText.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
+        mCurrentImage.getLayoutParams().height =
+                getResources().getDimensionPixelSize(R.dimen.current_weather_image_size);
+        mCurrentImage.getLayoutParams().width =
+                getResources().getDimensionPixelSize(R.dimen.current_weather_image_size);
     }
 }

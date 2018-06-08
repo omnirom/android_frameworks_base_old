@@ -26,7 +26,7 @@
     <LinearLayout
         android:id="@+id/current"
         android:layout_width="wrap_content"
-        android:layout_height="42dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
         android:orientation="horizontal"
@@ -42,12 +42,13 @@
             android:letterSpacing="0.05"
             android:gravity="center"
             android:ellipsize="end"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:paddingEnd="8dp"/>
 
         <ImageView
             android:id="@+id/current_image"
-            android:layout_width="56dp"
-            android:layout_height="42dp"
+            android:layout_width="@dimen/current_weather_image_size"
+            android:layout_height="@dimen/current_weather_image_size"
             android:scaleType="centerInside"/>
 
         <TextView
@@ -58,7 +59,8 @@
             style="@style/widget_label"
             android:letterSpacing="0.05"
             android:gravity="center"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:paddingStart="8dp" />
     </LinearLayout>
 
 </com.android.systemui.omni.CurrentWeatherView>

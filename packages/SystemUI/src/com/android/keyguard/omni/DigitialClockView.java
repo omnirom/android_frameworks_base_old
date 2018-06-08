@@ -199,12 +199,16 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        onDensityOrFontScaleChanged();
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
         Typeface tfLight = Typeface.create(FONT_FAMILY_LIGHT, Typeface.NORMAL);
         Typeface tfMedium = Typeface.create(FONT_FAMILY_MEDIUM, Typeface.NORMAL);
         mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(R.dimen.widget_big_font_size));
         mClockView.setTypeface(tfLight);
-        // Some layouts like burmese have a different margin for the clock
         MarginLayoutParams layoutParams = (MarginLayoutParams) mClockView.getLayoutParams();
         layoutParams.bottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.bottom_text_spacing_digital);
@@ -212,7 +216,11 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
         mDateView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
         mDateView.setTypeface(tfMedium);
+        mAlarmStatusView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
         mAlarmStatusView.setTypeface(tfMedium);
+        mAlarmStatusView.setCompoundDrawablesWithIntrinsicBounds(
+                getResources().getDrawable(R.drawable.ic_access_alarms_big), null, null, null);
     }
 
     @Override
