@@ -189,4 +189,15 @@ public class CurrentWeatherView extends FrameLayout implements OmniJawsClient.Om
             mCurrentImage.setImageTintList((d instanceof VectorDrawable) ? ColorStateList.valueOf(getTintColor()) : null);
         }
     }
+
+    public void onDensityOrFontScaleChanged() {
+        mLeftText.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
+        mRightText.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
+        mCurrentImage.getLayoutParams().height =
+                getResources().getDimensionPixelSize(R.dimen.current_weather_image_size);
+        mCurrentImage.getLayoutParams().width =
+                getResources().getDimensionPixelSize(R.dimen.current_weather_image_size);
+    }
 }
