@@ -26,8 +26,8 @@
 
     <com.android.keyguard.omni.OmniAnalogClock
         android:id="@+id/clock_view"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="@dimen/analog_clock_size"
+        android:layout_height="@dimen/analog_clock_size"
         android:layout_gravity="center_horizontal"
         android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"

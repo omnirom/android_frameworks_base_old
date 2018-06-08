@@ -321,5 +321,19 @@ public class OmniAnalogClock extends View {
         onTimeChanged();
         invalidate();
     }
+
+    public void onDensityOrFontScaleChanged() {
+        Resources r = mContext.getResources();
+        mTextSizePixels = r.getDimension(R.dimen.omni_clock_font_size);
+        mTextPaint.setTextSize(mTextSizePixels);
+
+        mCircleStrokeWidth = r.getDimension(R.dimen.omni_clock_circle_size);
+        mCirclePaint.setStrokeWidth(mCircleStrokeWidth);
+        mRemaingCirclePaint.setStrokeWidth(mCircleStrokeWidth);
+        mAmbientPaint.setStrokeWidth(r.getDimension(R.dimen.omni_clock_circle_ambient_size));
+        mHourPaint.setStrokeWidth(r.getDimensionPixelSize(R.dimen.omni_clock_hour_hand_width));
+        mMinutePaint.setStrokeWidth(r.getDimensionPixelSize(R.dimen.omni_clock_minute_hand_width));
+        mHandEndLength = r.getDimensionPixelSize(R.dimen.omni_clock_hand_end_length);
+    }
 }
 

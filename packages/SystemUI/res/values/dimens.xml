@@ -392,11 +392,11 @@
          max value is used when no notifications are displaying, and the min value is when the
          highest possible number of notifications are showing. -->
     <fraction name="keyguard_clock_y_fraction_max">32.5%</fraction>
-    <fraction name="keyguard_clock_y_fraction_min">19.8%</fraction>
+    <fraction name="keyguard_clock_y_fraction_min">23.0%</fraction>
 
     <!-- The margin between the clock and the notifications on Keyguard. See
          keyguard_clock_height_fraction_* for the difference between min and max.-->
-    <dimen name="keyguard_clock_notifications_margin_min">30dp</dimen>
+    <dimen name="keyguard_clock_notifications_margin_min">5dp</dimen>
     <dimen name="keyguard_clock_notifications_margin_max">42dp</dimen>
     <dimen name="heads_up_scrim_height">250dp</dimen>
 
@@ -551,7 +551,7 @@
     <dimen name="keyguard_affordance_icon_height">24dp</dimen>
     <dimen name="keyguard_affordance_icon_width">24dp</dimen>
 
-    <dimen name="keyguard_indication_margin_bottom">65dp</dimen>
+    <dimen name="keyguard_indication_margin_bottom">60dp</dimen>
 
     <!-- The text size for battery level -->
     <dimen name="battery_level_text_size">12sp</dimen>
