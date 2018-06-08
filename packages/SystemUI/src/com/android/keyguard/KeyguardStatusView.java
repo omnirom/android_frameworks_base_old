@@ -96,6 +96,7 @@ public class KeyguardStatusView extends GridLayout {
         public void onKeyguardVisibilityChanged(boolean showing) {
             if (showing) {
                 if (DEBUG) Slog.v(TAG, "refresh statusview showing:" + showing);
+                updateSettings();
                 refresh();
                 updateOwnerInfo();
             }
@@ -199,7 +200,13 @@ public class KeyguardStatusView extends GridLayout {
         if (mOwnerInfo != null) {
             mOwnerInfo.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
-           mOwnerInfo.setTypeface(tfMedium);
+            mOwnerInfo.setTypeface(tfMedium);
+        }
+        if (mWeatherView != null) {
+            mWeatherView.onDensityOrFontScaleChanged();
+        }
+        if (mBatteryViewManager != null) {
+            mBatteryViewManager.onDensityOrFontScaleChanged();
         }
     }
 
@@ -287,11 +294,11 @@ public class KeyguardStatusView extends GridLayout {
                 Settings.System.LOCKSCREEN_WEATHER, 0, UserHandle.USER_CURRENT) == 1;
 
         if (mWeatherView != null) {
-            if (showWeather && mWeatherView.getVisibility() == View.GONE) {
+            if (showWeather) {
                 mWeatherView.setVisibility(View.VISIBLE);
                 mWeatherView.enableUpdates();
             }
-            if (!showWeather && mWeatherView.getVisibility() == View.VISIBLE) {
+            if (!showWeather) {
                 mWeatherView.setVisibility(View.GONE);
                 mWeatherView.disableUpdates();
             }
@@ -342,7 +349,6 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     private void updateDozeVisibleViews() {
-        updateSettings();
         for (View child : mVisibleInDoze) {
             if (!mForcedMediaDoze) {
                 child.setAlpha(mDarkAmount == 1 && mPulsing ? 0.8f : 1);

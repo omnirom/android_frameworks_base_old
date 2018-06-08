@@ -83,6 +83,7 @@ public class KeyguardClockViewManager {
         }
 
         mCurrentClockView = mClockStyleList.get(mClockViewStyle);
+        onDensityOrFontScaleChanged();
         mContainerView.addView((View) mCurrentClockView);
     }
 
@@ -134,5 +135,9 @@ public class KeyguardClockViewManager {
 
     public void setPulsing(boolean pulsing) {
         mCurrentClockView.setPulsing(pulsing);
+    }
+
+    public void onDensityOrFontScaleChanged() {
+        mCurrentClockView.onDensityOrFontScaleChanged();
     }
 }
