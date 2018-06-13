@@ -59,7 +59,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class KeyguardStatusView extends GridLayout {
-    private static final boolean DEBUG = KeyguardConstants.DEBUG;
+    private static final boolean DEBUG = true; //KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardStatusView";
     private static final int MARQUEE_DELAY_MS = 2000;
     private static final String FONT_FAMILY_LIGHT = "sans-serif-light";

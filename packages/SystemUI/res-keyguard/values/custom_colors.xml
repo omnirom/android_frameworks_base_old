@@ -36,4 +36,8 @@
     <color name="omni_clock_ambient_bg_color">#000000</color>
     <color name="omni_clock_text_color">#ffffff</color>
 
+    <color name="binary_clock_dot_color">#ffffff</color>
+    <color name="binary_clock_empty_dot_color">#ffffff</color>
+    <color name="binary_clock_ambient_dot_color">#ffffff</color>
+    <color name="binary_clock_ambient_empty_dot_color">#ffffff</color>
 </resources>
