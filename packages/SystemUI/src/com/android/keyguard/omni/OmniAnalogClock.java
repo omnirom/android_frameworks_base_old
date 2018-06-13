@@ -33,6 +33,7 @@ import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.android.keyguard.R;
@@ -48,21 +49,21 @@ import java.util.TimeZone;
  * minutes.
  */
 public class OmniAnalogClock extends View {
+    private static final String TAG = "OmniAnalogClock";
     private Time mCalendar;
     private boolean mAttached;
     private final Handler mHandler = new Handler();
     private float mMinutes;
     private float mHour;
-    private final Context mContext;
     private String mTimeZoneId;
     private Paint mCirclePaint;
     private Paint mRemaingCirclePaint;
-    private float mCircleStrokeWidth;
+    private int mCircleStrokeWidth;
     private Paint mBgPaint;
     private Paint mHourPaint;
     private Paint mMinutePaint;
     private Paint mCenterDotPaint;
-    private float mHandEndLength;
+    private int mHandEndLength;
     private Paint mAmbientPaint;
     private Paint mAmbientBgPaint;
     private boolean mIsAmbientDisplay;
@@ -70,14 +71,14 @@ public class OmniAnalogClock extends View {
     private boolean mShowDate;
     private Paint mTextPaint;
     private String mAlarmText = "";
-    private float mTextSizePixels;
+    private int mTextSizePixels;
     private int mTickLength;
     private Paint mTextPaintSmall;
     private boolean mShowTicks;
     private boolean mShowNumbers;
     private int mNumberInset;
-    private float mTextInset;
-    private float mTextInsetTop;
+    private int mTextInset;
+    private int mTextInsetTop;
     private boolean m24hmode;
     private int mBgColor;
     private int mBorderColor;
@@ -100,8 +101,7 @@ public class OmniAnalogClock extends View {
     public OmniAnalogClock(Context context, AttributeSet attrs,
                        int defStyle) {
         super(context, attrs, defStyle);
-        mContext = context;
-        Resources r = mContext.getResources();
+        Resources r = context.getResources();
 
         mBgColor = r.getColor(R.color.omni_clock_bg_color);
         mBorderColor = r.getColor(R.color.omni_clock_primary);
@@ -199,18 +199,18 @@ public class OmniAnalogClock extends View {
     }
 
     public void onDensityOrFontScaleChanged() {
-        Resources r = mContext.getResources();
-        mTextSizePixels = r.getDimension(R.dimen.omni_clock_font_size);
+        Resources r = getContext().getResources();
+        mTextSizePixels = r.getDimensionPixelSize(R.dimen.omni_clock_font_size);
         mTextPaint.setTextSize(mTextSizePixels);
         mTextPaintSmall.setTextSize(mTextSizePixels / 2f);
 
-        mCircleStrokeWidth = r.getDimension(R.dimen.omni_clock_circle_size);
+        mCircleStrokeWidth = r.getDimensionPixelSize(R.dimen.omni_clock_circle_size);
         mTextInset = mTextSizePixels;
-        mTextInsetTop = 1.8f * mTextSizePixels;
+        mTextInsetTop = (int) (1.8f * mTextSizePixels);
 
         mCirclePaint.setStrokeWidth(mCircleStrokeWidth);
         mRemaingCirclePaint.setStrokeWidth(mCircleStrokeWidth);
-        mAmbientPaint.setStrokeWidth(r.getDimension(R.dimen.omni_clock_circle_ambient_size));
+        mAmbientPaint.setStrokeWidth(r.getDimensionPixelSize(R.dimen.omni_clock_circle_ambient_size));
         mHourPaint.setStrokeWidth(r.getDimensionPixelSize(R.dimen.omni_clock_hour_hand_width));
         mMinutePaint.setStrokeWidth(r.getDimensionPixelSize(R.dimen.omni_clock_minute_hand_width));
         mTickPaint.setStrokeWidth(r.getDimensionPixelSize(R.dimen.omni_clock_tick_width));
@@ -270,7 +270,7 @@ public class OmniAnalogClock extends View {
         int x = availableWidth / 2;
         int y = availableHeight / 2;
 
-        float radius = availableHeight / 2 - mCircleStrokeWidth;
+        int radius = availableHeight / 2 - mCircleStrokeWidth;
         RectF arcRect = new RectF();
         arcRect.top = y - radius;
         arcRect.bottom = y + radius;
@@ -285,8 +285,8 @@ public class OmniAnalogClock extends View {
             mNumberInset = (int) (radius / 6.0);
         }
 
-        float textInset = mTextInset;
-        float textInsetTop = mTextInsetTop;
+        int textInset = mTextInset;
+        int textInsetTop = mTextInsetTop;
         if (mShowNumbers) {
             textInset += mNumberInset;
             textInsetTop += mNumberInset;
@@ -333,12 +333,12 @@ public class OmniAnalogClock extends View {
             canvas.drawTextOnPath(mAlarmText, path, 0, 0, mTextPaint);
         }
 
-        drawHand(canvas, mIsAmbientDisplay ? mAmbientPaint : mHourPaint, x, y, radius * 0.70f, mHour / (m24hmode ? 24.0f : 12.0f) * 360.0f - 90);
+        drawHand(canvas, mIsAmbientDisplay ? mAmbientPaint : mHourPaint, x, y, (int)(radius * 0.70f), mHour / (m24hmode ? 24.0f : 12.0f) * 360.0f - 90);
         drawHand(canvas, mIsAmbientDisplay ? mAmbientPaint : mMinutePaint, x, y, radius, mMinutes / 60.0f * 360.0f - 90);
         canvas.drawCircle(x, y, mMinutePaint.getStrokeWidth(), mIsAmbientDisplay ? mAmbientPaint : mCenterDotPaint);
     }
 
-    private void drawHand(Canvas canvas, Paint mHandPaint, int x, int y, float length, float angle) {
+    private void drawHand(Canvas canvas, Paint mHandPaint, int x, int y, int length, float angle) {
         canvas.save();
         canvas.rotate(angle, x, y);
         canvas.drawLine(x, y, x + length, y, mHandPaint);
@@ -346,14 +346,14 @@ public class OmniAnalogClock extends View {
         canvas.restore();
     }
 
-    private void drawHourTick(Canvas canvas, float radius, int x, int y, float angle) {
+    private void drawHourTick(Canvas canvas, int radius, int x, int y, float angle) {
         canvas.save();
         canvas.rotate(angle, x, y);
         canvas.drawLine(x + radius - mTickLength, y, x + radius, y, mTickPaint);
         canvas.restore();
     }
 
-    private void drawNumeral(Canvas canvas, float radius, int number) {
+    private void drawNumeral(Canvas canvas, int radius, int number) {
 
         String tmp = String.valueOf(number == 24 ? 0 : number);
         Rect rect = new Rect();
@@ -394,14 +394,9 @@ public class OmniAnalogClock extends View {
 
     private void updateContentDescription(Time time) {
         final int flags = DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_24HOUR;
-        String contentDescription = DateUtils.formatDateTime(mContext,
+        String contentDescription = DateUtils.formatDateTime(getContext(),
                 time.toMillis(false), flags);
         setContentDescription(contentDescription);
-    }
-
-    public void setTimeZone(String id) {
-        mTimeZoneId = id;
-        onTimeChanged();
     }
 
     public void setDark(boolean dark) {
@@ -442,7 +437,6 @@ public class OmniAnalogClock extends View {
     public void setShowNumbers(boolean showNumbers) {
         if (mShowNumbers != showNumbers) {
             mShowNumbers = showNumbers;
-            onDensityOrFontScaleChanged();
             invalidate();
         }
     }
@@ -450,7 +444,6 @@ public class OmniAnalogClock extends View {
     public void setShowTicks(boolean showTicks) {
         if (mShowTicks != showTicks) {
             mShowTicks = showTicks;
-            onDensityOrFontScaleChanged();
             invalidate();
         }
     }
@@ -458,7 +451,6 @@ public class OmniAnalogClock extends View {
     public void setShow24Hours(boolean show24Hours) {
         if (m24hmode != show24Hours) {
             m24hmode = show24Hours;
-            onDensityOrFontScaleChanged();
             invalidate();
         }
     }

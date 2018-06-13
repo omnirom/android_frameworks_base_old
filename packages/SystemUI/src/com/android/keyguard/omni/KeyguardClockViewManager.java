@@ -64,6 +64,10 @@ public class KeyguardClockViewManager {
                 R.layout.keyguard_omni_clock_view, mContainerView, false);
         mClockStyleList.add(view);
 
+        view = (IKeyguardClockView) LayoutInflater.from(mContext).inflate(
+                R.layout.keyguard_binary_clock_view, mContainerView, false);
+        mClockStyleList.add(view);
+
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.LOCKSCREEN_CLOCK_STYLE), false,
                 mSettingsObserver, UserHandle.USER_ALL);
