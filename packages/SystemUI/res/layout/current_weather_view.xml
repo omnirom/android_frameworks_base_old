@@ -43,7 +43,8 @@
             android:gravity="center"
             android:ellipsize="end"
             android:singleLine="true"
-            android:paddingEnd="8dp"/>
+            android:paddingEnd="8dp"
+            android:fontFamily="sans-serif-medium" />
 
         <ImageView
             android:id="@+id/current_image"
@@ -60,7 +61,8 @@
             android:letterSpacing="0.05"
             android:gravity="center"
             android:singleLine="true"
-            android:paddingStart="8dp" />
+            android:paddingStart="8dp"
+            android:fontFamily="sans-serif-medium" />
     </LinearLayout>
 
 </com.android.systemui.omni.CurrentWeatherView>
