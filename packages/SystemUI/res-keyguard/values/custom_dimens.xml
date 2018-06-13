@@ -28,4 +28,8 @@
     <dimen name="omni_clock_tick_width">1dp</dimen>
     <dimen name="analog_clock_size">160dp</dimen>
     <dimen name="digitial_clock_two_line_spacing">-20dp</dimen>
+    <dimen name="binary_clock_dot_size">8dp</dimen>
+    <dimen name="binary_clock_stroke_size">1dp</dimen>
+    <dimen name="binary_clock_width">150dp</dimen>
+    <dimen name="binary_clock_height">100dp</dimen>
 </resources>

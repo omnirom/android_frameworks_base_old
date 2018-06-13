@@ -399,11 +399,6 @@ public class OmniAnalogClock extends View {
         setContentDescription(contentDescription);
     }
 
-    public void setTimeZone(String id) {
-        mTimeZoneId = id;
-        onTimeChanged();
-    }
-
     public void setDark(boolean dark) {
         if (mIsAmbientDisplay != dark) {
             mIsAmbientDisplay = dark;
