@@ -31,6 +31,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.support.v4.graphics.ColorUtils;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -69,6 +70,8 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
     private final AlarmManager mAlarmManager;
     private float mDarkAmount = 0;
     private boolean mPulsing;
+    private boolean mTwoLine;
+    private boolean mBoldHours;
 
     private static final String FONT_FAMILY_LIGHT = "sans-serif-light";
     private static final String FONT_FAMILY_MEDIUM = "sans-serif-medium";
@@ -148,10 +151,23 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
                 Settings.System.HIDE_LOCKSCREEN_CLOCK, 0, UserHandle.USER_CURRENT) == 0;
         boolean showDate = Settings.System.getIntForUser(resolver,
                 Settings.System.HIDE_LOCKSCREEN_DATE, 0, UserHandle.USER_CURRENT) == 0;
+        mTwoLine = Settings.System.getIntForUser(resolver,
+                Settings.System.LOCKSCREEN_DIGITAL_CLOCK_TWO_LINES, 0, UserHandle.USER_CURRENT) == 1;
+        mBoldHours = Settings.System.getIntForUser(resolver,
+                Settings.System.LOCKSCREEN_DIGITAL_CLOCK_BOLD_HOUR, 0, UserHandle.USER_CURRENT) == 1;
 
         mClockView.setVisibility(showClock ? View.VISIBLE : View.GONE);
         mDateView.setVisibility(showDate ? View.VISIBLE : View.GONE);
         mAlarmStatusView.setVisibility(showAlarm && nextAlarm != null ? View.VISIBLE : View.GONE);
+
+        if (mTwoLine) {
+            mClockView.setSingleLine(false);
+            mClockView.setLineSpacing(getResources().getDimensionPixelSize(R.dimen.digitial_clock_two_line_spacing), 1);
+        } else {
+            mClockView.setSingleLine(true);
+            mClockView.setLineSpacing(0, 1);
+        }
+        refreshTime();
     }
 
     @Override
@@ -181,8 +197,23 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
     public void refreshTime() {
         mDateView.setDatePattern(Patterns.dateViewSkel);
 
-        mClockView.setFormat12Hour(Patterns.clockView12);
-        mClockView.setFormat24Hour(Patterns.clockView24);
+        if (mTwoLine) {
+            if (mBoldHours) {
+                mClockView.setFormat12Hour(Html.fromHtml("<strong>hh</strong><br>mm"));
+                mClockView.setFormat24Hour(Html.fromHtml("<strong>kk</strong><br>mm"));
+            } else {
+                mClockView.setFormat12Hour("hh\nmm");
+                mClockView.setFormat24Hour("kk\nmm");
+            }
+        } else {
+            if (mBoldHours) {
+                mClockView.setFormat12Hour(Html.fromHtml("<strong>h</strong>\uee01mm"));
+                mClockView.setFormat24Hour(Html.fromHtml("<strong>kk</strong>\uee01mm"));
+            } else {
+                mClockView.setFormat12Hour(Patterns.clockView12);
+                mClockView.setFormat24Hour(Patterns.clockView24);
+            }
+        }
     }
 
     @Override
@@ -190,10 +221,10 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
         AlarmManager.AlarmClockInfo nextAlarm =
                 mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
         Patterns.update(mContext, nextAlarm != null);
+        updateSettings();
 
         refreshTime();
         refreshAlarmStatus(nextAlarm);
-        updateSettings();
     }
 
     @Override
