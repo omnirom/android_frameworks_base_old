@@ -33,6 +33,7 @@ import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.android.keyguard.R;
@@ -48,12 +49,12 @@ import java.util.TimeZone;
  * minutes.
  */
 public class OmniAnalogClock extends View {
+    private static final String TAG = "OmniAnalogClock";
     private Time mCalendar;
     private boolean mAttached;
     private final Handler mHandler = new Handler();
     private float mMinutes;
     private float mHour;
-    private final Context mContext;
     private String mTimeZoneId;
     private Paint mCirclePaint;
     private Paint mRemaingCirclePaint;
@@ -100,8 +101,7 @@ public class OmniAnalogClock extends View {
     public OmniAnalogClock(Context context, AttributeSet attrs,
                        int defStyle) {
         super(context, attrs, defStyle);
-        mContext = context;
-        Resources r = mContext.getResources();
+        Resources r = context.getResources();
 
         mBgColor = r.getColor(R.color.omni_clock_bg_color);
         mBorderColor = r.getColor(R.color.omni_clock_primary);
@@ -199,7 +199,7 @@ public class OmniAnalogClock extends View {
     }
 
     public void onDensityOrFontScaleChanged() {
-        Resources r = mContext.getResources();
+        Resources r = getContext().getResources();
         mTextSizePixels = r.getDimension(R.dimen.omni_clock_font_size);
         mTextPaint.setTextSize(mTextSizePixels);
         mTextPaintSmall.setTextSize(mTextSizePixels / 2f);
@@ -394,14 +394,9 @@ public class OmniAnalogClock extends View {
 
     private void updateContentDescription(Time time) {
         final int flags = DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_24HOUR;
-        String contentDescription = DateUtils.formatDateTime(mContext,
+        String contentDescription = DateUtils.formatDateTime(getContext(),
                 time.toMillis(false), flags);
         setContentDescription(contentDescription);
-    }
-
-    public void setTimeZone(String id) {
-        mTimeZoneId = id;
-        onTimeChanged();
     }
 
     public void setDark(boolean dark) {
@@ -442,7 +437,6 @@ public class OmniAnalogClock extends View {
     public void setShowNumbers(boolean showNumbers) {
         if (mShowNumbers != showNumbers) {
             mShowNumbers = showNumbers;
-            onDensityOrFontScaleChanged();
             invalidate();
         }
     }
@@ -450,7 +444,6 @@ public class OmniAnalogClock extends View {
     public void setShowTicks(boolean showTicks) {
         if (mShowTicks != showTicks) {
             mShowTicks = showTicks;
-            onDensityOrFontScaleChanged();
             invalidate();
         }
     }
@@ -458,7 +451,6 @@ public class OmniAnalogClock extends View {
     public void setShow24Hours(boolean show24Hours) {
         if (m24hmode != show24Hours) {
             m24hmode = show24Hours;
-            onDensityOrFontScaleChanged();
             invalidate();
         }
     }
