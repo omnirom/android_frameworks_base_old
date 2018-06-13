@@ -20,4 +20,7 @@
 <resources>
     <dimen name="analog_clock_size">200dp</dimen>
     <dimen name="omni_clock_font_size">16sp</dimen>
+    <dimen name="binary_clock_dot_size">10dp</dimen>
+    <dimen name="binary_clock_width">180dp</dimen>
+    <dimen name="binary_clock_height">120dp</dimen>
 </resources>

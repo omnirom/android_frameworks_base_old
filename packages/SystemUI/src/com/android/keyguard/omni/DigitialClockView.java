@@ -167,7 +167,6 @@ public class DigitialClockView extends LinearLayout implements IKeyguardClockVie
             mClockView.setSingleLine(true);
             mClockView.setLineSpacing(0, 1);
         }
-        refreshTime();
     }
 
     @Override

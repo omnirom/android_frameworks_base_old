@@ -16,52 +16,72 @@
 
 package com.android.keyguard.omni;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.ContentResolver;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.Typeface;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.support.v4.graphics.ColorUtils;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Slog;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
+import android.widget.TextClock;
 import android.widget.TextView;
 
 import com.android.keyguard.R;
 
 import com.android.keyguard.KeyguardClockAccessibilityDelegate;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.systemui.statusbar.policy.DateView;
+import com.android.settingslib.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class OmniAnalogClockView extends LinearLayout implements IKeyguardClockView  {
-    private static final String TAG = "OmniAnalogClockView";
+public class BinaryClockView extends LinearLayout implements IKeyguardClockView  {
+    private static final String TAG = "BinaryClockView";
 
-    private OmniAnalogClock mClockView;
+    private TextView mAlarmStatusView;
+    private DateView mDateView;
+    private BinaryClock mClockView;
+    private View mKeyguardStatusArea;
+    private int mDateTextColor;
+    private int mAlarmTextColor;
     private View[] mVisibleInDoze;
     private boolean mForcedMediaDoze;
     private final AlarmManager mAlarmManager;
     private float mDarkAmount = 0;
     private boolean mPulsing;
 
-    public OmniAnalogClockView(Context context) {
+    private static final String FONT_FAMILY_MEDIUM = "sans-serif-medium";
+
+    public BinaryClockView(Context context) {
         this(context, null, 0);
     }
 
-    public OmniAnalogClockView(Context context, AttributeSet attrs) {
+    public BinaryClockView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public OmniAnalogClockView(Context context, AttributeSet attrs, int defStyle) {
+    public BinaryClockView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
@@ -69,14 +89,21 @@ public class OmniAnalogClockView extends LinearLayout implements IKeyguardClockV
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mAlarmStatusView = findViewById(R.id.alarm_status);
+        mDateView = findViewById(R.id.date_view);
         mClockView = findViewById(R.id.clock_view);
         if (KeyguardClockAccessibilityDelegate.isNeeded(mContext)) {
             mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
         }
+        mKeyguardStatusArea = findViewById(R.id.keyguard_status_area);
 
         List<View> visibleInDoze = new ArrayList<>();
         visibleInDoze.add(mClockView);
+        visibleInDoze.add(mKeyguardStatusArea);
         mVisibleInDoze = visibleInDoze.toArray(new View[visibleInDoze.size()]);
+
+        mDateTextColor = mDateView.getCurrentTextColor();
+        mAlarmTextColor = mAlarmStatusView.getCurrentTextColor();
     }
 
     @Override
@@ -100,12 +127,16 @@ public class OmniAnalogClockView extends LinearLayout implements IKeyguardClockV
         boolean dark = darkAmount == 1;
 
         mClockView.setDark(dark);
+        mDateView.setTextColor(ColorUtils.blendARGB(mDateTextColor, Color.WHITE, darkAmount));
+        int blendedAlarmColor = ColorUtils.blendARGB(mAlarmTextColor, Color.WHITE, darkAmount);
+        mAlarmStatusView.setTextColor(blendedAlarmColor);
+        mAlarmStatusView.setCompoundDrawableTintList(ColorStateList.valueOf(blendedAlarmColor));
     }
 
     @Override
     public void updateSettings() {
         final ContentResolver resolver = getContext().getContentResolver();
-        final Resources r = getContext().getResources();
+        final Resources res = getContext().getResources();
         AlarmManager.AlarmClockInfo nextAlarm =
                 mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
         boolean showAlarm = Settings.System.getIntForUser(resolver,
@@ -114,54 +145,29 @@ public class OmniAnalogClockView extends LinearLayout implements IKeyguardClockV
                 Settings.System.HIDE_LOCKSCREEN_CLOCK, 0, UserHandle.USER_CURRENT) == 0;
         boolean showDate = Settings.System.getIntForUser(resolver,
                 Settings.System.HIDE_LOCKSCREEN_DATE, 0, UserHandle.USER_CURRENT) == 0;
-        boolean show24Mode = Settings.System.getIntForUser(resolver,
-                Settings.System.LOCKSCREEN_OMNI_CLOCK_24H_MODE, 0, UserHandle.USER_CURRENT) == 1;
-        boolean showTicks = Settings.System.getIntForUser(resolver,
-                Settings.System.LOCKSCREEN_OMNI_CLOCK_SHOW_TICKS, 0, UserHandle.USER_CURRENT) == 1;
-        boolean showNumbers = Settings.System.getIntForUser(resolver,
-                Settings.System.LOCKSCREEN_OMNI_CLOCK_SHOW_NUMBERS, 0, UserHandle.USER_CURRENT) == 1;
-
-        int bgColor = Settings.System.getIntForUser(resolver,
-                Settings.System.LOCKSCREEN_OMNI_CLOCK_BG_COLOR, r.getColor(R.color.omni_clock_bg_color),
-                UserHandle.USER_CURRENT);
-        int borderColor = Settings.System.getIntForUser(resolver,
-                Settings.System.LOCKSCREEN_OMNI_CLOCK_BORDER_COLOR, r.getColor(R.color.omni_clock_primary),
-                UserHandle.USER_CURRENT);
-        int textColor = Settings.System.getIntForUser(resolver,
-                Settings.System.LOCKSCREEN_OMNI_CLOCK_TEXT_COLOR, r.getColor(R.color.omni_clock_text_color),
-                UserHandle.USER_CURRENT);
-        int accentColor = Settings.System.getIntForUser(resolver,
-                Settings.System.LOCKSCREEN_OMNI_CLOCK_ACCENT_COLOR, r.getColor(R.color.omni_clock_accent),
-                UserHandle.USER_CURRENT);
-        int hourColor = Settings.System.getIntForUser(resolver,
-                Settings.System.LOCKSCREEN_OMNI_CLOCK_HOUR_COLOR, r.getColor(R.color.omni_clock_hour_hand_color),
-                UserHandle.USER_CURRENT);
-        int minuteColor = Settings.System.getIntForUser(resolver,
-                Settings.System.LOCKSCREEN_OMNI_CLOCK_MINUTE_COLOR, r.getColor(R.color.omni_clock_minute_hand_color),
-                UserHandle.USER_CURRENT);
 
         mClockView.setVisibility(showClock ? View.VISIBLE : View.GONE);
-        mClockView.setShowAlarm(showAlarm);
-        mClockView.setShowDate(showDate);
-        mClockView.setShow24Hours(show24Mode);
-        mClockView.setShowTicks(showTicks);
-        mClockView.setShowNumbers(showNumbers);
-        mClockView.setColors(bgColor, borderColor, hourColor, minuteColor, textColor, accentColor);
+        mClockView.setTintColor(getTintColor());
+        mDateView.setVisibility(showDate ? View.VISIBLE : View.GONE);
+        mAlarmStatusView.setVisibility(showAlarm && nextAlarm != null ? View.VISIBLE : View.GONE);
     }
 
     @Override
     public void refreshAlarmStatus(AlarmManager.AlarmClockInfo nextAlarm) {
         if (nextAlarm != null) {
             String alarm = KeyguardStatusView.formatNextAlarm(mContext, nextAlarm);
-            mClockView.setAlarmText(alarm);
+            mAlarmStatusView.setText(alarm);
+            mAlarmStatusView.setContentDescription(
+                    getResources().getString(R.string.keyguard_accessibility_next_alarm, alarm));
+            mAlarmStatusView.setVisibility(View.VISIBLE);
         } else {
-            mClockView.setAlarmText("");
+            mAlarmStatusView.setVisibility(View.GONE);
         }
     }
 
     @Override
     public int getClockBottom() {
-        return mClockView.getBottom();
+        return mKeyguardStatusArea.getBottom();
     }
 
     @Override
@@ -172,6 +178,7 @@ public class OmniAnalogClockView extends LinearLayout implements IKeyguardClockV
     @Override
     public void refreshTime() {
         mClockView.refreshTime();
+        mDateView.setDatePattern(Patterns.dateViewSkel);
     }
 
     @Override
@@ -194,12 +201,21 @@ public class OmniAnalogClockView extends LinearLayout implements IKeyguardClockV
     @Override
     public void onDensityOrFontScaleChanged() {
         mClockView.onDensityOrFontScaleChanged();
+        Typeface tfMedium = Typeface.create(FONT_FAMILY_MEDIUM, Typeface.NORMAL);
         MarginLayoutParams layoutParams = (MarginLayoutParams) mClockView.getLayoutParams();
         layoutParams.bottomMargin = getResources().getDimensionPixelSize(
-                R.dimen.bottom_text_spacing_analog);
-        layoutParams.width = getResources().getDimensionPixelSize(R.dimen.analog_clock_size);
-        layoutParams.height = getResources().getDimensionPixelSize(R.dimen.analog_clock_size);
+                R.dimen.bottom_text_spacing_binary);
+        layoutParams.width = getResources().getDimensionPixelSize(R.dimen.binary_clock_width);
+        layoutParams.height = getResources().getDimensionPixelSize(R.dimen.binary_clock_height);
         mClockView.setLayoutParams(layoutParams);
+        mDateView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
+        mDateView.setTypeface(tfMedium);
+        mAlarmStatusView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
+        mAlarmStatusView.setTypeface(tfMedium);
+        mAlarmStatusView.setCompoundDrawablesWithIntrinsicBounds(
+                getResources().getDrawable(R.drawable.ic_access_alarms_big), null, null, null);
     }
 
     @Override
@@ -215,11 +231,16 @@ public class OmniAnalogClockView extends LinearLayout implements IKeyguardClockV
 
     @Override
     public void setEnableMarqueeImpl(boolean enabled) {
+        if (mAlarmStatusView != null) mAlarmStatusView.setSelected(enabled);
     }
 
     @Override
     public void setPulsing(boolean pulsing) {
         mPulsing = pulsing;
+    }
+
+    private int getTintColor() {
+        return Utils.getColorAttr(getContext(), R.attr.wallpaperTextColor);
     }
 
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
