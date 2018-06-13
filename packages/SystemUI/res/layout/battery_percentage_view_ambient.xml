@@ -27,4 +27,5 @@
         android:textColor="?attr/wallpaperTextColor"
         style="@style/widget_label"
         android:letterSpacing="0.05"
+        android:fontFamily="sans-serif-medium"
         />
