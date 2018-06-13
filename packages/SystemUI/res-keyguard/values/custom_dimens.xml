@@ -19,7 +19,6 @@
 -->
 <resources>
     <dimen name="bottom_text_spacing_analog">2dp</dimen>
-
     <dimen name="omni_clock_hour_hand_width">5dp</dimen>
     <dimen name="omni_clock_minute_hand_width">4dp</dimen>
     <dimen name="omni_clock_hand_end_length">0dp</dimen>
@@ -27,6 +26,6 @@
     <dimen name="omni_clock_circle_ambient_size">2dp</dimen>
     <dimen name="omni_clock_font_size">14sp</dimen>
     <dimen name="omni_clock_tick_width">1dp</dimen>
-
     <dimen name="analog_clock_size">160dp</dimen>
+    <dimen name="digitial_clock_two_line_spacing">-20dp</dimen>
 </resources>
