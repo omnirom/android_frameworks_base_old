@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ea99959_cd3d1599",
+        "filename": "packages/SystemUI/res/values/config.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-06-17T22:32:32Z",
+      "side": 1,
+      "message": "to prevent side effects I would set the default to empty \u003d\u003d hidden. So every device must make sure the path it adds is correct for that device",
+      "revId": "a9e610c227c7515ff573b8b57fb371e552279c2e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
