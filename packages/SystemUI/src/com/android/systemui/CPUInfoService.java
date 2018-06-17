@@ -59,6 +59,8 @@ public class CPUInfoService extends Service {
 
         private int mNeededWidth;
         private int mNeededHeight;
+        private String mCPUTemp;
+        private boolean mCpuTempAvail;
 
         private boolean mDataAvail;
 
@@ -71,8 +73,9 @@ public class CPUInfoService extends Service {
                     String msgData = (String) msg.obj;
                     try {
                         String[] parts=msgData.split(";");
+                        mCPUTemp=parts[0];
 
-                        String[] cpuParts=parts[0].split("\\|");
+                        String[] cpuParts=parts[1].split("\\|");
                         for(int i=0; i<cpuParts.length; i++){
                             String cpuInfo=cpuParts[i];
                             String cpuInfoParts[]=cpuInfo.split(":");
@@ -162,6 +165,13 @@ public class CPUInfoService extends Service {
 
             int y = mPaddingTop - (int)mAscent;
 
+            if(!mCPUTemp.equals("0")) {
+                canvas.drawText("Temp: " + mCPUTemp + "°C", RIGHT-mPaddingRight-mMaxWidth,
+                        y-1, mOnlinePaint);
+                mCpuTempAvail = true;
+            }
+            y += mFH;
+
             for(int i=0; i<mCurrFreq.length; i++){
                 String s=getCPUInfoString(i);
                 String freq=mCurrFreq[i];
@@ -183,7 +193,7 @@ public class CPUInfoService extends Service {
             final int NW = mNumCpus;
 
             int neededWidth = mPaddingLeft + mPaddingRight + mMaxWidth;
-            int neededHeight = mPaddingTop + mPaddingBottom + mFH * NW;
+            int neededHeight = mPaddingTop + mPaddingBottom + (mFH*((mCpuTempAvail?1:0)+NW));
             if (neededWidth != mNeededWidth || neededHeight != mNeededHeight) {
                 mNeededWidth = neededWidth;
                 mNeededHeight = neededHeight;
@@ -210,6 +220,7 @@ public class CPUInfoService extends Service {
         private static final String CPU_ROOT = "/sys/devices/system/cpu/cpu";
         private static final String CPU_CUR_TAIL = "/cpufreq/scaling_cur_freq";
         private static final String CPU_GOV_TAIL = "/cpufreq/scaling_governor";
+        private final String CPU_TEMP_SENSOR = getResources().getString(R.string.config_cpuTempSensor);
 
         public CurCPUThread(Handler handler, int numCpus){
             mHandler=handler;
@@ -226,6 +237,9 @@ public class CPUInfoService extends Service {
                 while (!mInterrupt) {
                     sleep(500);
                     StringBuffer sb=new StringBuffer();
+                    String cpuTemp = CPUInfoService.readOneLine(CPU_TEMP_SENSOR);
+                    sb.append(cpuTemp == null ? "0" : cpuTemp);
+                    sb.append(";");
 
                     for(int i=0; i<mNumCpus; i++){
                         final String freqFile=CPU_ROOT+i+CPU_CUR_TAIL;
