@@ -432,4 +432,7 @@
         <item>60</item>
         <item>120</item>
     </integer-array>
+
+    <!-- The CPU temperature sensor path -->
+    <string name="config_cpuTempSensor" translatable="false">/sys/class/thermal/thermal_zone0/temp</string>
 </resources>
