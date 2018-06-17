@@ -16,6 +16,23 @@
       "revId": "a9e610c227c7515ff573b8b57fb371e552279c2e",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8924b59f_e5b395f5",
+        "filename": "packages/SystemUI/src/com/android/systemui/CPUInfoService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-06-17T22:33:41Z",
+      "side": 1,
+      "message": "id the path is empty (default) it should not be shown",
+      "revId": "a9e610c227c7515ff573b8b57fb371e552279c2e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
