@@ -11021,6 +11021,11 @@ public final class Settings {
         public static final String POLICY_CONTROL_STYLE = "policy_control_style";
 
         /**
+         * @hide
+         */
+        public static final String OVERRIDE_POLICY_CONTROL = "override_policy_control";
+
+        /**
          * Defines global zen mode.  ZEN_MODE_OFF, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
          * or ZEN_MODE_NO_INTERRUPTIONS.
          *
