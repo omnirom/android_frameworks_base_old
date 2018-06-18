@@ -157,5 +157,12 @@
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
   <string name="clear_recents">Zatvorenie všetkých nedávnych</string>
+  <string name="quick_settings_roaming_title">Indikátor roamingu</string>
+  <string name="quick_settings_roaming_summary">Ak sa toho dotknete, potom dúfam, že viete čo robíte</string>
   <!-- Navigation bar dpad -->
+  <string name="accessibility_dpad_left">Kurzor doľava</string>
+  <string name="accessibility_dpad_right">Kurzor doprava</string>
+  <!-- Heads up snooze toast -->
+  <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s</xliff:g> - Prehliadanie upozornenia je odložené o 1 minútu.</string>
+  <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> - Zobrazenie upozornenia je odložené o <xliff:g id="number">%d</xliff:g> minút.</string>
 </resources>

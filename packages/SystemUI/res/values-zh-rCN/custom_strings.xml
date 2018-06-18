@@ -83,7 +83,7 @@
   <string name="omnijaws_detail_header">天气</string>
   <string name="omnijaws_label_default">天气</string>
   <string name="omnijaws_current_text">现在</string>
-  <string name="omnijaws_package_not_available">OmniJaws无法使用</string>
+  <string name="omnijaws_package_not_available">OmniJaws 无法使用</string>
   <string name="omnijaws_service_last_update">最后更新</string>
   <!-- PiP Tile -->
   <string name="quick_settings_pip_label">画中画</string>
@@ -162,4 +162,7 @@
   <!-- Navigation bar dpad -->
   <string name="accessibility_dpad_left">光标向左</string>
   <string name="accessibility_dpad_right">光标向右</string>
+  <!-- Heads up snooze toast -->
+  <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s</xliff:g> 偷看通知正在打盹1分钟。</string>
+  <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> 偷看通知正在打盹1分钟。</string>
 </resources>

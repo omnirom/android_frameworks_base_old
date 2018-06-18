@@ -95,15 +95,15 @@
   <string name="accessibility_quick_settings_caffeine_on">Caffeine açık</string>
   <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
-  <string name="accessibility_quick_settings_location_battery_saving">Yer bildirimi: pil tasarrufu modu.</string>
-  <string name="accessibility_quick_settings_location_gps_only">Yer bildirimi: sadece sensörler modu.</string>
-  <string name="accessibility_quick_settings_location_high_accuracy">Yer bildirimi: yüksek hassâsiyyet modu.</string>
+  <string name="accessibility_quick_settings_location_battery_saving">Yer tespitini raporlama: pil tasarrufu modu.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Yer tespitini raporlama: sadece sensörler modu.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Yer tespitini raporlama: yüksek hassâsiyyet modu.</string>
   <!-- Heads Up QS Tile -->
-  <string name="quick_settings_heads_up_label">Ekran üstü bildirimleri</string>
-  <string name="accessibility_quick_settings_heads_up_off">Ekran üstü bildirimleri devre dışı bırakıldı.</string>
+  <string name="quick_settings_heads_up_label">Ekran üstü bildirimler</string>
+  <string name="accessibility_quick_settings_heads_up_off">Ekran üstü bildirimler devre dışı bırakıldı.</string>
   <string name="accessibility_quick_settings_heads_up_on">Ekran üstü bildirimlerine izin verildi.</string>
-  <string name="accessibility_quick_settings_heads_up_changed_off">Ekran üstü bildirimleri kapatıldı.</string>
-  <string name="accessibility_quick_settings_heads_up_changed_on">Ekran üstü bildirimleri açıldı.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Ekran üstü bildirimler kapatıldı.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Ekran üstü bildirimler açıldı.</string>
   <!-- Screenrecord QS tile -->
   <string name="quick_settings_screenrecord_label">Ekran kaydı</string>
   <string name="quick_settings_screenrecord_lq_label">Düşük kalitede ekran kaydı</string>
@@ -141,7 +141,7 @@
   <string name="accessibility_data_connection_hspap">HSPA+</string>
   <string name="qs_show_battery">Pili göster</string>
   <string name="qs_show_carrier">Operatör isimlerini göster</string>
-  <string name="qs_show_clock">Saati göster</string>
+  <string name="qs_show_clock">Sâati göster</string>
   <string name="qs_show_mini">Ufak mod</string>
   <string name="qs_header">Başlık</string>
   <string name="quick_settings_google_assist_label">Yardımcı</string>
@@ -162,4 +162,7 @@
   <!-- Navigation bar dpad -->
   <string name="accessibility_dpad_left">Soldaki işaretçi</string>
   <string name="accessibility_dpad_right">Sağdaki işaretçi</string>
+  <!-- Heads up snooze toast -->
+  <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s</xliff:g> - Ekran üstü bildirimler 1 dakîkalığına ertelenecek.</string>
+  <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> - Ekran üstü bildirimler <xliff:g id="number">%d</xliff:g> dakîkalığına ertelenecek.</string>
 </resources>

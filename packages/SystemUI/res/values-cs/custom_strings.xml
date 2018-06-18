@@ -162,4 +162,7 @@
   <!-- Navigation bar dpad -->
   <string name="accessibility_dpad_left">Kurzor doleva</string>
   <string name="accessibility_dpad_right">Kurzor doprava</string>
+  <!-- Heads up snooze toast -->
+  <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s</xliff:g> - Prohlížení oznámení je odloženo na 1 minutu.</string>
+  <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> - Prohlížení oznámení je odloženo na <xliff:g id="number">%d</xliff:g> minut.</string>
 </resources>

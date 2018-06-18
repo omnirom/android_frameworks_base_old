@@ -20,8 +20,8 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
-  <string name="reboot_to_bootloader_title">重启到bootloader</string>
-  <string name="reboot_to_bootloader_message">重启到bootloader\u2026</string>
+  <string name="reboot_to_bootloader_title">重启到引导模式</string>
+  <string name="reboot_to_bootloader_message">正在重启到引导模式\u2026</string>
   <!-- advanced reboot to recovery. -->
   <string name="reboot_to_recovery_title">重启到恢复模式</string>
   <string name="reboot_to_recovery_message">重启到恢复模式\u2026</string>

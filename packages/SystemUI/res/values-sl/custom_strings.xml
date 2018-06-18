@@ -19,10 +19,32 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">Ponovno zaženi</string>
+  <string name="global_action_reboot_sub">Sistem</string>
+  <string name="global_action_reboot_recovery">Obnovitev</string>
+  <string name="global_action_reboot_bootloader">Zagonski nalagalnik</string>
+  <string name="global_action_dnaa">Ne prikaži ponovno</string>
+  <string name="global_action_settings">Nastavitve</string>
+  <string name="qs_menu_item_columns">Stolpci</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Ponastavi</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="lockscreen_default">Privzeto</string>
+  <string name="lockscreen_hidden">Brez</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
   <!-- Screenrecord Notification Ticker -->
   <!-- Screenrecord notification title -->
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Ustavi</string>
   <!-- Screenrecord notification action: show/hide pointer -->
   <!-- Screen record notification error title -->
   <!-- Screen pinning dialog description when in accessibility mode. -->
@@ -39,4 +61,5 @@
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
   <!-- Navigation bar dpad -->
+  <!-- Heads up snooze toast -->
 </resources>

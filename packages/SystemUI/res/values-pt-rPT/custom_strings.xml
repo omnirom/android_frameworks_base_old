@@ -162,4 +162,7 @@
   <!-- Navigation bar dpad -->
   <string name="accessibility_dpad_left">Cursor para a esquerda</string>
   <string name="accessibility_dpad_right">Cursor para a direita</string>
+  <!-- Heads up snooze toast -->
+  <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s </xliff:g> - As notificações flutuantes serão suspendidas por 1 minuto.</string>
+  <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> - As notificações flutuantes serão suspendidas por <xliff:g id="number">%d</xliff:g> minutos.</string>
 </resources>

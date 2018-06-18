@@ -162,4 +162,7 @@
   <!-- Navigation bar dpad -->
   <string name="accessibility_dpad_left">Kurzor balra</string>
   <string name="accessibility_dpad_right">Kurzor jobbra</string>
+  <!-- Heads up snooze toast -->
+  <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s</xliff:g> - A lebegő értesítései 1 percig szundiznak.</string>
+  <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> - A lebegő értesítései <xliff:g id="number">%d</xliff:g> percig szundiznak.</string>
 </resources>

@@ -114,14 +114,17 @@
   <string name="no_home_title">Не найдена кнопка \"Домой\"</string>
   <string name="no_home_message">Для навигации по этому устройству требуется кнопка \"Домой\". Перед сохранением добавьте кнопку \"Домой\".</string>
   <string name="clipboard_description">Буфер обмена позволяет перемещать элементы непосредственно в буфер обмена. Элементы также можно перетаскивать непосредственно из буфера обмена, когда они присутствуют.</string>
+  <string name="keycode_description">Keycode buttons allow keyboard keys to be added to the navigation bar. When pressed they emulate the selected keyboard key. First the key must be selected for the button, followed by an image to be shown on the button.</string>
   <string name="start">В начале</string>
   <string name="center">В середине</string>
   <string name="end">В конце</string>
   <string name="space">Разделитель</string>
+  <string name="menu_ime">Переключатель меню/клавиатуры</string>
   <string name="select_button">Выберите кнопку для добавления</string>
   <string name="add_button">Добавить кнопку</string>
   <string name="save">Сохранить</string>
   <string name="reset">Сброс</string>
+  <string name="select_keycode">Выберите клавиатуру</string>
   <string name="left">Слева</string>
   <string name="right">Справа</string>
   <string name="navbar_editor_title">Редактор</string>
@@ -154,5 +157,12 @@
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
   <string name="clear_recents">Закрыть все недавние</string>
+  <string name="quick_settings_roaming_title">Индикатор роуминга</string>
+  <string name="quick_settings_roaming_summary">Better hope you know what you are doing if you touch this</string>
   <!-- Navigation bar dpad -->
+  <string name="accessibility_dpad_left">Курсор влево</string>
+  <string name="accessibility_dpad_right">Курсор вправо</string>
+  <!-- Heads up snooze toast -->
+  <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s </xliff:g> - Всплывающие уведомления будут приостановлены на 1 минуту.</string>
+  <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> - Всплывающие уведомления будут приостановлены на <xliff:g id="number">%d</xliff:g> минут.</string>
 </resources>

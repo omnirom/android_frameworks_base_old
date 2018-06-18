@@ -162,4 +162,5 @@
   <!-- Navigation bar dpad -->
   <string name="accessibility_dpad_left">Curseur à gauche</string>
   <string name="accessibility_dpad_right">Curseur à droite</string>
+  <!-- Heads up snooze toast -->
 </resources>

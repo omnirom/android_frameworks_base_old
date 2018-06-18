@@ -156,4 +156,5 @@
   <string name="clear_recents">Alle Löschen</string>
   <string name="quick_settings_roaming_title">Roaming-Anzeige</string>
   <!-- Navigation bar dpad -->
+  <!-- Heads up snooze toast -->
 </resources>
