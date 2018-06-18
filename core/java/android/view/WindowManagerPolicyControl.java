@@ -63,6 +63,7 @@ public class WindowManagerPolicyControl {
     private static Filter sImmersivePreconfirmationsFilter;
     private static Filter sImmersiveStatusFilter;
     private static Filter sImmersiveNavigationFilter;
+    private static boolean sTmpFullImmersiveStyle;
 
     /**
      * Accessible constants for Settings
@@ -76,18 +77,20 @@ public class WindowManagerPolicyControl {
     public static int getSystemUiVisibility(WindowState win, LayoutParams attrs) {
         attrs = attrs != null ? attrs : win.getAttrs();
         int vis = win != null ? win.getSystemUiVisibility() : attrs.systemUiVisibility;
-        if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)
+        if (sTmpFullImmersiveStyle
+                || (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)
                 && (sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_FULL ||
-                sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_STATUS))  {
+                sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_STATUS)))  {
             vis |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
             vis &= ~(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.STATUS_BAR_TRANSLUCENT);
         }
-        if (sImmersiveNavigationFilter != null && sImmersiveNavigationFilter.matches(attrs)
+        if (sTmpFullImmersiveStyle
+                || (sImmersiveNavigationFilter != null && sImmersiveNavigationFilter.matches(attrs)
                 && (sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_FULL ||
-                sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_NAVIGATION)) {
+                sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_NAVIGATION))) {
             vis |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -101,16 +104,18 @@ public class WindowManagerPolicyControl {
         attrs = attrs != null ? attrs : win.getAttrs();
         int flags = attrs.flags;
 
-        if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)
+        if (sTmpFullImmersiveStyle
+                || (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)
                 && (sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_FULL ||
-                sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_STATUS)) {
+                sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_STATUS))) {
             flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
             flags &= ~(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
                     | WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
         }
-        if (sImmersiveNavigationFilter != null && sImmersiveNavigationFilter.matches(attrs)
+        if (sTmpFullImmersiveStyle
+                || (sImmersiveNavigationFilter != null && sImmersiveNavigationFilter.matches(attrs)
                 && (sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_FULL ||
-                sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_NAVIGATION)) {
+                sDefaultImmersiveStyle == ImmersiveDefaultStyles.IMMERSIVE_NAVIGATION))) {
             flags &= ~WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
         }
         return flags;
@@ -120,9 +125,10 @@ public class WindowManagerPolicyControl {
         attrs = attrs != null ? attrs : win.getAttrs();
         int privateFlags = attrs.privateFlags;
 
-        if (sImmersiveStatusFilter != null && sImmersiveNavigationFilter != null &&
-                sImmersiveStatusFilter.isEnabledForAll()
-                && sImmersiveNavigationFilter.isEnabledForAll()) {
+        if (sTmpFullImmersiveStyle
+                || (sImmersiveStatusFilter != null && sImmersiveNavigationFilter != null
+                && sImmersiveStatusFilter.isEnabledForAll()
+                && sImmersiveNavigationFilter.isEnabledForAll())) {
 
             if ((attrs.flags & LayoutParams.FLAG_FULLSCREEN) == 0) {
                 privateFlags |= LayoutParams.PRIVATE_FLAG_WAS_NOT_FULLSCREEN;
@@ -167,7 +173,8 @@ public class WindowManagerPolicyControl {
 
     public static int adjustClearableFlags(WindowState win, int clearableFlags) {
         final LayoutParams attrs = win != null ? win.getAttrs() : null;
-        if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)) {
+        if (sTmpFullImmersiveStyle
+                || (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs))) {
             clearableFlags &= ~View.SYSTEM_UI_FLAG_FULLSCREEN;
         }
         return clearableFlags;
@@ -182,6 +189,9 @@ public class WindowManagerPolicyControl {
     public static void reloadFromSetting(Context context) {
         reloadStyleFromSetting(context, Settings.Global.POLICY_CONTROL_STYLE);
         reloadFromSetting(context, Settings.Global.POLICY_CONTROL);
+        sTmpFullImmersiveStyle = Settings.Global.getInt(context.getContentResolver(),
+                    Settings.Global.OVERRIDE_POLICY_CONTROL, 0) == 1;
+        if (DEBUG) Slog.d(TAG, "sTmpFullImmersiveStyle " + sTmpFullImmersiveStyle);
     }
 
     public static void reloadFromSetting(Context context, String key) {

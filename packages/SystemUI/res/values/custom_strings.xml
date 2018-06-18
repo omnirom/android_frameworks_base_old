@@ -187,4 +187,8 @@
     <!-- Heads up snooze toast -->
     <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s</xliff:g> - Peeking notification are snoozing for 1 minute.</string>
     <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> - Peeking notifications are snoozing for <xliff:g id="number">%d</xliff:g> minutes.</string>
+
+    <string name="quick_settings_expanded_desktop_label">Expanded desktop</string>
+    <string name="accessibility_quick_settings_expanded_desktop_on">Expanded desktop is on</string>
+    <string name="accessibility_quick_settings_expanded_desktop_off">Expanded desktop is off</string>
 </resources>
