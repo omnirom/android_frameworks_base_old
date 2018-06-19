@@ -191,4 +191,8 @@
     <string name="quick_settings_expanded_desktop_label">Expanded desktop</string>
     <string name="accessibility_quick_settings_expanded_desktop_on">Expanded desktop is on</string>
     <string name="accessibility_quick_settings_expanded_desktop_off">Expanded desktop is off</string>
+
+    <string name="quick_settings_game_mode_label">Game mode</string>
+    <string name="accessibility_quick_settings_game_mode_on">Game mode is on</string>
+    <string name="accessibility_quick_settings_game_mode_off">Game mode is off</string>
 </resources>

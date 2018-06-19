@@ -4748,6 +4748,11 @@ public final class Settings {
                 "lockscreen_digital_clock_bold_hour";
 
         /**
+         * @hide
+         */
+        public static final String SYSTEM_GAME_MODE_ENABLE = "system_game_mode_enable";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -5123,6 +5128,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(LOCKSCREEN_OMNI_CLOCK_MINUTE_COLOR);
             PRIVATE_SETTINGS.add(LOCKSCREEN_DIGITAL_CLOCK_TWO_LINES);
             PRIVATE_SETTINGS.add(LOCKSCREEN_DIGITAL_CLOCK_BOLD_HOUR);
+            PRIVATE_SETTINGS.add(SYSTEM_GAME_MODE_ENABLE);
         }
 
         /**
