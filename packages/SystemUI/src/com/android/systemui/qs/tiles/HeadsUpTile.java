@@ -39,7 +39,7 @@ public class HeadsUpTile extends QSTileImpl<BooleanState> {
     public HeadsUpTile(QSHost host) {
         super(host);
 
-        mSetting = new GlobalSetting(mContext, mHandler, Global.HEADS_UP_NOTIFICATIONS_ENABLED) {
+        mSetting = new GlobalSetting(mContext, mHandler, Global.HEADS_UP_NOTIFICATIONS_ENABLED, 1) {
             @Override
             protected void handleValueChanged(int value) {
                 handleRefreshState(value);
@@ -117,6 +117,8 @@ public class HeadsUpTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleSetListening(boolean listening) {
-        // Do nothing
+        if (mSetting != null) {
+            mSetting.setListening(listening);
+        }
     }
 }

@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.provider.Settings;
+import android.provider.Settings.System;
 import android.service.quicksettings.Tile;
 
 import com.android.systemui.qs.QSHost;
@@ -29,25 +30,19 @@ import com.android.systemui.R;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
-public class KeyDisableTile extends QSTileImpl<BooleanState> {
-    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_key_disable_on);
+public class GameModeTile extends QSTileImpl<BooleanState> {
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_game_mode_on);
     private final SystemSetting mSetting;
 
-    public KeyDisableTile(QSHost host) {
+    public GameModeTile(QSHost host) {
         super(host);
-        mSetting = new SystemSetting(mContext, mHandler, Settings.System.HARDWARE_KEYS_DISABLE, 0) {
+
+        mSetting = new SystemSetting(mContext, mHandler, System.SYSTEM_GAME_MODE_ENABLE, 0) {
             @Override
             protected void handleValueChanged(int value) {
                 handleRefreshState(value);
             }
         };
-    }
-
-    @Override
-    public boolean isAvailable() {
-        final int deviceKeys = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_deviceHardwareKeys);
-        return deviceKeys != 0;
     }
 
     @Override
@@ -61,12 +56,6 @@ public class KeyDisableTile extends QSTileImpl<BooleanState> {
         refreshState();
     }
 
-    private void setEnabled(boolean enabled) {
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.HARDWARE_KEYS_DISABLE,
-                enabled ? 1 : 0);
-    }
-
     @Override
     public Intent getLongClickIntent() {
         return null;
@@ -74,7 +63,22 @@ public class KeyDisableTile extends QSTileImpl<BooleanState> {
 
     @Override
     public CharSequence getTileLabel() {
-        return mContext.getString(R.string.quick_settings_key_disable_label);
+        return mContext.getString(R.string.quick_settings_game_mode_label);
+    }
+
+    private void setEnabled(boolean enabled) {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.OVERRIDE_POLICY_CONTROL,
+                enabled ? 1 : 0);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.HARDWARE_KEYS_DISABLE,
+                enabled ? 1 : 0);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
+                enabled ? 0 : 1);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SYSTEM_GAME_MODE_ENABLE,
+                enabled ? 1 : 0);
     }
 
     @Override
@@ -83,22 +87,33 @@ public class KeyDisableTile extends QSTileImpl<BooleanState> {
             return;
         }
         final int value = arg instanceof Integer ? (Integer)arg : mSetting.getValue();
-        final boolean keysDisabled = value != 0;
+        final boolean gameMode = value != 0;
         if (state.slash == null) {
             state.slash = new SlashState();
         }
         state.icon = mIcon;
-        state.value = keysDisabled;
-        state.slash.isSlashed = state.value;
-        state.label = mContext.getString(R.string.quick_settings_key_disable_label);
-        if (keysDisabled) {
+        state.value = gameMode;
+        state.slash.isSlashed = !state.value;
+        state.label = mContext.getString(R.string.quick_settings_game_mode_label);
+        if (gameMode) {
             state.contentDescription =  mContext.getString(
-                    R.string.accessibility_quick_settings_key_disable_on);
+                    R.string.accessibility_quick_settings_game_mode_on);
             state.state = Tile.STATE_ACTIVE;
         } else {
             state.contentDescription =  mContext.getString(
-                    R.string.accessibility_quick_settings_key_disable_off);
+                    R.string.accessibility_quick_settings_game_mode_off);
             state.state = Tile.STATE_INACTIVE;
+        }
+    }
+
+    @Override
+    protected String composeChangeAnnouncement() {
+        if (mState.value) {
+            return mContext.getString(
+                    R.string.accessibility_quick_settings_game_mode_on);
+        } else {
+            return mContext.getString(
+                    R.string.accessibility_quick_settings_game_mode_off);
         }
     }
 
