@@ -38,7 +38,7 @@ public class ExpandedDesktopTile extends QSTileImpl<BooleanState> {
     public ExpandedDesktopTile(QSHost host) {
         super(host);
 
-        mSetting = new GlobalSetting(mContext, mHandler, Global.OVERRIDE_POLICY_CONTROL) {
+        mSetting = new GlobalSetting(mContext, mHandler, Global.OVERRIDE_POLICY_CONTROL, 0) {
             @Override
             protected void handleValueChanged(int value) {
                 handleRefreshState(value);
@@ -116,6 +116,8 @@ public class ExpandedDesktopTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleSetListening(boolean listening) {
-        // Do nothing
+        if (mSetting != null) {
+            mSetting.setListening(listening);
+        }
     }
 }
