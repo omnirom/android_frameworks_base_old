@@ -19,26 +19,19 @@ package com.android.systemui.qs;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
-import android.provider.Settings.Global;
+import android.provider.Settings.System;
 
 import com.android.systemui.statusbar.policy.Listenable;
 
-/** Helper for managing a global setting. **/
-public abstract class GlobalSetting extends ContentObserver implements Listenable {
+/** Helper for managing a system setting. **/
+public abstract class SystemSetting extends ContentObserver implements Listenable {
     private final Context mContext;
     private final String mSettingName;
     private final int mDefaultValue;
 
     protected abstract void handleValueChanged(int value);
 
-    public GlobalSetting(Context context, Handler handler, String settingName) {
-        super(handler);
-        mContext = context;
-        mSettingName = settingName;
-        mDefaultValue = 0;
-    }
-
-    public GlobalSetting(Context context, Handler handler, String settingName, int defaultValue) {
+    public SystemSetting(Context context, Handler handler, String settingName, int defaultValue) {
         super(handler);
         mContext = context;
         mSettingName = settingName;
@@ -46,18 +39,18 @@ public abstract class GlobalSetting extends ContentObserver implements Listenabl
     }
 
     public int getValue() {
-        return Global.getInt(mContext.getContentResolver(), mSettingName, mDefaultValue);
+        return System.getInt(mContext.getContentResolver(), mSettingName, mDefaultValue);
     }
 
     public void setValue(int value) {
-        Global.putInt(mContext.getContentResolver(), mSettingName, value);
+        System.putInt(mContext.getContentResolver(), mSettingName, value);
     }
 
     @Override
     public void setListening(boolean listening) {
         if (listening) {
             mContext.getContentResolver().registerContentObserver(
-                    Global.getUriFor(mSettingName), false, this);
+                    System.getUriFor(mSettingName), false, this);
         } else {
             mContext.getContentResolver().unregisterContentObserver(this);
         }
