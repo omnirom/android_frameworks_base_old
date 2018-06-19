@@ -268,7 +268,7 @@ public class BatteryViewManager implements TunerService.Tunable {
             ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);
-            if (mLocation == BATTERY_LOCATION_AMBIENT) {
+            if (mLocation == BATTERY_LOCATION_AMBIENT && mBatteryStyle != 3) {
                 int margin = mContext.getResources().getDimensionPixelSize(R.dimen.battery_margin_ambient);
                 lp.setMargins(0, 0, margin, 0);
             }
