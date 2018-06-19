@@ -35,6 +35,7 @@ import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.ExpandedDesktopTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
+import com.android.systemui.qs.tiles.GameModeTile;
 import com.android.systemui.qs.tiles.GoogleAssistTile;
 import com.android.systemui.qs.tiles.GoogleNowTile;
 import com.android.systemui.qs.tiles.GoogleVoiceAssistTile;
@@ -99,6 +100,7 @@ public class QSFactoryImpl implements QSFactory {
         else if (tileSpec.equals("google")) return new GoogleNowTile(mHost);
         else if (tileSpec.equals("sync")) return new SyncTile(mHost);
         else if (tileSpec.equals("desktop")) return new ExpandedDesktopTile(mHost);
+        else if (tileSpec.equals("game")) return new GameModeTile(mHost);
         // Intent tiles.
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(mHost, tileSpec);
         else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(mHost, tileSpec);
