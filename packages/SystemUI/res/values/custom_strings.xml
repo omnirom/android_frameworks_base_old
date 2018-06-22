@@ -148,4 +148,10 @@
     <!-- Partial screenshot -->
     <string name="global_screenshot_selector_capture_description">Capture partial screenshot</string>
     <string name="global_screenshot_selector_cancel_description">Cancel partial screenshot</string>
+
+    <!-- Immersive tile -->
+    <string name="quick_settings_immersive_tile">Immersive mode</string>
+    <string name="quick_settings_immersive_tile_statusbar">Immersive statusbar</string>
+    <string name="quick_settings_immersive_tile_navbar">Immersive navbar</string>
+    <string name="quick_settings_immersive_tile_full">Immersive full</string>
 </resources>

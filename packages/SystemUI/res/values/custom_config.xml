@@ -23,7 +23,7 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_extra" translatable="false">
-        aod,caffeine,nfc,adb_network,scr,weather,heads_up
+        aod,caffeine,nfc,adb_network,scr,weather,heads_up,immersive
     </string>
 
     <!-- Color of the FOD view -->
