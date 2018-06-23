@@ -154,7 +154,9 @@ public class BinaryClockView extends LinearLayout implements IKeyguardClockView 
 
     @Override
     public void refreshAlarmStatus(AlarmManager.AlarmClockInfo nextAlarm) {
-        if (nextAlarm != null) {
+        boolean showAlarm = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.HIDE_LOCKSCREEN_ALARM, 0, UserHandle.USER_CURRENT) == 0;
+        if (showAlarm && nextAlarm != null) {
             String alarm = KeyguardStatusView.formatNextAlarm(mContext, nextAlarm);
             mAlarmStatusView.setText(alarm);
             mAlarmStatusView.setContentDescription(
