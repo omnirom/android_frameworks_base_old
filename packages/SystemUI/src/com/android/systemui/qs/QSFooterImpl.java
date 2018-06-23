@@ -132,8 +132,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mAlarmStatusCollapsed = findViewById(R.id.alarm_status_collapsed);
         mAlarmStatus = findViewById(R.id.alarm_status);
 
-        mDate.setOnClickListener(this);
-        mAlarmStatus.setOnClickListener(this);
+        mDateTimeGroup.setOnClickListener(this);
 
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
@@ -373,22 +372,19 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
             } else {
                 startSettingsActivity();
             }
-        } else if (v == mAlarmStatus) {
-            Dependency.get(MetricsLogger.class).action(ACTION_QS_DATE,
-                    mNextAlarm != null);
-            if (mNextAlarm != null) {
+        } else if (v == mDateTimeGroup) {
+            if (mAlarmShowing) {
+                Dependency.get(MetricsLogger.class).action(ACTION_QS_DATE,
+                        true);
                 PendingIntent showIntent = mNextAlarm.getShowIntent();
                 mActivityStarter.startPendingIntentDismissingKeyguard(showIntent);
-            } else {
-                mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
-                        AlarmClock.ACTION_SHOW_ALARMS), 0);
+           } else {
+                Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
+                builder.appendPath("time");
+                builder.appendPath(Long.toString(System.currentTimeMillis()));
+                Intent todayIntent = new Intent(Intent.ACTION_VIEW, builder.build());
+                mActivityStarter.postStartActivityDismissingKeyguard(todayIntent, 0);
             }
-        } else if (v == mDate) {
-            Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
-            builder.appendPath("time");
-            builder.appendPath(Long.toString(System.currentTimeMillis()));
-            Intent todayIntent = new Intent(Intent.ACTION_VIEW, builder.build());
-            mActivityStarter.postStartActivityDismissingKeyguard(todayIntent, 0);
         }
     }
 
