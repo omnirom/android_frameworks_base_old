@@ -536,7 +536,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final String PACKAGE_SCHEME = "package";
 
-    private static final String[] PACKAGE_OVERLAY_DIRS = { "/vendor/overlay", "/system/overlay" };
+    private static final String[] PACKAGE_OVERLAY_DIRS = { "/system/overlay", "/vendor/overlay" };
 
     /** Permission grant: not grant the permission. */
     private static final int GRANT_DENIED = 1;
