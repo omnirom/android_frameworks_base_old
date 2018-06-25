@@ -20,12 +20,25 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">ブートローダーへ再起動</string>
+  <string name="reboot_to_bootloader_message">ブートローダーに再起動しています\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">リカバリーモードへ再起動</string>
+  <string name="reboot_to_recovery_message">リカバリーモードへ再起動しています\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">再起動</string>
+  <string name="reboot_system_message">再起動しています\u2026</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">パッケージの署名を偽装</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">アプリが別のアプリに偽装することを許可します。悪意のあるアプリがこれを使用してプライベートなアプリデータにアクセスする可能性があります。注意してこの許可を与えてください！</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">画面ロックを解除するには、戻るボタンを押し続けてください。</string>
+  <string name="app_unpin_message">アプリの固定を解除しました</string>
   <!-- back kill -->
+  <string name="app_killed_message">アプリを終了しました</string>
   <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_accessFontManager"> フォントマネージャーにアクセス</string>
   <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_accessFontManager">アプリのフォントマネージャーへのアクセスを許可する</string>
 </resources>

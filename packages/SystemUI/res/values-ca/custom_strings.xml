@@ -19,25 +19,150 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="global_action_reboot">Reinici</string>
+  <string name="global_action_reboot_more">Reinici\u2026</string>
+  <string name="global_action_reboot_sub">Sistema</string>
+  <string name="global_action_reboot_recovery">Recuperació</string>
+  <string name="global_action_reboot_bootloader">Carregador d\'arrencada</string>
+  <string name="global_action_dismissable_dialog_text">S\'ha inhabilitat el reinici avançat.\nVoleu reiniciar\uoo3f</string>
+  <string name="global_action_dnaa">No ho tornis a mostrar</string>
+  <string name="global_action_settings">Ajustaments</string>
+  <string name="qs_menu_item_columns">Columnes</string>
+  <string name="qs_menu_item_columns_landscape">Columnes en horitzontal</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Restableix</string>
+  <string name="qs_menu_item_titles">Mostra les etiquetes</string>
+  <string name="qs_menu_item_rows">Files</string>
+  <string name="qs_menu_item_rows_one">1</string>
+  <string name="qs_menu_item_rows_two">2</string>
+  <string name="qs_menu_item_rows_three">3</string>
+  <string name="qs_menu_item_rows_four">4</string>
+  <string name="qs_menu_item_scroll">Desplaçament de la barra ràpida</string>
+  <string name="qs_menu_item_qs_columns">Columnes de la barra ràpida</string>
+  <string name="tuner_quick_settings">Ajustos ràpids</string>
+  <string name="tuner_show_brightness_mode">Mostra el commutador de mode de brillantor</string>
+  <string name="tuner_show_brightness_new">Mostra el botó lliscant de brillantor</string>
+  <string name="tuner_show_brightness_side_buttons">Mostra els botons laterals del botó lliscant de brillantor</string>
+  <string name="tuner_brightness_position_bottom">Botó lliscant a baix</string>
+  <string name="lockscreen_default">Per defecte</string>
+  <string name="lockscreen_hidden">Cap</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
+  <string name="custom_hint">Llisqueu des de la icona per iniciar</string>
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">S\'està gravant la pantalla</string>
+  <string name="screenrecord_notif_final_ticker">S\'ha gravat la pantalla amb èxit</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Gravació de la pantalla</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Atura</string>
+  <string name="screenrecord_notif_completed">S\'ha gravat la pantalla amb èxit</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Mostra el punter</string>
+  <string name="screenrecord_notif_pointer_off">Oculta el punter</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">No es pot gravar la pantalla</string>
+  <string name="notification_channel_screenrecord">Gravacions de pantalla</string>
+  <string name="screenrecord_hide_hint">Amaga la pista</string>
+  <string name="screenrecord_show_hint">Mostra la pista</string>
+  <string name="quick_settings_network_adb_enabled_label">Habilitat</string>
+  <string name="quick_settings_network_adb_disabled_label">Inhabilitat</string>
+  <string name="quick_settings_network_adb_label">ADB per xarxa</string>
+  <string name="quick_settings_network_adb_toast">No s\'ha habilitat la depuració per USB</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Això ho manté a la vista fins que ho desfixeu. Toqueu i manteniu enrere per desfixar.</string>
+  <string name="omnijaws_service_error">Error</string>
+  <string name="omnijaws_service_unkown">No hi ha dades meteorològiques</string>
+  <string name="omnijaws_service_error_long">Error en carregar les dades meteorològiques</string>
+  <string name="omnijaws_service_disabled">El servei està inhabilitat</string>
+  <string name="omnijaws_detail_header">El temps</string>
+  <string name="omnijaws_label_default">El temps</string>
+  <string name="omnijaws_current_text">Ara</string>
+  <string name="omnijaws_package_not_available">L\'OmniJaws no està disponible</string>
+  <string name="omnijaws_service_last_update">Darrera actualització:</string>
   <!-- PiP Tile -->
+  <string name="quick_settings_pip_label">PiP</string>
+  <string name="quick_settings_pip_tile_app_na">L\'app no és compatible amb PiP</string>
+  <string name="quick_settings_screenshot_label">Captura de pantalla</string>
+  <string name="quick_settings_region_screenshot_label">Captura de pantalla parcial</string>
+  <string name="quick_settings_caffeine_label">Cafeïna</string>
+  <string name="accessibility_quick_settings_caffeine_off">Cafeïna desactivada</string>
+  <string name="accessibility_quick_settings_caffeine_on">Cafeïna activada</string>
+  <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Informació d\'ubicació: mode d\'estalvi de bateria.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Informació d\'ubicació: mode de només sensors.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Informació d\'ubicació: mode d\'alta precisió.</string>
   <!-- Heads Up QS Tile -->
+  <string name="quick_settings_heads_up_label">Avisos flotants</string>
+  <string name="accessibility_quick_settings_heads_up_off">No es permeten els avisos flotants.</string>
+  <string name="accessibility_quick_settings_heads_up_on">Es permet els avisos flotants.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_off">Avisos flotants desactivats.</string>
+  <string name="accessibility_quick_settings_heads_up_changed_on">Avisos flotants activats.</string>
   <!-- Screenrecord QS tile -->
+  <string name="quick_settings_screenrecord_label">Gravació de pantalla</string>
+  <string name="quick_settings_screenrecord_lq_label">Gravació de pantalla LQ</string>
+  <string name="quick_settings_screenrecord_mq_label">Gravació de pantalla MQ</string>
+  <string name="quick_settings_screenrecord_hq_label">Gravació de pantalla HQ</string>
+  <string name="preview">Vista prèvia</string>
+  <string name="keycode">Keycode</string>
+  <string name="no_home_title">No hi ha botó inici</string>
+  <string name="no_home_message">Cal un botó inici per navegar pel dispositiu. Afegiu un botó inici abans de desar.</string>
+  <string name="clipboard_description">El porta-retalls permet arrossegar elements directament. També es pot arrossegar els elements directament fora del porta-retalls quan hi siguin.</string>
+  <string name="keycode_description">Els botons keycode permeten afegir tecles del teclat a la barra de navegació. Si es premen emulen la tecla seleccionada. Primer s\'ha de seleccionar la tecla per al botó i tot seguit una imatge que es mostrarà al botó.</string>
+  <string name="start">Inici</string>
+  <string name="center">Centre</string>
+  <string name="end">Final</string>
+  <string name="space">Espaiador</string>
+  <string name="menu_ime">Intercanviador menú / teclat</string>
+  <string name="select_button">Seleccioneu el botó a afegir</string>
+  <string name="add_button">Afegeix el botó</string>
+  <string name="save">Desa</string>
+  <string name="reset">Restableix</string>
+  <string name="select_keycode">Selecció del botó de teclat</string>
+  <string name="left">Esquerra</string>
+  <string name="right">Dreta</string>
+  <string name="navbar_editor_title">Editor</string>
+  <string name="navbar_editor_summary">Configuració de la barra de navegació</string>
   <!-- key disable QS Tile -->
+  <string name="quick_settings_key_disable_label">Desactiva les tecles</string>
+  <string name="accessibility_quick_settings_key_disable_on">Tecles habilitades.</string>
+  <string name="accessibility_quick_settings_key_disable_off">Tecles inhabilitades.</string>
   <!-- navbar disable QS Tile -->
+  <string name="quick_settings_navbar_disable_label">Inhabilita la barra de navegació</string>
+  <string name="accessibility_quick_settings_navbar_disable_on">Barra de navegació inhabilitada.</string>
+  <string name="accessibility_quick_settings_navbar_disable_off">Barra de navegació habilitada.</string>
   <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="qs_show_battery">Mostra la bateria</string>
+  <string name="qs_show_carrier">Mostra el nom dels proveïdors</string>
+  <string name="qs_show_clock">Mostra el rellotge</string>
+  <string name="qs_show_mini">Mode mini</string>
+  <string name="qs_header">Capçalera</string>
+  <string name="quick_settings_google_assist_label">Assistent</string>
+  <string name="quick_settings_google_voice_assist_label">Assistent de veu</string>
+  <string name="quick_settings_google_now_label">Canal de Google</string>
   <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Sincronizació</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Sincronització desactivada.</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Sincronització activada.</string>
   <!-- AOD QS tile -->
+  <string name="quick_settings_aod_label">AOD</string>
   <!-- Recents Panel -->
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
+  <string name="clear_recents">Tanca tots els recents</string>
+  <string name="quick_settings_roaming_title">Indicador d\'itinerància</string>
+  <string name="quick_settings_roaming_summary">Si toqueu això millor que sapigueu què esteu fent</string>
   <!-- Navigation bar dpad -->
+  <string name="accessibility_dpad_left">Cursor esquerre</string>
+  <string name="accessibility_dpad_right">Cursor dret</string>
   <!-- Heads up snooze toast -->
+  <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s</xliff:g> - Els avisos flotants s\'aplacen 1 minut.</string>
+  <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> - Els avisos flotants s\'aplacen <xliff:g id="number">%d</xliff:g> minuts.</string>
 </resources>
