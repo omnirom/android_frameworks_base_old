@@ -52,6 +52,7 @@ public class CPUInfoService extends Service {
     private static final String NUM_OF_CPUS_PATH = "/sys/devices/system/cpu/present";
     private int CPU_TEMP_DIVIDER = 1;
     private String CPU_TEMP_SENSOR = "";
+    private boolean mCpuTempAvail;
 
     private class CPUView extends View {
         private Paint mOnlinePaint;
@@ -63,7 +64,6 @@ public class CPUInfoService extends Service {
         private int mNeededWidth;
         private int mNeededHeight;
         private String mCpuTemp;
-        private boolean mCpuTempAvail;
 
         private boolean mDataAvail;
 
@@ -184,7 +184,6 @@ public class CPUInfoService extends Service {
             if(!mCpuTemp.equals("0")) {
                 canvas.drawText("Temp " + getCpuTemp(mCpuTemp) + "°C",
                         RIGHT-mPaddingRight-mMaxWidth, y-1, mOnlinePaint);
-                mCpuTempAvail = true;
                 y += mFH;
             }
 
@@ -287,6 +286,8 @@ public class CPUInfoService extends Service {
 
         CPU_TEMP_DIVIDER = getResources().getInteger(R.integer.config_cpuTempDivider);
         CPU_TEMP_SENSOR = getResources().getString(R.string.config_cpuTempSensor);
+
+        mCpuTempAvail = readOneLine(CPU_TEMP_SENSOR) != null;
 
         mView = new CPUView(this);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
