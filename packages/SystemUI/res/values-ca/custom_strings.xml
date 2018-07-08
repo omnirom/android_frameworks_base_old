@@ -45,7 +45,7 @@
   <string name="qs_menu_item_rows_four">4</string>
   <string name="qs_menu_item_scroll">Desplaçament de la barra ràpida</string>
   <string name="qs_menu_item_qs_columns">Columnes de la barra ràpida</string>
-  <string name="tuner_quick_settings">Ajustos ràpids</string>
+  <string name="tuner_quick_settings">Configuració ràpida</string>
   <string name="tuner_show_brightness_mode">Mostra el commutador de mode de brillantor</string>
   <string name="tuner_show_brightness_new">Mostra el botó lliscant de brillantor</string>
   <string name="tuner_show_brightness_side_buttons">Mostra els botons laterals del botó lliscant de brillantor</string>
@@ -75,7 +75,7 @@
   <string name="quick_settings_network_adb_label">ADB per xarxa</string>
   <string name="quick_settings_network_adb_toast">No s\'ha habilitat la depuració per USB</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
-  <string name="screen_pinning_description_back">Això ho manté a la vista fins que ho desfixeu. Toqueu i manteniu enrere per desfixar.</string>
+  <string name="screen_pinning_description_back">Això ho manté a la vista fins que ho desancoreu. Toqueu i manteniu enrere per desancorar.</string>
   <string name="omnijaws_service_error">Error</string>
   <string name="omnijaws_service_unkown">No hi ha dades meteorològiques</string>
   <string name="omnijaws_service_error_long">Error en carregar les dades meteorològiques</string>
@@ -95,9 +95,9 @@
   <string name="accessibility_quick_settings_caffeine_on">Cafeïna activada</string>
   <string name="status_bar_vpn">VPN</string>
   <!-- Advance location quick setting tile -->
-  <string name="accessibility_quick_settings_location_battery_saving">Informació d\'ubicació: mode d\'estalvi de bateria.</string>
-  <string name="accessibility_quick_settings_location_gps_only">Informació d\'ubicació: mode de només sensors.</string>
-  <string name="accessibility_quick_settings_location_high_accuracy">Informació d\'ubicació: mode d\'alta precisió.</string>
+  <string name="accessibility_quick_settings_location_battery_saving">Mode d\'ubicació: estalvi de bateria.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Mode d\'ubicació: només dispositiu.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Mode d\'ubicació: alta precisió.</string>
   <!-- Heads Up QS Tile -->
   <string name="quick_settings_heads_up_label">Avisos flotants</string>
   <string name="accessibility_quick_settings_heads_up_off">No es permeten els avisos flotants.</string>
@@ -119,7 +119,7 @@
   <string name="center">Centre</string>
   <string name="end">Final</string>
   <string name="space">Espaiador</string>
-  <string name="menu_ime">Intercanviador menú / teclat</string>
+  <string name="menu_ime">Commutador menú / teclat</string>
   <string name="select_button">Seleccioneu el botó a afegir</string>
   <string name="add_button">Afegeix el botó</string>
   <string name="save">Desa</string>
@@ -130,9 +130,9 @@
   <string name="navbar_editor_title">Editor</string>
   <string name="navbar_editor_summary">Configuració de la barra de navegació</string>
   <!-- key disable QS Tile -->
-  <string name="quick_settings_key_disable_label">Desactiva les tecles</string>
-  <string name="accessibility_quick_settings_key_disable_on">Tecles habilitades.</string>
-  <string name="accessibility_quick_settings_key_disable_off">Tecles inhabilitades.</string>
+  <string name="quick_settings_key_disable_label">Inhabilita les tecles</string>
+  <string name="accessibility_quick_settings_key_disable_on">Tecles inhabilitades.</string>
+  <string name="accessibility_quick_settings_key_disable_off">Tecles habilitades.</string>
   <!-- navbar disable QS Tile -->
   <string name="quick_settings_navbar_disable_label">Inhabilita la barra de navegació</string>
   <string name="accessibility_quick_settings_navbar_disable_on">Barra de navegació inhabilitada.</string>
@@ -140,7 +140,7 @@
   <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_data_connection_hspap">HSPA+</string>
   <string name="qs_show_battery">Mostra la bateria</string>
-  <string name="qs_show_carrier">Mostra el nom dels proveïdors</string>
+  <string name="qs_show_carrier">Mostra el nom de l\'operador</string>
   <string name="qs_show_clock">Mostra el rellotge</string>
   <string name="qs_show_mini">Mode mini</string>
   <string name="qs_header">Capçalera</string>
