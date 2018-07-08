@@ -163,4 +163,6 @@
   <string name="accessibility_dpad_left">游標向左</string>
   <string name="accessibility_dpad_right">游標向右</string>
   <!-- Heads up snooze toast -->
+  <string name="heads_up_snooze_message_one_minute"><xliff:g id="string">%s</xliff:g> - 預覽通知正在打盹1分鐘。</string>
+  <string name="heads_up_snooze_message"><xliff:g id="string">%s</xliff:g> - 預覽通知正在打盹 <xliff:g id="number">%d</xliff:g> 分鐘。</string>
 </resources>

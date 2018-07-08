@@ -152,7 +152,7 @@
   <string name="accessibility_quick_settings_sync_changed_off">同期をオフにしました</string>
   <string name="accessibility_quick_settings_sync_changed_on">同期をオンにしました</string>
   <!-- AOD QS tile -->
-  <string name="quick_settings_aod_label">Always on display</string>
+  <string name="quick_settings_aod_label">Always On Display</string>
   <!-- Recents Panel -->
   <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. [CHAR LIMIT=10]-->
