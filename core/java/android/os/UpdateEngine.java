@@ -388,6 +388,17 @@ public class UpdateEngine {
     }
 
     /**
+     * @hide
+     */
+    public void setPerformanceMode(boolean enable) {
+        try {
+            mUpdateEngine.setPerformanceMode(enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Suspends an in-progress update. This can be undone by calling
      * {@link #resume}.
      */
