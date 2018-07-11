@@ -100,8 +100,12 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
             if (mBattery != null) {
                 animCollection.add(animateTransitionTo(mBattery, newAlphaBC));
             }
-            animCollection.add(animateTransitionTo(mClock, newAlphaBC));
-            animCollection.add(animateTransitionTo(mLeftClock, newAlphaBC));
+            if (mClock.isEnabled()) {
+                animCollection.add(animateTransitionTo(mClock, newAlphaBC));
+            }
+            if (mLeftClock.isEnabled()) {
+                animCollection.add(animateTransitionTo(mLeftClock, newAlphaBC));
+            }
             animCollection.add(animateTransitionTo(mLogoIcon, newAlpha));
             animCollection.add(animateTransitionTo(mNetworkTraffic, newAlpha));
             if (mBatteryContainer != null) {
@@ -121,8 +125,12 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
             if (mBattery != null) {
                 mBattery.setAlpha(newAlphaBC);
             }
-            mClock.setAlpha(newAlphaBC);
-            mLeftClock.setAlpha(newAlphaBC);
+            if (mClock.isEnabled()) {
+                mClock.setAlpha(newAlphaBC);
+            }
+            if (mLeftClock.isEnabled()) {
+                mLeftClock.setAlpha(newAlphaBC);
+            }
             mLogoIcon.setAlpha(newAlpha);
             mNetworkTraffic.setAlpha(newAlpha);
             if (mBatteryContainer != null) {

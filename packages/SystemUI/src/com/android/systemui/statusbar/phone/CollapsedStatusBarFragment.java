@@ -76,6 +76,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private NetworkTraffic mNetworkTraffic;
     private View mClock;
     private View mLeftClock;
+    private LinearLayout mLeftSystemIconArea;
 
     private class OmniSettingsObserver extends ContentObserver {
         OmniSettingsObserver(Handler handler) {
@@ -176,6 +177,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mSignalClusterView);
         mOmniLogo = mStatusBar.findViewById(R.id.status_bar_logo);
         mNetworkTraffic = (NetworkTraffic) mStatusBar.findViewById(R.id.networkTraffic);
+        mLeftSystemIconArea = mStatusBar.findViewById(R.id.left_system_icon_area);
         updateSettings(false);
         mNetworkTraffic.updateSettings();
         ((Clock)mClock).updateSettings();
@@ -282,31 +284,20 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     public void hideSystemIconArea(boolean animate) {
         animateHide(mSystemIconArea, animate, true);
+        animateHide(mLeftSystemIconArea, animate, true);
     }
 
     public void showSystemIconArea(boolean animate) {
         animateShow(mSystemIconArea, animate);
+        animateShow(mLeftSystemIconArea, animate);
     }
 
     public void hideNotificationIconArea(boolean animate) {
         animateHide(mNotificationIconAreaInner, animate, true);
-        if (mShowLogo) {
-            animateHide(mOmniLogo, animate, true);
-        }
-
-        if (((Clock)mLeftClock).isEnabled()) {
-            animateHide(mLeftClock, animate, true);
-        }
     }
 
     public void showNotificationIconArea(boolean animate) {
         animateShow(mNotificationIconAreaInner, animate);
-        if (mShowLogo) {
-            animateShow(mOmniLogo, animate);
-        }
-        if (((Clock)mLeftClock).isEnabled()) {
-            animateShow(mLeftClock, animate);
-        }
     }
 
     /**
@@ -378,14 +369,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mShowLogo = Settings.System.getIntForUser(
                 getContext().getContentResolver(), Settings.System.STATUS_BAR_LOGO, 0,
                 UserHandle.USER_CURRENT) == 1;
-        if (mNotificationIconAreaInner != null) {
-            if (mShowLogo) {
-                if (mNotificationIconAreaInner.getVisibility() == View.VISIBLE) {
-                    animateShow(mOmniLogo, animate);
-                }
-            } else {
-                animateHide(mOmniLogo, animate, false);
-            }
-        }
+        mOmniLogo.setVisibility(mShowLogo ? View.VISIBLE : View.GONE);
     }
 }
