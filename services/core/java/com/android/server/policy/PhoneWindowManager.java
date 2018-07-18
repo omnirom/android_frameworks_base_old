@@ -3946,10 +3946,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         return -1;
                     }
                 }
+            } else {
+                // there is one action we could trigger here from keyguard thats important
+                // and thats back key to hide e.g. keypad
+                if (getCustomKeyAction(keyCode) == KEY_ACTION_BACK) {
+                    if (!down) {
+                        performKeyAction(KEY_ACTION_BACK);
+                    }
+                }
             }
             return -1;
         } else if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (!virtualKey) {
+                if (keyguardOn) {
+                    // shortcut for back key in lock screen
+                    if (!isCustomKeyAction(keyCode)) {
+                        if (!down) {
+                            performKeyAction(KEY_ACTION_BACK);
+                        }
+                    }
+                    return -1;
+                }
                 if (down) {
                     if (repeatCount == 0) {
                         if (isCustomKeyAction(keyCode)) {
