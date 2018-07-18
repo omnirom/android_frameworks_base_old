@@ -3952,7 +3952,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (!virtualKey) {
                 if (down) {
                     if (repeatCount == 0) {
-                        if (isCustomKeyAction(keyCode)) {
+                        if (!keyguardOn && isCustomKeyAction(keyCode)) {
                             doDownKeyAction(getCustomKeyAction(keyCode));
                             mDoCustomAction = true;
                             return -1;
@@ -3960,8 +3960,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         doDownKeyAction(KEY_ACTION_BACK);
                     }
                 } else {
-                    if (doUpKeyAction(keyCode, canceled) == -1) {
-                        return -1;
+                    if (!keyguardOn) {
+                        if (doUpKeyAction(keyCode, canceled) == -1) {
+                            return -1;
+                        }
                     }
                     // back action is simple to continue and pass further
                 }
