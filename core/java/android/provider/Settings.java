@@ -4916,6 +4916,11 @@ public final class Settings {
         public static final String NAVIGATION_BAR_MENU_ARROW_KEYS = "navigation_bar_menu_arrow_keys";
 
         /**
+         * @hide
+         */
+        public static final String USE_BOTTOM_GESTURE_NAVIGATION = "use_bottom_gesture_navigation";
+
+        /**
          * These are all public system settings
          *
          * @hide
@@ -5120,6 +5125,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SYSTEM_PROXI_CHECK_ENABLED);
             PRIVATE_SETTINGS.add(ASPECT_RATIO_APPS_LIST);
             PRIVATE_SETTINGS.add(ASPECT_RATIO_APPS_ENABLED);
+            PRIVATE_SETTINGS.add(USE_BOTTOM_GESTURE_NAVIGATION);
             PRIVATE_SETTINGS.add(NAVIGATION_BAR_MENU_ARROW_KEYS);
             PRIVATE_SETTINGS.add(HEADS_UP_NOTIFICATION_SNOOZE);
             PRIVATE_SETTINGS.add(HEADS_UP_TIMEOUT);
