@@ -24,6 +24,7 @@ import android.graphics.PixelFormat;
 import android.provider.Settings.Secure;
 import android.support.annotation.VisibleForTesting;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +47,7 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
 public class RoundedCorners extends SystemUI implements Tunable {
+    private static final String TAG = "RoundedCorners";
     public static final String SIZE = "sysui_rounded_size";
     public static final String PADDING = "sysui_rounded_content_padding";
 
@@ -72,6 +74,7 @@ public class RoundedCorners extends SystemUI implements Tunable {
     }
 
     private void setupRounding() {
+        Log.i(TAG, "setupRounding " + mRoundedDefault);
         mOverlay = LayoutInflater.from(mContext)
                 .inflate(R.layout.rounded_corners, null);
         mOverlay.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
@@ -132,6 +135,7 @@ public class RoundedCorners extends SystemUI implements Tunable {
     }
 
     private void setupPadding(int padding) {
+        Log.i(TAG, "setupPadding " + padding);
         // Add some padding to all the content near the edge of the screen.
         StatusBar sb = getComponent(StatusBar.class);
         View statusBar = (sb != null ? sb.getStatusBarWindow() : null);
