@@ -28,6 +28,7 @@
     <color name="omni_color7">@color/background_floating_material_light</color>
     <color name="omni_color8"></color>
     <color name="omni_color9">#E6EEEEEE</color>
+    <color name="omni_color900">#ff212121</color>
     <color name="omni_text1">@color/primary_text_material_light</color>
     <color name="omni_text2">@color/secondary_text_material_light</color>
     <color name="omni_text3">@color/secondary_text_material_light</color>
