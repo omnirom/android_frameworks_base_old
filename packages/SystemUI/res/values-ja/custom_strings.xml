@@ -50,7 +50,7 @@
   <string name="tuner_show_brightness_new">明るさスライダーを表示する</string>
   <string name="tuner_show_brightness_side_buttons">明るさスライダーをボタンの側に表示する</string>
   <string name="tuner_brightness_position_bottom">下部の明るさスライダー</string>
-  <string name="lockscreen_default">既定</string>
+  <string name="lockscreen_default">デフォルト</string>
   <string name="lockscreen_hidden">なし</string>
   <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
   <string name="custom_hint">アイコンをスワイプして起動</string>
@@ -72,7 +72,7 @@
   <string name="screenrecord_show_hint">ヒントを表示</string>
   <string name="quick_settings_network_adb_enabled_label">有効</string>
   <string name="quick_settings_network_adb_disabled_label">無効</string>
-  <string name="quick_settings_network_adb_label">ネットワーク経由のADB</string>
+  <string name="quick_settings_network_adb_label">ネット経由のADB</string>
   <string name="quick_settings_network_adb_toast">USBデバッグが有効になっていません</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">解除しない限りその画面に固定されます。解除するには戻るボタンを長押しします。</string>
@@ -87,7 +87,7 @@
   <string name="omnijaws_service_last_update">最終更新日時：</string>
   <!-- PiP Tile -->
   <string name="quick_settings_pip_label">ピクチャーインピクチャー</string>
-  <string name="quick_settings_pip_tile_app_na">アプリはピクチャーインピクチャーをサポートしていません</string>
+  <string name="quick_settings_pip_tile_app_na">このアプリはピクチャーインピクチャーに対応していません</string>
   <string name="quick_settings_screenshot_label">スクリーンショット</string>
   <string name="quick_settings_region_screenshot_label">範囲選択してスクリーンショット</string>
   <string name="quick_settings_caffeine_label">カフェイン</string>
