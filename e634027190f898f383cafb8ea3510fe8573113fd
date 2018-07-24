@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0b4d3086_9526822f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1001070
+      },
+      "writtenOn": "2018-07-24T07:17:17Z",
+      "side": 1,
+      "message": "should be 1/2",
+      "revId": "e634027190f898f383cafb8ea3510fe8573113fd",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a6a240e_f098bc34",
+        "filename": "services/core/java/com/android/server/policy/GestureButton.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1001070
+      },
+      "writtenOn": "2018-07-24T07:17:17Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "e634027190f898f383cafb8ea3510fe8573113fd",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
