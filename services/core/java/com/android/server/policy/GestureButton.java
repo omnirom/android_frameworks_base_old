@@ -25,6 +25,7 @@ import android.os.SystemProperties;
 import android.provider.Settings.System;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -43,42 +44,44 @@ import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 public class GestureButton implements PointerEventListener {
+    private static final String TAG = "GestureButton";
     private static boolean DEBUG = true;
+
     private static final float GESTURE_KEY_DISTANCE_THRESHOLD = 80.0f;
     private static final int GESTURE_KEY_DISTANCE_TIMEOUT = 250;
     private static final float GESTURE_KEY_LONG_CLICK_MOVE = 50.0f;
     private static final int GESTURE_KEY_LONG_CLICK_TIMEOUT = 500;
-    private static final String TAG = "GestureButton";
-    static final int MSG_SEND_KEY = 6;
-    static final int MSG_SEND_SWITCH_KEY = 5;
-    static boolean mDismissInputMethod = false;
+    private static final int MSG_SEND_SWITCH_KEY = 5;
+    private static final int MSG_SEND_KEY = 6;
+    private static final int MSG_SEND_LONG_PRESS = 7;
     private static float mRecentMoveTolerance = 5.0f;
-    Context mContext;
+
     private long mDownTime;
     private float mFromX;
     private float mFromY;
-    private boolean mIsKeyguardShowing = false;
+    private boolean mIsKeyguardShowing;
     private float mLastX;
     private float mLastY;
     private int mNavigationBarPosition = 0;
-    GestureButtonHandler mGestureButtonHandler;
+    private GestureButtonHandler mGestureButtonHandler;
     private int mPreparedKeycode;
-    PhoneWindowManager mPwm;
+    private PhoneWindowManager mPwm;
     private int mScreenHeight = -1;
     private int mScreenWidth = -1;
-    private boolean mSwipeStartFromEdge = false;
+    private boolean mSwipeStartFromEdge;
     private final int mSwipeStartThreshold;
     private boolean mKeyEventHandled;
     private boolean mRecentsTriggered;
     private boolean mLongSwipePossible;
+    private int mEventDeviceId;
+    private boolean mDismissInputMethod;
+
     private OnTouchListener mTouchListener = new OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
             handleTouch(event);
             return true;
         }
     };
-
-    WindowManager mWindowManager;
 
     private class GestureButtonHandler extends Handler {
 
@@ -91,25 +94,30 @@ public class GestureButton implements PointerEventListener {
                 case MSG_SEND_SWITCH_KEY:
                     if (DEBUG) Slog.i(TAG, "MSG_SEND_SWITCH_KEY");
                     mKeyEventHandled = true;
-                    mPwm.performHapticFeedbackLw(null, 1, false);
+                    mPwm.performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
                     toggleRecentApps();
                     break;
                 case MSG_SEND_KEY:
                     if (DEBUG) Slog.i(TAG, "MSG_SEND_KEY " + mPreparedKeycode);
                     mKeyEventHandled = true;
+                    mPwm.performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
                     triggerGestureVirtualKeypress(mPreparedKeycode);
-                    mPwm.performHapticFeedbackLw(null, 1, false);
                     break;
-            }
+                case MSG_SEND_LONG_PRESS:
+                    if (DEBUG) Slog.i(TAG, "MSG_SEND_LONG_PRESS");
+                    mKeyEventHandled = true;
+                    mPwm.handleLongPressOnHome(mEventDeviceId);
+                    break;
+                }
         }
     }
 
     public GestureButton(Context context, PhoneWindowManager pwm) {
         Slog.i(TAG, "GestureButton init");
-        mContext = context;
         mPwm = pwm;
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
+        WindowManager windowManager = (WindowManager) context.getSystemService("window");
+        windowManager.getDefaultDisplay().getRealMetrics(displayMetrics);
         mScreenHeight = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
         mScreenWidth = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
         mSwipeStartThreshold = 20;
@@ -135,6 +143,7 @@ public class GestureButton implements PointerEventListener {
     private void handleTouch(MotionEvent event) {
         if (isEnabled()) {
             int action = event.getActionMasked();
+            mEventDeviceId = event.getDeviceId();
 
             if (action == MotionEvent.ACTION_DOWN || mSwipeStartFromEdge) {
                 float rawX = event.getRawX();
@@ -208,11 +217,8 @@ public class GestureButton implements PointerEventListener {
                             }
                             long deltaSinceDown = event.getEventTime() - mDownTime;
                             if (moveDistanceSinceDown < GESTURE_KEY_LONG_CLICK_MOVE) {
-                                if (deltaSinceDown > GESTURE_KEY_LONG_CLICK_TIMEOUT && !mRecentsTriggered) {
-                                    mRecentsTriggered = true;
-                                    preloadRecentApps();
-                                    mGestureButtonHandler.removeMessages(MSG_SEND_SWITCH_KEY);
-                                    mGestureButtonHandler.sendEmptyMessage(MSG_SEND_SWITCH_KEY);
+                                if (deltaSinceDown > GESTURE_KEY_LONG_CLICK_TIMEOUT) {
+                                    mGestureButtonHandler.sendEmptyMessage(MSG_SEND_LONG_PRESS);
                                 }
                             }
 
@@ -272,13 +278,6 @@ public class GestureButton implements PointerEventListener {
         if (navigationBarPosition != mNavigationBarPosition) {
             mNavigationBarPosition = navigationBarPosition;
         }
-    }
-
-    private WindowManager getWindowManager() {
-        if (mWindowManager == null) {
-            mWindowManager = (WindowManager) mContext.getSystemService("window");
-        }
-        return mWindowManager;
     }
 
     static boolean isEnabled() {
