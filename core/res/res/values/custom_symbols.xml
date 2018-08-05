@@ -77,4 +77,7 @@
   <java-symbol type="dimen" name="config_screenAspectRatio" />
 
   <java-symbol type="array" name="config_vendorPlatformSignatures" />
+
+  <java-symbol type="dimen" name="nav_gesture_swipe_min_length" />
+  <java-symbol type="dimen" name="nav_gesture_long_press_max_length" />
 </resources>
