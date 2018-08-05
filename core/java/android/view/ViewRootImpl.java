@@ -139,13 +139,11 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_INPUT_STAGES = false || LOCAL_LOGV;
     private static final boolean DEBUG_KEEP_SCREEN_ON = false || LOCAL_LOGV;
 
-    private static final float GESTURE_KEY_DISTANCE_THRESHOLD = 80.0f;
-    private static final float GESTURE_KEY_LONG_CLICK_MOVE = 50.0f;
+    private static final float GESTURE_KEY_DISTANCE_THRESHOLD = 50.0f;
     private static final long GESTURE_MOTION_QUEUE_DELAY = 200;
     private static final int MSG_GESTURE_MOTION_DOWN = 5566;
     private boolean mCheckForGestureButton = false;
     private boolean mGestureButtonActive = false;
-    private boolean mGestureButtonEnabled = true;
     private int mGestureButtonZone = 0;
     private boolean mQueueMotionConsumed = true;
     private ArrayList<MotionEvent> mBackupEventList = new ArrayList();
@@ -153,7 +151,6 @@ public final class ViewRootImpl implements ViewParent,
     private float mRawY = 0.0f;
     private int mScreenHeight = -1;
     private int mScreenWidth = -1;
-    private int mOneThirdPart = -1;
     private boolean mIsKeyguard = false;
 
     /**
@@ -540,7 +537,6 @@ public final class ViewRootImpl implements ViewParent,
         mAttachInfo.mDisplay.getRealMetrics(dm);
         mScreenHeight = Math.max(dm.widthPixels, dm.heightPixels);
         mScreenWidth = Math.min(dm.widthPixels, dm.heightPixels);
-        mOneThirdPart = (mScreenWidth / 3);
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -4832,7 +4828,14 @@ public final class ViewRootImpl implements ViewParent,
             float raw;
             boolean hit;
 
-            if (mGestureButtonEnabled && !mIsKeyguard) {
+            IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+            boolean isGestureButtonEnabled = false;
+            try {
+                isGestureButtonEnabled = wm.isGestureButtonEnabled();
+            } catch (RemoteException ex) {
+                isGestureButtonEnabled = false;
+            }
+            if (isGestureButtonEnabled && !mIsKeyguard) {
                 if (event.getPointerCount() == 1) {
                     action = event.getActionMasked();
                     rotation = 0;
@@ -4915,16 +4918,10 @@ public final class ViewRootImpl implements ViewParent,
                                 }
                                 float threshold = ViewRootImpl.GESTURE_KEY_DISTANCE_THRESHOLD;
                                 if (rotation == 0 || rotation == 2) {
-                                    if (event.getRawX() > ((float) mOneThirdPart) && event.getRawX() < ((float) (mOneThirdPart * 2))) {
-                                        threshold = ViewRootImpl.GESTURE_KEY_LONG_CLICK_MOVE;
-                                    }
                                     if (Math.abs(event.getRawY() - mRawY) > ((float) threshold)) {
                                         reachDistance = true;
                                     }
                                 } else if (rotation == 1 || rotation == 3) {
-                                    if (event.getRawY() > ((float) mOneThirdPart) && event.getRawY() < ((float) (mOneThirdPart * 2))) {
-                                        threshold = ViewRootImpl.GESTURE_KEY_LONG_CLICK_MOVE;
-                                    }
                                     if (Math.abs(event.getRawX() - mRawX) > ((float) threshold)) {
                                         reachDistance = true;
                                     }
