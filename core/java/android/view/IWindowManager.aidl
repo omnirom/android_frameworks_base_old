@@ -408,4 +408,6 @@ interface IWindowManager
      * Call screen record from WindowManager.
      */
     void screenRecordAction(int mode);
+
+    boolean isGestureButtonEnabled();
 }
