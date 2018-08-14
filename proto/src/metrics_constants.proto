@@ -6119,5 +6119,13 @@ message MetricsEvent {
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
+
+    // ACTION: Custom Omni metrics
+    OMNI_SETTINGS = 9000;
+
+    OMNI_QS_WEATHER = 9001;
+    OMNI_QS_WEATHER_DETAILS = 9002;
+
+    CUSTOM_QUICK_TILES = 9003;
   }
 }
