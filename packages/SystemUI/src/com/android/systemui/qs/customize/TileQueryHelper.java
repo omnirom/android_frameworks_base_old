@@ -78,7 +78,8 @@ public class TileQueryHelper {
     }
 
     private void addStockTiles(QSTileHost host) {
-        String possible = mContext.getString(R.string.quick_settings_tiles_stock);
+        String possible = mContext.getString(R.string.quick_settings_tiles_stock)
+                + "," + mContext.getString(R.string.quick_settings_tiles_extra);
         final ArrayList<String> possibleTiles = new ArrayList<>();
         possibleTiles.addAll(Arrays.asList(possible.split(",")));
         if (Build.IS_DEBUGGABLE) {
