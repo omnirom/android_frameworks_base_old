@@ -24,4 +24,8 @@
     <!-- to hide statusbar and qs batteryy on unknown state
         needed for battery less devices -->
     <bool name="config_battery_hide_on_unknown">false</bool>
+
+    <!-- The default tiles to display in QuickSettings -->
+    <string name="quick_settings_tiles_extra" translatable="false">
+    </string>
 </resources>
