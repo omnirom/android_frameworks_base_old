@@ -59,6 +59,16 @@ public class DeviceUtils {
         return vibrator.hasVibrator();
     }
 
+    public static boolean deviceSupportsProximitySensor(Context context) {
+        SensorManager sm = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        return sm.getDefaultSensor(TYPE_PROXIMITY) != null;
+    }
+
+    public static boolean deviceSupportsLightSensor(Context context) {
+        SensorManager sm = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        return sm.getDefaultSensor(TYPE_LIGHT) != null;
+    }
+
     public static boolean deviceSupportNavigationBar(Context context) {
         return deviceSupportNavigationBarForUser(context, UserHandle.USER_CURRENT);
     }
