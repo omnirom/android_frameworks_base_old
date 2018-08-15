@@ -188,6 +188,10 @@ import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
 import android.hardware.power.V1_0.PowerHint;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
@@ -275,7 +279,9 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenShapeHelper;
+import com.android.internal.util.omni.DeviceKeyHandler;
 import com.android.internal.util.omni.OmniSwitchConstants;
+import com.android.internal.util.omni.OmniUtils;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
@@ -290,10 +296,13 @@ import com.android.server.wm.DisplayFrames;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
+import dalvik.system.PathClassLoader;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.util.List;
 
 /**
@@ -312,6 +321,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_SPLASH_SCREEN = false;
     static final boolean DEBUG_WAKEUP = false;
+    static final boolean DEBUG_PROXI_SENSOR = false;
     static final boolean SHOW_SPLASH_SCREENS = true;
 
     // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
@@ -854,6 +864,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // omni additions start
     private boolean mOmniSwitchRecents;
+    private DeviceKeyHandler mDeviceKeyHandler;
+    private boolean mProxyIsNear;
+    private SensorManager mSensorManager;
+    private Sensor mProximitySensor;
+    private boolean mProxiWakeupCheckEnabled;
+    private boolean mProxiListenerEnabled;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -1024,6 +1040,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.OMNI_NAVIGATION_BAR_RECENTS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -2307,6 +2326,48 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 });
         mScreenshotHelper = new ScreenshotHelper(mContext);
+
+        String deviceKeyHandlerLib = mContext.getResources().getString(
+                com.android.internal.R.string.config_deviceKeyHandlerLib);
+
+        String deviceKeyHandlerClass = mContext.getResources().getString(
+                com.android.internal.R.string.config_deviceKeyHandlerClass);
+
+        if (!deviceKeyHandlerLib.isEmpty() && !deviceKeyHandlerClass.isEmpty()) {
+            try {
+                PathClassLoader loader =  new PathClassLoader(deviceKeyHandlerLib,
+                        getClass().getClassLoader());
+
+                Class<?> klass = loader.loadClass(deviceKeyHandlerClass);
+                Constructor<?> constructor = klass.getConstructor(Context.class);
+                mDeviceKeyHandler = (DeviceKeyHandler) constructor.newInstance(
+                        mContext);
+                if(DEBUG) Slog.d(TAG, "Device key handler loaded");
+            } catch (Exception e) {
+                Slog.w(TAG, "Could not instantiate device key handler "
+                        + deviceKeyHandlerClass + " from class "
+                        + deviceKeyHandlerLib, e);
+            }
+        }
+        boolean supportPowerButtonProxyCheck = mContext.getResources().getBoolean(R.bool.config_proxiSensorWakupCheck);
+        if (supportPowerButtonProxyCheck) {
+            mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
+            if (mDeviceKeyHandler != null && mDeviceKeyHandler.getCustomProxiSensor() != null) {
+                String proxySensor = mDeviceKeyHandler.getCustomProxiSensor();
+                for (Sensor sensor : mSensorManager.getSensorList(Sensor.TYPE_ALL)) {
+                    if (proxySensor.equals(sensor.getStringType())) {
+                        mProximitySensor = sensor;
+                        if (DEBUG_PROXI_SENSOR) Log.i(TAG, "mProximitySensor = " + proxySensor);
+                    }
+                }
+            }
+            if (mProximitySensor == null) {
+                mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+                if (mProximitySensor != null) {
+                    if (DEBUG_PROXI_SENSOR) Log.i(TAG, "mProximitySensor = Sensor.TYPE_PROXIMITY");
+                }
+            }
+        }
     }
 
     /**
@@ -2534,6 +2595,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mOmniSwitchRecents = Settings.System.getIntForUser(resolver,
                     Settings.System.OMNI_NAVIGATION_BAR_RECENTS, 0,
                     UserHandle.USER_CURRENT) == 1;
+            mProxiWakeupCheckEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED, 0,
+                    UserHandle.USER_CURRENT) != 0;
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
             PolicyControl.reloadFromSetting(mContext);
@@ -4042,7 +4106,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
             return -1;
         }
-
+        // Specific device key handling
+        if (mDeviceKeyHandler != null) {
+            try {
+                // The device only will consume known keys.
+                if (mDeviceKeyHandler.canHandleKeyEvent(event)) {
+                    return -1;
+                }
+            } catch (Exception e) {
+                Slog.w(TAG, "Could not dispatch event to device key handler", e);
+            }
+        }
         if (down) {
             long shortcutCode = keyCode;
             if (event.isCtrlPressed()) {
@@ -6115,6 +6189,53 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && (!isNavBarVirtKey || mNavBarVirtualKeyHapticFeedbackEnabled)
                 && event.getRepeatCount() == 0;
 
+        // Specific device key handling
+        if (mDeviceKeyHandler != null) {
+            try {
+                // The device says if we should ignore this event.
+                if (mDeviceKeyHandler.isDisabledKeyEvent(event)) {
+                    result &= ~ACTION_PASS_TO_USER;
+                    return result;
+                }
+                if (mDeviceKeyHandler.isCameraLaunchEvent(event)) {
+                    if (DEBUG_INPUT) {
+                        Slog.i(TAG, "isCameraLaunchEvent from DeviceKeyHandler");
+                    }
+                    GestureLauncherService gestureService = LocalServices.getService(
+                            GestureLauncherService.class);
+                    if (gestureService != null) {
+                        gestureService.doCameraLaunchGesture();
+                    }
+                    result &= ~ACTION_PASS_TO_USER;
+                    return result;
+                }
+                if (!interactive && mDeviceKeyHandler.isWakeEvent(event)) {
+                    if (DEBUG_INPUT) {
+                        Slog.i(TAG, "isWakeEvent from DeviceKeyHandler");
+                    }
+                    wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey, "android.policy:KEY");
+                    result &= ~ACTION_PASS_TO_USER;
+                    return result;
+                }
+                final Intent eventLaunchActivity = mDeviceKeyHandler.isActivityLaunchEvent(event);
+                if (!interactive && eventLaunchActivity != null) {
+                    if (DEBUG_INPUT) {
+                        Slog.i(TAG, "isActivityLaunchEvent from DeviceKeyHandler " + eventLaunchActivity);
+                    }
+                    wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey, "android.policy:KEY");
+                    OmniUtils.launchKeyguardDismissIntent(mContext, UserHandle.CURRENT, eventLaunchActivity);
+                    result &= ~ACTION_PASS_TO_USER;
+                    return result;
+                }
+                if (mDeviceKeyHandler.handleKeyEvent(event)) {
+                    result &= ~ACTION_PASS_TO_USER;
+                    return result;
+                }
+            } catch (Exception e) {
+                Slog.w(TAG, "Could not dispatch event to device key handler", e);
+            }
+        }
+
         // Handle special keys.
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK: {
@@ -6273,6 +6394,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 cancelPendingAccessibilityShortcutAction();
                 result &= ~ACTION_PASS_TO_USER;
                 isWakeKey = false; // wake-up will be handled separately
+                if (mProxiListenerEnabled && mProxyIsNear) {
+                    if (DEBUG_PROXI_SENSOR) Log.i(TAG, "KeyEvent.KEYCODE_POWER blocked because of mProxyIsNear");
+                    break;
+                }
                 if (down) {
                     interceptPowerKeyDown(event, interactive);
                 } else {
@@ -6496,6 +6621,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * is always considered a wake key.
      */
     private boolean isWakeKeyWhenScreenOff(int keyCode) {
+        if (mProxiListenerEnabled && mProxyIsNear) {
+            if (DEBUG_PROXI_SENSOR) Log.i(TAG, "isWakeKeyWhenScreenOff blocked because of mProxyIsNear - keyCode = " + keyCode);
+            return false;
+        }
         switch (keyCode) {
             // ignore volume keys unless docked
             case KeyEvent.KEYCODE_VOLUME_UP:
@@ -6860,6 +6989,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onFinishedWakingUp();
         }
+        if (mProxiWakeupCheckEnabled && mProximitySensor != null) {
+            if (DEBUG_PROXI_SENSOR) Log.i(TAG, "unregisterListener");
+            mSensorManager.unregisterListener(mProximitySensorListener, mProximitySensor);
+            mProxyIsNear = false;
+            mProxiListenerEnabled = false;
+        }
     }
 
     private void wakeUpFromPowerKey(long eventTime) {
@@ -6919,6 +7054,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         reportScreenStateToVrManager(false);
+
+        if (mProxiWakeupCheckEnabled && mProximitySensor != null && !mProxiListenerEnabled) {
+            mProxyIsNear = false;
+            if (DEBUG_PROXI_SENSOR) Log.i(TAG, "registerListener");
+            mSensorManager.registerListener(mProximitySensorListener, mProximitySensor,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+            mProxiListenerEnabled = true;
+        }
     }
 
     private long getKeyguardDrawnTimeout() {
@@ -9011,4 +9154,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         return false;
     }
+
+    // omni additions start
+    private SensorEventListener mProximitySensorListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (mDeviceKeyHandler != null && mDeviceKeyHandler.getCustomProxiSensor() != null) {
+                mProxyIsNear = mDeviceKeyHandler.getCustomProxiIsNear(event);
+            } else {
+                mProxyIsNear = event.values[0] < mProximitySensor.getMaximumRange();
+            }
+            if (DEBUG_PROXI_SENSOR) Log.i(TAG, "mProxyIsNear = " + mProxyIsNear);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    };
 }
