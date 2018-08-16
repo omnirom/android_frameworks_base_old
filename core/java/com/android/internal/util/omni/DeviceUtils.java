@@ -76,11 +76,9 @@ public class DeviceUtils {
     public static boolean deviceSupportNavigationBarForUser(Context context, int userId) {
         final boolean showByDefault = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_showNavigationBar);
-        /*final int hasNavigationBar = Settings.System.getIntForUser(
+        final int hasNavigationBar = Settings.System.getIntForUser(
                 context.getContentResolver(),
-                Settings.System.OMNI_NAVIGATION_BAR_SHOW, -1,
-                userId);*/
-        final int hasNavigationBar = -1;
+                Settings.System.OMNI_NAVIGATION_BAR_SHOW, -1, userId);
 
         if (hasNavigationBar == -1) {
             String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
