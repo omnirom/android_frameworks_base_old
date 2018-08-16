@@ -5633,6 +5633,11 @@ public final class Settings {
         public static final String OMNI_DEVICE_FEATURE_SETTINGS = "device_feature_settings";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_NAVIGATION_BAR_SHOW = "navbar_visibility";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5642,7 +5647,8 @@ public final class Settings {
             OMNI_SYSTEM_PROXI_CHECK_ENABLED,
             OMNI_DEVICE_PROXI_CHECK_ENABLED,
             OMNI_BUTTON_EXTRA_KEY_MAPPING,
-            OMNI_DEVICE_FEATURE_SETTINGS
+            OMNI_DEVICE_FEATURE_SETTINGS,
+            OMNI_NAVIGATION_BAR_SHOW
         };
 
         /**
@@ -5661,6 +5667,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_PROXI_CHECK_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BUTTON_EXTRA_KEY_MAPPING, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS, 2);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_SHOW, 0);
         }
     }
 
