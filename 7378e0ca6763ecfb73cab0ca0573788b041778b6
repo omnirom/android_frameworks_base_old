@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab7f4d2a_c7318f72",
+        "filename": "packages/SystemUI/res/values/custom_config.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-08-16T10:40:36Z",
+      "side": 1,
+      "message": "dont add what we dont need at the moment",
+      "revId": "7378e0ca6763ecfb73cab0ca0573788b041778b6",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6ac661a_5491e9c6",
+        "filename": "packages/SystemUI/res/values/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-08-16T10:40:36Z",
+      "side": 1,
+      "message": "dont add what you dont need for that change only - else we will never get rid of old stuff",
+      "revId": "7378e0ca6763ecfb73cab0ca0573788b041778b6",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
