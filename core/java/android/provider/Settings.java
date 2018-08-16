@@ -5544,6 +5544,12 @@ public final class Settings {
                 "show_battery_image";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_NAVIGATION_BAR_SHOW = "navbar_visibility";
+
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
