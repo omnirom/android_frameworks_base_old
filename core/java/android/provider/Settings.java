@@ -5550,6 +5550,11 @@ public final class Settings {
         public static final String OMNI_NAVIGATION_BAR_ARROW_KEYS = "navigation_bar_menu_arrow_keys";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_NAVIGATION_BAR_SHOW = "navbar_visibility";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
