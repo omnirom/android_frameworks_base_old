@@ -4580,11 +4580,11 @@ public final class Settings {
         /**
          * @hide
          */
-        public static final String OMNI_NAVIGATION_BAR_SHOW = "navigation_bar_show";
+        public static final String OMNI_NAVIGATION_BAR_SHOW = "navigation_bar_show_new";
 
         /** @hide */
         private static final Validator OMNI_NAVIGATION_BAR_SHOW_VALIDATOR =
-                BOOLEAN_VALIDATOR;
+                ANY_INTEGER_VALIDATOR;
 
         /**
          * @hide
