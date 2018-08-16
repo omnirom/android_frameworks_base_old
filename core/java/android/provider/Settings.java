@@ -4584,7 +4584,7 @@ public final class Settings {
 
         /** @hide */
         private static final Validator OMNI_NAVIGATION_BAR_SHOW_VALIDATOR =
-                BOOLEAN_VALIDATOR;
+                ANY_INTEGER_VALIDATOR;
 
         /**
          * @hide
