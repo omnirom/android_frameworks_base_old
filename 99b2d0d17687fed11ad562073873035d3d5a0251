@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "062d63e8_20a39363",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 7839,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-08-17T13:48:06Z",
+      "side": 1,
+      "message": "better move at end of the AOSP settings (before SETTINGS_TO_BACKUP) so all ours are in one place\ncompare with e.g. System",
+      "revId": "99b2d0d17687fed11ad562073873035d3d5a0251",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
