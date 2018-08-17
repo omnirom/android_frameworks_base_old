@@ -279,8 +279,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private void updateVisibilities() {
         mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
-        mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
-                TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
         mMultiUserSwitch.setVisibility(showUserSwitcher(isDemo) ? View.VISIBLE : View.INVISIBLE);
         mEdit.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
@@ -346,24 +344,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
             MetricsLogger.action(mContext,
                     mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
                             : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
-            if (mSettingsButton.isTunerClick()) {
-                Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
-                    if (TunerService.isTunerEnabled(mContext)) {
-                        TunerService.showResetRequest(mContext, () -> {
-                            // Relaunch settings so that the tuner disappears.
-                            startSettingsActivity();
-                        });
-                    } else {
-                        Toast.makeText(getContext(), R.string.tuner_toast,
-                                Toast.LENGTH_LONG).show();
-                        TunerService.setTunerEnabled(mContext, true);
-                    }
-                    startSettingsActivity();
-
-                });
-            } else {
-                startSettingsActivity();
-            }
+            startSettingsActivity();
         }
     }
 
