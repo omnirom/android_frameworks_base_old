@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "65c06aa5_da632a0e",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 7821,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-08-17T09:03:17Z",
+      "side": 1,
+      "message": "does not follow our new naming convention!",
+      "revId": "775053e75cd4ec70f25d7875f9ac2454248a1dad",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
