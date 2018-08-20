@@ -37,7 +37,7 @@ import java.util.Objects;
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
     private static final int MAX_LABEL_LINES = 2;
-    private static final boolean DUAL_TARGET_ALLOWED = false;
+    private static final boolean DUAL_TARGET_ALLOWED = true;
     private View mDivider;
     protected TextView mLabel;
     protected TextView mSecondLine;
@@ -129,8 +129,8 @@ public class QSTileView extends QSTileBaseView {
                     : View.VISIBLE);
         }
         boolean dualTarget = DUAL_TARGET_ALLOWED && state.dualTarget;
-        mExpandIndicator.setVisibility(dualTarget ? View.VISIBLE : View.GONE);
-        mExpandSpace.setVisibility(dualTarget ? View.VISIBLE : View.GONE);
+        mExpandIndicator.setVisibility(View.GONE);
+        mExpandSpace.setVisibility(View.GONE);
         mLabelContainer.setContentDescription(dualTarget ? state.dualLabelContentDescription
                 : null);
         if (dualTarget != mLabelContainer.isClickable()) {
