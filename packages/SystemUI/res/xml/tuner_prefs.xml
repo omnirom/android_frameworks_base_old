@@ -49,16 +49,8 @@
         android:title="@string/status_bar" >
 
         <com.android.systemui.tuner.StatusBarSwitch
-            android:key="rotate"
-            android:title="@string/status_bar_settings_auto_rotation" />
-
-        <com.android.systemui.tuner.StatusBarSwitch
             android:key="headset"
             android:title="@string/headset" />
-
-        <com.android.systemui.tuner.StatusBarSwitch
-            android:key="managed_profile"
-            android:title="@string/status_bar_work" />
 
         <!-- ime -->
         <!-- sync_failing -->
@@ -142,17 +134,6 @@
             android:title="@string/volume_dnd_silent"
             sysui:defValue="true"
             sysui:metricsAction="315" />
-
-    </PreferenceScreen>
-
-    <PreferenceScreen
-      android:key="doze"
-      android:title="@string/tuner_doze">
-
-        <com.android.systemui.tuner.TunerSwitch
-          android:key="doze_always_on"
-          android:title="@string/tuner_doze_always_on"
-          sysui:defValue="true" />
 
     </PreferenceScreen>
 
