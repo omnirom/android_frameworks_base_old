@@ -26,5 +26,7 @@
         aod,caffeine,adb_network
     </string>
 
+    <!-- crazy gockel -->
+    <integer name="quick_settings_num_rows_portrait">2</integer>
 </resources>
 
