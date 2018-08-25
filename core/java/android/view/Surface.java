@@ -143,7 +143,8 @@ public class Surface implements Parcelable {
             ROTATION_0,
             ROTATION_90,
             ROTATION_180,
-            ROTATION_270
+            ROTATION_270,
+            ROTATION_360
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Rotation {}
@@ -167,6 +168,11 @@ public class Surface implements Parcelable {
      * Rotation constant: 270 degree rotation.
      */
     public static final int ROTATION_270 = 3;
+
+    /**
+     * Rotation constant: 360 degree rotation.
+     */
+    public static final int ROTATION_360 = 4;
 
     /**
      * Create an empty surface, which will later be filled in by readFromParcel().

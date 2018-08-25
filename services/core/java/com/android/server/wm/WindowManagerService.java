@@ -4027,6 +4027,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
                     case Surface.ROTATION_270:
                         return Gravity.START | Gravity.BOTTOM;
+                    case Surface.ROTATION_360:
+                        return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
                 }
             }
 

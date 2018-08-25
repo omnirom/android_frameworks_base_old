@@ -24,5 +24,6 @@ message SurfaceProto {
         ROTATION_90 = 1;
         ROTATION_180 = 2;
         ROTATION_270 = 3;
+        ROTATION_360 = 4;
     }
 }

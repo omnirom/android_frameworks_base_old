@@ -505,16 +505,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSafeMode;
     private final ArraySet<WindowState> mScreenDecorWindows = new ArraySet<>();
     WindowState mStatusBar = null;
-    private final int[] mStatusBarHeightForRotation = new int[4];
+    private final int[] mStatusBarHeightForRotation = new int[5];
     WindowState mNavigationBar = null;
     boolean mHasNavigationBar = false;
     boolean mNavigationBarCanMove = false; // can the navigation bar ever move to the side?
     @NavigationBarPosition
     int mNavigationBarPosition = NAV_BAR_BOTTOM;
-    int[] mNavigationBarHeightForRotationDefault = new int[4];
-    int[] mNavigationBarWidthForRotationDefault = new int[4];
-    int[] mNavigationBarHeightForRotationInCarMode = new int[4];
-    int[] mNavigationBarWidthForRotationInCarMode = new int[4];
+    int[] mNavigationBarHeightForRotationDefault = new int[5];
+    int[] mNavigationBarWidthForRotationDefault = new int[5];
+    int[] mNavigationBarHeightForRotationInCarMode = new int[5];
+    int[] mNavigationBarWidthForRotationInCarMode = new int[5];
 
     private LongSparseArray<IShortcutService> mShortcutKeyServices = new LongSparseArray<>();
 
@@ -2684,6 +2684,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return Surface.ROTATION_180;
                 case 270:
                     return Surface.ROTATION_270;
+                case 360:
+                    return Surface.ROTATION_360;
             }
         } catch (Resources.NotFoundException e) {
             // fall through

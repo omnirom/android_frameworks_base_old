@@ -19,6 +19,7 @@ package com.android.server.wm.utils;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_360;
 import static android.view.Surface.ROTATION_90;
 
 import android.annotation.Dimension;
@@ -54,6 +55,9 @@ public class CoordinateTransforms {
             case ROTATION_270:
                 out.setRotate(90);
                 out.postTranslate(physicalHeight, 0);
+                break;
+            case ROTATION_360:
+                out.reset();
                 break;
             default:
                 throw new IllegalArgumentException("Unknown rotation: " + rotation);
