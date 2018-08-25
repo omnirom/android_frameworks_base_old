@@ -1114,8 +1114,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (localLOGV) Slog.v(TAG, "onProposedRotationChanged, rotation=" + rotation);
             Runnable r = mRunnableCache.get(rotation, null);
             if (r == null){
-                r = new UpdateRunnable(rotation);
-                mRunnableCache.put(rotation, r);
+                if (rotation < 4) {
+                    r = new UpdateRunnable(rotation);
+                    mRunnableCache.put(rotation, r);
+                }
             }
             mHandler.post(r);
         }
