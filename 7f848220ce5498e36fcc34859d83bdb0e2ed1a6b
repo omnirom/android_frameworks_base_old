@@ -33,6 +33,23 @@
       "revId": "7f848220ce5498e36fcc34859d83bdb0e2ed1a6b",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64a74cd4_d15d85bb",
+        "filename": "core/res/res/values/custom_config.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-08-29T09:03:12Z",
+      "side": 1,
+      "message": "the description does not match the config",
+      "revId": "7f848220ce5498e36fcc34859d83bdb0e2ed1a6b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
