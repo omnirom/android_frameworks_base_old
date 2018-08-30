@@ -69,6 +69,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     protected QuickStatusBarHeader mHeader;
     private QSCustomizer mQSCustomizer;
     protected QSPanel mQSPanel;
+    protected QuickQSPanel mQuickQSPanel;
     private QSDetail mQSDetail;
     private boolean mListening;
     private QSContainerImpl mContainer;
@@ -107,12 +108,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSPanel = view.findViewById(R.id.quick_settings_panel);
         mQSDetail = view.findViewById(R.id.qs_detail);
         mHeader = view.findViewById(R.id.header);
+        mQuickQSPanel  = mHeader.findViewById(R.id.quick_qs_panel);
         mFooter = view.findViewById(R.id.qs_footer);
         mContainer = view.findViewById(id.quick_settings_container);
 
         mQSDetail.setQsPanel(mQSPanel, mHeader, (View) mFooter);
-        mQSAnimator = new QSAnimator(this,
-                mHeader.findViewById(R.id.quick_qs_panel), mQSPanel);
+        mQSAnimator = new QSAnimator(this, mQuickQSPanel, mQSPanel);
 
         mQSCustomizer = view.findViewById(R.id.qs_customize);
         mQSCustomizer.setQs(this);
@@ -181,6 +182,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 mQSAnimator.onRtlChanged();
             }
         }
+        if (mQSAnimator != null) {
+            mQSAnimator.updateSettings();
+        }
     }
 
     private void setEditLocation(View view) {
@@ -206,7 +210,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void setHost(QSTileHost qsh) {
         mQSPanel.setHost(qsh, mQSCustomizer);
         mHeader.setQSPanel(mQSPanel);
-        mFooter.setQSPanel(mQSPanel);
+        mFooter.setQSPanel(mQSPanel, mQuickQSPanel);
         mQSDetail.setHost(qsh);
 
         if (mQSAnimator != null) {
@@ -418,6 +422,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         // when we come back from customize update
         if (!mQSCustomizer.isCustomizing()) {
             mQSPanel.updateSettings();
+            mQuickQSPanel.updateSettings();
+            mQSAnimator.updateSettings();
         }
     }
 
@@ -481,4 +487,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             updateQsState();
         }
     };
+
+    public QuickQSPanel getQuickQsPanel() {
+        return mQuickQSPanel;
+    }
 }
