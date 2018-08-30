@@ -43,6 +43,7 @@ import java.util.Collection;
 public class QuickQSPanel extends QSPanel {
 
     public static final String NUM_QUICK_TILES = "sysui_qqs_count";
+    public static final int NUM_QUICK_TILES_DEFAULT = 6;
 
     private boolean mDisabledByPolicy;
     private int mMaxTiles;
@@ -149,7 +150,7 @@ public class QuickQSPanel extends QSPanel {
     };
 
     public static int getNumQuickTiles(Context context) {
-        return Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, 6);
+        return Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, NUM_QUICK_TILES_DEFAULT);
     }
 
     void setDisabledByPolicy(boolean disabled) {
