@@ -30,6 +30,12 @@ limitations under the License.
                 <item android:id="@+id/menu_item_columns_six"
                       android:title="@string/qs_menu_item_columns_six"
                       android:checkable="true" />
+                <item android:id="@+id/menu_item_columns_seven"
+                      android:title="@string/qs_menu_item_columns_seven"
+                      android:checkable="true" />
+                <item android:id="@+id/menu_item_columns_eight"
+                      android:title="@string/qs_menu_item_columns_eight"
+                      android:checkable="true" />
             </menu>
         </item>
         <item android:id="@+id/menu_item_columns_landscape"
