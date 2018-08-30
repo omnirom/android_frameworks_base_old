@@ -29,6 +29,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSFooter;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -95,7 +96,7 @@ public class CarQSFooter extends RelativeLayout implements QSFooter,
     }
 
     @Override
-    public void setQSPanel(@Nullable QSPanel panel) {
+    public void setQSPanel(@Nullable QSPanel panel, @Nullable QuickQSPanel quickQSPanel) {
         if (panel != null) {
             mMultiUserSwitch.setQsPanel(panel);
         }

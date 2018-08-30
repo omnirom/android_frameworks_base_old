@@ -50,6 +50,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -89,6 +90,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private Menu mColumnsLandscapeSubMenu;
     private Menu mRowsSubMenu;
     private Menu mRowsLandscapeSubMenu;
+    private Menu mQsColumnsSubMenu;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
@@ -125,7 +127,10 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         if (menuItemRows != null) {
             mRowsLandscapeSubMenu = menuItemRowsLand.getSubMenu();
         }
-
+        MenuItem menuItemQs = mToolbar.getMenu().findItem(R.id.menu_item_qs_columns);
+        if (menuItemQs != null) {
+            mQsColumnsSubMenu = menuItemQs.getSubMenu();
+        }
         int qsTitlesValue = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.OMNI_QS_TILE_TITLE_VISIBILITY, 1,
                 UserHandle.USER_CURRENT);
@@ -245,6 +250,9 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             if (mRowsLandscapeSubMenu != null) {
                 mRowsLandscapeSubMenu.close();
             }
+            if (mQsColumnsSubMenu != null) {
+                mQsColumnsSubMenu.close();
+            }
             mToolbar.dismissPopupMenus();
             setCustomizing(false);
             save();
@@ -361,6 +369,18 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             case R.id.menu_item_rows_landscape_four:
                 Settings.System.putIntForUser(mContext.getContentResolver(),
                         Settings.System.OMNI_QS_LAYOUT_ROWS_LANDSCAPE, 4, UserHandle.USER_CURRENT);
+                break;
+            case R.id.menu_item_qs_columns_six:
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                        Settings.System.OMNI_QS_QUICKBAR_COLUMNS, 6, UserHandle.USER_CURRENT);
+                break;
+            case R.id.menu_item_qs_columns_seven:
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                        Settings.System.OMNI_QS_QUICKBAR_COLUMNS, 7, UserHandle.USER_CURRENT);
+                break;
+            case R.id.menu_item_qs_columns_eight:
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                        Settings.System.OMNI_QS_QUICKBAR_COLUMNS, 8, UserHandle.USER_CURRENT);
                 break;
         }
         updateSettings();
@@ -539,5 +559,15 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         menuItemThree.setChecked(rowsLandscape == 3);
         menuItemFour = mToolbar.getMenu().findItem(R.id.menu_item_rows_landscape_four);
         menuItemFour.setChecked(rowsLandscape == 4);
+
+        int qsColumns = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_QS_QUICKBAR_COLUMNS,
+                QuickQSPanel.NUM_QUICK_TILES_DEFAULT, UserHandle.USER_CURRENT);
+        menuItemSix = mToolbar.getMenu().findItem(R.id.menu_item_qs_columns_six);
+        menuItemSix.setChecked(qsColumns == 6);
+        menuItemSeven = mToolbar.getMenu().findItem(R.id.menu_item_qs_columns_seven);
+        menuItemSeven.setChecked(qsColumns == 7);
+        menuItemEight = mToolbar.getMenu().findItem(R.id.menu_item_qs_columns_eight);
+        menuItemEight.setChecked(qsColumns == 8);
     }
 }
