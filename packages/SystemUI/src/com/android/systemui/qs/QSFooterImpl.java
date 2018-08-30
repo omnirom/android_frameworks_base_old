@@ -74,6 +74,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private boolean mQsDisabled;
     private QSPanel mQsPanel;
+    private QuickQSPanel mQuickQSPanel;
 
     private boolean mExpanded;
 
@@ -146,7 +147,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     }
 
     private void updateAnimator(int width) {
-        int numTiles = QuickQSPanel.getNumQuickTiles(mContext);
+        int numTiles = mQuickQSPanel.getNumQuickTiles();
         int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size)
                 - mContext.getResources().getDimensionPixelSize(dimen.qs_quick_tile_padding);
         int remaining = (width - numTiles * size) / (numTiles - 1);
@@ -320,8 +321,9 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     }
 
     @Override
-    public void setQSPanel(final QSPanel qsPanel) {
+    public void setQSPanel(final QSPanel qsPanel, final QuickQSPanel quickQSPanel) {
         mQsPanel = qsPanel;
+        mQuickQSPanel = quickQSPanel;
         if (mQsPanel != null) {
             mMultiUserSwitch.setQsPanel(qsPanel);
             mQsPanel.setFooterPageIndicator(mPageIndicator);
