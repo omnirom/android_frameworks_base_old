@@ -73,6 +73,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     private QSFooter mFooter;
     private float mLastQSExpansion = -1;
     private boolean mQsDisabled;
+    protected QuickQSPanel mQuickQSPanel;
 
     private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler =
             Dependency.get(RemoteInputQuickSettingsDisabler.class);
@@ -90,12 +91,12 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         mQSPanel = view.findViewById(R.id.quick_settings_panel);
         mQSDetail = view.findViewById(R.id.qs_detail);
         mHeader = view.findViewById(R.id.header);
+        mQuickQSPanel  = mHeader.findViewById(R.id.quick_qs_panel);
         mFooter = view.findViewById(R.id.qs_footer);
         mContainer = view.findViewById(id.quick_settings_container);
 
         mQSDetail.setQsPanel(mQSPanel, mHeader, (View) mFooter);
-        mQSAnimator = new QSAnimator(this,
-                mHeader.findViewById(R.id.quick_qs_panel), mQSPanel);
+        mQSAnimator = new QSAnimator(this, mQuickQSPanel, mQSPanel);
 
         mQSCustomizer = view.findViewById(R.id.qs_customize);
         mQSCustomizer.setQs(this);
@@ -391,6 +392,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         // when we come back from customize update
         if (!mQSCustomizer.isCustomizing()) {
             mQSPanel.updateSettings();
+            mQuickQSPanel.updateSettings();
         }
     }
 

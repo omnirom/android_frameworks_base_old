@@ -17,7 +17,10 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.res.Configuration;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -175,6 +178,13 @@ public class QuickQSPanel extends QSPanel {
             visibility = View.GONE;
         }
         super.setVisibility(visibility);
+    }
+
+    public void updateSettings() {
+        int qsColumns = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_QS_QUICKBAR_COLUMNS,
+                NUM_QUICK_TILES_DEFAULT, UserHandle.USER_CURRENT);
+        setMaxTiles(qsColumns);
     }
 
     private static class HeaderTileLayout extends LinearLayout implements QSTileLayout {
