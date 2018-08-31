@@ -55,4 +55,21 @@
   <java-symbol type="bool" name="config_multiColorBatteryLed" />
   <java-symbol type="bool" name="config_FastChargingLedSupported" />
   <java-symbol type="integer" name="config_notificationsFastBatteryARGB" />
+
+  <!-- PoorManThemes -->
+  <java-symbol type="color" name="omni_color1" />
+  <java-symbol type="color" name="omni_color2" />
+  <java-symbol type="color" name="omni_color3" />
+  <java-symbol type="color" name="omni_color4" />
+  <java-symbol type="color" name="omni_color5" />
+  <java-symbol type="color" name="omni_color6" />
+  <java-symbol type="color" name="omni_color7" />
+  <java-symbol type="color" name="omni_color8" />
+  <java-symbol type="color" name="omni_color9" />
+  <java-symbol type="color" name="omni_color900" />
+  <java-symbol type="color" name="omni_text1" />
+  <java-symbol type="color" name="omni_text2" />
+  <java-symbol type="color" name="omni_text3" />
+  <java-symbol type="color" name="omni_text4" />
+
 </resources>
