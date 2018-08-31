@@ -4675,7 +4675,7 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.reply_icon_action, View.VISIBLE);
                 contentView.setDrawableTint(R.id.reply_icon_action,
                         false /* targetBackground */,
-                        getNeutralColor(),
+                        resolveContrastColor(),
                         PorterDuff.Mode.SRC_ATOP);
                 contentView.setOnClickPendingIntent(R.id.reply_icon_action, action.actionIntent);
                 contentView.setRemoteInputs(R.id.reply_icon_action, action.mRemoteInputs);
