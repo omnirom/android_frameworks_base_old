@@ -623,6 +623,7 @@
 
     <!-- omni additions start -->
     <protected-broadcast android:name="org.omnirom.omnirecord.ACTION_START" />
+    <protected-broadcast android:name="com.android.systemui.ACTION_DISMISS_KEYGUARD" />
 
     <!-- For CarIdlenessTracker -->
     <protected-broadcast android:name="com.android.server.jobscheduler.GARAGE_MODE_ON" />
