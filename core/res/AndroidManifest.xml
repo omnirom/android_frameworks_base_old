@@ -689,6 +689,10 @@
     <!-- For tether entitlement recheck-->
     <protected-broadcast
         android:name="com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM" />
+
+    <!-- omni additions start -->
+    <protected-broadcast android:name="com.android.systemui.ACTION_DISMISS_KEYGUARD" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
