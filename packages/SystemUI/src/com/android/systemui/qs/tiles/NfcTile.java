@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.nfc.NfcAdapter;
 import android.provider.Settings;
 import android.widget.Switch;
+import android.service.quicksettings.Tile;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -101,6 +102,7 @@ public class NfcTile extends QSTileImpl<BooleanState> {
 
         if (getAdapter() == null) return;
         state.value = getAdapter().isEnabled();
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_nfc_label);
         state.icon = new DrawableIcon(state.value ? mEnable : mDisable);
         state.expandedAccessibilityClassName = Switch.class.getName();
