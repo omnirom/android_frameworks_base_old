@@ -1000,7 +1000,7 @@ public class Build {
                         + String.valueOf(result));
             }
 
-            return result == 0;
+            //return result == 0;
         }
 
         final String system = SystemProperties.get("ro.build.fingerprint");
@@ -1020,7 +1020,7 @@ public class Build {
             if (!Objects.equals(system, vendor)) {
                 Slog.e(TAG, "Mismatched fingerprints; system reported " + system
                         + " but vendor reported " + vendor);
-                return false;
+                //return false;
             }
         }
 
