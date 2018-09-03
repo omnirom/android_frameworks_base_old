@@ -645,15 +645,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         public void update() {
-            int showNavBar = Settings.System.getIntForUser(
-                    mContext.getContentResolver(), Settings.System.OMNI_NAVIGATION_BAR_SHOW,
-                    -1, UserHandle.USER_CURRENT);
-            if (showNavBar != -1){
-                boolean showNavBarBool = showNavBar == 1;
-                if (showNavBarBool !=  mShowNavBar){
-                    updateNavigationBar();
-                }
-            }
+            updateNavigationBar();
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver;
