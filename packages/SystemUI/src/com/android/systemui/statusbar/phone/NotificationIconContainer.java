@@ -176,15 +176,15 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        Paint paint = new Paint();
-        paint.setColor(Color.RED);
-        paint.setStyle(Paint.Style.STROKE);
-        canvas.drawRect(getActualPaddingStart(), 0, getLayoutEnd(), getHeight(), paint);
-
         if (DEBUG_OVERFLOW) {
             if (mLastVisibleIconState == null) {
                 return;
             }
+            Paint paint = new Paint();
+            paint.setColor(Color.RED);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(3);
+            canvas.drawRect(getActualPaddingStart(), 0, getLayoutEnd(), getHeight(), paint);
 
             int height = getHeight();
             int end = getFinalTranslationX();
