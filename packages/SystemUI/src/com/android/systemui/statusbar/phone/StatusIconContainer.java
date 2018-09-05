@@ -245,7 +245,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         for (int i = totalVisible - 1; i >= 0; i--) {
             StatusIconState state = mLayoutStates.get(i);
             // Allow room for underflow if we found we need it in onMeasure
-            if (mNeedsUnderflow && (state.xTranslation < (contentStart + mUnderflowWidth))||
+            if (mNeedsUnderflow && (state.xTranslation < contentStart)||
                     (mShouldRestrictIcons && visible >= maxVisible)) {
                 firstUnderflowIndex = i;
                 break;
