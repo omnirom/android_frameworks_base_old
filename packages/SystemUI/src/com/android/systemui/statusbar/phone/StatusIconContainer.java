@@ -124,6 +124,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         if (DEBUG_OVERFLOW) {
             Paint paint = new Paint();
             paint.setStyle(Style.STROKE);
+            paint.setStrokeWidth(3);
             paint.setColor(Color.RED);
 
             // Show bounding box
