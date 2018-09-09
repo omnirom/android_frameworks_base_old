@@ -170,6 +170,9 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
                 mQSAnimator.onRtlChanged();
             }
         }
+        if (mQSAnimator != null) {
+            mQSAnimator.updateSettings();
+        }
     }
 
     @Override
@@ -457,4 +460,8 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
             updateQsState();
         }
     };
+
+    public QuickQSPanel getQuickQsPanel() {
+        return mQuickQSPanel;
+    }
 }
