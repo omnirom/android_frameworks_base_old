@@ -170,6 +170,9 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
                 mQSAnimator.onRtlChanged();
             }
         }
+        if (mQSAnimator != null) {
+            mQSAnimator.updateSettings();
+        }
     }
 
     @Override
