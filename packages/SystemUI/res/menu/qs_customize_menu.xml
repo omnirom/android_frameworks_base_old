@@ -107,6 +107,9 @@ limitations under the License.
                 <item android:id="@+id/menu_item_qs_columns_eight"
                       android:title="@string/qs_menu_item_columns_eight"
                       android:checkable="true" />
+                <item android:id="@+id/menu_item_qs_columns_auto"
+                      android:title="@string/qs_menu_item_columns_auto"
+                      android:checkable="true" />
             </menu>
         </item>
         <item android:id="@+id/menu_item_titles"
