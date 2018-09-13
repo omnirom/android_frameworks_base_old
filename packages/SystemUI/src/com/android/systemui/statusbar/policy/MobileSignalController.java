@@ -60,7 +60,7 @@ public class MobileSignalController extends SignalController<
     final SubscriptionInfo mSubscriptionInfo;
 
     // @VisibleForDemoMode
-    final SparseArray<MobileIconGroup> mNetworkToIconLookup;
+    static SparseArray<MobileIconGroup> mNetworkToIconLookup;
 
     // Since some pieces of the phone state are interdependent we store it locally,
     // this could potentially become part of MobileState for simplification/complication
@@ -69,8 +69,8 @@ public class MobileSignalController extends SignalController<
     private int mDataState = TelephonyManager.DATA_DISCONNECTED;
     private ServiceState mServiceState;
     private SignalStrength mSignalStrength;
-    private MobileIconGroup mDefaultIcons;
-    private Config mConfig;
+    private static MobileIconGroup mDefaultIcons;
+    private static Config mConfig;
 
     // TODO: Reduce number of vars passed in, if we have the NetworkController, probably don't
     // need listener lists anymore.
@@ -174,7 +174,7 @@ public class MobileSignalController extends SignalController<
      * Produce a mapping of data network types to icon groups for simple and quick use in
      * updateTelephony.
      */
-    private void mapIconSets() {
+    public static void mapIconSets() {
         mNetworkToIconLookup.clear();
 
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_EVDO_0, TelephonyIcons.THREE_G);
@@ -575,7 +575,7 @@ public class MobileSignalController extends SignalController<
 
     static class MobileIconGroup extends SignalController.IconGroup {
         final int mDataContentDescription; // mContentDescriptionDataType
-        final int mDataType;
+        int mDataType;
         final boolean mIsWide;
         final int mQsDataType;
 
