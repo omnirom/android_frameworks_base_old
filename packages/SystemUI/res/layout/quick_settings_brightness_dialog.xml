@@ -35,7 +35,7 @@
     <com.android.systemui.settings.ToggleSliderView
         android:id="@+id/brightness_slider"
         android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/qs_brightness_slider_height"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:contentDescription="@string/accessibility_brightness"
