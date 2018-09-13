@@ -21,4 +21,5 @@
     <dimen name="qs_tile_height_wo_label">48dp</dimen>
     <dimen name="current_weather_image_size">42dp</dimen>
     <dimen name="quick_status_bar_system_icons_margin_top">8dp</dimen>
+    <dimen name="qs_brightness_slider_margin_top_bottom">16dp</dimen>
 </resources>
