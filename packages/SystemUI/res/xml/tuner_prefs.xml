@@ -87,7 +87,7 @@
 
         <com.android.systemui.tuner.StatusBarSwitch
             android:key="mobile"
-            android:title="@string/quick_settings_cellular_detail_title" />
+            android:title="@string/tuner_cellular_title" />
 
         <com.android.systemui.tuner.StatusBarSwitch
             android:key="roaming"
