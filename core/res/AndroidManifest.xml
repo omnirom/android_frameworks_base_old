@@ -623,6 +623,9 @@
     <protected-broadcast android:name="android.settings.action.GRAYSCALE_CHANGED" />
 
     <!-- omni additions start -->
+    <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_TOGGLE_OVERLAY2" />
+    <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_PRELOAD_TASKS" />
+    <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_HIDE_OVERLAY" />
     <protected-broadcast android:name="org.omnirom.omnirecord.ACTION_START" />
     <protected-broadcast android:name="com.android.systemui.ACTION_DISMISS_KEYGUARD" />
 
@@ -639,6 +642,7 @@
     <!-- For tether entitlement recheck-->
     <protected-broadcast
         android:name="com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
