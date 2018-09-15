@@ -71,8 +71,6 @@ import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZ
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_START;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.WEIGHT_SUFFIX;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.WEIGHT_CENTERED_SUFFIX;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.LEFT;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.RIGHT;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractButton;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractSize;
 
@@ -134,8 +132,8 @@ public class NavBarEditor extends TunerPreferenceFragment implements TunerServic
         String[] views = navLayout.split(GRAVITY_SEPARATOR);
         String[] groups = new String[] { NavBarAdapter.START, NavBarAdapter.CENTER,
                 NavBarAdapter.END};
-        CharSequence[] groupLabels = new String[] { getString(R.string.start),
-                getString(R.string.center), getString(R.string.end) };
+        CharSequence[] groupLabels = new String[] { getString(R.string.nav_start),
+                getString(R.string.nav_center), getString(R.string.nav_end) };
         mNavBarAdapter.clear();
         for (int i = 0; i < 3; i++) {
             mNavBarAdapter.addButton(groups[i], groupLabels[i]);
@@ -177,15 +175,11 @@ public class NavBarEditor extends TunerPreferenceFragment implements TunerServic
         } else if (button.startsWith(BACK)) {
             return context.getString(R.string.accessibility_back);
         } else if (button.startsWith(RECENT)) {
-            return context.getString(R.string.accessibility_recent);
+            return context.getString(R.string.overview);
         } else if (button.startsWith(NAVSPACE)) {
-            return context.getString(R.string.space);
-        } else if (button.startsWith(LEFT)) {
-            return context.getString(R.string.left);
-        } else if (button.startsWith(RIGHT)) {
-            return context.getString(R.string.right);
-        /*} else if (button.equals(MENU_IME_ROTATE)) {
-            return context.getString(R.string.menu_ime);*/
+            return context.getString(R.string.nav_space);
+        } else if (button.equals(MENU_IME_ROTATE)) {
+            return context.getString(R.string.menu_ime_rotate);
         /*} else if (button.startsWith(CLIPBOARD)) {
             return context.getString(R.string.clipboard);*/
         /*} else if (button.startsWith(KEY)) {
@@ -408,7 +402,7 @@ public class NavBarEditor extends TunerPreferenceFragment implements TunerServic
 
         private void showAddDialog(final Context context) {
             final String[] options = new String[] {
-                    BACK, HOME, RECENT, NAVSPACE, LEFT, RIGHT
+                    BACK, RECENT, NAVSPACE, MENU_IME_ROTATE
             };
             final CharSequence[] labels = new CharSequence[options.length];
             for (int i = 0; i < options.length; i++) {

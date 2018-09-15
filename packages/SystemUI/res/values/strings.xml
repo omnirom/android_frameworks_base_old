@@ -1836,9 +1836,9 @@
 
     <string-array name="nav_bar_layouts_values" translatable="false">
         <item>default</item>
-        <item>left;back,home,recent;right</item>
-        <item>left,back,home,recent,right;space;space</item>
-        <item>space;space;left,back,home,recent,right</item>
+        <item>space;back,home,recent;menu_ime</item>
+        <item>space,back,home,recent,menu_ime;space;space</item>
+        <item>space;space;space,back,home,recent,menu_ime</item>
     </string-array>
 
     <!-- SysUI Tuner: Name of Combination Menu / Keyboard Switcher button [CHAR LIMIT=30] -->
