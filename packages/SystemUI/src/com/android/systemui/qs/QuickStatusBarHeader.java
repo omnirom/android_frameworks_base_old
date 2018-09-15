@@ -185,6 +185,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         mBatteryMeterView = findViewById(R.id.battery);
         mBatteryMeterView.setForceShowPercent(true);
+        mBatteryMeterView.setHideableByUser(false);
         mBatteryMeterView.setOnClickListener(this);
         mClockView = findViewById(R.id.clock);
         mClockView.setOnClickListener(this);
