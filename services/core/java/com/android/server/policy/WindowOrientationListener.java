@@ -1079,6 +1079,9 @@ public abstract class WindowOrientationListener {
 
         public int evaluateRotationChangeLocked() {
             unscheduleRotationEvaluationLocked();
+            if (mDesiredRotation > 3) {
+                return -1;
+            }
             if (mDesiredRotation == mProposedRotation) {
                 return -1;
             }
