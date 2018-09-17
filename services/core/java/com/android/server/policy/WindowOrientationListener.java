@@ -1079,6 +1079,10 @@ public abstract class WindowOrientationListener {
 
         public int evaluateRotationChangeLocked() {
             unscheduleRotationEvaluationLocked();
+            // maxwen: op6_sensor_tweak
+            if (mDesiredRotation > 3) {
+                return -1;
+            }
             if (mDesiredRotation == mProposedRotation) {
                 return -1;
             }
