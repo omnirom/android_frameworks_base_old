@@ -806,7 +806,7 @@ public abstract class WindowOrientationListener {
             }
 
             // Tell the listener.
-            if (proposedRotation != oldProposedRotation && proposedRotation >= 0) {
+            if (proposedRotation != oldProposedRotation && proposedRotation >= 0 && proposedRotation < 4) {
                 if (LOG) {
                     Slog.v(TAG, "Proposed rotation changed!  proposedRotation=" + proposedRotation
                             + ", oldProposedRotation=" + oldProposedRotation);
@@ -1047,7 +1047,7 @@ public abstract class WindowOrientationListener {
                 mDesiredRotation = (int) event.values[0];
                 newRotation = evaluateRotationChangeLocked();
             }
-            if (newRotation >=0) {
+            if (newRotation >=0 && newRotation < 4) {
                 onProposedRotationChanged(newRotation);
             }
         }
