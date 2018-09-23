@@ -13774,7 +13774,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Deprecated
     @Override
     public void requestBugReport(int bugreportType) {
-        String extraOptions = null;
+        // maxwen: disable for a reason
+        return;
+        /*String extraOptions = null;
         switch (bugreportType) {
             case ActivityManager.BUGREPORT_OPTION_FULL:
                 // Default options.
@@ -13806,7 +13808,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (extraOptions != null) {
             SystemProperties.set("dumpstate.options", extraOptions);
         }
-        SystemProperties.set("ctl.start", "bugreport");
+        SystemProperties.set("ctl.start", "bugreport");*/
     }
 
     /**
