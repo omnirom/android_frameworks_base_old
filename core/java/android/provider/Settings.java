@@ -14142,6 +14142,12 @@ public final class Settings {
         public static final String OMNI_ADB_PORT = "omni_adb_port";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_RECENT_TASKS_VISIBLE_DISABLE =
+                "recents_tasks_visible_disable";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
