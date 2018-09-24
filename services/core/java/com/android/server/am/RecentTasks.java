@@ -43,6 +43,8 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -51,6 +53,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -59,6 +62,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -178,10 +182,25 @@ class RecentTasks {
     private final SparseBooleanArray mTmpQuietProfileUserIds = new SparseBooleanArray();
     private final TaskActivitiesReport mTmpReport = new TaskActivitiesReport();
 
+    private boolean mDisableVisibleLimits;
+    private Context mContext;
+
+    private class SettingsObserver extends ContentObserver {
+        public SettingsObserver() {
+            super(null);
+        }
+        @Override
+        public void onChange(boolean selfChange) {
+            mDisableVisibleLimits = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.OMNI_RECENT_TASKS_VISIBLE_DISABLE, 0) != 0;
+        }
+    }
+
     @VisibleForTesting
     RecentTasks(ActivityManagerService service, TaskPersister taskPersister,
             UserController userController) {
         mService = service;
+        mContext = service.mContext;
         mUserController = userController;
         mTaskPersister = taskPersister;
         mGlobalMaxNumTasks = ActivityManager.getMaxRecentTasksStatic();
@@ -192,6 +211,7 @@ class RecentTasks {
         final File systemDir = Environment.getDataSystemDirectory();
         final Resources res = service.mContext.getResources();
         mService = service;
+        mContext = service.mContext;
         mUserController = service.mUserController;
         mTaskPersister = new TaskPersister(systemDir, stackSupervisor, service, this);
         mGlobalMaxNumTasks = ActivityManager.getMaxRecentTasksStatic();
@@ -264,6 +284,13 @@ class RecentTasks {
                 Slog.w(TAG, "Could not load application info for recents component: " + cn);
             }
         }
+
+        mDisableVisibleLimits = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.OMNI_RECENT_TASKS_VISIBLE_DISABLE, 0) != 0;
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.OMNI_RECENT_TASKS_VISIBLE_DISABLE),
+                false, new SettingsObserver(), UserHandle.USER_ALL);
     }
 
     /**
@@ -732,7 +759,10 @@ class RecentTasks {
 
             if (isVisibleRecentTask(tr)) {
                 numVisibleTasks++;
-                if (isInVisibleRange(tr, numVisibleTasks)) {
+                if (DEBUG_RECENTS && mDisableVisibleLimits && !isInVisibleRange(tr, numVisibleTasks)) {
+                    Slog.d(TAG, "Force showing invisible task=" + tr);
+                }
+                if (mDisableVisibleLimits || isInVisibleRange(tr, numVisibleTasks)) {
                     // Fall through
                 } else {
                     // Not in visible range
@@ -1065,7 +1095,7 @@ class RecentTasks {
                     continue;
                 } else {
                     numVisibleTasks++;
-                    if (isInVisibleRange(task, numVisibleTasks) || !isTrimmable(task)) {
+                    if (isInVisibleRange(task, numVisibleTasks) || !isTrimmable(task) || mDisableVisibleLimits) {
                         // Keep visible tasks in range
                         i++;
                         continue;
@@ -1189,15 +1219,16 @@ class RecentTasks {
             return numVisibleTasks <= mMaxNumVisibleTasks;
         }
 
+        // -1 means no time limit
         if (mActiveTasksSessionDurationMs > 0) {
             // Keep the task if the inactive time is within the session window, this check must come
             // after the checks for the min/max visible task range
-            if (task.getInactiveDuration() <= mActiveTasksSessionDurationMs) {
-                return true;
+            if (task.getInactiveDuration() > mActiveTasksSessionDurationMs) {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     /**
