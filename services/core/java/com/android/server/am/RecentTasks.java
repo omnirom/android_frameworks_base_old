@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.FLAG_AND_UNLOCKED;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
+import static android.app.ActivityManager.RECENT_WITH_INVISIBLE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -714,6 +715,7 @@ class RecentTasks {
     ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
             boolean getTasksAllowed, boolean getDetailedTasks, int userId, int callingUid) {
         final boolean withExcluded = (flags & RECENT_WITH_EXCLUDED) != 0;
+        final boolean withInvisible = (flags & RECENT_WITH_INVISIBLE) != 0;
 
         if (!mService.isUserRunning(userId, FLAG_AND_UNLOCKED)) {
             Slog.i(TAG, "user " + userId + " is still locked. Cannot load recents");
@@ -732,7 +734,7 @@ class RecentTasks {
 
             if (isVisibleRecentTask(tr)) {
                 numVisibleTasks++;
-                if (isInVisibleRange(tr, numVisibleTasks)) {
+                if (withInvisible || isInVisibleRange(tr, numVisibleTasks)) {
                     // Fall through
                 } else {
                     // Not in visible range
@@ -1189,15 +1191,16 @@ class RecentTasks {
             return numVisibleTasks <= mMaxNumVisibleTasks;
         }
 
+        // -1 means no time limit
         if (mActiveTasksSessionDurationMs > 0) {
             // Keep the task if the inactive time is within the session window, this check must come
             // after the checks for the min/max visible task range
-            if (task.getInactiveDuration() <= mActiveTasksSessionDurationMs) {
-                return true;
+            if (task.getInactiveDuration() > mActiveTasksSessionDurationMs) {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     /**

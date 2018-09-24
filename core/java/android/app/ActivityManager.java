@@ -1668,6 +1668,12 @@ public class ActivityManager {
     public static final int RECENT_IGNORE_UNAVAILABLE = 0x0002;
 
     /**
+     * dont filter anything in RecentsTask
+     * @hide
+     */
+    public static final int RECENT_WITH_INVISIBLE = 0x0004;
+
+    /**
      * <p></p>Return a list of the tasks that the user has recently launched, with
      * the most recent being first and older ones after in order.
      *
