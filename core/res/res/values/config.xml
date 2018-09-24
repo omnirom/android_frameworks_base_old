@@ -2827,7 +2827,8 @@
          SystemUI. Can be -1 if there is no maximum limit. -->
     <integer name="config_maxNumVisibleRecentTasks">-1</integer>
 
-    <!-- The duration in which a recent task is considered in session and should be visible. -->
+    <!-- The duration in which a recent task is considered in session and should be visible.
+         Can be -1 if there is no time limit -->
     <integer name="config_activeTaskDurationHours">6</integer>
 
     <!-- default window ShowCircularMask property -->
