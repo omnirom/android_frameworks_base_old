@@ -47,6 +47,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -55,6 +56,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
@@ -62,6 +64,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -221,6 +224,20 @@ class RecentTasks {
     private final Runnable mResetFreezeTaskListOnTimeoutRunnable =
             this::resetFreezeTaskListReorderingOnTimeout;
 
+    // omni additions start
+    private boolean mDisableVisibleLimits;
+
+    private class SettingsObserver extends ContentObserver {
+        public SettingsObserver() {
+            super(null);
+        }
+        @Override
+        public void onChange(boolean selfChange) {
+            mDisableVisibleLimits = Settings.Global.getInt(mService.mContext.getContentResolver(),
+                    Settings.Global.OMNI_RECENT_TASKS_VISIBLE_DISABLE, 0) != 0;
+        }
+    }
+
     @VisibleForTesting
     RecentTasks(ActivityTaskManagerService service, TaskPersister taskPersister) {
         mService = service;
@@ -374,6 +391,13 @@ class RecentTasks {
                 Slog.w(TAG, "Could not load application info for recents component: " + cn);
             }
         }
+
+        mDisableVisibleLimits = Settings.Global.getInt(mService.mContext.getContentResolver(),
+                Settings.Global.OMNI_RECENT_TASKS_VISIBLE_DISABLE, 0) != 0;
+
+        mService.mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.OMNI_RECENT_TASKS_VISIBLE_DISABLE),
+                false, new SettingsObserver(), UserHandle.USER_ALL);
     }
 
     /**
