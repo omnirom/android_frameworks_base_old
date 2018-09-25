@@ -3331,8 +3331,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         || ArrayUtils.isEmpty(p.getRequestedPermissions())) ? Collections.emptySet()
                         : mPermissionManager.getGrantedPermissions(ps.name, userId);
 
-                PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
-                        ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId, ps);
+                PackageInfo packageInfo = mayFakeSignature(p, PackageInfoUtils.generate(p, gids, flags,
+                        ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId, ps),
+                        permissions);
 
                 if (packageInfo == null) {
                     return null;
@@ -3367,6 +3368,24 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 return null;
             }
+        }
+
+        private PackageInfo mayFakeSignature(AndroidPackage p, PackageInfo pi,
+                Set<String> permissions) {
+            try {
+                if (permissions.contains("android.permission.FAKE_PACKAGE_SIGNATURE")
+                        && p.getTargetSdkVersion() > Build.VERSION_CODES.LOLLIPOP_MR1
+                        && p.getMetaData() != null) {
+                    String sig = p.getMetaData().getString("fake-signature");
+                    if (sig != null) {
+                        pi.signatures = new Signature[] {new Signature(sig)};
+                    }
+                }
+            } catch (Throwable t) {
+                // We should never die because of any failures, this is system code!
+                Log.w("PackageManagerService.FAKE_PACKAGE_SIGNATURE", t);
+            }
+            return pi;
         }
 
         public final PackageInfo getPackageInfo(String packageName, int flags, int userId) {
