@@ -53,6 +53,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
@@ -314,13 +315,18 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            String devName = SystemProperties.get("ro.product.model", "?");
             if (BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED.equals(action)) {
                 String newName = intent.getStringExtra(BluetoothAdapter.EXTRA_LOCAL_NAME);
                 if (DBG) {
                     Slog.d(TAG, "Bluetooth Adapter name changed to " + newName);
                 }
                 if (newName != null) {
-                    storeNameAndAddress(newName, null);
+                    if ((newName == devName) && (!isNameAndAddressSet())) {
+                        storeNameAndAddress(newName, null);
+                    } else {
+                        storeNameAndAddress(newName, null);
+                    }
                 }
             } else if (BluetoothAdapter.ACTION_BLUETOOTH_ADDRESS_CHANGED.equals(action)) {
                 String newAddress = intent.getStringExtra(BluetoothAdapter.EXTRA_BLUETOOTH_ADDRESS);
