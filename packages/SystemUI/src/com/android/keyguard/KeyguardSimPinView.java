@@ -76,6 +76,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                     if (mCallback != null) {
                         mCallback.dismiss(true, KeyguardUpdateMonitor.getCurrentUser());
                     }
+                    mSubId = subId;
                     break;
                 }
                 case READY: {
