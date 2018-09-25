@@ -1539,11 +1539,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     + slotId + ", state=" + state +")");
         }
 
-        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-            Log.w(TAG, "invalid subId in handleSimStateChange()");
-            return;
-        }
-
         SimData data = mSimDatas.get(subId);
         final boolean changed;
         if (data == null) {
