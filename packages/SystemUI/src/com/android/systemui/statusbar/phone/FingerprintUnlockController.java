@@ -227,6 +227,13 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                 Trace.endSection();
                 break;
             case MODE_UNLOCK:
+                if (pulsingOrAod()) {
+                    mKeyguardViewMediator.onWakeAndUnlocking();
+                    if (mStatusBar.getNavigationBarView() != null) {
+                        mStatusBar.getNavigationBarView().setWakeAndUnlocking(true);
+                    }
+                    break;
+                }
             case MODE_SHOW_BOUNCER:
                 Trace.beginSection("MODE_UNLOCK or MODE_SHOW_BOUNCER");
                 if (!wasDeviceInteractive) {
@@ -314,8 +321,8 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         if (!mUpdateMonitor.isDeviceInteractive()) {
             if (!mStatusBarKeyguardViewManager.isShowing()) {
                 return MODE_ONLY_WAKE;
-            } else if (mDozeScrimController.isPulsing() && unlockingAllowed) {
-                return MODE_WAKE_AND_UNLOCK_PULSING;
+            } else if (pulsingOrAod() && unlockingAllowed) {
+                return MODE_UNLOCK;
             } else if (unlockingAllowed || !mUnlockMethodCache.isMethodSecure()) {
                 return MODE_WAKE_AND_UNLOCK;
             } else {
