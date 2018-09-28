@@ -19,4 +19,6 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <color name="qs_icon_active_color">@*android:color/qs_icon_active_color</color>
+    <!-- Color for the AOD dash slice and its animation -->
+    <color name="notification_aod_dash_animation">@*android:color/background_floating_material_light</color>
 </resources>
