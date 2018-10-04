@@ -4303,6 +4303,7 @@ public final class ViewRootImpl implements ViewParent,
                             k++;
                         } catch (NullPointerException e) {
                             Log.e(ViewRootImpl.TAG, "mView does not exist, discard points. " + e);
+                            break;
                         }
                     }
                 } break;
