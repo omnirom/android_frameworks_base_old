@@ -4294,14 +4294,11 @@ public final class ViewRootImpl implements ViewParent,
                     pendingDrawFinished();
                 } break;
                 case MSG_GESTURE_MOTION_DOWN: {
-                    int k = 0;
-                    while (k < ViewRootImpl.this.mBackupEventList.size()) {
+                    for (MotionEvent me : ViewRootImpl.this.mBackupEventList) {
                         try {
-                            boolean ishandled = ViewRootImpl.this.mView.dispatchPointerEvent(
-                                    (MotionEvent) ViewRootImpl.this.mBackupEventList.get(k));
-                            k++;
+                            boolean ishandled = ViewRootImpl.this.mView.dispatchPointerEvent(me);
                         } catch (NullPointerException e) {
-                            Log.e(ViewRootImpl.TAG, "mView does not exist, discard points. " + e);
+                            break;
                         }
                     }
                 } break;
@@ -5160,7 +5157,6 @@ public final class ViewRootImpl implements ViewParent,
                     }
 
                     Message msg;
-                    int i2;
                     boolean ishandled;
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
@@ -5203,14 +5199,11 @@ public final class ViewRootImpl implements ViewParent,
                                                 ViewRootImpl.MSG_GESTURE_MOTION_DOWN);
                                     }
                                     if (!mQueueMotionConsumed) {
-                                        i2 = 0;
-                                        while (i2 < mBackupEventList.size()) {
+                                        for (MotionEvent me : mBackupEventList) {
                                             try {
-                                                ishandled = mView.dispatchPointerEvent(
-                                                        (MotionEvent) mBackupEventList.get(i2));
-                                                i2++;
+                                                ishandled = mView.dispatchPointerEvent(me);
                                             } catch (NullPointerException e) {
-                                                Log.e(ViewRootImpl.TAG, "discard points" + e);
+                                                break;
                                             }
                                         }
                                     }
@@ -5259,14 +5252,11 @@ public final class ViewRootImpl implements ViewParent,
                                                 ViewRootImpl.MSG_GESTURE_MOTION_DOWN);
                                     }
                                     if (!mQueueMotionConsumed) {
-                                        i2 = 0;
-                                        while (i2 < mBackupEventList.size()) {
+                                        for (MotionEvent me : mBackupEventList) {
                                             try {
-                                                ishandled = mView.dispatchPointerEvent(
-                                                        (MotionEvent) mBackupEventList.get(i2));
-                                                i2++;
+                                                ishandled = mView.dispatchPointerEvent(me);
                                             } catch (NullPointerException e2) {
-                                                Log.e(ViewRootImpl.TAG, "discard points" + e2);
+                                                break;
                                             }
                                         }
                                     }
