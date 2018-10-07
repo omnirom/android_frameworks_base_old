@@ -106,4 +106,6 @@
     <string name="omnijaws_current_text">Now</string>
     <string name="omnijaws_package_not_available">OmniJaws not available</string>
     <string name="omnijaws_service_last_update">Last update:</string>
+
+    <string name="quick_settings_screenrecord_label">Screenrecord</string>
 </resources>
