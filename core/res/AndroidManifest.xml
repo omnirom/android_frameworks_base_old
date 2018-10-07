@@ -621,6 +621,9 @@
     <protected-broadcast android:name="android.content.pm.action.SESSION_UPDATED" />
     <protected-broadcast android:name="android.settings.action.GRAYSCALE_CHANGED" />
 
+    <!-- omni additions start -->
+    <protected-broadcast android:name="org.omnirom.omnirecord.ACTION_START" />
+
     <!-- For CarIdlenessTracker -->
     <protected-broadcast android:name="com.android.server.jobscheduler.GARAGE_MODE_ON" />
     <protected-broadcast android:name="com.android.server.jobscheduler.GARAGE_MODE_OFF" />
