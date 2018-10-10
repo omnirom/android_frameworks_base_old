@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aab2e0c_1a888250",
+        "filename": "services/core/java/com/android/server/power/PowerManagerService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 895,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-10-10T16:58:59Z",
+      "side": 1,
+      "message": "NOT Secure! - System",
+      "revId": "25b2bde0f15e21a27e19744aff7d55932ae072e3",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
