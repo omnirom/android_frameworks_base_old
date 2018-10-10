@@ -68,4 +68,8 @@
     <bool name="config_FastChargingLedSupported">false</bool>
     <!-- Default value for led color when fast charging is active -->
     <integer name="config_notificationsFastBatteryARGB">0x0000FF</integer>
+
+    <!-- Boolean indicating whether we want button brightness support -->
+    <bool name="config_button_brightness_support">false</bool>
+    <integer name="config_button_brightness_default">128</integer>
 </resources>
