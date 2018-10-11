@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c1404ea3_fdfb6467",
+        "filename": "core/res/res/values/config.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 1671,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-10-11T11:00:11Z",
+      "side": 1,
+      "message": "why not in custom_config as we do with all stuff we add?",
+      "revId": "e1b7f0146a91c3101a27782c2dc766f3ff9d66aa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
