@@ -72,4 +72,8 @@
     <!-- Boolean indicating whether we want button brightness support -->
     <bool name="config_button_brightness_support">false</bool>
     <integer name="config_button_brightness_default">128</integer>
+
+    <!-- Component name of the combo network location provider. -->
+    <string name="config_comboNetworkLocationProvider" translatable="false">@null</string>
+
 </resources>
