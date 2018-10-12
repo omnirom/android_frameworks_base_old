@@ -17,8 +17,10 @@
 package com.android.systemui;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -45,13 +47,16 @@ public class CPUInfoService extends Service {
     private View mView;
     private Thread mCurCPUThread;
     private final String TAG = "CPUInfoService";
-    private int mNumCpus = 1;
+    private int mNumCpus = 2;
+    private static int mNumOfPolicies = 1;
+    private static String[] mPolicies=null;
     private String[] mCurrFreq=null;
     private String[] mCurrGov=null;
 
-    private static final String NUM_OF_CPUS_PATH = "/sys/devices/system/cpu/present";
     private int CPU_TEMP_DIVIDER = 1;
     private String CPU_TEMP_SENSOR = "";
+
+    private boolean mDispOn = true;
 
     private class CPUView extends View {
         private Paint mOnlinePaint;
@@ -153,7 +158,7 @@ public class CPUInfoService extends Service {
         private String getCPUInfoString(int i) {
             String freq=mCurrFreq[i];
             String gov=mCurrGov[i];
-            return "cpu" + i + " " + gov + " " + String.format("%7s", freq);
+            return "cl" + i + ": " + gov + " " + String.format("%7s", toMHz(freq));
         }
 
         private String getCpuTemp(String cpuTemp) {
@@ -194,9 +199,6 @@ public class CPUInfoService extends Service {
                 if(!freq.equals("0")){
                     canvas.drawText(s, RIGHT-mPaddingRight-mMaxWidth,
                         y-1, mOnlinePaint);
-                } else {
-                    canvas.drawText(s, RIGHT-mPaddingRight-mMaxWidth,
-                        y-1, mOfflinePaint);
                 }
                 y += mFH;
             }
@@ -233,9 +235,9 @@ public class CPUInfoService extends Service {
         private Handler mHandler;
 
         private static final String CURRENT_CPU = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq";
-        private static final String CPU_ROOT = "/sys/devices/system/cpu/cpu";
-        private static final String CPU_CUR_TAIL = "/cpufreq/scaling_cur_freq";
-        private static final String CPU_GOV_TAIL = "/cpufreq/scaling_governor";
+        private static final String CPU_ROOT_POLICY = "/sys/devices/system/cpu/cpufreq/";
+        private static final String CPU_CUR_POLICY_TAIL = "/scaling_cur_freq";
+        private static final String CPU_GOV_POLICY_TAIL = "/scaling_governor";
 
         public CurCPUThread(Handler handler, int numCpus){
             mHandler=handler;
@@ -256,10 +258,10 @@ public class CPUInfoService extends Service {
                     sb.append(cpuTemp == null ? "0" : cpuTemp);
                     sb.append(";");
 
-                    for(int i=0; i<mNumCpus; i++){
-                        final String freqFile=CPU_ROOT+i+CPU_CUR_TAIL;
+                    for(int i=0; i<mNumOfPolicies; i++){
+                        final String freqFile=CPU_ROOT_POLICY+mPolicies[i]+CPU_CUR_POLICY_TAIL;
                         String currFreq = CPUInfoService.readOneLine(freqFile);
-                        final String govFile=CPU_ROOT+i+CPU_GOV_TAIL;
+                        final String govFile=CPU_ROOT_POLICY+mPolicies[i]+CPU_GOV_POLICY_TAIL;
                         String currGov = CPUInfoService.readOneLine(govFile);
 
                         if(currFreq==null){
@@ -281,7 +283,8 @@ public class CPUInfoService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mNumCpus = getNumOfCpus();
+        mNumCpus = 2;
+        getPolicies();
         mCurrFreq = new String[mNumCpus];
         mCurrGov = new String[mNumCpus];
 
@@ -304,8 +307,16 @@ public class CPUInfoService extends Service {
 
         Log.d(TAG, "started CurCPUThread");
 
+        IntentFilter screenStateFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        screenStateFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(mScreenStateReceiver, screenStateFilter);
+
         WindowManager wm = (WindowManager)getSystemService(WINDOW_SERVICE);
         wm.addView(mView, params);
+        if (!mDispOn && (mView != null)) {
+            wm.removeView(mView);
+            mView = null;
+        }
     }
 
     @Override
@@ -321,6 +332,7 @@ public class CPUInfoService extends Service {
         Log.d(TAG, "stopped CurCPUThread");
         ((WindowManager)getSystemService(WINDOW_SERVICE)).removeView(mView);
         mView = null;
+        unregisterReceiver(mScreenStateReceiver);
     }
 
     @Override
@@ -344,23 +356,27 @@ public class CPUInfoService extends Service {
         return line;
     }
 
-    private static int getNumOfCpus() {
-        int numOfCpu = 1;
-        String numOfCpus = readOneLine(NUM_OF_CPUS_PATH);
-        String[] cpuCount = numOfCpus.split("-");
-        if (cpuCount.length > 1) {
-            try {
-                int cpuStart = Integer.parseInt(cpuCount[0]);
-                int cpuEnd = Integer.parseInt(cpuCount[1]);
+    private BroadcastReceiver mScreenStateReceiver = new BroadcastReceiver() {
+         @Override
+         public void onReceive(Context context, Intent intent) {
+             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                 mDispOn = true;
+             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                 mDispOn = false;
+             }
+         }
+    };
 
-                numOfCpu = cpuEnd - cpuStart + 1;
+    private static void getPolicies() {
+        File folder = new File("/sys/devices/system/cpu/cpufreq");
+        File[] listOfFiles = folder.listFiles();
+        mNumOfPolicies = listOfFiles.length;
+        mPolicies = new String[mNumOfPolicies];
 
-                if (numOfCpu < 0)
-                    numOfCpu = 1;
-            } catch (NumberFormatException ex) {
-                numOfCpu = 1;
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isDirectory()) {
+              mPolicies[i] = listOfFiles[i].getName();
             }
         }
-        return numOfCpu;
     }
 }
