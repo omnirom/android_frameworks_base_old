@@ -33,6 +33,24 @@
       "revId": "375e3c9cad9550b733332ded5f97ac48f23e903e",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1708521_79b368a9",
+        "filename": "services/core/java/com/android/server/power/PowerManagerService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 4900,
+      "author": {
+        "id": 1002011
+      },
+      "writtenOn": "2018-10-12T14:55:24Z",
+      "side": 1,
+      "message": "And its called OMNI_HARDWARE_KEYS_DISABLE. Secure will fix.",
+      "parentUuid": "7604d412_10f8cf99",
+      "revId": "375e3c9cad9550b733332ded5f97ac48f23e903e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
     }
   ]
 }
