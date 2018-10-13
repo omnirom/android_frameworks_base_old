@@ -16,6 +16,23 @@
       "revId": "003b6bde4a76a92cfde198760f1c5ef8718b4ffd",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb82ae6b_f7770cb5",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 4630,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-10-13T09:39:45Z",
+      "side": 1,
+      "message": "missing ,",
+      "revId": "003b6bde4a76a92cfde198760f1c5ef8718b4ffd",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
     }
   ]
 }
