@@ -302,6 +302,13 @@ public class Build {
                 "ro.build.version.security_patch", "");
 
         /**
+         * The user-visible omni security patch level.
+         * @hide
+         */
+        public static final String SECURITY_PATCH_OMNI = SystemProperties.get(
+                "ro.omni.version.security_patch", "");
+
+        /**
          * The media performance class of the device or 0 if none.
          * <p>
          * If this value is not <code>0</code>, the device conforms to the media performance class
