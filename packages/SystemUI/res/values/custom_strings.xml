@@ -52,6 +52,11 @@
     <string name="accessibility_quick_settings_heads_up_changed_off">Peek notifications turned off.</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Peek notifications turned on.</string>
 
+    <!-- Game Mode QS Tile -->
+    <string name="quick_settings_game_mode_label">Game mode</string>
+    <string name="accessibility_quick_settings_game_mode_on">Game mode is on</string>
+    <string name="accessibility_quick_settings_game_mode_off">Game mode is off</string>
+
     <string name="status_bar_vpn">VPN</string>
     <string name="quick_settings_roaming_title">Roaming indicator</string>
 
