@@ -4533,6 +4533,14 @@ public final class Settings {
         /** @hide */
         private static final Validator OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR =
                 BOOLEAN_VALIDATOR;
+        /**
+         * @hide
+         */
+        public static final String OMNI_GAME_MODE_ENABLE = "omni_game_mode_enable";
+
+        /** @hide */
+        private static final Validator OMNI_GAME_MODE_ENABLE_VALIDATOR =
+                NULLABLE_COMPONENT_NAME_VALIDATOR;
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
@@ -4643,6 +4651,7 @@ public final class Settings {
             OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY,
             OMNI_SHOW_CPU_OVERLAY,
             OMNI_FINGERPRINT_SUCCESS_VIB,
+            OMNI_GAME_MODE_ENABLE,
         };
 
         /**
@@ -4802,6 +4811,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY);
             PRIVATE_SETTINGS.add(OMNI_SHOW_CPU_OVERLAY);
             PRIVATE_SETTINGS.add(OMNI_FINGERPRINT_SUCCESS_VIB);
+            PRIVATE_SETTINGS.add(OMNI_GAME_MODE_ENABLE);
         }
 
         /**
@@ -4964,6 +4974,8 @@ public final class Settings {
                     OMNI_SHOW_CPU_OVERLAY_VALIDATOR);
             VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB,
                     OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR);
+            VALIDATORS.put(OMNI_GAME_MODE_ENABLE,
+                    OMNI_GAME_MODE_ENABLE_VALIDATOR);
         }
 
         /**
