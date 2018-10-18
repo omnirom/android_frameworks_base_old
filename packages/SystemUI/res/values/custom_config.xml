@@ -23,7 +23,7 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_extra" translatable="false">
-        aod,caffeine,adb_network,weather,nfc,scr,heads_up
+        aod,caffeine,adb_network,weather,nfc,scr,heads_up,game_mode
     </string>
 
     <!-- The CPU temperature sensor path, defaults to empty -->
