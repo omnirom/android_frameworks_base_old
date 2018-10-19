@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6aab44b8_5e5c47ab",
+        "filename": "core/java/android/os/Build.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-10-19T13:03:54Z",
+      "side": 1,
+      "message": "should be @hide",
+      "revId": "bdda53db305f8b990a62d7f8f0c58d736d195bf6",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
