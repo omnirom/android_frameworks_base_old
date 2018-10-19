@@ -175,6 +175,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private int mBurnInXOffset;
     private boolean mIsPowerCameraGesture;
     private String mPreviousSource;
+    private int mBurnInYOffset;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -248,6 +249,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 R.dimen.keyguard_indication_margin_bottom);
         mIndicationBottomMarginAmbient = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom_ambient);
+        mBurnInYOffset = getResources().getDimensionPixelSize(
+                R.dimen.charging_indication_burn_in_prevention_offset_y);
         updateCameraVisibility();
         mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
         mUnlockMethodCache.addListener(this);
@@ -321,6 +324,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 R.dimen.keyguard_indication_margin_bottom);
         mIndicationBottomMarginAmbient = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom_ambient);
+        mBurnInYOffset = getResources().getDimensionPixelSize(
+                R.dimen.charging_indication_burn_in_prevention_offset_y);
         MarginLayoutParams mlp = (MarginLayoutParams) mIndicationArea.getLayoutParams();
         if (mlp.bottomMargin != mIndicationBottomMargin) {
             mlp.bottomMargin = mIndicationBottomMargin;
@@ -594,12 +599,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             return;
         }
         mDarkAmount = darkAmount;
-        // Let's randomize the bottom margin every time we wake up to avoid burn-in.
-        if (darkAmount == 0) {
-            mIndicationBottomMarginAmbient = getResources().getDimensionPixelSize(
-                    R.dimen.keyguard_indication_margin_bottom_ambient)
-                    + (int) (Math.random() * mIndicationText.getTextSize());
-        }
         mIndicationArea.setAlpha(MathUtils.lerp(1f, 0.7f, darkAmount));
         mIndicationArea.setTranslationY(MathUtils.lerp(0,
                 mIndicationBottomMargin - mIndicationBottomMarginAmbient, darkAmount));
@@ -891,8 +890,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public void dozeTimeTick() {
         if (mDarkAmount == 1) {
             // Move indication every minute to avoid burn-in
-            final int dozeTranslation = mIndicationBottomMargin - mIndicationBottomMarginAmbient;
-            mIndicationArea.setTranslationY(dozeTranslation + (float) Math.random() * 5);
+            int dozeTranslation = mIndicationBottomMargin - mIndicationBottomMarginAmbient;
+            int burnInYOffset = (int) (-mBurnInYOffset + Math.random() * mBurnInYOffset * 2);
+            mIndicationArea.setTranslationY(dozeTranslation + burnInYOffset);
         }
     }
 
