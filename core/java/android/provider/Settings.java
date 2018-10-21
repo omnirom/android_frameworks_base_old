@@ -4629,6 +4629,8 @@ public final class Settings {
             OMNI_BATTERY_LIGHT_MEDIUM_COLOR,
             OMNI_BATTERY_LIGHT_FULL_COLOR,
             OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR,
+            OMNI_FAST_BATTERY_LIGHT_COLOR,
+            OMNI_FAST_CHARGING_LED_ENABLED,
             OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED,
             OMNIJAWS_WEATHER_ICON_PACK,
             OMNI_LOCKSCREEN_WEATHER_ENABLED,
@@ -7692,6 +7694,8 @@ public final class Settings {
          */
         public static final String DOZE_ALWAYS_ON = "doze_always_on";
 
+        private static final Validator DOZE_ALWAYS_ON_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * Whether the device should pulse on pick up gesture.
          * @hide
@@ -8636,6 +8640,7 @@ public final class Settings {
             VOLUME_HUSH_GESTURE,
             MANUAL_RINGER_TOGGLE_COUNT,
             HUSH_GESTURE_USED,
+            DOZE_ALWAYS_ON,
         };
 
         /**
@@ -8782,6 +8787,7 @@ public final class Settings {
                     ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES_VALIDATOR); //legacy restore setting
             VALIDATORS.put(HUSH_GESTURE_USED, HUSH_GESTURE_USED_VALIDATOR);
             VALIDATORS.put(MANUAL_RINGER_TOGGLE_COUNT, MANUAL_RINGER_TOGGLE_COUNT_VALIDATOR);
+            VALIDATORS.put(DOZE_ALWAYS_ON, DOZE_ALWAYS_ON_VALIDATOR);
         }
 
         /**
@@ -12673,6 +12679,9 @@ public final class Settings {
         public static final String OMNI_RECENT_TASKS_VISIBLE_DISABLE =
                 "recents_tasks_visible_disable";
 
+        private static final Validator OMNI_RECENT_TASKS_VISIBLE_DISABLE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
@@ -12717,6 +12726,7 @@ public final class Settings {
             SOFT_AP_TIMEOUT_ENABLED,
             ZEN_DURATION,
             CHARGING_VIBRATION_ENABLED,
+            OMNI_RECENT_TASKS_VISIBLE_DISABLE,
         };
 
         /**
@@ -12761,6 +12771,8 @@ public final class Settings {
             VALIDATORS.put(APP_AUTO_RESTRICTION_ENABLED, APP_AUTO_RESTRICTION_ENABLED_VALIDATOR);
             VALIDATORS.put(ZEN_DURATION, ZEN_DURATION_VALIDATOR);
             VALIDATORS.put(CHARGING_VIBRATION_ENABLED, CHARGING_VIBRATION_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_RECENT_TASKS_VISIBLE_DISABLE,
+                    OMNI_RECENT_TASKS_VISIBLE_DISABLE_VALIDATOR);
         }
 
         /**
