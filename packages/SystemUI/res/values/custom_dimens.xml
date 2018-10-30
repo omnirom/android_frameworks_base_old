@@ -22,4 +22,5 @@
     <dimen name="current_weather_image_size">42dp</dimen>
     <dimen name="quick_status_bar_system_icons_margin_top">8dp</dimen>
     <dimen name="qs_brightness_slider_height">48dp</dimen>
+    <dimen name="quick_qs_drag_handle_height">20dp</dimen>
 </resources>

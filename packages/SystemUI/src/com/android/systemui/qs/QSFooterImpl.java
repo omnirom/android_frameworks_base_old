@@ -61,9 +61,12 @@ import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 
 public class QSFooterImpl extends FrameLayout implements QSFooter,
-        OnClickListener, OnUserInfoChangedListener, EmergencyListener, SignalCallback {
+        OnClickListener, OnUserInfoChangedListener, EmergencyListener, SignalCallback, Tunable {
+
+    public static final String QS_SHOW_DRAG_HANDLE = "qs_show_drag_handle";
 
     private ActivityStarter mActivityStarter;
     private UserInfoController mUserInfoController;
@@ -231,10 +234,25 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        final TunerService tunerService = Dependency.get(TunerService.class);
+        tunerService.addTunable(this, QS_SHOW_DRAG_HANDLE);
+    }
+
+    @Override
     @VisibleForTesting
     public void onDetachedFromWindow() {
+        Dependency.get(TunerService.class).removeTunable(this);
         setListening(false);
         super.onDetachedFromWindow();
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (QS_SHOW_DRAG_HANDLE.equals(key)) {
+            setHideDragHandle(newValue != null && Integer.parseInt(newValue) == 0);
+        }
     }
 
     @Override
@@ -437,5 +455,9 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         public String contentDescription;
         String typeContentDescription;
         boolean roaming;
+    }
+
+    private void setHideDragHandle(boolean hide) {
+        mDragHandle.setVisibility(hide ? View.GONE : View.VISIBLE);
     }
 }
