@@ -103,6 +103,7 @@
     <string name="tuner_show_info_header_title">Show information header</string>
     <string name="tuner_cellular_title">Mobile</string>
     <string name="tuner_show_secure_title">Show security footer</string>
+    <string name="tuner_show_drag_handle">Show drag handle</string>
 
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>

@@ -23,4 +23,5 @@
     <dimen name="quick_status_bar_system_icons_margin_top">8dp</dimen>
     <dimen name="qs_brightness_slider_height">48dp</dimen>
     <dimen name="net_traffic_text_size">10sp</dimen>
+    <dimen name="quick_qs_drag_handle_height">20dp</dimen>
 </resources>
