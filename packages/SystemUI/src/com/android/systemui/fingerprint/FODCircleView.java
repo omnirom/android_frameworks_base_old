@@ -51,6 +51,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.systemui.R;
 
+import android.util.Log;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -155,6 +156,17 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             mInsideCircle = false;
             setDim(false);
         }
+
+        @Override
+        public void onFingerprintError(int msgId, String errString) {
+            super.onFingerprintError(msgId, errString);
+            int mMsgId = msgId;
+            Log.i("darkobas", "onFingerprintError " + msgId);
+            if ((viewAdded) && (mMsgId == 7)) {
+                hide();
+            }
+        }
+            
     };
 
     FODCircleView(Context context) {
