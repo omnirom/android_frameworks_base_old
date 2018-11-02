@@ -1230,48 +1230,66 @@ public final class BatteryService extends SystemService {
             }
             final int level = mHealthInfo.batteryLevel;
             final int status = mHealthInfo.batteryStatus;
-            boolean fastlightenabled = mFastBatteryLightEnabled & mIsFastCharging;
+            boolean lightEnabled = mLightEnabled;
+            int lightColor = mBatteryLowARGB;
+            boolean pulseColor = false;
+            boolean fastLightEnabled = mFastBatteryLightEnabled & mIsFastCharging;
+
             if (!mLightEnabled || (mIsDndActive && !mAllowBatteryLightOnDnd)) {
-                mBatteryLight.turnOff();
+                lightEnabled = false;
             } else if (level < mLowBatteryWarningLevel) {
-                if (fastlightenabled) {
-                    //Solid color when battery is fast charging
-                    mBatteryLight.setColor(mFastBatteryARGB);
-                    mLightEnabled = !mLightOnlyFullyCharged;
-                } else if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
+                if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
                     // Battery is charging and low
-                    mBatteryLight.setColor(mBatteryLowARGB);
+                    lightColor = mBatteryLowARGB;
+                    if (fastLightEnabled) {
+                        //Solid color when battery is fast charging
+                        lightColor = mFastBatteryARGB;
+                    }
+                    lightEnabled = !mLightOnlyFullyCharged;
                 } else if (mLowBatteryBlinking) {
                     // Flash when battery is low and not charging
-                    mBatteryLight.setFlashing(mBatteryLowARGB, Light.LIGHT_FLASH_TIMED,
-                            mBatteryLedOn, mBatteryLedOff);
+                    lightColor = mBatteryLowARGB;
+                    pulseColor = true;
+                    lightEnabled = true;
                 } else {
                     // "Pulse low battery light" is disabled, no lights.
-                    mBatteryLight.turnOff();
+                    lightEnabled = false;
                 }
             } else if (status == BatteryManager.BATTERY_STATUS_CHARGING
                     || status == BatteryManager.BATTERY_STATUS_FULL) {
                 if (status == BatteryManager.BATTERY_STATUS_FULL || level >= 90) {
                     if (level == 100) {
                         // Battery is really full
-                        mBatteryLight.setColor(mBatteryReallyFullARGB);
+                        lightColor = mBatteryReallyFullARGB;
+                        lightEnabled = true;
                     } else {
                         // Battery is full or charging and nearly full
-                        mBatteryLight.setColor(mBatteryFullARGB);
+                        lightColor = mBatteryFullARGB;
+                        lightEnabled = !mLightOnlyFullyCharged;
                     }
                 } else {
-                    if (fastlightenabled) {
+                    if (fastLightEnabled) {
                         //Solid color when battery is fast charging
-                        mBatteryLight.setColor(mFastBatteryARGB);
-                        mLightEnabled = !mLightOnlyFullyCharged;
+                        lightColor = mFastBatteryARGB;
                     } else {
                         // Battery is charging and halfway full
-                        mLightEnabled = !mLightOnlyFullyCharged;
-                        mBatteryLight.setColor(mBatteryMediumARGB);
+                        lightColor = mBatteryMediumARGB;
                     }
+                    lightEnabled = !mLightOnlyFullyCharged;
                 }
             } else {
                 // No lights if not charging and not low
+                lightEnabled = false;
+            }
+
+            if (lightEnabled) {
+                if (pulseColor) {
+                    mBatteryLight.setFlashing(lightColor, Light.LIGHT_FLASH_TIMED,
+                            mBatteryLedOn, mBatteryLedOff);
+                } else {
+                    mBatteryLight.setColor(lightColor);
+                }
+            } else {
                 mBatteryLight.turnOff();
             }
         }
