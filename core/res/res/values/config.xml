@@ -2361,6 +2361,9 @@
     <!-- Whether safe headphone volume is enabled or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">true</bool>
 
+    <!-- Whether safe headphone volume warning dialog is disabled on Vol+ (operator specific). -->
+    <bool name="config_safe_media_disable_on_volume_up">true</bool>
+
     <!-- Set to true if the wifi display supports compositing content stored
          in gralloc protected buffers.  For this to be true, there must exist
          a protected hardware path for surface flinger to composite and send
@@ -2782,7 +2785,7 @@
         <item>SUPL_PORT=7275</item>
         <item>SUPL_VER=0x20000</item>
         <item>SUPL_MODE=1</item>
-        <item>SUPL_ES=0</item>
+        <item>SUPL_ES=1</item>
         <item>LPP_PROFILE=0</item>
         <item>USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL=1</item>
         <item>A_GLONASS_POS_PROTOCOL_SELECT=0</item>
@@ -3506,4 +3509,11 @@
 
     <!-- Whether or not we should show the option to show battery percentage -->
     <bool name="config_battery_percentage_setting_available">true</bool>
+
+    <!-- Model of potentially misprovisioned devices. If none is specified in an overlay, an
+         empty string is passed in. -->
+    <string name="config_misprovisionedDeviceModel" translatable="false"></string>
+
+    <!-- Brand value for attestation of misprovisioned device. -->
+    <string name="config_misprovisionedBrandValue" translatable="false"></string>
 </resources>
