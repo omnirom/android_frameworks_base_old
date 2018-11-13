@@ -25,6 +25,7 @@ import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -61,6 +62,8 @@ public class KeyguardStatusView extends GridLayout implements
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardStatusView";
     private static final int MARQUEE_DELAY_MS = 2000;
+
+    private static final String FONT_FAMILY = "sans-serif-light";
 
     private final LockPatternUtils mLockPatternUtils;
     private final IActivityManager mIActivityManager;
@@ -228,13 +231,13 @@ public class KeyguardStatusView extends GridLayout implements
     private void onSliceContentChanged() {
         boolean smallClock = mKeyguardSlice.hasHeader() || mPulsing;
         float clockScale = smallClock ? mSmallClockScale : 1;
-
+        Typeface tf = Typeface.create(FONT_FAMILY, Typeface.NORMAL);
         RelativeLayout.LayoutParams layoutParams =
                 (RelativeLayout.LayoutParams) mClockView.getLayoutParams();
         int height = mClockView.getHeight();
         layoutParams.bottomMargin = (int) -(height - (clockScale * height));
         mClockView.setLayoutParams(layoutParams);
-
+        mClockView.setTypeface(tf);
         layoutParams = (RelativeLayout.LayoutParams) mClockSeparator.getLayoutParams();
         layoutParams.topMargin = smallClock ? (int) mWidgetPadding : 0;
         layoutParams.bottomMargin = layoutParams.topMargin;

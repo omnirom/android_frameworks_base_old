@@ -25,6 +25,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.TypedValue;
@@ -64,6 +65,7 @@ import com.android.systemui.tuner.TunerService;
 public class KeyguardStatusBarView extends RelativeLayout
         implements BatteryStateChangeCallback, OnUserInfoChangedListener, ConfigurationListener {
 
+    private static final String FONT_FAMILY = "sans-serif";
     private static final int LAYOUT_NONE = 0;
     private static final int LAYOUT_CUTOUT = 1;
     private static final int LAYOUT_NO_CUTOUT = 2;
@@ -124,6 +126,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
+        Typeface tf = Typeface.create(FONT_FAMILY, Typeface.NORMAL);
         MarginLayoutParams lp = (MarginLayoutParams) mMultiUserAvatar.getLayoutParams();
         lp.width = lp.height = getResources().getDimensionPixelSize(
                 R.dimen.multi_user_avatar_keyguard_size);
@@ -151,6 +154,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mCarrierLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.text_size_small_material));
+        mCarrierLabel.setTypeface(tf);
         lp = (MarginLayoutParams) mCarrierLabel.getLayoutParams();
         lp.setMarginStart(
                 getResources().getDimensionPixelSize(R.dimen.keyguard_carrier_text_margin));

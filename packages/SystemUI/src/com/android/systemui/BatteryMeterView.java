@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -65,6 +66,7 @@ import java.util.Locale;
 public class BatteryMeterView extends LinearLayout implements
         BatteryStateChangeCallback, Tunable, DarkReceiver, ConfigurationListener {
 
+    private static final String FONT_FAMILY = "sans-serif-medium";
     private final BatteryMeterDrawableBase mDrawable;
     private final String mSlotBattery;
     private final ImageView mBatteryIconView;
@@ -281,8 +283,10 @@ public class BatteryMeterView extends LinearLayout implements
     }
 
     private void updatePercentText() {
+        Typeface tf = Typeface.create(FONT_FAMILY, Typeface.NORMAL);
         mBatteryPercentView.setText(
                 NumberFormat.getPercentInstance(Locale.US).format(mLevel / 100f));
+        mBatteryPercentView.setTypeface(tf);
         if (!mShowBatteryImage && mPowerSaveEnabled && !mCharging) {
             mBatteryPercentView.setTextColor(mDrawable.getPowersaveColor());
         } else if (mTextColor != 0) {
