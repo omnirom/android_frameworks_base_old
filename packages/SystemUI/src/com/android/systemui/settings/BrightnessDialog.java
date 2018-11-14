@@ -16,8 +16,12 @@
 
 package com.android.systemui.settings;
 
+import static com.android.settingslib.display.BrightnessUtils.GAMMA_SPACE_MAX;
+
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -26,6 +30,10 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+
+import android.content.ContentResolver;
+import android.content.Context;
+import android.provider.Settings;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -40,7 +48,12 @@ public class BrightnessDialog extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        final Context mContext = this;
+
+        final ContentResolver resolver = mContext.getContentResolver();
+
         final Window window = getWindow();
+        final Vibrator mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
 
         window.setGravity(Gravity.TOP);
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
@@ -50,13 +63,64 @@ public class BrightnessDialog extends Activity {
         // the QS content.
         ContextThemeWrapper themedContext = new ContextThemeWrapper(this,
                 com.android.internal.R.style.Theme_DeviceDefault_QuickSettings);
-        View v = LayoutInflater.from(themedContext).inflate(
+        View mBrightnessView = LayoutInflater.from(themedContext).inflate(
                 R.layout.quick_settings_brightness_dialog, null);
-        setContentView(v);
+        setContentView(mBrightnessView);
 
         final ImageView icon = findViewById(R.id.brightness_icon);
         final ToggleSliderView slider = findViewById(R.id.brightness_slider);
+
         mBrightnessController = new BrightnessController(this, icon, slider);
+
+        ImageView mMinBrightness = mBrightnessView.findViewById(R.id.brightness_left);
+        mMinBrightness.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int currentValue = Settings.System.getInt(resolver,
+                        Settings.System.SCREEN_BRIGHTNESS, 0);
+                int brightness = currentValue - 10;
+                if (currentValue != 0) {
+                    Settings.System.putInt(resolver,
+                            Settings.System.SCREEN_BRIGHTNESS, Math.max(0, brightness));
+                }
+            }
+        });
+
+        mMinBrightness.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                setBrightnessMinMax(true);
+                mVibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
+                return true;
+            }
+        });
+
+        ImageView mMaxBrightness = mBrightnessView.findViewById(R.id.brightness_right);
+        mMaxBrightness.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int currentValue = Settings.System.getInt(resolver,
+                        Settings.System.SCREEN_BRIGHTNESS, 0);
+                int brightness = currentValue + 10;
+                if (currentValue != 255) {
+                    Settings.System.putInt(resolver,
+                            Settings.System.SCREEN_BRIGHTNESS, Math.min(255, brightness));
+                }
+            }
+        });
+
+        mMaxBrightness.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                setBrightnessMinMax(false);
+                mVibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
+                return true;
+            }
+        });
+    }
+
+    private void setBrightnessMinMax(boolean min) {
+        mBrightnessController.setBrightnessFromSliderButtons(min ? 0 : GAMMA_SPACE_MAX);
     }
 
     @Override
