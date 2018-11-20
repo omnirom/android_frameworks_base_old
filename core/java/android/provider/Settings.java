@@ -4803,6 +4803,20 @@ public final class Settings {
          */
 
         /**
+         * Hold current font name and name of the originating package Uses "|" as a delimiter
+         *
+         * @hide
+         */
+        public static final String OMNI_FONT_INFO = "font_info";
+
+        /**
+         * Hold list of installed font provider packages. Uses "|" as a delimiter
+         *
+         * @hide
+         */
+        public static final String OMNI_FONT_PACKAGES = "font_packages";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -5116,6 +5130,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_ARROW_KEYS);
             PRIVATE_SETTINGS.add(OMNI_VOLUME_BUTTON_MUSIC_CONTROL);
             PRIVATE_SETTINGS.add(OMNI_FACE_AUTO_UNLOCK);
+            PRIVATE_SETTINGS.add(OMNI_FONT_INFO);
+            PRIVATE_SETTINGS.add(OMNI_FONT_PACKAGES);
         }
 
         /**
