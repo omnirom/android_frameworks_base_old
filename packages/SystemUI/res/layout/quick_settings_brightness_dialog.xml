@@ -60,6 +60,6 @@
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_qs_brightness_auto_off_new"
         android:contentDescription="@null"
-        android:layout_marginStart="25.0dip" />
+        android:layout_marginStart="20.0dip" />
 
 </LinearLayout>
