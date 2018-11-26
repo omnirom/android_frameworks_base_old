@@ -71,6 +71,7 @@ public class BrightnessController implements ToggleSlider.Listener {
 
     private final Context mContext;
     private final ImageView mIcon;
+    private final ImageView mIconLeft;
     private final ToggleSlider mControl;
     private final boolean mAutomaticAvailable;
     private final DisplayManager mDisplayManager;
@@ -265,9 +266,11 @@ public class BrightnessController implements ToggleSlider.Listener {
         }
     };
 
-    public BrightnessController(Context context, ImageView icon, ToggleSlider control) {
+    public BrightnessController(Context context, ImageView icon, ImageView iconLeft,
+                                ToggleSlider control) {
         mContext = context;
         mIcon = icon;
+        mIconLeft = iconLeft;
         mControl = control;
         mControl.setMax(GAMMA_SPACE_MAX);
         mBackgroundHandler = new Handler((Looper) Dependency.get(Dependency.BG_LOOPER));
@@ -297,6 +300,17 @@ public class BrightnessController implements ToggleSlider.Listener {
        if (mIcon != null) {
             if (mAutomaticAvailable) {
                 mIcon.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int newMode = mAutomatic ? Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL : Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
+                        setMode(newMode);
+                    }
+                });
+            }
+        }
+       if (mIconLeft != null) {
+            if (mAutomaticAvailable) {
+                mIconLeft.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         int newMode = mAutomatic ? Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL : Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
@@ -444,6 +458,11 @@ public class BrightnessController implements ToggleSlider.Listener {
     private void updateIcon(boolean automatic) {
         if (mIcon != null) {
             mIcon.setImageResource(automatic ?
+                    com.android.systemui.R.drawable.ic_qs_brightness_auto_on_new :
+                    com.android.systemui.R.drawable.ic_qs_brightness_auto_off_new);
+        }
+        if (mIconLeft != null) {
+            mIconLeft.setImageResource(automatic ?
                     com.android.systemui.R.drawable.ic_qs_brightness_auto_on_new :
                     com.android.systemui.R.drawable.ic_qs_brightness_auto_off_new);
         }

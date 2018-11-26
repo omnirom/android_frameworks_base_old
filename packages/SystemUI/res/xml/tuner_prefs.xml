@@ -30,7 +30,26 @@
         <com.android.systemui.tuner.TunerSwitch
             android:key="qs_brightness_position_bottom"
             android:title="@string/tuner_brightness_position_bottom"
+            android:dependency="qs_show_brightness"
             sysui:defValue="false" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_show_auto_brightness"
+            android:title="@string/tuner_show_auto_brightness"
+            android:dependency="qs_show_brightness"
+            sysui:defValue="true" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_auto_brightness_right"
+            android:title="@string/tuner_auto_brightness_right"
+            android:dependency="qs_show_auto_brightness"
+            sysui:defValue="true" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_show_brightness_buttons"
+            android:title="@string/tuner_show_brightness_buttons"
+            android:dependency="qs_show_brightness"
+            sysui:defValue="true" />
 
         <com.android.systemui.tuner.TunerSwitch
             android:key="qs_show_info_header"

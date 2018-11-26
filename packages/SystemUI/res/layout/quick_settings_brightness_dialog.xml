@@ -23,6 +23,17 @@
     style="@style/BrightnessDialogContainer">
 
     <ImageButton
+        android:id="@+id/brightness_icon_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_qs_brightness_auto_off_new"
+        android:contentDescription="@null"
+        android:layout_marginStart="20.0dip"
+        android:visibility="gone" />
+
+    <ImageButton
         android:id="@+id/brightness_left"
         android:layout_marginEnd="6.0dip"
         android:layout_width="wrap_content"
