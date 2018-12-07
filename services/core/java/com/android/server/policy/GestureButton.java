@@ -49,14 +49,11 @@ import com.android.server.LocalServices;
 
 public class GestureButton implements PointerEventListener {
     private static final String TAG = "GestureButton";
-    private static boolean DEBUG = false;
+    private static boolean DEBUG = true;
 
-    private static final int GESTURE_KEY_DISTANCE_TIMEOUT = 250;
-    private static final int GESTURE_KEY_LONG_CLICK_TIMEOUT = 500;
     private static final int MSG_SEND_SWITCH_KEY = 5;
     private static final int MSG_SEND_KEY = 6;
     private static final int MSG_SEND_LONG_PRESS = 7;
-    private static float mRecentMoveTolerance = 5.0f;
 
     private long mDownTime;
     private float mFromX;
@@ -79,6 +76,9 @@ public class GestureButton implements PointerEventListener {
     private boolean mDismissInputMethod;
     private int mSwipeMinLength;
     private int mLongPressMaxLength;
+    private int mMoveTolerance;
+    private int mSwipeTriggerTimeout;
+    private boolean mShortSwipeTriggered;
     private Context mContext;
 
     private class GestureButtonHandler extends Handler {
@@ -123,6 +123,8 @@ public class GestureButton implements PointerEventListener {
         mSwipeStartThreshold = 20;
         mSwipeMinLength = context.getResources().getDimensionPixelSize(R.dimen.nav_gesture_swipe_min_length);
         mLongPressMaxLength = context.getResources().getDimensionPixelSize(R.dimen.nav_gesture_long_press_max_length);
+        mMoveTolerance = context.getResources().getDimensionPixelSize(R.dimen.nav_gesture_move_threshold);
+        mSwipeTriggerTimeout  = context.getResources().getInteger(R.integer.nav_gesture_swipe_timout);
         HandlerThread gestureButtonThread = new HandlerThread("GestureButtonThread", -8);
         gestureButtonThread.start();
         mGestureButtonHandler = new GestureButtonHandler(gestureButtonThread.getLooper());
@@ -181,6 +183,7 @@ public class GestureButton implements PointerEventListener {
                         mKeyEventHandled = false;
                         mRecentsTriggered = false;
                         mLongSwipePossible = false;
+                        mShortSwipeTriggered = false;
                         if (DEBUG) Slog.i(TAG, "ACTION_DOWN " + mPreparedKeycode);
                     }
                     break;
@@ -189,6 +192,7 @@ public class GestureButton implements PointerEventListener {
                         if (DEBUG)
                             Slog.i(TAG, "ACTION_UP " + mPreparedKeycode + " " + mRecentsTriggered + " " + mKeyEventHandled + " " + mLongSwipePossible);
                         mGestureButtonHandler.removeMessages(MSG_SEND_SWITCH_KEY);
+                        mGestureButtonHandler.removeMessages(MSG_SEND_LONG_PRESS);
                         cancelPreloadRecentApps();
 
                         if (!mKeyEventHandled && mLongSwipePossible) {
@@ -203,6 +207,7 @@ public class GestureButton implements PointerEventListener {
                         mKeyEventHandled = false;
                         mRecentsTriggered = false;
                         mLongSwipePossible = false;
+                        mShortSwipeTriggered = false;
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
@@ -221,13 +226,22 @@ public class GestureButton implements PointerEventListener {
                         }
                         long deltaSinceDown = event.getEventTime() - mDownTime;
                         if (mPreparedKeycode == KeyEvent.KEYCODE_HOME && moveDistanceSinceDown < mLongPressMaxLength) {
-                            if (deltaSinceDown > GESTURE_KEY_LONG_CLICK_TIMEOUT) {
-                                if (DEBUG) Slog.i(TAG, "long click: moveDistanceSinceDown = " + moveDistanceSinceDown);
-                                mGestureButtonHandler.sendEmptyMessage(MSG_SEND_LONG_PRESS);
+                            if (moveDistanceSinceLast < mMoveTolerance) {
+                                if (!mShortSwipeTriggered) {
+                                    mShortSwipeTriggered = true;
+                                    if (DEBUG) Slog.i(TAG, "long click: moveDistanceSinceDown = " + moveDistanceSinceDown);
+                                    mGestureButtonHandler.removeMessages(MSG_SEND_LONG_PRESS);
+                                    mGestureButtonHandler.sendEmptyMessageDelayed(MSG_SEND_LONG_PRESS, mSwipeTriggerTimeout);
+                                }
+                            } else {
+                                mGestureButtonHandler.removeMessages(MSG_SEND_LONG_PRESS);
+                                mShortSwipeTriggered = false;
                             }
                         }
 
                         if (moveDistanceSinceDown > mSwipeMinLength) {
+                            mGestureButtonHandler.removeMessages(MSG_SEND_LONG_PRESS);
+                            mShortSwipeTriggered = false;
                             if (DEBUG) Slog.i(TAG, "swipe: moveDistanceSinceDown = " + moveDistanceSinceDown);
                             mLongSwipePossible = true;
                             if (mPreparedKeycode == KeyEvent.KEYCODE_BACK) {
@@ -235,11 +249,11 @@ public class GestureButton implements PointerEventListener {
                                 //mGestureButtonHandler.sendEmptyMessage(MSG_SEND_KEY);
                             } else if (!mRecentsTriggered) {
                                 // swipe comes to an stop
-                                if (moveDistanceSinceLast < mRecentMoveTolerance) {
+                                if (moveDistanceSinceLast < mMoveTolerance) {
                                     mRecentsTriggered = true;
                                     preloadRecentApps();
                                     mGestureButtonHandler.removeMessages(MSG_SEND_SWITCH_KEY);
-                                    mGestureButtonHandler.sendEmptyMessageDelayed(MSG_SEND_SWITCH_KEY, GESTURE_KEY_DISTANCE_TIMEOUT);
+                                    mGestureButtonHandler.sendEmptyMessageDelayed(MSG_SEND_SWITCH_KEY, mSwipeTriggerTimeout);
                                 }
                             }
                         }
