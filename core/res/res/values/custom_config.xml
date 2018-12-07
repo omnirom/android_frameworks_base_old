@@ -76,4 +76,10 @@
     <!-- Component name of the combo network location provider. -->
     <string name="config_comboNetworkLocationProvider" translatable="false">@null</string>
 
+    <!-- minimal way before long swipe will get accepted - in dp -->
+    <integer name="nav_gesture_swipe_min_length">60</integer>
+    <!-- time in ms that needs to pass before trigger the action -->
+    <integer name="nav_gesture_swipe_timout">250</integer>
+    <!-- signification move threshold - if stays below will trigger action -->
+    <integer name="nav_gesture_move_threshold">4</integer>
 </resources>
