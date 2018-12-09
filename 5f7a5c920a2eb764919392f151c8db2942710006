@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ef7e8824_699d2279",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationIconContainer.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-12-09T20:23:49Z",
+      "side": 1,
+      "message": "I would keep those as variables - less changes - just remove the static final and set in initDimens",
+      "revId": "5f7a5c920a2eb764919392f151c8db2942710006",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
