@@ -16,6 +16,24 @@
       "revId": "5f7a5c920a2eb764919392f151c8db2942710006",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fc3ae60_f00ea76a",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationIconContainer.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1001441
+      },
+      "writtenOn": "2018-12-09T20:27:24Z",
+      "side": 1,
+      "message": "fyi original patch was way easier but someone memed it up lmao\n\nsee https://review.lineageos.org/c/LineageOS/android_frameworks_base/+/225680",
+      "parentUuid": "ef7e8824_699d2279",
+      "revId": "5f7a5c920a2eb764919392f151c8db2942710006",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
     }
   ]
 }
