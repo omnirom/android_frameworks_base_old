@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "515f2282_3d2df40d",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationIconContainer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-12-09T13:59:30Z",
+      "side": 1,
+      "message": "never ever initialize a resource variable like that!\nyou can do it in initDimens.",
+      "revId": "d82cb9316585899f4005487d39c36f56edf8e40c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
