@@ -127,8 +127,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
     }.setDuration(CONTENT_FADE_DURATION);
 
-    public static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
-    public static final int MAX_STATIC_ICONS = 4;
+    public int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
+    public int MAX_STATIC_ICONS = 4;
     private static final int MAX_DOTS = 1;
 
     private boolean mIsStaticLayout = true;
@@ -171,6 +171,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mDotPadding = getResources().getDimensionPixelSize(R.dimen.overflow_icon_dot_padding);
         mStaticDotRadius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
         mStaticDotDiameter = 2 * mStaticDotRadius;
+        MAX_VISIBLE_ICONS_WHEN_DARK = getResources().getInteger(R.integer.config_maxVisibleNotificationIconsWhenDark);
+        MAX_STATIC_ICONS = getResources().getInteger(R.integer.config_maxVisibleNotificationIcons);
     }
 
     @Override
