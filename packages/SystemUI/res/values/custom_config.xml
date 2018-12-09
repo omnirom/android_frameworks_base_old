@@ -41,5 +41,7 @@
     <!-- The CPUs to display in CPUInfoService view -->
     <string name="config_displayCpus" translatable="false"></string>
 
+    <!-- Max visible notification icons -->
+    <integer name="config_maxVisibleNotificationIcons">4</integer>
+    <integer name="config_maxVisibleNotificationIconsWhenDark">5</integer>
 </resources>
-
