@@ -127,13 +127,15 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
     }.setDuration(CONTENT_FADE_DURATION);
 
-    public static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
-    public static final int MAX_STATIC_ICONS = 4;
+    //public static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
+    //public static final int MAX_STATIC_ICONS = 4;
     private static final int MAX_DOTS = 1;
 
     private boolean mIsStaticLayout = true;
     private final HashMap<View, IconState> mIconStates = new HashMap<>();
     private int mDotPadding;
+    private int mMaxVisibleIconsWhenDark;
+    private int mMaxStaticIcons;
     private int mStaticDotRadius;
     private int mStaticDotDiameter;
     private int mOverflowWidth;
@@ -168,6 +170,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }
 
     private void initDimens() {
+        mMaxVisibleIconsWhenDark = getResources().getInteger(R.integer.config_maxVisibleNotificationIconsWhenDark);
+        mMaxStaticIcons = getResources().getInteger(R.integer.config_maxVisibleNotificationIcons);
         mDotPadding = getResources().getDimensionPixelSize(R.dimen.overflow_icon_dot_padding);
         mStaticDotRadius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
         mStaticDotDiameter = 2 * mStaticDotRadius;
@@ -371,8 +375,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         float translationX = getActualPaddingStart();
         int firstOverflowIndex = -1;
         int childCount = getChildCount();
-        int maxVisibleIcons = mDark ? MAX_VISIBLE_ICONS_WHEN_DARK :
-                    mIsStaticLayout ? MAX_STATIC_ICONS : childCount;
+        int maxVisibleIcons = mDark ? /*MAX_VISIBLE_ICONS_WHEN_DARK*/ mMaxVisibleIconsWhenDark  :
+                    mIsStaticLayout ? /*MAX_STATIC_ICONS*/ mMaxStaticIcons  : childCount;
         float layoutEnd = getLayoutEnd();
         float overflowStart = getMaxOverflowStart();
         mVisualOverflowStart = 0;
