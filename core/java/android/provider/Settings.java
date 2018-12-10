@@ -4636,6 +4636,15 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Setting to disable rounded corner preferences and use frameworks values instead
+         * @hide
+         */
+        public static final String OMNI_SYSUI_ROUNDED_FWVALS = "sysui_rounded_fwvals";
+
+        private static final Validator OMNI_SYSUI_ROUNDED_FWVALS_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4755,7 +4764,8 @@ public final class Settings {
             OMNI_NETWORK_TRAFFIC_AUTOHIDE,
             OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD,
             OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
-            OMNI_LOCK_QS_DISABLED
+            OMNI_LOCK_QS_DISABLED,
+            OMNI_SYSUI_ROUNDED_FWVALS
         };
 
         /**
@@ -4925,6 +4935,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD);
             PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN);
             PRIVATE_SETTINGS.add(OMNI_LOCK_QS_DISABLED);
+            PRIVATE_SETTINGS.add(OMNI_SYSUI_ROUNDED_FWVALS);
         }
 
         /**
@@ -5104,6 +5115,8 @@ public final class Settings {
             VALIDATORS.put(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
                     OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR);
             VALIDATORS.put(OMNI_LOCK_QS_DISABLED, OMNI_LOCK_QS_DISABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_SYSUI_ROUNDED_FWVALS,
+                    OMNI_SYSUI_ROUNDED_FWVALS_VALIDATOR);
         }
 
         /**
@@ -6069,6 +6082,14 @@ public final class Settings {
                 int userHandle) {
             return putStringForUser(cr, name, Float.toString(value), userHandle);
         }
+
+        /**
+          * Setting to allow setting rounded corner size and content padding
+          * @hide
+          */
+        public static final String OMNI_SYSUI_ROUNDED_SIZE = "sysui_rounded_size";
+
+        public static final String OMNI_SYSUI_ROUNDED_CONTENT_PADDING = "sysui_rounded_content_padding";
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}
