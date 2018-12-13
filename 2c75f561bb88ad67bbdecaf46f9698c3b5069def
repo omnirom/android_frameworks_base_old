@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "312fe050_1ff1cd66",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationIconContainer.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2018-12-13T21:48:56Z",
+      "side": 1,
+      "message": "holy mother of weired code changes ....",
+      "revId": "2c75f561bb88ad67bbdecaf46f9698c3b5069def",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
