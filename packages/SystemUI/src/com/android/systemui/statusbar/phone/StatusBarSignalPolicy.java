@@ -53,6 +53,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private static final String TAG = "StatusBarSignalPolicy";
 
     private static final String SLOT_ROAMING = "roaming";
+    private static final String HIDE_DISABLED_SIM = "hide_disabled_sim";
 
     private final String mSlotAirplane;
     private final String mSlotMobile;
@@ -75,6 +76,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private boolean mForceBlockWifi;
     private boolean mBlockRoaming;
     private boolean mBlockVpn;
+    private boolean mHideDisabledSim;
 
     // Track as little state as possible, and only for padding purposes
     private boolean mIsAirplaneMode = false;
@@ -102,6 +104,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         mSecurityController.addCallback(this);
 
         Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+        Dependency.get(TunerService.class).addTunable(this, HIDE_DISABLED_SIM);
 
         if (TelephonyExtUtils.getInstance(context).hasService()) {
             TelephonyExtUtils.getInstance(context).addListener(this);
@@ -150,30 +153,34 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (!StatusBarIconController.ICON_BLACKLIST.equals(key)) {
-            return;
-        }
-        ArraySet<String> blockList = StatusBarIconController.getIconBlacklist(newValue);
-        boolean blockAirplane = blockList.contains(mSlotAirplane);
-        boolean blockMobile = blockList.contains(mSlotMobile);
-        boolean blockWifi = blockList.contains(mSlotWifi);
-        boolean blockEthernet = blockList.contains(mSlotEthernet);
-        boolean blockRoaming = blockList.contains(mSlotRoaming);
-        boolean blockVpn = blockList.contains(mSlotVpn);
-
-        if (blockAirplane != mBlockAirplane || blockMobile != mBlockMobile
-                || blockEthernet != mBlockEthernet || blockWifi != mBlockWifi
-                || blockRoaming != mBlockRoaming || blockVpn != mBlockVpn) {
-            mBlockAirplane = blockAirplane;
-            mBlockMobile = blockMobile;
-            mBlockEthernet = blockEthernet;
-            mBlockWifi = blockWifi || mForceBlockWifi;
-            mBlockRoaming = blockRoaming;
-            mBlockVpn = blockVpn;
+        if (HIDE_DISABLED_SIM.equals(key)) {
+            mHideDisabledSim = newValue != null && Integer.parseInt(newValue) == 1;
             // Re-register to get new callbacks.
             mNetworkController.removeCallback(this);
             mNetworkController.addCallback(this);
-            updateVpn();
+        } else if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
+            ArraySet<String> blockList = StatusBarIconController.getIconBlacklist(newValue);
+            boolean blockAirplane = blockList.contains(mSlotAirplane);
+            boolean blockMobile = blockList.contains(mSlotMobile);
+            boolean blockWifi = blockList.contains(mSlotWifi);
+            boolean blockEthernet = blockList.contains(mSlotEthernet);
+            boolean blockRoaming = blockList.contains(mSlotRoaming);
+            boolean blockVpn = blockList.contains(mSlotVpn);
+
+            if (blockAirplane != mBlockAirplane || blockMobile != mBlockMobile
+                    || blockEthernet != mBlockEthernet || blockWifi != mBlockWifi
+                    || blockRoaming != mBlockRoaming || blockVpn != mBlockVpn) {
+                mBlockAirplane = blockAirplane;
+                mBlockMobile = blockMobile;
+                mBlockEthernet = blockEthernet;
+                mBlockWifi = blockWifi || mForceBlockWifi;
+                mBlockRoaming = blockRoaming;
+                mBlockVpn = blockVpn;
+                // Re-register to get new callbacks.
+                mNetworkController.removeCallback(this);
+                mNetworkController.addCallback(this);
+                updateVpn();
+            }
         }
     }
 
@@ -229,7 +236,10 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         // Visibility of the data type indicator changed
         boolean typeChanged = statusType != state.typeId && (statusType == 0 || state.typeId == 0);
 
-        state.visible = statusIcon.visible && !mBlockMobile && state.provisioned;
+        state.visible = statusIcon.visible && !mBlockMobile;
+        if (state.visible && !state.provisioned && mHideDisabledSim) {
+            state.visible = false;
+        }
         state.strengthId = statusIcon.icon;
         state.typeId = statusType;
         state.contentDescription = statusIcon.contentDescription;
