@@ -127,6 +127,11 @@
             android:title="@string/tuner_time"
             android:summary="%s"
             android:entries="@array/clock_options" />
+        
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="hide_disabled_sim"
+            android:title="@string/tuner_hide_disabled_sim"
+            sysui:defValue="false" />
 
     </PreferenceScreen>
 
@@ -141,17 +146,6 @@
             android:title="@string/volume_dnd_silent"
             sysui:defValue="true"
             sysui:metricsAction="315" />
-
-    </PreferenceScreen>
-
-    <PreferenceScreen
-      android:key="doze"
-      android:title="@string/tuner_doze">
-
-        <com.android.systemui.tuner.TunerSwitch
-          android:key="doze_always_on"
-          android:title="@string/tuner_doze_always_on"
-          sysui:defValue="true" />
 
     </PreferenceScreen>
 
