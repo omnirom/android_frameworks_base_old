@@ -52,6 +52,24 @@
       "revId": "5f7a5c920a2eb764919392f151c8db2942710006",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4764454a_b6fd1687",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationIconContainer.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002248
+      },
+      "writtenOn": "2018-12-14T11:57:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "70cf483a_c8f2ff0c",
+      "revId": "5f7a5c920a2eb764919392f151c8db2942710006",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
     }
   ]
 }
