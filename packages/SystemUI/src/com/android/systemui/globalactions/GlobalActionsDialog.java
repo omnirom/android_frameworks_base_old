@@ -68,6 +68,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
+import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -709,11 +711,24 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mScreenshotHelper.takeScreenshot(1, true, true, mHandler);
+                    mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN, true, true, mHandler);
                     MetricsLogger.action(mContext,
                             MetricsEvent.ACTION_SCREENSHOT_POWER_MENU);
                 }
             }, 500);
+        }
+
+        @Override
+        public boolean onLongPress() {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_SELECTED_REGION, true, true, mHandler);
+                    MetricsLogger.action(mContext,
+                            MetricsEvent.ACTION_SCREENSHOT_POWER_MENU);
+                }
+            }, 500);
+            return false;
         }
 
         @Override
