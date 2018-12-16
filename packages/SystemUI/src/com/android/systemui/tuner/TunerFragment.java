@@ -24,6 +24,8 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v14.preference.PreferenceFragment;
 import android.support.v7.preference.Preference;
+import android.support.v7.preference.PreferenceScreen;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,7 +34,10 @@ import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.omni.OmniSystemUIUtils;
 import com.android.systemui.plugins.PluginPrefs;
+
+import java.util.Calendar;
 
 public class TunerFragment extends PreferenceFragment {
 
@@ -41,6 +46,10 @@ public class TunerFragment extends PreferenceFragment {
     private static final String KEY_BATTERY_PCT = "battery_pct";
     private static final String KEY_PLUGINS = "plugins";
     private static final CharSequence KEY_DOZE = "doze";
+    private static final String KEY_QS_SHOW_FUN = "qs_show_fun";
+    private static final String KEY_QS_FORCE_SHOW_FUN_TRIGGER = "qs_force_show_fun_trigger";
+    private static final String KEY_QS_FORCE_SHOW_FUN = "qs_force_show_fun";
+    private static final String KEY_QS_CATEGORY = "quick_settings";
 
     public static final String SETTING_SEEN_TUNER_WARNING = "seen_tuner_warning";
 
@@ -86,6 +95,29 @@ public class TunerFragment extends PreferenceFragment {
                 0) == 0) {
             if (getFragmentManager().findFragmentByTag(WARNING_TAG) == null) {
                 new TunerWarningFragment().show(getFragmentManager(), WARNING_TAG);
+            }
+        }
+
+        Preference preference = findPreference(KEY_QS_SHOW_FUN);
+        if (preference != null) {
+            if (!OmniSystemUIUtils.isXMasFunEnabled()) {
+                ((PreferenceScreen) findPreference(KEY_QS_CATEGORY)).removePreference(preference);
+            }
+        }
+        final Preference p = findPreference(KEY_QS_FORCE_SHOW_FUN_TRIGGER);
+        final Preference ts = findPreference(KEY_QS_FORCE_SHOW_FUN);
+        ts.setVisible(false);
+        if (p != null && ts != null) {
+            if (!OmniSystemUIUtils.isXMasFunEnabled()) {
+                p.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        Log.d(TAG, "onPreferenceClick");
+                        p.setVisible(false);
+                        ts.setVisible(true);
+                        return false;
+                    }
+                });
             }
         }
     }

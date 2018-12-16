@@ -105,6 +105,8 @@
     <string name="tuner_show_secure_title">Show security footer</string>
     <string name="tuner_show_drag_handle">Show drag handle</string>
     <string name="tuner_hide_disabled_sim">Hide disabled SIM cards</string>
+    <string name="tuner_show_fun">Show fun stuff</string>
+    <string name="tuner_force_show_fun">Show fun stuff</string>
 
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>
