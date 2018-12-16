@@ -4113,7 +4113,7 @@ public final class Settings {
          *
          * @hide
          */
-        public static final String OMNI_BUTTON_EXTRA_KEY_MAPPING = "button_extra_mapping";
+        public static final String OMNI_BUTTON_EXTRA_KEY_MAPPING = "omni_button_extra_mapping";
 
         /** @hide */
         private static final Validator OMNI_BUTTON_EXTRA_KEY_MAPPING_VALIDATOR =
