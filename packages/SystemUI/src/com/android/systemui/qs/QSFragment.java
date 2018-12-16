@@ -22,6 +22,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -40,6 +41,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.omni.xFallView.views.XFallView;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.CommandQueue;
@@ -49,7 +51,7 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     private static final String TAG = "QS";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String EXTRA_EXPANDED = "expanded";
     private static final String EXTRA_LISTENING = "listening";
 
@@ -80,6 +82,9 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
 
     // omni additions
     private boolean mSecureExpandDisabled;
+    private View mFunImage;
+    private View mFunImageContainer;
+    private XFallView mXFallView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -97,7 +102,23 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         mQuickQSPanel  = mHeader.findViewById(R.id.quick_qs_panel);
         mFooter = view.findViewById(R.id.qs_footer);
         mContainer = view.findViewById(id.quick_settings_container);
-
+        mFunImage = view.findViewById(R.id.qs_fun_image);
+        mFunImage.setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.ho_ho_ho);
+                mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp){
+                        mp.release();
+                    }
+                });
+                mp.start();
+                return false;
+            }
+        });
+        mFunImageContainer = view.findViewById(R.id.qs_fun_image_container);
+        mXFallView = view.findViewById(R.id.qs_fun_background);
         mQSDetail.setQsPanel(mQSPanel, mHeader, (View) mFooter);
         mQSAnimator = new QSAnimator(this, mQuickQSPanel, mQSPanel);
 
@@ -292,6 +313,12 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         mHeader.setListening(listening);
         mFooter.setListening(listening);
         mQSPanel.setListening(mListening && mQsExpanded);
+        if (listening) {
+            showFunImage();
+        } else {
+            mFunImage.setVisibility(View.GONE);
+            mXFallView.stopFall();
+        }
     }
 
     @Override
@@ -332,6 +359,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         if (fullyExpanded) {
             // Always draw within the bounds of the view when fully expanded.
             mQSPanel.setClipBounds(null);
+            showFunImage();
         } else {
             // Set bounds on the QS panel so it doesn't run over the header when animating.
             mQsBounds.top = (int) -mQSPanel.getTranslationY();
@@ -474,5 +502,27 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
 
     public QuickQSPanel getQuickQsPanel() {
         return mQuickQSPanel;
+    }
+
+    private void showFunImage() {
+        mFunImage.setVisibility(View.VISIBLE);
+        mFunImage.setTranslationX(0);
+        mFunImage.animate()
+            .translationX(mQSPanel.getWidth() - mFunImage.getWidth())
+            .setInterpolator(Interpolators.LINEAR)
+            .setStartDelay(0)
+            .setDuration(3000)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mFunImage.setVisibility(View.GONE);
+                }
+            })
+            .start();
+        mXFallView.startFall();
+        mXFallView.animate()
+                        .setDuration(1_500)
+                        .alpha(1)
+                        .start();
     }
 }
