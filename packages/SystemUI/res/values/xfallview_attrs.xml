@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="XFallView">
+
+        <attr name="viewsCount" format="integer" />
+
+        <attr name="minSpeed" format="integer" />
+        <attr name="maxSpeed" format="integer" />
+
+        <attr name="minAlpha" format="integer" />
+        <attr name="maxAlpha" format="integer" />
+
+        <attr name="minScale" format="integer" />
+        <attr name="maxScale" format="integer" />
+
+        <attr name="srcArray" format="reference" />
+
+        <attr name="wind" format="enum">
+            <enum name="slight" value="10" />
+            <enum name="normal" value="6" />
+            <enum name="strong" value="3" />
+        </attr>
+
+        <attr name="rotate" format="enum">
+            <enum name="on" value="0" />
+            <enum name="off" value="1" />
+        </attr>
+
+    </declare-styleable>
+
+</resources>

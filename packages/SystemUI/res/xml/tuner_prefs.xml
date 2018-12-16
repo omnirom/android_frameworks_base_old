@@ -47,6 +47,11 @@
             android:title="@string/tuner_show_drag_handle"
             sysui:defValue="true" />
 
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_show_fun"
+            android:title="@string/tuner_show_fun"
+            sysui:defValue="true" />
+
     </PreferenceScreen>
 
     <PreferenceScreen
