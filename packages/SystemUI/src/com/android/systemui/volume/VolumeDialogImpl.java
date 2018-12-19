@@ -158,6 +158,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private boolean isAlarmShowing = false;
     private boolean isVoiceShowing = false;
     private boolean isBTSCOShowing = false;
+    private boolean isRightPosition = true;
 
     private class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -171,6 +172,7 @@ public class VolumeDialogImpl implements VolumeDialog {
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.AUDIO_PANEL_VIEW_ALARM), false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.AUDIO_PANEL_VIEW_VOICE), false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.AUDIO_PANEL_VIEW_BT_SCO), false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.AUDIO_PANEL_VIEW_POSITION), false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -186,7 +188,14 @@ public class VolumeDialogImpl implements VolumeDialog {
             isAlarmShowing = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.AUDIO_PANEL_VIEW_ALARM, 0, UserHandle.USER_CURRENT) == 1;
             isVoiceShowing = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.AUDIO_PANEL_VIEW_VOICE, 0, UserHandle.USER_CURRENT) == 1;
             isBTSCOShowing = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.AUDIO_PANEL_VIEW_BT_SCO, 0, UserHandle.USER_CURRENT) == 1;
-            updateRowsH(getActiveRow());
+
+            boolean value = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.AUDIO_PANEL_VIEW_POSITION, 0, UserHandle.USER_CURRENT) == 0;
+            if(value != isRightPosition){
+                isRightPosition = value;
+                initDialog();
+            } else {
+                updateRowsH(getActiveRow());
+            }
         }
     }
 
@@ -217,6 +226,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     }
 
     private void initDialog() {
+        if(mDialog!=null) mDialog.dismiss();
         mDialog = new CustomDialog(mContext);
 
         mConfigurableTexts = new ConfigurableTexts(mContext);
@@ -238,28 +248,33 @@ public class VolumeDialogImpl implements VolumeDialog {
         final WindowManager.LayoutParams lp = mWindow.getAttributes();
         lp.format = PixelFormat.TRANSLUCENT;
         lp.setTitle(VolumeDialogImpl.class.getSimpleName());
-        lp.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+        if(isRightPosition){
+            lp.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+            mDialog.setContentView(R.layout.volume_dialog);
+        } else {
+            lp.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
+            mDialog.setContentView(R.layout.volume_dialog_left);
+        }
         lp.windowAnimations = -1;
         mWindow.setAttributes(lp);
         mWindow.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
         mDialog.setCanceledOnTouchOutside(true);
-        mDialog.setContentView(R.layout.volume_dialog);
         mDialog.setOnShowListener(dialog -> {
-            if (!isLandscape()) mDialogView.setTranslationX(mDialogView.getWidth() / 2);
-            mDialogView.setAlpha(0);
-            mDialogView.animate()
-                    .alpha(1)
-                    .translationX(0)
-                    .setDuration(300)
-                    .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
-                    .withEndAction(() -> {
-                        if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
-                            mRingerIcon.postOnAnimationDelayed(mSinglePress, 1500);
-                        }
-                    })
-                    .start();
-        });
+                if (!isLandscape()) mDialogView.setTranslationX((mDialogView.getWidth() / 2)*(isRightPosition ? 1 : -1));
+                mDialogView.setAlpha(0);
+                mDialogView.animate()
+                        .alpha(1)
+                        .translationX(0)
+                        .setDuration(300)
+                        .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
+                        .withEndAction(() -> {
+                            if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
+                                mRingerIcon.postOnAnimationDelayed(mSinglePress, 1500);
+                            }
+                        })
+                        .start();
+            });
         mDialogView = mDialog.findViewById(R.id.volume_dialog);
         mDialogView.setOnHoverListener((v, event) -> {
             int action = event.getActionMasked();
@@ -360,7 +375,11 @@ public class VolumeDialogImpl implements VolumeDialog {
         if (D.BUG) Slog.d(TAG, "Adding row for stream " + stream);
         VolumeRow row = new VolumeRow();
         initRow(row, stream, iconRes, iconMuteRes, important, defaultStream);
-        mDialogRowsView.addView(row.view);
+        if(isRightPosition){
+            mDialogRowsView.addView(row.view, 0);
+        } else {
+            mDialogRowsView.addView(row.view);
+        }
         mRows.add(row);
     }
 
@@ -370,7 +389,11 @@ public class VolumeDialogImpl implements VolumeDialog {
             final VolumeRow row = mRows.get(i);
             initRow(row, row.stream, row.iconRes, row.iconMuteRes, row.important,
                     row.defaultStream);
-            mDialogRowsView.addView(row.view);
+            if(isRightPosition){
+                mDialogRowsView.addView(row.view, 0);
+            } else {
+                mDialogRowsView.addView(row.view);
+            }
             updateVolumeRowH(row);
         }
     }
@@ -629,7 +652,7 @@ public class VolumeDialogImpl implements VolumeDialog {
                     if (D.BUG) Log.d(TAG, "mDialog.dismiss()");
                     mDialog.dismiss();
                 }, 50));
-        if (!isLandscape()) animator.translationX(mDialogView.getWidth() / 2);
+        if (!isLandscape()) animator.translationX((mDialogView.getWidth() / 2)*(isRightPosition ? 1 : -1));
         animator.start();
 
         Events.writeEvent(mContext, Events.EVENT_DISMISS_DIALOG, reason);
