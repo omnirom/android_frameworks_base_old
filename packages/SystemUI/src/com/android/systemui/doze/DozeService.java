@@ -34,7 +34,7 @@ import java.io.PrintWriter;
 public class DozeService extends DreamService
         implements DozeMachine.Service, RequestDoze, PluginListener<DozeServicePlugin> {
     private static final String TAG = "DozeService";
-    static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    static final boolean DEBUG = true; //Log.isLoggable(TAG, Log.DEBUG);
 
     private DozeMachine mDozeMachine;
     private DozeServicePlugin mDozePlugin;
