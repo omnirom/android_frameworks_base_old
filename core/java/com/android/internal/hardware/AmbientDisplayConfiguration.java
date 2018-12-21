@@ -148,4 +148,16 @@ public class AmbientDisplayConfiguration {
     private boolean boolSetting(String name, int user, int def) {
         return Settings.Secure.getIntForUser(mContext.getContentResolver(), name, def, user) != 0;
     }
+
+    public boolean pulseRepeatingEnabled() {
+        return false;
+    }
+
+    public int pulseRepeatingInterval() {
+        return 15;
+    }
+
+    public int pulseRepeatingTimeout() {
+        return 1800;
+    }
 }
