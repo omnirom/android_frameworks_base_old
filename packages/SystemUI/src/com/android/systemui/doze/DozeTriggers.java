@@ -17,6 +17,7 @@
 package com.android.systemui.doze;
 
 import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -40,6 +41,7 @@ import com.android.systemui.util.Assert;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.function.IntConsumer;
 
 /**
@@ -69,6 +71,13 @@ public class DozeTriggers implements DozeMachine.Part {
     private long mNotificationPulseTime;
     private boolean mPulsePending;
 
+    // omni aditions start
+    private final AlarmManager mAlarmManager;
+    private static final int REPEAT_INTERVAL = 30 * 1000;
+    private static PendingIntent mRepeatAlarm;
+    private static PendingIntent mStopAlarm;
+    private static final String PULSE_REPEAT_ACTION = "com.android.systemui.doze.pulse.repeat";
+    private static final String PULSE_STOP_ACTION = "com.android.systemui.doze.pulse.stop";
 
     public DozeTriggers(Context context, DozeMachine machine, DozeHost dozeHost,
             AlarmManager alarmManager, AmbientDisplayConfiguration config,
@@ -87,14 +96,65 @@ public class DozeTriggers implements DozeMachine.Part {
                 config, wakeLock, this::onSensor, this::onProximityFar,
                 dozeParameters.getPolicy());
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
+        mAlarmManager = alarmManager;
     }
 
     private void onNotification() {
         if (DozeMachine.DEBUG) Log.d(TAG, "requestNotificationPulse");
         mNotificationPulseTime = SystemClock.elapsedRealtime();
         if (!mConfig.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) return;
+        final boolean canRepeatPulse = mMachine.getState() == DozeMachine.State.DOZE;
         requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */);
         DozeLog.traceNotificationPulse(mContext);
+
+        if (mConfig.pulseRepeatingEnabled() && canRepeatPulse) {
+            cancelAlarms();
+            startRepeatingAlarm();
+            startStopAlarm();
+        }
+    }
+
+    private PendingIntent getRepeatAlarm() {
+        Intent intent = new Intent(PULSE_REPEAT_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    private PendingIntent getStopAlarm() {
+        Intent intent = new Intent(PULSE_STOP_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    private void startRepeatingAlarm() {
+        long firstRepeating = System.currentTimeMillis() + mConfig.pulseRepeatingInterval() * 1000;
+        if (DozeMachine.DEBUG) Log.d(TAG, "trigger repeating alarm at " + new Date(firstRepeating));
+        mRepeatAlarm = getRepeatAlarm();
+        mAlarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, firstRepeating, mRepeatAlarm);
+    }
+
+    private void startStopAlarm() {
+        long repeatingStop = System.currentTimeMillis() + mConfig.pulseRepeatingTimeout() * 1000;
+        if (DozeMachine.DEBUG) Log.d(TAG, "set repeating alarm stop at " + new Date(repeatingStop));
+        mStopAlarm = getStopAlarm();
+        mAlarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, repeatingStop, mStopAlarm);
+    }
+
+    private void cancelAlarms() {
+        if (mRepeatAlarm != null) {
+            if (DozeMachine.DEBUG) Log.d(TAG, "cancel repeating alarm");
+            mAlarmManager.cancel(mRepeatAlarm);
+            mRepeatAlarm = null;
+        }
+        cancelStopAlarm();
+    }
+
+    private void cancelStopAlarm() {
+        if (mStopAlarm != null) {
+            if (DozeMachine.DEBUG) Log.d(TAG, "cancel stop alarm");
+            mAlarmManager.cancel(mStopAlarm);
+            mStopAlarm = null;
+        }
     }
 
     private void onWhisper() {
@@ -192,11 +252,16 @@ public class DozeTriggers implements DozeMachine.Part {
                     mDozeSensors.reregisterAllSensors();
                 }
                 mDozeSensors.setListening(true);
+                // just as a firewall
+                if (newState == DozeMachine.State.DOZE_AOD) {
+                    cancelAlarms();
+                }
                 break;
             case DOZE_AOD_PAUSED:
             case DOZE_AOD_PAUSING:
                 mDozeSensors.setProxListening(true);
                 mDozeSensors.setListening(false);
+                cancelAlarms();
                 break;
             case DOZE_PULSING:
                 mDozeSensors.setTouchscreenSensorsListening(false);
@@ -207,6 +272,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 mDozeHost.removeCallback(mHostCallback);
                 mDozeSensors.setListening(false);
                 mDozeSensors.setProxListening(false);
+                cancelAlarms();
                 break;
             default:
         }
@@ -352,11 +418,19 @@ public class DozeTriggers implements DozeMachine.Part {
                 if (DozeMachine.DEBUG) Log.d(TAG, "Received pulse intent");
                 requestPulse(DozeLog.PULSE_REASON_INTENT, false /* performedProxCheck */);
             }
+            if (PULSE_REPEAT_ACTION.equals(intent.getAction())) {
+                if (DozeMachine.DEBUG) Log.d(TAG, "Received repeat pulse intent");
+                requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */);
+                startRepeatingAlarm();
+            }
             if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
                 mMachine.requestState(DozeMachine.State.FINISH);
             }
             if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
                 mDozeSensors.onUserSwitched();
+            }
+            if (PULSE_STOP_ACTION.equals(intent.getAction())) {
+                cancelAlarms();
             }
         }
 
@@ -367,6 +441,8 @@ public class DozeTriggers implements DozeMachine.Part {
             IntentFilter filter = new IntentFilter(PULSE_ACTION);
             filter.addAction(UiModeManager.ACTION_ENTER_CAR_MODE);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
+            filter.addAction(PULSE_REPEAT_ACTION);
+            filter.addAction(PULSE_STOP_ACTION);
             context.registerReceiver(this, filter);
             mRegistered = true;
         }
