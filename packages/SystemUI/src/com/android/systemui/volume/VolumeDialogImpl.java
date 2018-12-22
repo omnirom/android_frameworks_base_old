@@ -234,16 +234,15 @@ public class VolumeDialogImpl implements VolumeDialog {
         lp.setTitle(VolumeDialogImpl.class.getSimpleName());
         if(isRightPosition){
             lp.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
-            mDialog.setContentView(R.layout.volume_dialog);
         } else {
             lp.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
-            mDialog.setContentView(R.layout.volume_dialog_left);
         }
         lp.windowAnimations = -1;
         mWindow.setAttributes(lp);
         mWindow.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
         mDialog.setCanceledOnTouchOutside(true);
+        mDialog.setContentView(R.layout.volume_dialog);
         mDialog.setOnShowListener(dialog -> {
             if (!isLandscape()) mDialogView.setTranslationX((mDialogView.getWidth() / 2)*(isRightPosition ? 1 : -1));
             mDialogView.setAlpha(0);
@@ -276,6 +275,11 @@ public class VolumeDialogImpl implements VolumeDialog {
 
         mDialogRowsView = mDialog.findViewById(R.id.volume_dialog_rows);
         mRinger = mDialog.findViewById(R.id.ringer);
+        if(isRightPosition) {
+            mRinger.setForegroundGravity(Gravity.RIGHT);
+        } else {
+            mRinger.setForegroundGravity(Gravity.LEFT);
+        }
         mRingerIcon = mRinger.findViewById(R.id.ringer_icon);
         mZenIcon = mRinger.findViewById(R.id.dnd_icon);
         mSettingsView = mDialog.findViewById(R.id.settings_container);
