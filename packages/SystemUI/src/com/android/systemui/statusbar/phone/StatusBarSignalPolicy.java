@@ -439,7 +439,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         public int typeId;
         public boolean roaming;
         public boolean needsLeadingPadding;
-        public boolean provisioned;
+        public boolean provisioned = true;
         public String typeContentDescription;
         public Context context;
 
