@@ -47,6 +47,23 @@ public class OmniSystemUIUtils {
         return false;
     }
 
+    public static boolean isNewYearsFunEnabled() {
+        if (!isFunEnabled()) {
+            return false;
+        }
+        long now = System.currentTimeMillis();
+        Calendar cal = Calendar.getInstance();
+        cal.set(2018, Calendar.DECEMBER, 31, 12, 12);
+        long startTime = cal.getTimeInMillis();
+        cal.set(2019, Calendar.DECEMBER, 01, 01, 12);
+        long endTime = cal.getTimeInMillis();
+
+        if (now >= startTime && now <= endTime) {
+            return true;
+        }
+        return false;
+    }
+
     public static void startXMasFun(Context context) {
         if (!isFunEnabled()) {
             return;
