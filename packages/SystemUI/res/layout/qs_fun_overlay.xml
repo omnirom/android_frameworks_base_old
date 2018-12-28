@@ -25,20 +25,11 @@
     android:orientation="vertical"
     android:visibility="gone" >
 
-    <com.android.systemui.omni.xFallView.views.XFallView
+    <com.android.systemui.omni.GifImageView
         android:id="@+id/qs_fun_background"
         android:layout_width="match_parent"
         android:layout_height="@*android:dimen/quick_qs_offset_height"
-        systemui:viewsCount="50"
-        systemui:minSpeed="40"
-        systemui:maxSpeed="60"
-        systemui:minAlpha="10"
-        systemui:maxAlpha="255"
-        systemui:minScale="10"
-        systemui:maxScale="30"
-        systemui:wind="slight"
-        systemui:rotate="on"
-        systemui:srcArray="@array/x_views_snowflake_array" />
+        android:layout_gravity="center" />
 
     <ImageView
         android:id="@+id/qs_fun_image"
@@ -46,5 +37,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:src="@drawable/santa_e"
-        android:scaleType="centerInside" />
+        android:scaleType="centerInside"
+        android:visibility="gone" />
 </FrameLayout>
