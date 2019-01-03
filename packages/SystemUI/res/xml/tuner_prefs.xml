@@ -47,19 +47,6 @@
             android:title="@string/tuner_show_drag_handle"
             sysui:defValue="true" />
 
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="qs_show_fun"
-            android:title="@string/tuner_show_fun"
-            sysui:defValue="true" />
-
-        <Preference
-            android:key="qs_force_show_fun_trigger"/>
-
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="qs_force_show_fun"
-            android:title="@string/tuner_show_fun"
-            sysui:defValue="false" />
-
     </PreferenceScreen>
 
     <PreferenceScreen
