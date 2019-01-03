@@ -22,7 +22,6 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -33,7 +32,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout.LayoutParams;
 
@@ -42,20 +40,14 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
 import com.android.systemui.SysUiServiceProvider;
-import com.android.systemui.omni.OmniSystemUIUtils;
-import com.android.systemui.omni.GifImageView;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
-import com.android.systemui.tuner.TunerService;
-import com.android.systemui.tuner.TunerService.Tunable;
 
-import java.util.Calendar;
-
-public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks, Tunable {
+public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     private static final String TAG = "QS";
     private static final boolean DEBUG = false;
     private static final String EXTRA_EXPANDED = "expanded";
@@ -88,15 +80,6 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks, 
 
     // omni additions
     private boolean mSecureExpandDisabled;
-    private View mFunImage;
-    private View mFunImageContainer;
-    private GifImageView mFunBgImage;
-    private boolean mForceHideFun;
-    private boolean mForceShowFun;
-    private ViewPropertyAnimator mFunAnimation;
-
-    private static final String QS_SHOW_FUN = "qs_show_fun";
-    private static final String QS_FORCE_SHOW_FUN = "qs_force_show_fun";
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -114,9 +97,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks, 
         mQuickQSPanel  = mHeader.findViewById(R.id.quick_qs_panel);
         mFooter = view.findViewById(R.id.qs_footer);
         mContainer = view.findViewById(id.quick_settings_container);
-        mFunImage = view.findViewById(R.id.qs_fun_image);
-        mFunImageContainer = view.findViewById(R.id.qs_fun_image_container);
-        mFunBgImage = view.findViewById(R.id.qs_fun_background);
+
         mQSDetail.setQsPanel(mQSPanel, mHeader, (View) mFooter);
         mQSAnimator = new QSAnimator(this, mQuickQSPanel, mQSPanel);
 
@@ -134,15 +115,11 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks, 
             mQSCustomizer.restoreInstanceState(savedInstanceState);
         }
         SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
-        final TunerService tunerService = Dependency.get(TunerService.class);
-        tunerService.addTunable(this, QS_SHOW_FUN);
-        tunerService.addTunable(this, QS_FORCE_SHOW_FUN);
     }
 
     @Override
     public void onDestroyView() {
         SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallbacks(this);
-        Dependency.get(TunerService.class).removeTunable(this);
         super.onDestroyView();
     }
 
@@ -315,14 +292,6 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks, 
         mHeader.setListening(listening);
         mFooter.setListening(listening);
         mQSPanel.setListening(mListening && mQsExpanded);
-        if (listening) {
-            showFunImage();
-        } else {
-            mFunImageContainer.setVisibility(View.GONE);
-            if (mFunAnimation != null) {
-                mFunAnimation.cancel();
-            }
-        }
     }
 
     @Override
@@ -505,67 +474,5 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks, 
 
     public QuickQSPanel getQuickQsPanel() {
         return mQuickQSPanel;
-    }
-
-    private void showFunImage() {
-        if (!isFunEnabled()) {
-            mFunImageContainer.setVisibility(View.GONE);
-            return;
-        }
-        mFunImageContainer.setVisibility(View.VISIBLE);
-        mFunBgImage.setGifImageResource(R.raw.fireworks);
-    }
-
-    private boolean isFunEnabled() {
-        if (!OmniSystemUIUtils.isFunEnabled()) {
-            return false;
-        }
-        if(OmniSystemUIUtils.isNewYearsFunEnabled()) {
-            if (mForceHideFun) {
-                return false;
-            } else {
-                return true;
-            }
-        } else {
-            if (mForceShowFun) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        if (QS_SHOW_FUN.equals(key)) {
-            mForceHideFun = newValue != null && Integer.parseInt(newValue) == 0;
-        }
-        if (QS_FORCE_SHOW_FUN.equals(key)) {
-            mForceShowFun = newValue != null && Integer.parseInt(newValue) == 1;
-        }
-        if (isFunEnabled()) {
-            mFunBgImage.setOnLongClickListener(new View.OnLongClickListener(){
-                @Override
-                public boolean onLongClick(View v) {
-                    if (!mKeyguardShowing) {
-                        OmniSystemUIUtils.startsNewYearsFun(getContext());
-                    }
-                    return true;
-                }
-            });
-            mFunBgImage.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v) {
-                    final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.fireworks_sound);
-                    mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp){
-                            mp.release();
-                        }
-                    });
-                    mp.start();
-                }
-            });
-        }
     }
 }
