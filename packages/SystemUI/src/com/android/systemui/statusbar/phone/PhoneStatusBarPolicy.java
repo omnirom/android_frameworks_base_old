@@ -450,8 +450,13 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                 mContext.getString(R.string.accessibility_quick_settings_bluetooth_on);
         boolean shouldShowBluetooth = Dependency.get(TunerService.class)
                              .getValue(BLUETOOTH_SHOW_CONN, 0) != 1;
-        boolean bluetoothVisible = shouldShowBluetooth;
+        boolean bluetoothEnabled = false;
+        boolean bluetoothVisible = false;
         if (mBluetooth != null) {
+            bluetoothEnabled = mBluetooth.isBluetoothEnabled();
+            if (!shouldShowBluetooth) {
+                bluetoothVisible = bluetoothEnabled;
+            }
             final Collection<CachedBluetoothDevice> devices = mBluetooth.getDevices();
             if (devices != null) {
                 // get battery level for the first device with battery level support
@@ -468,7 +473,9 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                             iconId = R.drawable.stat_sys_data_bluetooth_connected;
                         }
                         contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
-                        bluetoothVisible = mBluetooth.isBluetoothEnabled();
+                        if (shouldShowBluetooth) {
+                            bluetoothVisible = true;
+                        }
                         break;
                     }
                 }
