@@ -204,11 +204,16 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         mMode = mode;
         mHasScreenTurnedOnSinceAuthenticating = false;
         if (mMode == MODE_WAKE_AND_UNLOCK_PULSING && pulsingOrAod()) {
-            // If we are waking the device up while we are pulsing the clock and the
-            // notifications would light up first, creating an unpleasant animation.
-            // Defer changing the screen brightness by forcing doze brightness on our window
-            // until the clock and the notifications are faded out.
-            mStatusBarWindowManager.setForceDozeBrightness(true);
+            if (mStatusBar.wallpaperSupportsAmbientMode()) {
+                // Don't show any animation when live wallpaper is showing
+                mMode = MODE_WAKE_AND_UNLOCK;
+            }else{
+                // If we are waking the device up while we are pulsing the clock and the
+                // notifications would light up first, creating an unpleasant animation.
+                // Defer changing the screen brightness by forcing doze brightness on our window
+                // until the clock and the notifications are faded out.
+                mStatusBarWindowManager.setForceDozeBrightness(true);
+            }
         }
         // During wake and unlock, we need to draw black before waking up to avoid abrupt
         // brightness changes due to display state transitions.
