@@ -946,9 +946,10 @@ public class Build {
 
     /**
      * @hide
+     * originally stores the value of ro.omni.fingerprint
+     * replaced with ro.build.date but kept the field name to avoid having to rename everywhere
      */
-    public static final String OMNI_FINGERPRINT = SystemProperties.get("ro.omni.fingerprint",
-            deriveFingerprint());
+    public static final String OMNI_FINGERPRINT = getString("ro.build.date");
 
     /**
      * Some devices split the fingerprint components between multiple
