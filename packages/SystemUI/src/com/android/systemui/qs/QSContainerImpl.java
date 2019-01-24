@@ -59,6 +59,10 @@ public class QSContainerImpl extends FrameLayout {
 
     private Drawable mQsBackGround;
 
+    // omni additions start
+    private boolean mHeaderImageEnabled = false;
+    private View mHeaderImage;
+
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
         Handler mHandler = new Handler();
@@ -79,7 +83,9 @@ public class QSContainerImpl extends FrameLayout {
         mBackgroundGradient = findViewById(R.id.quick_settings_gradient_view);
         mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
         mQsBackGround = getContext().getDrawable(R.drawable.qs_background_primary);
+        mHeaderImage = findViewById(R.id.qs_header_image_view);
         updateSettings();
+        updateResources();
 
         setClickable(true);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -110,8 +116,11 @@ public class QSContainerImpl extends FrameLayout {
 
         void observe() {
             getContext().getContentResolver().registerContentObserver(Settings.System
-                            .getUriFor(Settings.System.OMNI_QS_PANEL_BG_ALPHA), false,
+                    .getUriFor(Settings.System.OMNI_QS_PANEL_BG_ALPHA), false,
                     this, UserHandle.USER_ALL);
+            getContext().getContentResolver().registerContentObserver(Settings.System
+                    .getUriFor(Settings.System.OMNI_STATUS_BAR_CUSTOM_HEADER), false,
+                    this, UserHandle.USER_ALL);                    
         }
 
         @Override
@@ -134,6 +143,12 @@ public class QSContainerImpl extends FrameLayout {
             mBackground.setVisibility(View.VISIBLE);
             mBackgroundGradient.setVisibility(View.VISIBLE);
         }
+
+        mHeaderImageEnabled = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.OMNI_STATUS_BAR_CUSTOM_HEADER, 0,
+                UserHandle.USER_CURRENT) == 1;
+        mHeaderImage.setVisibility(mHeaderImageEnabled ? View.VISIBLE : View.GONE);
+        updateResources();
     }
 
     @Override
@@ -178,11 +193,15 @@ public class QSContainerImpl extends FrameLayout {
     }
 
     private void updateResources() {
-        LayoutParams layoutParams = (LayoutParams) mQSPanel.getLayoutParams();
-        layoutParams.topMargin = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.quick_qs_offset_height);
+        int topMargin = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.quick_qs_offset_height) + (mHeaderImageEnabled ?
+                mContext.getResources().getDimensionPixelSize(R.dimen.qs_custom_header_offset) : 0);
 
-        mQSPanel.setLayoutParams(layoutParams);
+        ((LayoutParams) mQSPanel.getLayoutParams()).topMargin = topMargin;
+        mQSPanel.setLayoutParams(mQSPanel.getLayoutParams());
+        
+        mStatusBarBackground.getLayoutParams().height = topMargin;
+        mStatusBarBackground.setLayoutParams(mStatusBarBackground.getLayoutParams());
     }
 
     /**

@@ -77,6 +77,7 @@ endif
 include frameworks/base/packages/SettingsLib/common.mk
 
 LOCAL_AAPT_FLAGS := --extra-packages com.android.keyguard
+LOCAL_DEX_PREOPT := false
 
 include $(BUILD_PACKAGE)
 
