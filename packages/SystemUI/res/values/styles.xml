@@ -344,6 +344,10 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
+    <style name="qs_theme_globalact" parent="qs_theme">
+        <item name="colorBackgroundFloating">?android:attr/colorBackgroundFloating</item>
+    </style>
+
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:colorAccent">@color/remote_input_accent</item>
     </style>

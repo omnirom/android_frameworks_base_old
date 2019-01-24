@@ -151,7 +151,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private boolean mHovering = false;
 
     public VolumeDialogImpl(Context context) {
-        mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
+        mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme_globalact);
         mController = Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
@@ -1137,7 +1137,7 @@ public class VolumeDialogImpl implements VolumeDialog {
 
     private final class CustomDialog extends Dialog implements DialogInterface {
         public CustomDialog(Context context) {
-            super(context, com.android.systemui.R.style.qs_theme);
+            super(context, com.android.systemui.R.style.qs_theme_globalact);
         }
 
         @Override
