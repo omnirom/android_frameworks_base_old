@@ -92,4 +92,22 @@ public class OmniUtils {
             pm.goToSleep(SystemClock.uptimeMillis());
         }
     }
+
+    /* e.g.
+        <integer-array name="config_defaultNotificationVibePattern">
+        <item>0</item>
+        <item>350</item>
+        <item>250</item>
+        <item>350</item>
+        </integer-array>
+    */
+    public static void vibrateResourcePattern(Context context, int resId) {
+        if (DeviceUtils.deviceSupportsVibrator(context)) {
+            int[] pattern = context.getResources().getIntArray(resid);
+            if (pattern == null) {
+                return;
+            }
+            ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(pattern, -1);
+        }
+    }
 }
