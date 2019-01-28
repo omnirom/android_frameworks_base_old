@@ -73,6 +73,10 @@ public class DeviceUtils {
         return deviceSupportNavigationBarForUser(context, UserHandle.USER_CURRENT);
     }
 
+    public static boolean deviceSupportsTelephony(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+    }
+
     public static boolean deviceSupportNavigationBarForUser(Context context, int userId) {
         final boolean showByDefault = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_showNavigationBar);
