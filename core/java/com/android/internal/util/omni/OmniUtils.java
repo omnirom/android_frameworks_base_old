@@ -26,6 +26,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -90,6 +91,34 @@ public class OmniUtils {
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         if(pm != null) {
             pm.goToSleep(SystemClock.uptimeMillis());
+        }
+    }
+
+    /* e.g.
+        <integer-array name="config_defaultNotificationVibePattern">
+        <item>0</item>
+        <item>350</item>
+        <item>250</item>
+        <item>350</item>
+        </integer-array>
+    */
+    public static void vibrateResourcePattern(Context context, int resId) {
+        if (DeviceUtils.deviceSupportsVibrator(context)) {
+            int[] pattern = context.getResources().getIntArray(resId);
+            if (pattern == null) {
+                return;
+            }
+            long[] out = new long[pattern.length];
+            for (int i=0; i<pattern.length; i++) {
+                out[i] = pattern[i];
+            }
+            ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(out, -1);
+        }
+    }
+
+    public static void vibratePattern(Context context, long[] pattern) {
+        if (DeviceUtils.deviceSupportsVibrator(context)) {
+            ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(pattern, -1);
         }
     }
 }
