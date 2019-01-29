@@ -18,5 +18,5 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <dimen name="qs_custom_header_offset">0dp</dimen>
+    <dimen name="qs_custom_header_offset">10dp</dimen>
 </resources>
