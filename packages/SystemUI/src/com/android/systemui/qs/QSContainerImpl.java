@@ -96,6 +96,7 @@ public class QSContainerImpl extends FrameLayout implements
         mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
         mQsBackGround = getContext().getDrawable(R.drawable.qs_background_primary);
         mBackgroundImage = findViewById(R.id.qs_header_image_view);
+        mBackgroundImage.setClipToOutline(true);
         updateSettings();
         updateResources();
 
@@ -216,7 +217,10 @@ public class QSContainerImpl extends FrameLayout implements
         int statusBarSideMargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.qs_header_image_side_margin);
 
-        ((LayoutParams) mQSPanel.getLayoutParams()).topMargin = topMargin;
+        int statusBarBottomMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.qs_header_image_bottom_margin);
+
+        ((LayoutParams) mQSPanel.getLayoutParams()).topMargin = topMargin + statusBarBottomMargin;
         mQSPanel.setLayoutParams(mQSPanel.getLayoutParams());
 
         ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) mStatusBarBackground.getLayoutParams();
