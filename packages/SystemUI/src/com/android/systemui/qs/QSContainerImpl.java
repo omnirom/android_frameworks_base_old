@@ -63,14 +63,13 @@ public class QSContainerImpl extends FrameLayout implements
     private int mSideMargins;
     private boolean mQsDisabled;
 
-    private Drawable mQsBackGround;
-
     // omni additions start
     private boolean mHeaderImageEnabled;
     private ImageView mBackgroundImage;
     private StatusBarHeaderMachine mStatusBarHeaderMachine;
     private Drawable mCurrentBackground;
     private boolean mLandscape;
+    private boolean mQsBackgroundAlpha;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -92,8 +91,8 @@ public class QSContainerImpl extends FrameLayout implements
         mStatusBarBackground = findViewById(R.id.quick_settings_status_bar_background);
         mBackgroundGradient = findViewById(R.id.quick_settings_gradient_view);
         mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
-        mQsBackGround = getContext().getDrawable(R.drawable.qs_background_primary);
         mBackgroundImage = findViewById(R.id.qs_header_image_view);
+        mBackgroundImage.setClipToOutline(true);
         updateSettings();
         updateResources();
 
@@ -123,7 +122,7 @@ public class QSContainerImpl extends FrameLayout implements
         // Hide the backgrounds when in landscape mode.
         if (mLandscape) {
             mBackgroundGradient.setVisibility(View.INVISIBLE);
-        } else {
+        } else if (!mQsBackgroundAlpha) {
             mBackgroundGradient.setVisibility(View.VISIBLE);
         }
 
@@ -150,17 +149,20 @@ public class QSContainerImpl extends FrameLayout implements
     }
 
     private void updateSettings() {
-        int mQsBackGroundAlpha = Settings.System.getIntForUser(getContext().getContentResolver(),
+        int bgAlpha = Settings.System.getIntForUser(getContext().getContentResolver(),
                 Settings.System.OMNI_QS_PANEL_BG_ALPHA, 255,
                 UserHandle.USER_CURRENT);
 
-        if (mQsBackGroundAlpha < 255 ) {
-            mBackground.setVisibility(View.INVISIBLE);
+        Drawable bg = mBackground.getBackground();
+        if (bgAlpha < 255 ) {
+            mQsBackgroundAlpha = true;
+            bg.setAlpha(bgAlpha);
+            mBackground.setBackground(bg);
             mBackgroundGradient.setVisibility(View.INVISIBLE);
-            mQsBackGround.setAlpha(mQsBackGroundAlpha);
-            setBackground(mQsBackGround);
         } else {
-            mBackground.setVisibility(View.VISIBLE);
+            mQsBackgroundAlpha = false;
+            bg.setAlpha(255);
+            mBackground.setBackground(bg);
             mBackgroundGradient.setVisibility(View.VISIBLE);
         }
     }
@@ -222,16 +224,26 @@ public class QSContainerImpl extends FrameLayout implements
                 com.android.internal.R.dimen.quick_qs_offset_height) + (mHeaderImageEnabled ?
                 mContext.getResources().getDimensionPixelSize(R.dimen.qs_header_image_offset) : 0);
 
-        int statusBarSideMargin = mContext.getResources().getDimensionPixelSize(
-                R.dimen.qs_header_image_side_margin);
+        int statusBarSideMargin = mHeaderImageEnabled ? mContext.getResources().getDimensionPixelSize(
+                R.dimen.qs_header_image_side_margin) : 0;
 
-        ((LayoutParams) mQSPanel.getLayoutParams()).topMargin = topMargin;
+        // always add the margin below the statusbar with or without image
+        int statusBarBottomMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.qs_header_image_bottom_margin);
+
+        ((LayoutParams) mQSPanel.getLayoutParams()).topMargin = topMargin + statusBarBottomMargin;
         mQSPanel.setLayoutParams(mQSPanel.getLayoutParams());
 
         ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) mStatusBarBackground.getLayoutParams();
         lp.height = topMargin;
         lp.setMargins(statusBarSideMargin, 0, statusBarSideMargin, 0);
         mStatusBarBackground.setLayoutParams(lp);
+
+        if (mHeaderImageEnabled) {
+            mStatusBarBackground.setBackgroundColor(Color.TRANSPARENT);
+        } else {
+            mStatusBarBackground.setBackgroundColor(Color.BLACK);
+        }
     }
 
     /**
