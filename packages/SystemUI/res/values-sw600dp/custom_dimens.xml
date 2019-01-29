@@ -18,11 +18,5 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <dimen name="qs_tile_height_wo_label">48dp</dimen>
-    <dimen name="quick_qs_drag_handle_height">20dp</dimen>
-    <dimen name="current_weather_image_size">42dp</dimen>
-    <dimen name="battery_bar_view_height">6dp</dimen>
-    <dimen name="qs_header_image_offset">25dp</dimen>
-    <dimen name="qs_header_image_side_margin">4dp</dimen>
-    <dimen name="qs_header_image_bottom_margin">4dp</dimen>
+    <dimen name="qs_custom_header_offset">25dp</dimen>
 </resources>
