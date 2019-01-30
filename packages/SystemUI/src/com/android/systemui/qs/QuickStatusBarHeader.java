@@ -140,6 +140,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private NetworkTraffic mNetworkTraffic;
     private boolean mLandscape;
     private boolean mHeaderImageEnabled;
+    private boolean mForceHideQsStatusBar;
 
     private class OmniSettingsObserver extends ContentObserver {
         OmniSettingsObserver(Handler handler) {
@@ -214,6 +215,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mNextAlarmTextView.setOnClickListener(this);
         mRingerModeIcon = findViewById(R.id.ringer_mode_icon);
         mRingerModeTextView = findViewById(R.id.ringer_mode_text);
+        mForceHideQsStatusBar = mContext.getResources().getBoolean(R.bool.qs_status_bar_hidden);
 
         updateResources();
 
@@ -736,7 +738,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     // Update color schemes in landscape to use wallpaperTextColor
     private void updateStatusbarProperties() {
-        boolean shouldUseWallpaperTextColor = mLandscape && !mHeaderImageEnabled;
+        boolean shouldUseWallpaperTextColor = (mLandscape || mForceHideQsStatusBar) && !mHeaderImageEnabled;
         mBatteryMeterView.useWallpaperTextColor(shouldUseWallpaperTextColor);
         mClockView.useWallpaperTextColor(shouldUseWallpaperTextColor);
     }
