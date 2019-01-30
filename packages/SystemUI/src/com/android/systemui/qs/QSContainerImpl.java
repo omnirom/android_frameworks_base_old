@@ -59,7 +59,6 @@ public class QSContainerImpl extends FrameLayout implements
     private View mQSFooter;
 
     private View mBackground;
-    private View mBackgroundGradient;
     private View mStatusBarBackground;
 
     private int mSideMargins;
@@ -91,7 +90,6 @@ public class QSContainerImpl extends FrameLayout implements
         mQSFooter = findViewById(R.id.qs_footer);
         mBackground = findViewById(R.id.quick_settings_background);
         mStatusBarBackground = findViewById(R.id.quick_settings_status_bar_background);
-        mBackgroundGradient = findViewById(R.id.quick_settings_gradient_view);
         mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
         mBackgroundImage = findViewById(R.id.qs_header_image_view);
         mBackgroundImage.setClipToOutline(true);
@@ -120,13 +118,6 @@ public class QSContainerImpl extends FrameLayout implements
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
-
-        // Hide the backgrounds when in landscape mode.
-        if (mLandscape) {
-            mBackgroundGradient.setVisibility(View.INVISIBLE);
-        } else if (!mQsBackgroundAlpha) {
-            mBackgroundGradient.setVisibility(View.VISIBLE);
-        }
 
         updateResources();
         updateStatusbarVisibility();
@@ -160,12 +151,10 @@ public class QSContainerImpl extends FrameLayout implements
             mQsBackgroundAlpha = true;
             bg.setAlpha(bgAlpha);
             mBackground.setBackground(bg);
-            mBackgroundGradient.setVisibility(View.INVISIBLE);
         } else {
             mQsBackgroundAlpha = false;
             bg.setAlpha(255);
             mBackground.setBackground(bg);
-            mBackgroundGradient.setVisibility(View.VISIBLE);
         }
     }
 
@@ -206,7 +195,6 @@ public class QSContainerImpl extends FrameLayout implements
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
-        mBackgroundGradient.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         mBackground.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
     }
 
