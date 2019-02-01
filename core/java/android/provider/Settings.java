@@ -5690,6 +5690,18 @@ public final class Settings {
         public static final String OMNI_LOCKSCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
 
         /**
+         * Whether to enable DOZE only when charging
+         * @hide
+         */
+        public static final String OMNI_DOZE_ON_CHARGE = "doze_on_charge";
+
+        /**
+         * hidden stting of the current atate of DOZE only when charging
+         * @hide
+         */
+        public static final String OMNI_DOZE_ON_CHARGE_NOW = "doze_on_charge_now";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5701,7 +5713,8 @@ public final class Settings {
             OMNI_BUTTON_EXTRA_KEY_MAPPING,
             OMNI_DEVICE_FEATURE_SETTINGS,
             OMNI_ADVANCED_REBOOT,
-            OMNI_LOCKSCREEN_WEATHER_ENABLED
+            OMNI_LOCKSCREEN_WEATHER_ENABLED,
+            OMNI_DOZE_ON_CHARGE,
         };
 
         /**
@@ -5722,6 +5735,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_ADVANCED_REBOOT, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_DOZE_ON_CHARGE, 0);
         }
     }
 
