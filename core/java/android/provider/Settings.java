@@ -5009,6 +5009,21 @@ public final class Settings {
         private static final Validator OMNI_VIBRATE_ON_DISCONNECT_VALIDATOR =
                 BOOLEAN_VALIDATOR;
 
+         /**
+         * Whether to enable DOZE only when charging
+         * @hide
+         */
+        public static final String OMNI_DOZE_ON_CHARGE = "doze_on_charge";
+
+        private static final Validator OMNI_DOZE_ON_CHARGE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * hidden stting of the current atate of DOZE only when charging
+         * @hide
+         */
+        public static final String OMNI_DOZE_ON_CHARGE_NOW = "doze_on_charge_now";
+
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
@@ -5133,7 +5148,8 @@ public final class Settings {
             OMNI_STATUS_BAR_FILE_HEADER_IMAGE,
             OMNI_VIBRATE_ON_CONNECT,
             OMNI_VIBRATE_ON_CALLWAITING,
-            OMNI_VIBRATE_ON_DISCONNECT
+            OMNI_VIBRATE_ON_DISCONNECT,
+            OMNI_DOZE_ON_CHARGE
         };
 
         /**
@@ -5308,6 +5324,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_CONNECT);
             PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_CALLWAITING);
             PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_DISCONNECT);
+            PRIVATE_SETTINGS.add(OMNI_DOZE_ON_CHARGE);
         }
 
         /**
@@ -5492,6 +5509,8 @@ public final class Settings {
                     OMNI_VIBRATE_ON_CALLWAITING_VALIDATOR);
             VALIDATORS.put(OMNI_VIBRATE_ON_DISCONNECT,
                     OMNI_VIBRATE_ON_DISCONNECT_VALIDATOR);
+            VALIDATORS.put(OMNI_DOZE_ON_CHARGE,
+                    OMNI_DOZE_ON_CHARGE_VALIDATOR);
         }
 
         /**
