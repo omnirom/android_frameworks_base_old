@@ -5294,6 +5294,18 @@ public final class Settings {
          */
         public static final String OMNI_CUSTOM_FP_ICON = "custom_fingerprint_icon";
 
+         /**
+         * Whether to enable DOZE only when charging
+         * @hide
+         */
+        public static final String OMNI_DOZE_ON_CHARGE = "doze_on_charge";
+
+        /**
+         * hidden stting of the current atate of DOZE only when charging
+         * @hide
+         */
+        public static final String OMNI_DOZE_ON_CHARGE_NOW = "doze_on_charge_now";
+
         /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
@@ -5312,6 +5324,7 @@ public final class Settings {
             OMNI_BUTTON_EXTRA_KEY_MAPPING,
             OMNI_DEVICE_FEATURE_SETTINGS,
             OMNI_CUSTOM_FP_ICON,
+            OMNI_DOZE_ON_CHARGE,
         };
 
         /**
@@ -5338,6 +5351,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BUTTON_EXTRA_KEY_MAPPING, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_CUSTOM_FP_ICON, 2);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_DOZE_ON_CHARGE, 0);
         }
     }
 
