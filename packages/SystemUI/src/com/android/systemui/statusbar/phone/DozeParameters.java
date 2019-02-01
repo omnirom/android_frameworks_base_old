@@ -67,7 +67,6 @@ public class DozeParameters implements TunerService.Tunable,
 
     private final Set<Callback> mCallbacks = new HashSet<>();
 
-    private boolean mDozeAlwaysOn;
     private boolean mControlScreenOffAnimation;
 
     @Inject
@@ -95,7 +94,6 @@ public class DozeParameters implements TunerService.Tunable,
 
         tunerService.addTunable(
                 this,
-                Settings.Secure.DOZE_ALWAYS_ON,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
     }
 
@@ -187,7 +185,8 @@ public class DozeParameters implements TunerService.Tunable,
      * @return {@code true} if enabled and available.
      */
     public boolean getAlwaysOn() {
-        return mDozeAlwaysOn && !mBatteryController.isAodPowerSave();
+        return mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT)
+                && !mBatteryController.isAodPowerSave();
     }
 
     public boolean isQuickPickupEnabled() {
@@ -283,7 +282,6 @@ public class DozeParameters implements TunerService.Tunable,
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
         for (Callback callback : mCallbacks) {
             callback.onAlwaysOnChange();
         }
