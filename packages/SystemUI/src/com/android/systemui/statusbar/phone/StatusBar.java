@@ -1016,7 +1016,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             @Override
             public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-                // noop
+                boolean mAodOnCharge = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.OMNI_DOZE_ON_CHARGE, 0,  UserHandle.myUserId()) != 0;
+                if (mAodOnCharge) {
+                    Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                            Settings.Secure.DOZE_ALWAYS_ON, pluggedIn ? 1 : 0,  UserHandle.myUserId());
+                }
             }
         });
 
