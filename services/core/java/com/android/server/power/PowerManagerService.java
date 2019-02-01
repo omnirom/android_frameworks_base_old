@@ -529,6 +529,9 @@ public final class PowerManagerService extends SystemService
     // True if always on display is enabled
     private boolean mAlwaysOnEnabled;
 
+    // Omni doze on charge
+    private boolean mDozeOnChargeEnabled;
+
     // True if double tap to wake is enabled
     private boolean mDoubleTapWakeEnabled;
 
@@ -853,6 +856,9 @@ public final class PowerManagerService extends SystemService
         resolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.DEVICE_DEMO_MODE),
                 false, mSettingsObserver, UserHandle.USER_SYSTEM);
+        resolver.registerContentObserver(Settings.System.getUriFor(
+                Settings.System.OMNI_DOZE_ON_CHARGE),
+                false, mSettingsObserver, UserHandle.USER_SYSTEM);
         IVrManager vrManager = (IVrManager) getBinderService(Context.VR_SERVICE);
         if (vrManager != null) {
             try {
@@ -974,6 +980,8 @@ public final class PowerManagerService extends SystemService
         mTheaterModeEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.THEATER_MODE_ON, 0) == 1;
         mAlwaysOnEnabled = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+        mDozeOnChargeEnabled = (Settings.System.getIntForUser(resolver,
+                Settings.System.OMNI_DOZE_ON_CHARGE, 0, UserHandle.USER_CURRENT) != 0);
 
         if (mSupportsDoubleTapWakeConfig) {
             boolean doubleTapWakeEnabled = Settings.Secure.getIntForUser(resolver,
@@ -1767,6 +1775,10 @@ public final class PowerManagerService extends SystemService
 
     private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(
             boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {
+        // If doze on charge is enabled always turn on screen on unplug
+        if (mDozeOnChargeEnabled) {
+            return true;
+        }
         // Don't wake when powered unless configured to do so.
         if (!mWakeUpWhenPluggedOrUnpluggedConfig) {
             return false;
