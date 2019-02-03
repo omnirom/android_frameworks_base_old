@@ -29,6 +29,7 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -83,7 +84,6 @@ public class BatteryMeterView extends LinearLayout implements
     private int mLightModeBackgroundColor;
     private int mLightModeFillColor;
     private float mDarkIntensity;
-    private int mUser;
 
     /**
      * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings.
@@ -155,11 +155,9 @@ public class BatteryMeterView extends LinearLayout implements
         mUserTracker = new CurrentUserTracker(mContext) {
             @Override
             public void onUserSwitched(int newUserId) {
-                mUser = newUserId;
-                getContext().getContentResolver().unregisterContentObserver(mSettingObserver);
-                getContext().getContentResolver().registerContentObserver(
-                        Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver,
-                        newUserId);
+                updateShowPercent();
+                updateShowImage();
+                updatePercentText();
             }
         };
 
@@ -241,14 +239,13 @@ public class BatteryMeterView extends LinearLayout implements
         super.onAttachedToWindow();
         mBatteryController = Dependency.get(BatteryController.class);
         mBatteryController.addCallback(this);
-        mUser = ActivityManager.getCurrentUser();
         Dependency.get(TunerService.class)
                 .addTunable(this, StatusBarIconController.ICON_BLACKLIST);
         getContext().getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver, mUser);
+                Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver, UserHandle.USER_ALL);
         updateShowPercent();
         getContext().getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(OMNI_SHOW_BATTERY_IMAGE), false, mSettingObserver);
+                Settings.System.getUriFor(OMNI_SHOW_BATTERY_IMAGE), false, mSettingObserver, UserHandle.USER_ALL);
         updateShowImage();
         Dependency.get(ConfigurationController.class).addCallback(this);
         mUserTracker.startTracking();
@@ -294,15 +291,15 @@ public class BatteryMeterView extends LinearLayout implements
     }
 
     private void updateShowPercent() {
-        final boolean showPercent = Settings.System.getInt(getContext().getContentResolver(),
-                SHOW_BATTERY_PERCENT, 0) != 0;
+        final boolean showPercent = Settings.System.getIntForUser(getContext().getContentResolver(),
+                SHOW_BATTERY_PERCENT, 0, UserHandle.USER_CURRENT) != 0;
         mBatteryPercentView.setVisibility((showPercent || mForceShowPercent) ? View.VISIBLE : View.GONE);
         mBatteryPercentView.setPadding(mShowBatteryImage ? mBatteryPercentPadding : 0, 0, 0, 0);
     }
 
     private void updateShowImage() {
-        mShowBatteryImage = Settings.System.getInt(getContext().getContentResolver(),
-                OMNI_SHOW_BATTERY_IMAGE, 1) == 1;
+        mShowBatteryImage = Settings.System.getIntForUser(getContext().getContentResolver(),
+                OMNI_SHOW_BATTERY_IMAGE, 1, UserHandle.USER_CURRENT) == 1;
         mBatteryIconView.setVisibility(mShowBatteryImage ? View.VISIBLE : View.GONE);
         mBatteryPercentView.setPadding(mShowBatteryImage ? mBatteryPercentPadding : 0, 0, 0, 0);
     }
