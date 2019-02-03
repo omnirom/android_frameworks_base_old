@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
+import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
 import android.annotation.ColorInt;
 import android.content.Context;
@@ -38,6 +39,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.provider.Settings;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
@@ -189,7 +191,14 @@ public class KeyguardStatusBarView extends RelativeLayout
                 mMultiUserSwitch.setVisibility(View.GONE);
             }
         }
-        mBatteryView.setForceShowPercent(mBatteryCharging && mShowPercentAvailable);
+	if(mShowPercentAvailable) {
+        final boolean percentSystemSetting= Settings.System.getInt(getContext().getContentResolver(),
+	        SHOW_BATTERY_PERCENT, 0) != 0;
+        mBatteryView.setForceShowPercent(mBatteryCharging && percentSystemSetting);
+	}
+	else {
+		mBatteryView.setForceShowPercent(mBatteryCharging && mShowPercentAvailable);
+	}
     }
 
     private void updateSystemIconsLayoutParams() {
