@@ -24,9 +24,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.IntDef;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -132,6 +134,24 @@ public class DisplayRotation {
     private boolean mDemoHdmiRotationLock;
     private boolean mDemoRotationLock;
 
+    /**
+     * Broadcast Action: WiFi Display video is enabled or disabled
+     *
+     * <p>The intent will have the following extra values:</p>
+     * <ul>
+     *    <li><em>state</em> - 0 for disabled, 1 for enabled. </li>
+     * </ul>
+     */
+
+    private static final String ACTION_WIFI_DISPLAY_VIDEO =
+                    "org.codeaurora.intent.action.WIFI_DISPLAY_VIDEO";
+
+    /**
+     * Wifi Display specific variables
+     */
+    private boolean mWifiDisplayConnected = false;
+    private int mWifiDisplayRotation = -1;
+
     DisplayRotation(WindowManagerService service, DisplayContent displayContent) {
         this(service, displayContent, displayContent.getDisplayPolicy(),
                 service.mDisplayWindowSettings, service.mContext, service.getWindowManagerLock());
@@ -167,7 +187,44 @@ public class DisplayRotation {
             mSettingsObserver = new SettingsObserver(uiHandler);
             mSettingsObserver.observe();
         }
+        /* Register for WIFI Display Intents */
+        IntentFilter wifiDisplayFilter = new IntentFilter(ACTION_WIFI_DISPLAY_VIDEO);
+        Intent wifidisplayIntent = context.registerReceiver(
+                mWifiDisplayReceiver, wifiDisplayFilter);
     }
+
+    final BroadcastReceiver mWifiDisplayReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(ACTION_WIFI_DISPLAY_VIDEO)) {
+                int state = intent.getIntExtra("state", 0);
+                if(state == 1) {
+                    mWifiDisplayConnected = true;
+                } else {
+                    mWifiDisplayConnected = false;
+                }
+                int rotation = intent.getIntExtra("wfd_UIBC_rot", -1);
+                switch (rotation) {
+                    case 0:
+                        mWifiDisplayRotation = Surface.ROTATION_0;
+                        break;
+                    case 1:
+                        mWifiDisplayRotation = Surface.ROTATION_90;
+                        break;
+                    case 2:
+                        mWifiDisplayRotation = Surface.ROTATION_180;
+                        break;
+                    case 3:
+                        mWifiDisplayRotation = Surface.ROTATION_270;
+                        break;
+                    default:
+                        mWifiDisplayRotation = -1;
+                }
+                mService.updateRotation(true /* alwaysSendConfiguration */,
+                        false/* forceRelayout */);
+            }
+        }
+    };
 
     private int readRotation(int resID) {
         try {
@@ -574,10 +631,13 @@ public class DisplayRotation {
             // This case can override the behavior of NOSENSOR, and can also
             // enable 180 degree rotation while docked.
             preferredRotation = deskDockEnablesAccelerometer ? sensorRotation : mDeskDockRotation;
-        } else if (hdmiPlugged && mDemoHdmiRotationLock) {
+        } else if ((hdmiPlugged || mWifiDisplayConnected) && mDemoHdmiRotationLock) {
             // Ignore sensor when plugged into HDMI when demo HDMI rotation lock enabled.
             // Note that the dock orientation overrides the HDMI orientation.
             preferredRotation = mDemoHdmiRotation;
+        } else if (mWifiDisplayConnected && (mWifiDisplayRotation > -1)) {
+            // Ignore sensor when WFD is active and UIBC rotation is enabled
+            preferredRotation = mWifiDisplayRotation;
         } else if (hdmiPlugged && dockMode == Intent.EXTRA_DOCK_STATE_UNDOCKED
                 && mUndockedHdmiRotation >= 0) {
             // Ignore sensor when plugged into HDMI and an undocked orientation has
