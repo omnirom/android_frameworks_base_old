@@ -767,6 +767,10 @@ public final class PowerManagerService extends SystemService
     }
 
     public void systemReady(IAppOpsService appOps) {
+        // set initial value
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_DOZE_ON_CHARGE_NOW, 0, UserHandle.USER_CURRENT);
+
         synchronized (mLock) {
             mSystemReady = true;
             mAppOps = appOps;
@@ -986,8 +990,6 @@ public final class PowerManagerService extends SystemService
         mAlwaysOnEnabled = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
         mDozeOnChargeEnabled = Settings.System.getIntForUser(resolver,
                 Settings.System.OMNI_DOZE_ON_CHARGE, 0, UserHandle.USER_CURRENT) != 0;
-        final boolean dozeOnChargeEnabledNow = Settings.System.getIntForUser(resolver,
-                Settings.System.OMNI_DOZE_ON_CHARGE_NOW, 0, UserHandle.USER_CURRENT) != 0;
         if (mSupportsDoubleTapWakeConfig) {
             boolean doubleTapWakeEnabled = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.DOUBLE_TAP_TO_WAKE, DEFAULT_DOUBLE_TAP_TO_WAKE,
