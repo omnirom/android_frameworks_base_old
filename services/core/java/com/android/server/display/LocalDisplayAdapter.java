@@ -80,8 +80,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         mHotplugReceiver = new HotplugDisplayEventReceiver(getHandler().getLooper());
 
-        for (int builtInDisplayId = SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN;
-             builtInDisplayId <= SurfaceControl.BUILT_IN_DISPLAY_ID_EXT_MAX; builtInDisplayId++) {
+        for (int builtInDisplayId : BUILT_IN_DISPLAY_IDS_TO_SCAN) {
             tryConnectDisplayLocked(builtInDisplayId);
         }
     }
