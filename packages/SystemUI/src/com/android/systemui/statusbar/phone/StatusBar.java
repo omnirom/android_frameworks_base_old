@@ -334,10 +334,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     private static final boolean ENABLE_LOCKSCREEN_WALLPAPER = true;
 
     /** Whether to force dark theme if Configuration.UI_MODE_NIGHT_YES. */
-    private static final boolean DARK_THEME_IN_NIGHT_MODE = true;
+    private static final boolean DARK_THEME_IN_NIGHT_MODE = false;
 
     /** Whether to switch the device into night mode in battery saver. */
-    private static final boolean NIGHT_MODE_IN_BATTERY_SAVER = true;
+    private static final boolean NIGHT_MODE_IN_BATTERY_SAVER = false;
 
     /**
      * Never let the alpha become zero for surfaces that draw with SRC - otherwise the RenderNode
