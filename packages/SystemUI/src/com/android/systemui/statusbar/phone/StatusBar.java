@@ -337,7 +337,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private static final boolean DARK_THEME_IN_NIGHT_MODE = true;
 
     /** Whether to switch the device into night mode in battery saver. */
-    private static final boolean NIGHT_MODE_IN_BATTERY_SAVER = true;
+    private static final boolean NIGHT_MODE_IN_BATTERY_SAVER = false;
 
     /**
      * Never let the alpha become zero for surfaces that draw with SRC - otherwise the RenderNode
