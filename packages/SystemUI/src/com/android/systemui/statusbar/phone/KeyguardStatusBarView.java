@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -95,6 +96,9 @@ public class KeyguardStatusBarView extends RelativeLayout
     private View mCutoutSpace;
     private ViewGroup mStatusIconArea;
     private int mLayoutState = LAYOUT_NONE;
+
+    // tuner switch
+    private static final String KEYGUARD_SHOW_PERCENT_ON_CHARGING = "sysui_keyguard_battery_percent";
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -195,7 +199,10 @@ public class KeyguardStatusBarView extends RelativeLayout
                 mMultiUserSwitch.setVisibility(View.GONE);
             }
         }
-        mBatteryView.setForceShowPercent(mBatteryCharging && mShowPercentAvailable);
+        final boolean showPercentOnCharging = Dependency.get(TunerService.class)
+                .getValue(KEYGUARD_SHOW_PERCENT_ON_CHARGING, 1) == 1;
+
+        mBatteryView.setForceShowPercent(showPercentOnCharging && mBatteryCharging && mShowPercentAvailable);
     }
 
     private void updateSystemIconsLayoutParams() {
