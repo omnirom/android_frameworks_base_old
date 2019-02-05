@@ -39,4 +39,10 @@
         android:title="@string/lockscreen_unlock_right"
         sysui:defValue="true" />
 
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="sysui_keyguard_battery_percent"
+        android:title="@string/tuner_keyguard_battery_percent_title"
+        android:summary="@string/tuner_keyguard_battery_percent_summary"
+        sysui:defValue="true" />
+
 </PreferenceScreen>
