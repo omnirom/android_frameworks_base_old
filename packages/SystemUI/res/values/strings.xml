@@ -1833,7 +1833,7 @@
 
     <string-array name="nav_bar_layouts_values" translatable="false">
         <item>default</item>
-        <item>left;back,home,recent;right</item>
+        <item>space;left,back,home,recent,right;space</item>
         <item>left,back,home,recent,right;space;space</item>
         <item>space;space;left,back,home,recent,right</item>
     </string-array>
