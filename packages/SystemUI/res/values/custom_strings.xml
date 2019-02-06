@@ -122,4 +122,14 @@
     <string name="omnijaws_service_last_update">Last update:</string>
 
     <string name="quick_settings_screenrecord_label">Screenrecord</string>
+
+    <string-array name="nav_bar_layouts_new">
+        <item>Normal</item>
+        <item>Compact</item>
+    </string-array>
+
+    <string-array name="nav_bar_layouts_values_new" translatable="false">
+        <item>default</item>
+        <item>space;left,back,home,recent,right;space</item>
+    </string-array>
 </resources>
