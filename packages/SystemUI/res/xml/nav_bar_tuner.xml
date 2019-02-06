@@ -23,8 +23,8 @@
         android:title="@string/nav_bar_layout"
         android:summary="%s"
         android:persistent="false"
-        android:entries="@array/nav_bar_layouts"
-        android:entryValues="@array/nav_bar_layouts_values" />
+        android:entries="@array/nav_bar_layouts_new"
+        android:entryValues="@array/nav_bar_layouts_values_new" />
 
     <!--<com.android.systemui.tuner.RadioListPreference
         android:key="type_left"
