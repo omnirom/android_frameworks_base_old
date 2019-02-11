@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90fc77e6_88003d1f",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 5055,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-02-11T13:39:52Z",
+      "side": 1,
+      "message": "please name OMNI_\u003cfoo\u003e add to backup settings and add a validator",
+      "revId": "f31d7597ccf4fed624e8c3671937638e402fea69",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2ec5195b_0f3cbc51",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/NavigationBarView.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1276,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-02-11T13:39:52Z",
+      "side": 1,
+      "message": "please rename to OMNI_ to easier track our added settings",
+      "revId": "f31d7597ccf4fed624e8c3671937638e402fea69",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
