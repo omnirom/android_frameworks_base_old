@@ -110,6 +110,8 @@
     <string name="tuner_bluetooth_show_connected_title">Show bluetooth only when connected</string>
     <string name="tuner_keyguard_battery_percent_title">Show battery percent</string>
     <string name="tuner_keyguard_battery_percent_summary">Force show battery percent in status bar on charging</string>
+    <string name="tuner_keyguard_show_watt_title">Show charging watt</string>
+    <string name="tuner_keyguard_show_watt_summary">Show charging watt value in mW</string>
 
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>
