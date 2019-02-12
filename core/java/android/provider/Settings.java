@@ -5578,6 +5578,21 @@ public final class Settings {
         public static final String OMNI_KEYGUARD_SHOW_BATTERY_BAR_ALWAYS = "sysui_keyguard_show_battery_bar_always";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_KEYGUARD_SHOW_WATT_ON_CHARGING = "sysui_keyguard_show_watt";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_KEYGUARD_SHOW_CURRENT_ON_CHARGING = "sysui_keyguard_show_current";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_KEYGUARD_SHOW_BATTERY_TEMP = "sysui_keyguard_show_battery_temp";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5632,7 +5647,10 @@ public final class Settings {
             OMNI_NAVIGATION_BAR_ARROW_KEYS,
             OMNI_NAVIGATION_BAR_SHOW,
             OMNI_KEYGUARD_SHOW_BATTERY_BAR,
-            OMNI_KEYGUARD_SHOW_BATTERY_BAR_ALWAYS
+            OMNI_KEYGUARD_SHOW_BATTERY_BAR_ALWAYS,
+            OMNI_KEYGUARD_SHOW_WATT_ON_CHARGING,
+            OMNI_KEYGUARD_SHOW_CURRENT_ON_CHARGING,
+            OMNI_KEYGUARD_SHOW_BATTERY_TEMP
         };
 
         /**
@@ -5699,6 +5717,9 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_SHOW, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_KEYGUARD_SHOW_BATTERY_BAR, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_KEYGUARD_SHOW_BATTERY_BAR_ALWAYS, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_KEYGUARD_SHOW_WATT_ON_CHARGING, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_KEYGUARD_SHOW_CURRENT_ON_CHARGING, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_KEYGUARD_SHOW_BATTERY_TEMP, 0);
         }
     }
 
