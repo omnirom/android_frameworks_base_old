@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.tuner.TunerService;
@@ -77,7 +78,6 @@ public class KeyguardIndicationController implements StateListener,
         UnlockMethodCache.OnUnlockMethodChangedListener {
 
     private static final String TAG = "KeyguardIndication";
-    private static final boolean DEBUG_CHARGING_SPEED = false;
 
     private static final int MSG_HIDE_TRANSIENT = 1;
     private static final int MSG_CLEAR_BIOMETRIC_MSG = 2;
@@ -134,6 +134,9 @@ public class KeyguardIndicationController implements StateListener,
     private static final String KEYGUARD_SHOW_BATTERY_BAR_ALWAYS = "sysui_keyguard_show_battery_bar_always";
 
     private BatteryBarView mBatteryBar;
+
+    // omni additions
+    private static final String KEYGUARD_SHOW_WATT_ON_CHARGING = "sysui_keyguard_show_watt";
 
     /**
      * Creates a new KeyguardIndicationController and registers callbacks.
@@ -379,6 +382,11 @@ public class KeyguardIndicationController implements StateListener,
                     mTextView.switchIndication(mTransientIndication);
                 } else if (mPowerPluggedIn) {
                     String indication = computePowerIndication();
+                    final boolean showWattOnCharging = Dependency.get(TunerService.class)
+                            .getValue(KEYGUARD_SHOW_WATT_ON_CHARGING, 0) == 1;
+                    if (showWattOnCharging) {
+                        indication += ",  " + (mChargingWattage / 1000) + " mW";
+                    }
                     if (animate) {
                         animateText(mTextView, indication);
                     } else {
@@ -412,7 +420,9 @@ public class KeyguardIndicationController implements StateListener,
                 mTextView.setTextColor(mInitialTextColorState);
             } else if (mPowerPluggedIn) {
                 String indication = computePowerIndication();
-                if (DEBUG_CHARGING_SPEED) {
+                final boolean showWattOnCharging = Dependency.get(TunerService.class)
+                        .getValue(KEYGUARD_SHOW_WATT_ON_CHARGING, 0) == 1;
+                if (showWattOnCharging) {
                     indication += ",  " + (mChargingWattage / 1000) + " mW";
                 }
                 mTextView.setTextColor(mInitialTextColorState);
