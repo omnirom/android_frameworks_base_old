@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -66,7 +67,6 @@ import java.util.IllegalFormatConversionException;
 public class KeyguardIndicationController {
 
     private static final String TAG = "KeyguardIndication";
-    private static final boolean DEBUG_CHARGING_SPEED = false;
 
     private static final int MSG_HIDE_TRANSIENT = 1;
     private static final int MSG_CLEAR_FP_MSG = 2;
@@ -103,6 +103,9 @@ public class KeyguardIndicationController {
 
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mDozing;
+
+    // omni additions
+    private static final String KEYGUARD_SHOW_WATT_ON_CHARGING = "sysui_keyguard_show_watt";
 
     /**
      * Creates a new KeyguardIndicationController and registers callbacks.
@@ -330,7 +333,9 @@ public class KeyguardIndicationController {
                 mTextView.setTextColor(mInitialTextColor);
             } else if (mPowerPluggedIn) {
                 String indication = computePowerIndication();
-                if (DEBUG_CHARGING_SPEED) {
+                final boolean showWattOnCharging = Dependency.get(TunerService.class)
+                        .getValue(KEYGUARD_SHOW_WATT_ON_CHARGING, 0) == 1;
+                if (showWattOnCharging) {
                     indication += ",  " + (mChargingWattage / 1000) + " mW";
                 }
                 mTextView.setTextColor(mInitialTextColor);
