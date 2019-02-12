@@ -148,6 +148,12 @@ public final class NavigationBarTransitions extends BarTransitions {
         for (int i = buttonDispatchers.size() - 1; i >= 0; i--) {
             buttonDispatchers.valueAt(i).setDarkIntensity(darkIntensity);
         }
+
+        if (mView.showDpadArrowKeys()) {
+            mView.getKeyButtonViewById(R.id.dpad_left).setDarkIntensity(darkIntensity);
+            mView.getKeyButtonViewById(R.id.dpad_right).setDarkIntensity(darkIntensity);
+        }
+
         if (mAutoDim) {
             applyLightsOut(false, true);
         }
