@@ -26,6 +26,7 @@ import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_PRESENT;
 import static android.os.BatteryManager.EXTRA_STATUS;
+import static android.os.BatteryManager.EXTRA_TEMPERATURE;
 
 import android.content.Context;
 import android.content.Intent;
@@ -54,15 +55,19 @@ public class BatteryStatus {
     public final int plugged;
     public final int health;
     public int maxChargingWattage;
+    public final double currBatteryTemp;
+    public final double currChargingVolt;
     public final boolean mPresent;
 
     public BatteryStatus(int status, int level, int plugged, int health,
-            int maxChargingWattage) {
+            int maxChargingWattage, double currChargingVolt, double currBatteryTemp) {
         this.status = status;
         this.level = level;
         this.plugged = plugged;
         this.health = health;
         this.maxChargingWattage = maxChargingWattage;
+        this.currChargingVolt = currChargingVolt;
+        this.currBatteryTemp = currBatteryTemp;
         this.mPresent = true;
     }
 
@@ -74,6 +79,7 @@ public class BatteryStatus {
         final int maxChargingMicroAmp = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT,
                 -1);
         int maxChargingMicroVolt = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
+        currBatteryTemp = batteryChangedIntent.getIntExtra(EXTRA_TEMPERATURE, -1);
 
         if (maxChargingMicroVolt <= 0) {
             maxChargingMicroVolt = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
@@ -83,12 +89,16 @@ public class BatteryStatus {
             // to maintain precision equally on both factors.
             maxChargingWattage = (maxChargingMicroAmp / 1000)
                     * (maxChargingMicroVolt / 1000);
+            currChargingVolt = maxChargingMicroVolt;
         } else {
             maxChargingWattage = -1;
+            currChargingVolt = -1;
         }
         if (DEBUG) Log.d(TAG, "maxChargingMicroVolt = " + maxChargingMicroVolt
                 + " maxChargingMicroAmp = " + maxChargingMicroAmp
-                + " maxChargingWattage = " + maxChargingWattage);
+                + " maxChargingWattage = " + maxChargingWattage
+                + " currChargingVolt = " + currChargingVolt
+                + " currBatteryTemp = " + currBatteryTemp);
         mPresent = batteryChangedIntent.getBooleanExtra(EXTRA_PRESENT, true);
     }
 
@@ -172,7 +182,9 @@ public class BatteryStatus {
     @Override
     public String toString() {
         return "BatteryStatus{status=" + status + ",level=" + level + ",plugged=" + plugged
-                + ",health=" + health + ",maxChargingWattage=" + maxChargingWattage + "}";
+                + ",health=" + health + ",maxChargingWattage=" + maxChargingWattage
+                + ",currChargingVolt=" + currChargingVolt
+                + ",currBatteryTemp=" + currBatteryTemp + "}";
     }
 
     public boolean isBatteryPresent() {

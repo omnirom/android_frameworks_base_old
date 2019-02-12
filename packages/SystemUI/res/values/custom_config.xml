@@ -58,4 +58,7 @@
 
     <string name="config_navBarLayoutHandleArrows" translatable="false">back[1.7WC];home_handle;ime_switcher[1.7WC]</string>
 
+    <!-- The battery temperature divider, if needed -->
+    <integer name="config_battTempDivider" translatable="false">10</integer>
+
 </resources>
