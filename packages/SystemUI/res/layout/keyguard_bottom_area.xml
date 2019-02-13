@@ -49,6 +49,23 @@
                 android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
                 android:visibility="gone" />
 
+            <com.android.systemui.omni.BatteryBarView
+                android:id="@+id/battery_bar_view"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/battery_bar_view_height"
+                android:background="@drawable/battery_bar_view_bg"
+                android:visibility="gone"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="5dp" >
+
+                <ImageView
+                    android:id="@+id/battery_bar_view_fg"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/battery_bar_view_height"
+                    android:src="@drawable/battery_bar_view_fg"/>
+            </com.android.systemui.omni.BatteryBarView>
+
             <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
                 android:id="@+id/keyguard_indication_text"
                 android:layout_width="match_parent"

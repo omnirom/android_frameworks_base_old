@@ -21,4 +21,5 @@
     <dimen name="qs_tile_height_wo_label">48dp</dimen>
     <dimen name="quick_qs_drag_handle_height">20dp</dimen>
     <dimen name="current_weather_image_size">42dp</dimen>
+    <dimen name="battery_bar_view_height">6dp</dimen>
 </resources>

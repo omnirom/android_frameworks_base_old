@@ -73,6 +73,11 @@
 
     <string name="quick_settings_screenrecord_label">Screenrecord</string>
 
+    <string name="tuner_keyguard_show_battery_bar_title">Show battery bar</string>
+    <string name="tuner_keyguard_show_battery_bar_summary">Show battery bar on charging in always on display</string>
+    <string name="tuner_keyguard_show_battery_bar_always_title">Always show battery bar</string>
+    <string name="tuner_keyguard_show_battery_bar_always_summary">Always show battery bar on charging</string>
+
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>
     <string name="omnijaws_service_error_long">Error loading weather data</string>
