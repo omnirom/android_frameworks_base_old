@@ -57,6 +57,23 @@
                 android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
                 android:accessibilityLiveRegion="polite" />
 
+            <com.android.systemui.omni.BatteryBarView
+                android:id="@+id/battery_bar_view"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/battery_bar_view_height"
+                android:background="@drawable/battery_bar_view_bg"
+                android:visibility="gone"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp" >
+
+                <ImageView
+                    android:id="@+id/battery_bar_view_fg"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/battery_bar_view_height"
+                    android:src="@drawable/battery_bar_view_fg"/>
+            </com.android.systemui.omni.BatteryBarView>
         </LinearLayout>
 
         <include layout="@layout/right_docked_overlay" />

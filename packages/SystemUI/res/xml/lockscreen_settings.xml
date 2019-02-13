@@ -39,4 +39,17 @@
         android:title="@string/lockscreen_unlock_right"
         sysui:defValue="true" />
 
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="sysui_keyguard_show_battery_bar"
+        android:title="@string/tuner_keyguard_show_battery_bar_title"
+        android:summary="@string/tuner_keyguard_show_battery_bar_summary"
+        sysui:defValue="true" />
+
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="sysui_keyguard_show_battery_bar_always"
+        android:title="@string/tuner_keyguard_show_battery_bar_always_title"
+        android:summary="@string/tuner_keyguard_show_battery_bar_always_summary"
+        android:dependency="sysui_keyguard_show_battery_bar"
+        sysui:defValue="false" />
+
 </PreferenceScreen>
