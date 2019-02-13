@@ -5568,6 +5568,16 @@ public final class Settings {
         public static final String OMNI_NAVIGATION_BAR_SHOW = "navbar_visibility";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_KEYGUARD_SHOW_BATTERY_BAR = "sysui_keyguard_show_battery_bar";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_KEYGUARD_SHOW_BATTERY_BAR_ALWAYS = "sysui_keyguard_show_battery_bar_always";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5620,7 +5630,9 @@ public final class Settings {
             OMNI_RECENT_TASKS_VISIBLE_DISABLE,
             OMNI_SHOW_BATTERY_IMAGE,
             OMNI_NAVIGATION_BAR_ARROW_KEYS,
-            OMNI_NAVIGATION_BAR_SHOW
+            OMNI_NAVIGATION_BAR_SHOW,
+            OMNI_KEYGUARD_SHOW_BATTERY_BAR,
+            OMNI_KEYGUARD_SHOW_BATTERY_BAR_ALWAYS
         };
 
         /**
@@ -5685,6 +5697,8 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_ARROW_KEYS, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_SHOW, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_KEYGUARD_SHOW_BATTERY_BAR, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_KEYGUARD_SHOW_BATTERY_BAR_ALWAYS, 0);
         }
     }
 
