@@ -51,4 +51,10 @@
         android:summary="@string/tuner_keyguard_show_watt_summary"
         sysui:defValue="false" />
 
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="sysui_keyguard_show_battery_bar"
+        android:title="@string/tuner_keyguard_show_battery_bar_title"
+        android:summary="@string/tuner_keyguard_show_battery_bar_summary"
+        sysui:defValue="false" />
+
 </PreferenceScreen>
