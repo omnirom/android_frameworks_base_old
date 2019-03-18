@@ -80,6 +80,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -124,7 +125,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private CustomDialog mDialog;
     private ViewGroup mDialogView;
     private ViewGroup mDialogRowsView;
-    private ViewGroup mRinger;
+    private FrameLayout mRinger;
     private ImageButton mRingerIcon;
     private View mExpandRowsView;
     private ImageButton mExpandRows;
@@ -280,11 +281,13 @@ public class VolumeDialogImpl implements VolumeDialog {
         mRinger = mDialog.findViewById(R.id.ringer);
         mExpandRowsView = mDialog.findViewById(R.id.expandable_indicator_container);
         mExpandRows = mDialog.findViewById(R.id.expandable_indicator);
+        LinearLayout.LayoutParams paramsRinger = (LinearLayout.LayoutParams) mRinger.getLayoutParams();
         if(isRightPosition) {
-            mRinger.setForegroundGravity(Gravity.RIGHT);
+            paramsRinger.gravity = Gravity.RIGHT|Gravity.CENTER_VERTICAL;
         } else {
-            mRinger.setForegroundGravity(Gravity.LEFT);
+            paramsRinger.gravity = Gravity.LEFT|Gravity.CENTER_VERTICAL;
         }
+        mRinger.setLayoutParams(paramsRinger);
         mRingerIcon = mRinger.findViewById(R.id.ringer_icon);
         mZenIcon = mRinger.findViewById(R.id.dnd_icon);
 
