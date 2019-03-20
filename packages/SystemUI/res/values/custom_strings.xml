@@ -81,6 +81,8 @@
     <string name="tuner_keyguard_battery_percent_summary">Force show battery percent in status bar on charging</string>
     <string name="tuner_keyguard_show_watt_title">Show charging watt</string>
     <string name="tuner_keyguard_show_watt_summary">Show charging watt value in mW</string>
+    <string name="tuner_keyguard_show_current_title">Show charging current</string>
+    <string name="tuner_keyguard_show_current_summary">Show charging current values</string>
 
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>
