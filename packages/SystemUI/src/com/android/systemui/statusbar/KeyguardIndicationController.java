@@ -60,6 +60,7 @@ import com.android.systemui.util.wakelock.WakeLock;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
+import java.text.DecimalFormat;
 import java.util.IllegalFormatConversionException;
 
 /**
@@ -97,6 +98,7 @@ public class KeyguardIndicationController {
     private boolean mPowerCharged;
     private int mChargingSpeed;
     private int mChargingWattage;
+    private double mChargingVolt;
     private int mBatteryLevel;
     private String mMessageToShowOnScreenOn;
 
@@ -107,6 +109,7 @@ public class KeyguardIndicationController {
 
     // omni additions
     private static final String KEYGUARD_SHOW_WATT_ON_CHARGING = "sysui_keyguard_show_watt";
+    private static final String KEYGUARD_SHOW_CURRENT_ON_CHARGING = "sysui_keyguard_show_current";
     private static final String KEYGUARD_SHOW_BATTERY_BAR = "sysui_keyguard_show_battery_bar";
     private static final String KEYGUARD_SHOW_BATTERY_BAR_ALWAYS = "sysui_keyguard_show_battery_bar_always";
 
@@ -304,6 +307,8 @@ public class KeyguardIndicationController {
         if (mVisible) {
             final boolean showWattOnCharging = Dependency.get(TunerService.class)
                     .getValue(KEYGUARD_SHOW_WATT_ON_CHARGING, 0) == 1;
+            final boolean showCurrentOnCharging = Dependency.get(TunerService.class)
+                    .getValue(KEYGUARD_SHOW_CURRENT_ON_CHARGING, 0) == 1;
             final boolean showBatteryBar = Dependency.get(TunerService.class)
                     .getValue(KEYGUARD_SHOW_BATTERY_BAR, 1) == 1;
             final boolean showBatteryBarAlways = Dependency.get(TunerService.class)
@@ -320,8 +325,16 @@ public class KeyguardIndicationController {
                     mTextView.switchIndication(mTransientIndication);
                 } else if (mPowerPluggedIn) {
                     String indication = computePowerIndication();
-                    if (showWattOnCharging) {
-                        indication += ",  " + (mChargingWattage / 1000) + " mW";
+                    if (showWattOnCharging && !mPowerCharged) {
+                        DecimalFormat df = new DecimalFormat("#.0");
+                        indication += ", " + (df.format(mChargingWattage / 1000000)) + " W";
+                    }
+                    if (showCurrentOnCharging && !mPowerCharged) {
+                        String amps = String.valueOf(mChargingWattage / mChargingVolt);
+                        amps = amps.substring(0,4);
+                        amps = amps.replaceAll("\\.","");
+                        indication += ", " + (String.format("%.3f", mChargingVolt / 1000)) + " V";
+                        indication += ", " + (amps) + " mA";
                     }
                     if (animate) {
                         animateText(mTextView, indication);
@@ -357,8 +370,16 @@ public class KeyguardIndicationController {
                 mTextView.setTextColor(mInitialTextColor);
             } else if (mPowerPluggedIn) {
                 String indication = computePowerIndication();
-                if (showWattOnCharging) {
-                    indication += ",  " + (mChargingWattage / 1000) + " mW";
+                if (showWattOnCharging && !mPowerCharged) {
+                    DecimalFormat df = new DecimalFormat("#.0");
+                    indication += ", " + (df.format(mChargingWattage / 1000000)) + " W";
+                }
+                if (showCurrentOnCharging && !mPowerCharged) {
+                    String amps = String.valueOf(mChargingWattage / mChargingVolt);
+                    amps = amps.substring(0,4);
+                    amps = amps.replaceAll("\\.","");
+                    indication += ", " + (String.format("%.3f", mChargingVolt / 1000)) + " V";
+                    indication += ", " + (amps) + " mA";
                 }
                 mTextView.setTextColor(mInitialTextColor);
                 if (animate) {
@@ -534,6 +555,7 @@ public class KeyguardIndicationController {
             mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;
+            mChargingVolt = status.currChargingVolt;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
             mBatteryLevel = status.level;
             updateIndication(!wasPluggedIn && mPowerPluggedInWired);
