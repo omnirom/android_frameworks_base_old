@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e7f3f3f6_77c9116a",
+        "filename": "packages/SystemUI/res/values/custom_strings.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-03-21T15:28:27Z",
+      "side": 1,
+      "message": "I would nuke the \"value in W\" then - just \"Show charging watts\" - matches then \"Show charging current\" down",
+      "revId": "0d79afa7eb4cc3e5599d9223d60f73174265327a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48d53b59_a4579ed4",
+        "filename": "packages/SystemUI/res/values/custom_strings.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-03-21T15:28:27Z",
+      "side": 1,
+      "message": "also here - charging current is enough - everybody knows what that means",
+      "revId": "0d79afa7eb4cc3e5599d9223d60f73174265327a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
