@@ -39,7 +39,7 @@ public class BatteryBarView extends LinearLayout {
     private Runnable mBarUpdate = new Runnable() {
         @Override
         public void run() {
-            mCurrentWidth = (mMaxWidth / 100) * mPercent;
+            mCurrentWidth = (mPercent == 100) ? mMaxWidth : ((mMaxWidth / 100) * mPercent);
             ViewGroup.LayoutParams barParams = mBarForground.getLayoutParams();
             barParams.width = mCurrentWidth;
             mBarForground.setLayoutParams(barParams);
