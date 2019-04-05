@@ -22,4 +22,8 @@
     <!-- make sure you enable this only if your device supports deep slepp
     with active proximity sensor event listener -->
     <bool name="config_proxiSensorWakupCheck">false</bool>
+
+    <!-- Device uses Fingerprint On Display -->
+    <bool name="config_usesFOD">false</bool>
+
 </resources>
