@@ -37,6 +37,12 @@
          so this value is used only in the config ui -->
     <integer name="quick_settings_num_columns_port_max">8</integer>
     <integer name="quick_settings_num_columns_land_max">9</integer>
+    <!-- Color of the FOD view -->
+    <color name="config_fodColor">#00ff00</color>
+    <color name="config_fodColorBackground">#00212121</color>
+
+    <!-- Whether to use fingerprint pressed image -->
+    <bool name="config_fodPressedImage">false</bool>
 
     <!-- if true will auto-hide all battery display if battery present is false -->
     <bool name="config_batteryPresentVisibility">false</bool>
