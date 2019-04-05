@@ -137,6 +137,7 @@ java_library_static {
         "SurfaceFlingerProperties",
         "vendor.qti.hardware.servicetracker-V1.0-java",
         "vendor.qti.hardware.servicetracker-V1.2-java",
+        "vendor.omni.biometrics.fingerprint.inscreen-V1.0-java",
     ],
 }
 
