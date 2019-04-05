@@ -44,4 +44,8 @@
          platform signatures, specifically for use on devices with a vendor partition. -->
     <string-array name="config_vendorPlatformSignatures">
     </string-array>
+
+    <!-- Device uses Fingerprint On Display -->
+    <bool name="config_usesFOD">false</bool>
+
 </resources>
