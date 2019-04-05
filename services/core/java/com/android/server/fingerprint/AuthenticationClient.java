@@ -17,6 +17,7 @@
 package com.android.server.fingerprint;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricPromptReceiver;
@@ -53,6 +54,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
     private boolean mInLockout;
     private final FingerprintManager mFingerprintManager;
     protected boolean mDialogDismissed;
+
+    private boolean mDisplayFODView;
 
     // Receives events from SystemUI and handles them before forwarding them to FingerprintDialog
     protected IBiometricPromptReceiver mDialogReceiver = new IBiometricPromptReceiver.Stub() {
@@ -96,6 +99,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         mStatusBarService = statusBarService;
         mFingerprintManager = (FingerprintManager) getContext()
                 .getSystemService(Context.FINGERPRINT_SERVICE);
+        mDisplayFODView = context.getResources().getBoolean(com.android.internal.R.bool.config_needCustomFODView);
     }
 
     @Override
@@ -233,6 +237,11 @@ public abstract class AuthenticationClient extends ClientMonitor {
             resetFailedAttempts();
             onStop();
         }
+        if(result == true && mDisplayFODView) {
+            try {
+                mStatusBarService.handleInDisplayFingerprintView(false, false);
+            } catch (RemoteException e) {}
+        }
         return result;
     }
 
@@ -246,6 +255,12 @@ public abstract class AuthenticationClient extends ClientMonitor {
             Slog.w(TAG, "start authentication: no fingerprint HAL!");
             return ERROR_ESRCH;
         }
+
+        if (mDisplayFODView) {
+            try {
+                mStatusBarService.handleInDisplayFingerprintView(true, false);
+            } catch (RemoteException e) {}
+        }
         onStart();
         try {
             final int result = daemon.authenticate(mOpId, getGroupId());
@@ -258,7 +273,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             if (DEBUG) Slog.w(TAG, "client " + getOwnerString() + " is authenticating...");
 
             // If authenticating with system dialog, show the dialog
-            if (mBundle != null) {
+            if (!mDisplayFODView && mBundle != null) {
                 try {
                     mStatusBarService.showFingerprintDialog(mBundle, mDialogReceiver);
                 } catch (RemoteException e) {
@@ -277,6 +292,12 @@ public abstract class AuthenticationClient extends ClientMonitor {
         if (mAlreadyCancelled) {
             Slog.w(TAG, "stopAuthentication: already cancelled!");
             return 0;
+        }
+
+        if (mDisplayFODView) {
+            try {
+                mStatusBarService.handleInDisplayFingerprintView(false, false);
+            } catch (RemoteException e) {}
         }
 
         onStop();
@@ -300,7 +321,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             // dialog, we do not need to hide it since it's already hidden.
             // If the device is in lockout, don't hide the dialog - it will automatically hide
             // after BiometricPrompt.HIDE_DIALOG_DELAY
-            if (mBundle != null && !mDialogDismissed && !mInLockout) {
+            if (!mDisplayFODView && mBundle != null && !mDialogDismissed && !mInLockout) {
                 try {
                     mStatusBarService.hideFingerprintDialog();
                 } catch (RemoteException e) {
