@@ -54,7 +54,9 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     SystemUI-tags \
-    SystemUI-proto
+    SystemUI-proto \
+    vendor.oneplus.fingerprint.extension-V1.0-java \
+    vendor.oneplus.hardware.display-V1.0-java
 
 LOCAL_JAVA_LIBRARIES := telephony-common telephony-ext \
     android.car
