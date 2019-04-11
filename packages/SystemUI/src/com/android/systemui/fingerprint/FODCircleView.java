@@ -78,12 +78,20 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     KeyguardUpdateMonitor mUpdateMonitor;
 
     KeyguardUpdateMonitorCallback mMonitorCallback = new KeyguardUpdateMonitorCallback() {
-       @Override
-       public void onDreamingStateChanged(boolean dreaming) {
-           super.onDreamingStateChanged(dreaming);
-           mIsDreaming = dreaming;
-           mInsideCircle = false;
-       }
+        @Override
+        public void onDreamingStateChanged(boolean dreaming) {
+            super.onDreamingStateChanged(dreaming);
+            setImageResource(dreaming ? R.drawable.fod_icon_default_disable : R.drawable.fod_icon_default);
+            mIsDreaming = dreaming;
+            mInsideCircle = false;
+        }
+
+        @Override
+        public void onPulsing(boolean pulsing) {
+            super.onPulsing(pulsing);
+            setImageResource(pulsing ? R.drawable.fod_icon_default : R.drawable.fod_icon_default_disable);
+            mInsideCircle = false;
+        }
 
         @Override
         public void onScreenTurnedOff() {
