@@ -187,44 +187,47 @@ public class DisplayRotation {
             mSettingsObserver = new SettingsObserver(uiHandler);
             mSettingsObserver.observe();
         }
-        /* Register for WIFI Display Intents */
-        IntentFilter wifiDisplayFilter = new IntentFilter(ACTION_WIFI_DISPLAY_VIDEO);
-        Intent wifidisplayIntent = context.registerReceiver(
-                mWifiDisplayReceiver, wifiDisplayFilter);
-    }
-
-    final BroadcastReceiver mWifiDisplayReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(ACTION_WIFI_DISPLAY_VIDEO)) {
-                int state = intent.getIntExtra("state", 0);
-                if(state == 1) {
-                    mWifiDisplayConnected = true;
-                } else {
-                    mWifiDisplayConnected = false;
-                }
-                int rotation = intent.getIntExtra("wfd_UIBC_rot", -1);
-                switch (rotation) {
-                    case 0:
-                        mWifiDisplayRotation = Surface.ROTATION_0;
-                        break;
-                    case 1:
-                        mWifiDisplayRotation = Surface.ROTATION_90;
-                        break;
-                    case 2:
-                        mWifiDisplayRotation = Surface.ROTATION_180;
-                        break;
-                    case 3:
-                        mWifiDisplayRotation = Surface.ROTATION_270;
-                        break;
-                    default:
-                        mWifiDisplayRotation = -1;
-                }
-                mService.updateRotation(true /* alwaysSendConfiguration */,
-                        false/* forceRelayout */);
+        /* Register for WIFI Display Intents in a separate thread
+         * to avoid possible deadlock between ActivityManager and
+         * WindowManager global locks*/
+        Thread t = new Thread(){
+            public void run() {
+                context.registerReceiver(new BroadcastReceiver(){
+                    public void onReceive(Context context, Intent intent) {
+                        String action = intent.getAction();
+                        if (action.equals(ACTION_WIFI_DISPLAY_VIDEO)) {
+                            int state = intent.getIntExtra("state", 0);
+                            if(state == 1) {
+                                mWifiDisplayConnected = true;
+                            } else {
+                                mWifiDisplayConnected = false;
+                            }
+                            int rotation = intent.getIntExtra("wfd_UIBC_rot", -1);
+                            switch (rotation) {
+                                case 0:
+                                    mWifiDisplayRotation = Surface.ROTATION_0;
+                                    break;
+                                case 1:
+                                    mWifiDisplayRotation = Surface.ROTATION_90;
+                                    break;
+                                case 2:
+                                    mWifiDisplayRotation = Surface.ROTATION_180;
+                                    break;
+                                case 3:
+                                    mWifiDisplayRotation = Surface.ROTATION_270;
+                                    break;
+                                default:
+                                    mWifiDisplayRotation = -1;
+                            }
+                            mService.updateRotation(true /* alwaysSendConfiguration */,
+                                    false/* forceRelayout */);
+                        }
+                    }
+                }, new IntentFilter(ACTION_WIFI_DISPLAY_VIDEO), null, UiThread.getHandler());
             }
-        }
-    };
+        };
+        t.start();
+    }
 
     private int readRotation(int resID) {
         try {
