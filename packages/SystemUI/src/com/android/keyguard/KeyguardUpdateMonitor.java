@@ -235,6 +235,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mLogoutEnabled;
 
+    // For face unlock identification
+    private String lastBroadcastActionReceived;
+
     /**
      * Short delay before restarting fingerprint authentication after a successful try
      * This should be slightly longer than the time between onFingerprintAuthenticated and
@@ -848,11 +851,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     };
 
+    public boolean isFaceTrusted(){
+        return lastBroadcastActionReceived.equals(ACTION_FACE_UNLOCK_STOPPED);
+    }
+
     private final BroadcastReceiver mBroadcastAllReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            lastBroadcastActionReceived = action;
             if (AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED.equals(action)) {
                 mHandler.sendEmptyMessage(MSG_TIME_UPDATE);
             } else if (Intent.ACTION_USER_INFO_CHANGED.equals(action)) {
