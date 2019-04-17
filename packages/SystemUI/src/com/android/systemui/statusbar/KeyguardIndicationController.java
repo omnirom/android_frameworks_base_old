@@ -60,7 +60,6 @@ import com.android.systemui.util.wakelock.WakeLock;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
-import java.text.DecimalFormat;
 import java.util.IllegalFormatConversionException;
 
 /**
@@ -100,6 +99,8 @@ public class KeyguardIndicationController {
     private int mChargingWattage;
     private double mChargingVolt;
     private int mBatteryLevel;
+    private boolean mShowChargingWatts;
+    private boolean mShowChargingCurrent;
     private String mMessageToShowOnScreenOn;
 
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
@@ -305,14 +306,16 @@ public class KeyguardIndicationController {
         }
 
         if (mVisible) {
-            final boolean showWattOnCharging = Dependency.get(TunerService.class)
-                    .getValue(KEYGUARD_SHOW_WATT_ON_CHARGING, 0) == 1;
-            final boolean showCurrentOnCharging = Dependency.get(TunerService.class)
-                    .getValue(KEYGUARD_SHOW_CURRENT_ON_CHARGING, 0) == 1;
+            mShowChargingWatts = Dependency.get(TunerService.class)
+                .getValue(KEYGUARD_SHOW_WATT_ON_CHARGING, 0) == 1;
+            mShowChargingCurrent = Dependency.get(TunerService.class)
+                .getValue(KEYGUARD_SHOW_CURRENT_ON_CHARGING, 0) == 1;
+
             final boolean showBatteryBar = Dependency.get(TunerService.class)
                     .getValue(KEYGUARD_SHOW_BATTERY_BAR, 1) == 1;
             final boolean showBatteryBarAlways = Dependency.get(TunerService.class)
                     .getValue(KEYGUARD_SHOW_BATTERY_BAR_ALWAYS, 0) == 1;
+            final boolean showPowerDetails = mShowChargingWatts || mShowChargingCurrent;
 
             // Walk down a precedence-ordered list of what indication
             // should be shown based on user or device state
@@ -325,16 +328,8 @@ public class KeyguardIndicationController {
                     mTextView.switchIndication(mTransientIndication);
                 } else if (mPowerPluggedIn) {
                     String indication = computePowerIndication();
-                    if (showWattOnCharging && !mPowerCharged) {
-                        DecimalFormat df = new DecimalFormat("#.0");
-                        indication += ", " + (df.format(mChargingWattage / 1000000)) + " W";
-                    }
-                    if (showCurrentOnCharging && !mPowerCharged) {
-                        String amps = String.valueOf(mChargingWattage / mChargingVolt);
-                        amps = amps.substring(0,4);
-                        amps = amps.replaceAll("\\.","");
-                        indication += ", " + (String.format("%.3f", mChargingVolt / 1000)) + " V";
-                        indication += ", " + (amps) + " mA";
+                    if (showPowerDetails) {
+                        indication += computePowerDetailIndication();
                     }
                     if (animate) {
                         animateText(mTextView, indication);
@@ -370,16 +365,8 @@ public class KeyguardIndicationController {
                 mTextView.setTextColor(mInitialTextColor);
             } else if (mPowerPluggedIn) {
                 String indication = computePowerIndication();
-                if (showWattOnCharging && !mPowerCharged) {
-                    DecimalFormat df = new DecimalFormat("#.0");
-                    indication += ", " + (df.format(mChargingWattage / 1000000)) + " W";
-                }
-                if (showCurrentOnCharging && !mPowerCharged) {
-                    String amps = String.valueOf(mChargingWattage / mChargingVolt);
-                    amps = amps.substring(0,4);
-                    amps = amps.replaceAll("\\.","");
-                    indication += ", " + (String.format("%.3f", mChargingVolt / 1000)) + " V";
-                    indication += ", " + (amps) + " mA";
+                if (showPowerDetails) {
+                    indication += computePowerDetailIndication();
                 }
                 mTextView.setTextColor(mInitialTextColor);
                 if (animate) {
@@ -430,6 +417,28 @@ public class KeyguardIndicationController {
                                 .setListener(null);
                     }
                 });
+    }
+
+    private String computePowerDetailIndication() {
+        if (mPowerCharged) {
+            return "";
+        }
+
+        final StringBuilder powerString = new StringBuilder();
+
+        if (mShowChargingWatts) {
+            powerString.append(", ");
+            powerString.append(String.format("%.1f", (float) mChargingWattage / 1000000));
+            powerString.append(" W");
+        }
+        if (mShowChargingCurrent) {
+            powerString.append(", ");
+            powerString.append(String.format("%.3f", mChargingVolt / 1000));
+            powerString.append(" V, ");
+            powerString.append(Math.round(mChargingWattage / mChargingVolt));
+            powerString.append(" mA");
+        }
+        return powerString.toString();
     }
 
     private String computePowerIndication() {
