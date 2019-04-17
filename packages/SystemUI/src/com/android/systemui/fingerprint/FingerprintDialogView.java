@@ -77,6 +77,7 @@ public class FingerprintDialogView extends LinearLayout {
     private int mLastState;
     private boolean mAnimatingAway;
     private boolean mWasForceRemoved;
+    private boolean mDisplayFODView;
 
     private final float mDisplayWidth;
 
@@ -111,6 +112,8 @@ public class FingerprintDialogView extends LinearLayout {
                 getResources().getString(R.color.fingerprint_dialog_text_light_color));
         mFingerprintColor = Color.parseColor(
                 getResources().getString(R.color.fingerprint_dialog_fingerprint_color));
+        mDisplayFODView = context.getResources()
+                .getBoolean(com.android.internal.R.bool.config_needCustomFODView);
 
         DisplayMetrics metrics = new DisplayMetrics();
         mWindowManager.getDefaultDisplay().getMetrics(metrics);
@@ -329,7 +332,7 @@ public class FingerprintDialogView extends LinearLayout {
                 : null;
 
         final ImageView fingerprint_icon = mLayout.findViewById(R.id.fingerprint_icon);
-        fingerprint_icon.setImageDrawable(icon);
+        fingerprint_icon.setImageDrawable(mDisplayFODView ? null : icon);
 
         if (animation != null && shouldAnimateForTransition(mLastState, newState)) {
             animation.forceAnimationOnUI();
