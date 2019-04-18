@@ -93,6 +93,14 @@ public class BatteryManager {
 
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+     * integer containing the current battery amperage.
+     * Not in aosp:
+     * @hide
+     */
+    public static final String EXTRA_CURRENT = "current";
+
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the current battery temperature.
      */
     public static final String EXTRA_TEMPERATURE = "temperature";

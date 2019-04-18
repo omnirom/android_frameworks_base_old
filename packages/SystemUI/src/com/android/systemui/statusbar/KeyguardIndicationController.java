@@ -96,11 +96,15 @@ public class KeyguardIndicationController {
     private boolean mPowerPluggedInWired;
     private boolean mPowerCharged;
     private int mChargingSpeed;
-    private int mChargingWattage;
-    private double mChargingVolt;
+    private int mChargingMaxMicroWatt;
     private int mBatteryLevel;
+    private int mChargingMaxMicroAmp;
+    private int mChargingMaxMicroVolt;
+    private int mBatteryMilliAmp;
+    private int mBatteryMilliVolt;
     private boolean mShowChargingWatts;
     private boolean mShowChargingCurrent;
+    private int mBatteryTemperature;
     private String mMessageToShowOnScreenOn;
 
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
@@ -113,6 +117,8 @@ public class KeyguardIndicationController {
     private static final String KEYGUARD_SHOW_CURRENT_ON_CHARGING = "sysui_keyguard_show_current";
     private static final String KEYGUARD_SHOW_BATTERY_BAR = "sysui_keyguard_show_battery_bar";
     private static final String KEYGUARD_SHOW_BATTERY_BAR_ALWAYS = "sysui_keyguard_show_battery_bar_always";
+    private static final String KEYGUARD_SHOW_BATTERY_EXTENDED_INFO = "sysui_keyguard_show_battery_extended_info";
+    private static final String KEYGUARD_SHOW_BATTERY_EXTENDED_INFO_WATT = "sysui_keyguard_show_battery_extended_info_watt";
 
     private BatteryBarView mBatteryBar;
 
@@ -307,30 +313,26 @@ public class KeyguardIndicationController {
 
         if (mVisible) {
             mShowChargingWatts = Dependency.get(TunerService.class)
-                .getValue(KEYGUARD_SHOW_WATT_ON_CHARGING, 0) == 1;
+                    .getValue(KEYGUARD_SHOW_WATT_ON_CHARGING, 0) == 1;
             mShowChargingCurrent = Dependency.get(TunerService.class)
-                .getValue(KEYGUARD_SHOW_CURRENT_ON_CHARGING, 0) == 1;
+                    .getValue(KEYGUARD_SHOW_CURRENT_ON_CHARGING, 0) == 1;
 
             final boolean showBatteryBar = Dependency.get(TunerService.class)
                     .getValue(KEYGUARD_SHOW_BATTERY_BAR, 1) == 1;
             final boolean showBatteryBarAlways = Dependency.get(TunerService.class)
                     .getValue(KEYGUARD_SHOW_BATTERY_BAR_ALWAYS, 0) == 1;
-            final boolean showPowerDetails = mShowChargingWatts || mShowChargingCurrent;
 
             // Walk down a precedence-ordered list of what indication
             // should be shown based on user or device state
             mBatteryBar.setVisibility(View.GONE);
             if (mDozing) {
                 mTextView.setTextColor(Color.WHITE);
+                final String indication = computePowerDetailIndication();
                 if (!TextUtils.isEmpty(mTransientIndication)) {
                     // When dozing we ignore any text color and use white instead, because
                     // colors can be hard to read in low brightness.
                     mTextView.switchIndication(mTransientIndication);
                 } else if (mPowerPluggedIn) {
-                    String indication = computePowerIndication();
-                    if (showPowerDetails) {
-                        indication += computePowerDetailIndication();
-                    }
                     if (animate) {
                         animateText(mTextView, indication);
                     } else {
@@ -342,9 +344,7 @@ public class KeyguardIndicationController {
                         mBatteryBar.setBarColor(Color.WHITE);
                     }
                 } else {
-                    String percentage = NumberFormat.getPercentInstance()
-                            .format(mBatteryLevel / 100f);
-                    mTextView.switchIndication(percentage);
+                    mTextView.switchIndication(indication);
                 }
                 return;
             }
@@ -364,10 +364,7 @@ public class KeyguardIndicationController {
                 mTextView.switchIndication(trustGrantedIndication);
                 mTextView.setTextColor(mInitialTextColor);
             } else if (mPowerPluggedIn) {
-                String indication = computePowerIndication();
-                if (showPowerDetails) {
-                    indication += computePowerDetailIndication();
-                }
+                String indication = computePowerDetailIndication();
                 mTextView.setTextColor(mInitialTextColor);
                 if (animate) {
                     animateText(mTextView, indication);
@@ -419,24 +416,48 @@ public class KeyguardIndicationController {
                 });
     }
 
-    private String computePowerDetailIndication() {
-        if (mPowerCharged) {
-            return "";
-        }
+    private final String computePowerDetailIndication() {
+        final boolean showExtendedInfo = Dependency.get(TunerService.class)
+                .getValue(KEYGUARD_SHOW_BATTERY_EXTENDED_INFO, 1) == 1;
+        final boolean extendedInfoShowWatt = Dependency.get(TunerService.class)
+                .getValue(KEYGUARD_SHOW_BATTERY_EXTENDED_INFO_WATT, 0) == 1;
 
         final StringBuilder powerString = new StringBuilder();
 
-        if (mShowChargingWatts) {
-            powerString.append(", ");
-            powerString.append(String.format("%.1f", (float) mChargingWattage / 1000000));
-            powerString.append(" W");
+        if (mPowerPluggedIn) {
+            powerString.append(computePowerIndication());
+        } else {
+            powerString.append(NumberFormat.getPercentInstance().format(mBatteryLevel / 100f));
         }
-        if (mShowChargingCurrent) {
-            powerString.append(", ");
-            powerString.append(String.format("%.3f", mChargingVolt / 1000));
-            powerString.append(" V, ");
-            powerString.append(Math.round(mChargingWattage / mChargingVolt));
-            powerString.append(" mA");
+
+        if (mPowerPluggedIn) {
+            if (mShowChargingWatts || mShowChargingCurrent) {
+                // TODO: Localize "at"
+                powerString.append(" at ");
+            }
+
+            if (mShowChargingWatts) {
+                powerString.append(String.format("%.1fW", mChargingMaxMicroWatt / 1000000f));
+                if (mShowChargingCurrent) {
+                    powerString.append(", ");
+                }
+            }
+            if (mShowChargingCurrent) {
+                powerString.append(String.format("%.3fA, %.1fV",
+                        mChargingMaxMicroAmp / 1000000f,
+                        mChargingMaxMicroVolt / 1000000f));
+            }
+        }
+
+        if (showExtendedInfo) {
+            powerString.append(String.format(" • %.1f°C", mBatteryTemperature / 10f));
+            if (extendedInfoShowWatt) {
+                powerString.append(String.format(" • %.3fW",
+                        (float)mBatteryMilliVolt * mBatteryMilliAmp / 1000000f));
+            } else {
+                powerString.append(String.format(" • %.3fV", mBatteryMilliVolt / 1000f));
+                powerString.append(String.format(" • %dmA", mBatteryMilliAmp));
+            }
         }
         return powerString.toString();
     }
@@ -543,7 +564,12 @@ public class KeyguardIndicationController {
         pw.println("  mPowerPluggedIn: " + mPowerPluggedIn);
         pw.println("  mPowerCharged: " + mPowerCharged);
         pw.println("  mChargingSpeed: " + mChargingSpeed);
-        pw.println("  mChargingWattage: " + mChargingWattage);
+        pw.println("  mChargingMaxMicroWatt: " + mChargingMaxMicroWatt);
+        pw.println("  mChargingMaxMicroAmp: " + mChargingMaxMicroAmp);
+        pw.println("  mChargingMaxMicroVolt: " + mChargingMaxMicroVolt);
+        pw.println("  mBatteryMilliAmp: " + mBatteryMilliAmp);
+        pw.println("  mBatteryMilliVolt: " + mBatteryMilliVolt);
+        pw.println("  mBatteryTemperature: " + mBatteryTemperature);
         pw.println("  mMessageToShowOnScreenOn: " + mMessageToShowOnScreenOn);
         pw.println("  mDozing: " + mDozing);
         pw.println("  mBatteryLevel: " + mBatteryLevel);
@@ -563,14 +589,18 @@ public class KeyguardIndicationController {
             mPowerPluggedInWired = status.isPluggedInWired() && isChargingOrFull;
             mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
             mPowerCharged = status.isCharged();
-            mChargingWattage = status.maxChargingWattage;
-            mChargingVolt = status.currChargingVolt;
+            mChargingMaxMicroWatt = status.maxChargingMicroWatt;
+            mChargingMaxMicroAmp = status.maxChargingMicroAmp;
+            mChargingMaxMicroVolt = status.maxChargingMicroVolt;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
             mBatteryLevel = status.level;
+            mBatteryMilliAmp = status.currentMilliAmp;
+            mBatteryMilliVolt = status.currentMilliVolt;
+            mBatteryTemperature = status.temperature;
             updateIndication(!wasPluggedIn && mPowerPluggedInWired);
             if (mDozing) {
                 if (!wasPluggedIn && mPowerPluggedIn) {
-                    showTransientIndication(computePowerIndication());
+                    showTransientIndication(computePowerDetailIndication());
                     hideTransientIndicationDelayed(HIDE_DELAY_MS);
                 } else if (wasPluggedIn && !mPowerPluggedIn) {
                     hideTransientIndication();

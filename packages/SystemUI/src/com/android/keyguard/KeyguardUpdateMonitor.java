@@ -29,6 +29,8 @@ import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
+import static android.os.BatteryManager.EXTRA_TEMPERATURE;
+import static android.os.BatteryManager.EXTRA_CURRENT;
 
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
@@ -780,30 +782,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 final int plugged = intent.getIntExtra(EXTRA_PLUGGED, 0);
                 final int level = intent.getIntExtra(EXTRA_LEVEL, 0);
                 final int health = intent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
+                final int temperature = intent.getIntExtra(EXTRA_TEMPERATURE, Integer.MIN_VALUE);
+                // NOTE: HealthInfo documentation says healthInfo.batteryVoltage is in uV,
+                // but it is divided by 1000 in healthd and thus in mV. Same for current.
+                // See the kernel ABI: sysfs paths provide info in micro{volts,amps},
+                // but there's an erroneous division: https://android.googlesource.com/platform/system/core/+/android-9.0.0_r35/healthd/BatteryMonitor.cpp#214
+                final int currentMilliAmp = intent.getIntExtra(EXTRA_CURRENT, -1);
+                final int currentMilliVolt = intent.getIntExtra(EXTRA_VOLTAGE, -1);
 
                 final int maxChargingMicroAmp = intent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT, -1);
-                int maxChargingMicroVolt = intent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
-                double currChargingVoltage = intent.getIntExtra(EXTRA_VOLTAGE, -1);
-                final int maxChargingMicroWatt;
+                final int maxChargingMicroVolt = intent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT);
 
-                if ((maxChargingMicroVolt <= 0) || (currChargingVoltage <= 0)) {
-                    maxChargingMicroVolt = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
-                    currChargingVoltage = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
-                }
-                if (maxChargingMicroAmp > 0) {
-                    // Calculating muW = muA * muV / (10^6 mu^2 / mu); splitting up the divisor
-                    // to maintain precision equally on both factors.
-                    maxChargingMicroWatt = (maxChargingMicroAmp / 1000)
-                            * (maxChargingMicroVolt / 1000);
-                } else {
-                    maxChargingMicroWatt = -1;
-                }
                 if (DEBUG) Log.d(TAG, "maxChargingMicroAmp = " + maxChargingMicroAmp +
-                        " maxChargingMicroVolt = " + maxChargingMicroVolt + " maxChargingMicroWatt = " +
-                        maxChargingMicroWatt);
+                        " maxChargingMicroVolt = " + maxChargingMicroVolt);
                 final Message msg = mHandler.obtainMessage(
                         MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health,
-                                maxChargingMicroWatt, currChargingVoltage));
+                                temperature, currentMilliAmp, currentMilliVolt,
+                                maxChargingMicroAmp, maxChargingMicroVolt));
                 mHandler.sendMessage(msg);
             } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
                 SimData args = SimData.fromIntent(intent);
@@ -1005,16 +1000,35 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         public final int level;
         public final int plugged;
         public final int health;
-        public final int maxChargingWattage;
-        public final double currChargingVolt;
-        public BatteryStatus(int status, int level, int plugged, int health,
-                int maxChargingWattage, double currChargingVolt) {
+        public final int temperature;
+        public final int currentMilliAmp;
+        public final int currentMilliVolt;
+        public final int maxChargingMicroAmp;
+        public final int maxChargingMicroVolt;
+        public final int maxChargingMicroWatt;
+
+        public BatteryStatus(int status, int level, int plugged, int health, int temperature,
+                int currentMilliAmp, int currentMilliVolt,
+                int maxChargingMicroAmp, int maxChargingMicroVolt) {
             this.status = status;
             this.level = level;
             this.plugged = plugged;
             this.health = health;
-            this.maxChargingWattage = maxChargingWattage;
-            this.currChargingVolt = currChargingVolt;
+            this.temperature = temperature;
+            this.currentMilliAmp = currentMilliAmp;
+            this.currentMilliVolt = currentMilliVolt;
+            this.maxChargingMicroAmp = maxChargingMicroAmp;
+            this.maxChargingMicroVolt = maxChargingMicroVolt;
+
+            if (maxChargingMicroAmp > 0) {
+                // Calculating muW = muA * muV / (10^6 mu^2 / mu); splitting up the divisor
+                // to maintain precision equally on both factors.
+                maxChargingMicroWatt = (maxChargingMicroAmp / 1000) * (maxChargingMicroVolt / 1000);
+                Log.d(TAG, "maxChargingMicroAmp = " + maxChargingMicroAmp + " maxChargingMicroVolt = "
+                        + maxChargingMicroVolt + " maxChargingMicroWatt = " + maxChargingMicroWatt);
+            } else {
+                maxChargingMicroWatt = -1;
+            }
         }
 
         /**
@@ -1055,16 +1069,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         public final int getChargingSpeed(int slowThreshold, int fastThreshold) {
-            return maxChargingWattage <= 0 ? CHARGING_UNKNOWN :
-                    maxChargingWattage < slowThreshold ? CHARGING_SLOWLY :
-                    maxChargingWattage > fastThreshold ? CHARGING_FAST :
+            return maxChargingMicroWatt <= 0 ? CHARGING_UNKNOWN :
+                    maxChargingMicroWatt < slowThreshold ? CHARGING_SLOWLY :
+                    maxChargingMicroWatt > fastThreshold ? CHARGING_FAST :
                     CHARGING_REGULAR;
         }
 
         @Override
         public String toString() {
             return "BatteryStatus{status=" + status + ",level=" + level + ",plugged=" + plugged
-                    + ",health=" + health + ",maxChargingWattage=" + maxChargingWattage + "}";
+                    + ",health=" + health + ",currentMilliAmp=" + currentMilliAmp + ",maxChargingMicroWatt=" + maxChargingMicroWatt + "}";
         }
     }
 
@@ -1201,7 +1215,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         // Take a guess at initial SIM state, battery status and PLMN until we get an update
-        mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, 100, 0, 0, 0, 0);
+        mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, 100, 0, 0, 0, 0, 0, 0, 0);
 
         // Watch for interesting updates
         final IntentFilter filter = new IntentFilter();
@@ -1735,8 +1749,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             return true;
         }
 
+        if (current.temperature != old.temperature) {
+            return true;
+        }
+
+        if (current.currentMilliAmp != old.currentMilliAmp) {
+            return true;
+        }
+
+        if (current.currentMilliVolt != old.currentMilliVolt) {
+            return true;
+        }
+
         // change in charging current while plugged in
-        if (nowPluggedIn && current.maxChargingWattage != old.maxChargingWattage) {
+        if (nowPluggedIn && (current.maxChargingMicroAmp != old.maxChargingMicroAmp
+                || current.maxChargingMicroVolt != old.maxChargingMicroVolt)) {
             return true;
         }
 
