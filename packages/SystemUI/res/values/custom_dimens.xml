@@ -28,4 +28,6 @@
     <dimen name="qs_header_image_side_margin">4dp</dimen>
     <dimen name="qs_header_image_bottom_margin">4dp</dimen>
     <dimen name="battery_bar_view_height">6dp</dimen>
+
+    <dimen name="op_keyguard_indication_margin_bottom">415.0px</dimen>
 </resources>
