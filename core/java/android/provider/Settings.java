@@ -4818,6 +4818,21 @@ public final class Settings {
          */
         public static final String PROXIMITY_AUTO_SPEAKER_INCALL_ONLY = "proximity_auto_speaker_incall_only";
 
+         /**
+	  ** Whether the use proximity sensor for answering incoming ring
+	  **/
+        public static final String PROXIMITY_AUTO_ANSWER_INCALL_ONLY = "proximity_auto_answer_incall_only";
+
+         /**
+	  ** Time delay to activate auto answer on ring when headset is plugged
+	  * */
+        public static final String AUTO_ANSWER_DELAY = "auto_answer_delay";
+
+         /**
+	  ** Whether to enable auto answer on ring when headset is plugged
+	  **/
+        public static final String AUTO_ANSWER_CALL_KEY = "auto_answer_call_key";
+
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
