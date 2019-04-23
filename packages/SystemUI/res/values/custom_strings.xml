@@ -103,6 +103,8 @@
     <string name="tuner_show_auto_brightness">Adaptive brightness button</string>
     <string name="tuner_auto_brightness_right">Right position for adaptive brightness button</string>
     <string name="tuner_show_brightness_buttons">Brightness control buttons</string>
+    <string name="quick_settings_vibrate_title">Vibrate on touch</string>
+    <string name="quick_settings_vibrate_summary">Vibrate when touching QS tiles</string>
     <string name="tuner_show_info_header_title">Show information header</string>
     <string name="tuner_cellular_title">Mobile</string>
     <string name="tuner_show_secure_title">Show security footer</string>
