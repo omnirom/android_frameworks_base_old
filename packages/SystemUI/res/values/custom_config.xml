@@ -29,6 +29,9 @@
     <!-- The CPU temperature sensor path, defaults to empty -->
     <string name="config_cpuTempSensor" translatable="false"></string>
 
+    <!-- The battery temperature divider, if needed -->
+    <integer name="config_battTempDivider" translatable="false">10</integer>
+
     <!-- The CPU temperature divider, if needed -->
     <integer name="config_cpuTempDivider" translatable="false">1</integer>
 
