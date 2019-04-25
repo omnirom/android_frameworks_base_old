@@ -115,7 +115,10 @@ public class KeyguardIndicationController implements StateListener,
     private int mChargingSpeed;
     private int mChargingWattage;
     private double mChargingVolt;
+    private double mBatteryTemp;
     private int mBatteryLevel;
+    private int mBatteryTempDivider;
+    private boolean mShowBatteryTemp;
     private boolean mShowChargingWatts;
     private boolean mShowChargingCurrent;
     private String mMessageToShowOnScreenOn;
@@ -137,6 +140,7 @@ public class KeyguardIndicationController implements StateListener,
     private static final String KEYGUARD_SHOW_CURRENT_ON_CHARGING = "sysui_keyguard_show_current";
     private static final String KEYGUARD_SHOW_BATTERY_BAR = "sysui_keyguard_show_battery_bar";
     private static final String KEYGUARD_SHOW_BATTERY_BAR_ALWAYS = "sysui_keyguard_show_battery_bar_always";
+    private static final String KEYGUARD_SHOW_BATTERY_TEMP = "sysui_keyguard_show_battery_temp";
 
     private BatteryBarView mBatteryBar;
 
@@ -368,16 +372,21 @@ public class KeyguardIndicationController implements StateListener,
         }
 
         if (mVisible) {
+            mShowBatteryTemp = Dependency.get(TunerService.class)
+                    .getValue(KEYGUARD_SHOW_BATTERY_TEMP, 0) == 1;
             mShowChargingWatts = Dependency.get(TunerService.class)
-                .getValue(KEYGUARD_SHOW_WATT_ON_CHARGING, 0) == 1;
+                    .getValue(KEYGUARD_SHOW_WATT_ON_CHARGING, 0) == 1;
             mShowChargingCurrent = Dependency.get(TunerService.class)
-                .getValue(KEYGUARD_SHOW_CURRENT_ON_CHARGING, 0) == 1;
+                    .getValue(KEYGUARD_SHOW_CURRENT_ON_CHARGING, 0) == 1;
+            mBatteryTempDivider = mContext.getResources()
+                    .getInteger(R.integer.config_battTempDivider);
 
             final boolean showBatteryBar = Dependency.get(TunerService.class)
                     .getValue(KEYGUARD_SHOW_BATTERY_BAR, 1) == 1;
             final boolean showBatteryBarAlways = Dependency.get(TunerService.class)
                     .getValue(KEYGUARD_SHOW_BATTERY_BAR_ALWAYS, 0) == 1;
-            final boolean showPowerDetails = mShowChargingWatts || mShowChargingCurrent;
+            final boolean showPowerDetails =
+                    mShowChargingWatts || mShowChargingCurrent || mShowBatteryTemp;
 
             // Walk down a precedence-ordered list of what indication
             // should be shown based on user or device state
@@ -513,19 +522,29 @@ public class KeyguardIndicationController implements StateListener,
             return "";
         }
 
-        final StringBuilder powerString = new StringBuilder();
+        final StringBuilder powerString = new StringBuilder("\n");
+        final String SPACER = " • ";
 
         if (mShowChargingWatts) {
-            powerString.append(", ");
             powerString.append(String.format("%.1f", (float) mChargingWattage / 1000000));
             powerString.append(" W");
         }
         if (mShowChargingCurrent) {
-            powerString.append(", ");
+            if (mShowChargingWatts) {
+                powerString.append(SPACER);
+            }
             powerString.append(String.format("%.3f", mChargingVolt / 1000));
-            powerString.append(" V, ");
+            powerString.append(" V");
+            powerString.append(SPACER);
             powerString.append(Math.round(mChargingWattage / mChargingVolt));
             powerString.append(" mA");
+        }
+        if (mShowBatteryTemp) {
+            if (mShowChargingWatts || mShowChargingCurrent) {
+                powerString.append(SPACER);
+            }
+            powerString.append(String.format("%.1f", (float) mBatteryTemp / mBatteryTempDivider));
+            powerString.append(" °C");
         }
         return powerString.toString();
     }
@@ -638,6 +657,8 @@ public class KeyguardIndicationController implements StateListener,
         pw.println("  mPowerCharged: " + mPowerCharged);
         pw.println("  mChargingSpeed: " + mChargingSpeed);
         pw.println("  mChargingWattage: " + mChargingWattage);
+        pw.println("  mChargingVolt: " + mChargingVolt);
+        pw.println("  mBatteryTemp: " + mBatteryTemp);
         pw.println("  mMessageToShowOnScreenOn: " + mMessageToShowOnScreenOn);
         pw.println("  mDozing: " + mDozing);
         pw.println("  mBatteryLevel: " + mBatteryLevel);
@@ -671,6 +692,7 @@ public class KeyguardIndicationController implements StateListener,
             mPowerPluggedInWired = status.isPluggedInWired() && isChargingOrFull;
             mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
             mPowerCharged = status.isCharged();
+            mBatteryTemp = status.currBatteryTemp;
             mChargingWattage = status.maxChargingWattage;
             mChargingVolt = status.currChargingVolt;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
