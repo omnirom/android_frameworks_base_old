@@ -243,9 +243,10 @@ public class DozeSensors {
                 return;
             }
             if (register) {
+                final Sensor sensor = findSensorWithType(mSensorManager,
+                        mDozeParameters.getDeviceDozeProximitySensor());
                 mRegistered = mSensorManager.registerListener(this,
-                        mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
-                        SensorManager.SENSOR_DELAY_NORMAL, mHandler);
+                        sensor, SensorManager.SENSOR_DELAY_NORMAL, mHandler);
             } else {
                 mSensorManager.unregisterListener(this);
                 mRegistered = false;
@@ -256,8 +257,13 @@ public class DozeSensors {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (DEBUG) Log.d(TAG, "onSensorChanged " + event);
-
-            mCurrentlyFar = event.values[0] >= event.sensor.getMaximumRange();
+            final boolean isNearInverted = mDozeParameters
+                    .getDeviceDozeProximitySensorInverted();
+            if (isNearInverted) {
+                mCurrentlyFar = event.values[0] < event.sensor.getMaximumRange();
+            } else {
+                mCurrentlyFar = event.values[0] >= event.sensor.getMaximumRange();
+            }
             mProxCallback.accept(mCurrentlyFar);
 
             long now = SystemClock.elapsedRealtime();
