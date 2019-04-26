@@ -285,7 +285,9 @@ public class DozeTriggers implements DozeMachine.Part {
 
         public void check() {
             Preconditions.checkState(!mFinished && !mRegistered);
-            final Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+            //final Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+            final Sensor sensor = mDozeSensors.findSensorWithType(mSensorManager,
+                 mDozeParameters.getDeviceDozeProximitySensor());
             if (sensor == null) {
                 if (DozeMachine.DEBUG) Log.d(TAG, "ProxCheck: No sensor found");
                 finishWithResult(RESULT_UNKNOWN);
@@ -310,7 +312,12 @@ public class DozeTriggers implements DozeMachine.Part {
                 if (DozeMachine.DEBUG) {
                     Log.d(TAG, "ProxCheck: Event: value=" + event.values[0] + " max=" + mMaxRange);
                 }
-                final boolean isNear = event.values[0] < mMaxRange;
+                boolean isNear = event.values[0] < mMaxRange;
+                final boolean isNearInverted = mDozeParameters
+                        .getDeviceDozeProximitySensorInverted();
+                if (isNearInverted) {
+                    isNear = !isNear;
+                }
                 finishWithResult(isNear ? RESULT_NEAR : RESULT_FAR);
             }
         }
