@@ -36,6 +36,7 @@ abstract class DisplayDevice {
     private final DisplayAdapter mDisplayAdapter;
     private final IBinder mDisplayToken;
     private final String mUniqueId;
+    private int mPhysicalId = -1;
 
     // The display device does not manage these properties itself, they are set by
     // the display manager service.  The display device shouldn't really be looking at these.
@@ -51,6 +52,12 @@ abstract class DisplayDevice {
     // DEBUG STATE: Last device info which was written to the log, or null if none.
     // Do not use for any other purpose.
     DisplayDeviceInfo mDebugLastLoggedDeviceInfo;
+
+    public DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken, String uniqueId,
+                         int physicalId) {
+      this(displayAdapter, displayToken, uniqueId);
+      mPhysicalId = physicalId;
+    }
 
     public DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken, String uniqueId) {
         mDisplayAdapter = displayAdapter;
@@ -84,6 +91,15 @@ abstract class DisplayDevice {
      */
     public final String getNameLocked() {
         return getDisplayDeviceInfoLocked().name;
+    }
+
+    /**
+     * Gets the physical id (vendor specified) of the display device.
+     *
+     * @return The display device id.
+     */
+    public final int getPhysicalId() {
+        return mPhysicalId;
     }
 
     /**
@@ -233,6 +249,7 @@ abstract class DisplayDevice {
     public void dumpLocked(PrintWriter pw) {
         pw.println("mAdapter=" + mDisplayAdapter.getName());
         pw.println("mUniqueId=" + mUniqueId);
+        pw.println("mPhysicalId=" + mPhysicalId);
         pw.println("mDisplayToken=" + mDisplayToken);
         pw.println("mCurrentLayerStack=" + mCurrentLayerStack);
         pw.println("mCurrentOrientation=" + mCurrentOrientation);
