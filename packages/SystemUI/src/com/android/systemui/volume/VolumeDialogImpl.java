@@ -151,13 +151,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     private State mState;
     private SafetyWarningDialog mSafetyWarning;
     private boolean mHovering = false;
-
-    private boolean isMediaShowing = true;
-    private boolean isRingerShowing = false;
-    private boolean isNotificationShowing = false;
-    private boolean isAlarmShowing = false;
-    private boolean isVoiceShowing = false;
-    private boolean isBTSCOShowing = false;
     private boolean isRightPosition = true;
 
     private class SettingsObserver extends ContentObserver {
@@ -166,12 +159,6 @@ public class VolumeDialogImpl implements VolumeDialog {
         }
 
         void observe() {
-            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.AUDIO_PANEL_VIEW_MEDIA), false, this, UserHandle.USER_ALL);
-            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.AUDIO_PANEL_VIEW_RINGER), false, this, UserHandle.USER_ALL);
-            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.AUDIO_PANEL_VIEW_NOTIFICATION), false, this, UserHandle.USER_ALL);
-            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.AUDIO_PANEL_VIEW_ALARM), false, this, UserHandle.USER_ALL);
-            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.AUDIO_PANEL_VIEW_VOICE), false, this, UserHandle.USER_ALL);
-            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.AUDIO_PANEL_VIEW_BT_SCO), false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.AUDIO_PANEL_VIEW_POSITION), false, this, UserHandle.USER_ALL);
             update();
         }
@@ -182,12 +169,6 @@ public class VolumeDialogImpl implements VolumeDialog {
         }
 
         public void update() {
-            isMediaShowing = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.AUDIO_PANEL_VIEW_MEDIA, 1, UserHandle.USER_CURRENT) == 1;
-            isRingerShowing = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.AUDIO_PANEL_VIEW_RINGER, 0, UserHandle.USER_CURRENT) == 1;
-            isNotificationShowing = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.AUDIO_PANEL_VIEW_NOTIFICATION, 0, UserHandle.USER_CURRENT) == 1;
-            isAlarmShowing = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.AUDIO_PANEL_VIEW_ALARM, 0, UserHandle.USER_CURRENT) == 1;
-            isVoiceShowing = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.AUDIO_PANEL_VIEW_VOICE, 0, UserHandle.USER_CURRENT) == 1;
-            isBTSCOShowing = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.AUDIO_PANEL_VIEW_BT_SCO, 0, UserHandle.USER_CURRENT) == 1;
 
             boolean value = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.AUDIO_PANEL_VIEW_POSITION, 0, UserHandle.USER_CURRENT) == 0;
             if(value != isRightPosition){
@@ -261,20 +242,20 @@ public class VolumeDialogImpl implements VolumeDialog {
 
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.setOnShowListener(dialog -> {
-                if (!isLandscape()) mDialogView.setTranslationX((mDialogView.getWidth() / 2)*(isRightPosition ? 1 : -1));
-                mDialogView.setAlpha(0);
-                mDialogView.animate()
-                        .alpha(1)
-                        .translationX(0)
-                        .setDuration(300)
-                        .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
-                        .withEndAction(() -> {
-                            if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
-                                mRingerIcon.postOnAnimationDelayed(mSinglePress, 1500);
-                            }
-                        })
-                        .start();
-            });
+            if (!isLandscape()) mDialogView.setTranslationX((mDialogView.getWidth() / 2)*(isRightPosition ? 1 : -1));
+            mDialogView.setAlpha(0);
+            mDialogView.animate()
+                    .alpha(1)
+                    .translationX(0)
+                    .setDuration(300)
+                    .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
+                    .withEndAction(() -> {
+                        if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
+                            mRingerIcon.postOnAnimationDelayed(mSinglePress, 1500);
+                        }
+                    })
+                    .start();
+        });
         mDialogView = mDialog.findViewById(R.id.volume_dialog);
         mDialogView.setOnHoverListener((v, event) -> {
             int action = event.getActionMasked();
@@ -666,25 +647,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     }
 
     private boolean shouldBeVisibleH(VolumeRow row, VolumeRow activeRow) {
-        if (row.stream == AudioManager.STREAM_MUSIC && isMediaShowing) {
-            return true;
-        }
-        if (row.stream == AudioManager.STREAM_RING && isRingerShowing) {
-            return true;
-        }
-        if (row.stream == AudioManager.STREAM_NOTIFICATION && isNotificationShowing) {
-            return true;
-        }
-        if (row.stream == AudioManager.STREAM_ALARM && isAlarmShowing) {
-            return true;
-        }
-        if (row.stream == AudioManager.STREAM_VOICE_CALL && isVoiceShowing) {
-            return true;
-        }
-        if (row.stream == AudioManager.STREAM_BLUETOOTH_SCO && isBTSCOShowing) {
-            return true;
-        }
-
         boolean isActive = row.stream == activeRow.stream;
         if (row.stream == AudioSystem.STREAM_ACCESSIBILITY) {
             return mShowA11yStream;
