@@ -119,6 +119,8 @@
     <string name="tuner_keyguard_show_watt_summary">Show charging watts value</string>
     <string name="tuner_keyguard_show_current_title">Show charging current</string>
     <string name="tuner_keyguard_show_current_summary">Show charging current values</string>
+    <string name="tuner_keyguard_show_battery_temp_title">Show battery temperature</string>
+    <string name="tuner_keyguard_show_battery_temp_summary">Show battery temperature value</string>
     <string name="tuner_keyguard_show_battery_bar_title">Show battery bar</string>
     <string name="tuner_keyguard_show_battery_bar_summary">Show battery bar on charging in always on display</string>
     <string name="tuner_keyguard_show_battery_bar_always_title">Always show battery bar</string>
