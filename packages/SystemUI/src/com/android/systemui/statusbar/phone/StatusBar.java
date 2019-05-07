@@ -336,7 +336,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     /** Whether to force dark theme if Configuration.UI_MODE_NIGHT_YES. */
     private static final boolean DARK_THEME_IN_NIGHT_MODE = false;
 
-    /** Whether to switch the device into night mode in battery saver. */
+    /** Whether to switch the device into night mode in battery saver. (Disabled.) */
     private static final boolean NIGHT_MODE_IN_BATTERY_SAVER = false;
 
     /**
