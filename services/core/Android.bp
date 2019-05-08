@@ -45,6 +45,7 @@ java_library_static {
         "android.hardware.contexthub-V1.0-java",
         "vendor.oneplus.fingerprint.extension-V1.0-java",
         "vendor.oneplus.hardware.display-V1.0-java",
+        "motorola.hardware.health-V1.0-java",
     ],
 }
 
