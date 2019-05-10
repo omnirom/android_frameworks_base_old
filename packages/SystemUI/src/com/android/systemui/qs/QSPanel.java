@@ -511,6 +511,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             public void run() {
                 if (mCustomizePanel != null) {
                     if (!mCustomizePanel.isCustomizing()) {
+                        mCustomizePanel.updateTopMargin();
                         int[] loc = new int[2];
                         v.getLocationInWindow(loc);
                         int x = loc[0] + v.getWidth() / 2;

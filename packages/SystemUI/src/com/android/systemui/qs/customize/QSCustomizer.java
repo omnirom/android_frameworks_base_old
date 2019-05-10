@@ -37,6 +37,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toolbar;
 import android.widget.Toolbar.OnMenuItemClickListener;
@@ -91,6 +92,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private Menu mRowsSubMenu;
     private Menu mRowsLandscapeSubMenu;
     private Menu mQsColumnsSubMenu;
+    private View mTopMarginView;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
@@ -98,6 +100,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         LayoutInflater.from(getContext()).inflate(R.layout.qs_customize_panel_content, this);
         mClipper = new QSDetailClipper(findViewById(R.id.customize_container));
         mToolbar = findViewById(com.android.internal.R.id.action_bar);
+        mTopMarginView = findViewById(R.id.customize_top_margin);
         TypedValue value = new TypedValue();
         mContext.getTheme().resolveAttribute(android.R.attr.homeAsUpIndicator, value, true);
         mToolbar.setNavigationIcon(
@@ -507,6 +510,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mLayout.setSpanCount(isPortrait ? columns : columnsLandscape);
         updateColumnsMenu(defaultColumns, defaultRows);
     }
+
     private void updateColumnsMenu(int defaultColumns, int defaultRows) {
         int columns = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.OMNI_QS_LAYOUT_COLUMNS, defaultColumns,
@@ -575,5 +579,18 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         menuItemEight.setChecked(qsColumns == 8);
         MenuItem menuItemAuto = mToolbar.getMenu().findItem(R.id.menu_item_qs_columns_auto);
         menuItemAuto.setChecked(qsColumns == -1);
+    }
+
+    public void updateTopMargin() {
+        // move down if we show a header image
+        boolean headerImageEnabled = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.OMNI_STATUS_BAR_CUSTOM_HEADER, 0,
+                UserHandle.USER_CURRENT) == 1;
+        int topMargin = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.quick_qs_offset_height) + (headerImageEnabled ?
+                mContext.getResources().getDimensionPixelSize(R.dimen.qs_header_image_offset) : 0);
+        ViewGroup.LayoutParams lp = mTopMarginView.getLayoutParams();
+        lp.height = topMargin;
+        mTopMarginView.setLayoutParams(lp);
     }
 }
