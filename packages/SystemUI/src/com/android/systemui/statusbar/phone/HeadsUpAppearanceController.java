@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.PowerManager;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
@@ -67,6 +68,8 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
             (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
                     -> updatePanelTranslation();
     Point mPoint;
+
+    private PowerManager mPowerManager;
 
     public HeadsUpAppearanceController(
             NotificationIconAreaController notificationIconAreaController,
@@ -233,12 +236,12 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
                 mHeadsUpStatusBarView.setVisibility(View.VISIBLE);
                 CrossFadeHelper.fadeIn(mHeadsUpStatusBarView, CONTENT_FADE_DURATION /* duration */,
                         CONTENT_FADE_DELAY /* delay */);
-                if (mClockView.isClockVisible()) {
+                if (mClockView.isClockVisible() || !mPowerManager.isScreenOn()) {
                     CrossFadeHelper.fadeOut(mClockView, CONTENT_FADE_DURATION/* duration */,
                             0 /* delay */, () -> mClockView.setVisibility(View.INVISIBLE));
                 }
             } else {
-                if (mClockView.isClockVisible()) {
+                if (mClockView.isClockVisible() || !mPowerManager.isScreenOn()) {
                     CrossFadeHelper.fadeIn(mClockView, CONTENT_FADE_DURATION /* duration */,
                             CONTENT_FADE_DELAY /* delay */);
                 }
