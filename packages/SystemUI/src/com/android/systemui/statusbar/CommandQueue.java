@@ -126,6 +126,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     private static final int MSG_HIDE_TOAST                        = 54 << MSG_SHIFT;
     private static final int MSG_TRACING_STATE_CHANGED             = 55 << MSG_SHIFT;
     private static final int MSG_SUPPRESS_AMBIENT_DISPLAY          = 56 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_CAMERA_FLASH               = 57 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_CAMERA_FLASH_STATE         = 58 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -338,6 +340,12 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
          * @param enabled
          */
         default void onTracingStateChanged(boolean enabled) { }
+
+	    /**
+    	 * Omni
+    	 */
+        default void toggleCameraFlash() { }
+        default void toggleCameraFlashState(boolean enable) { }
     }
 
     public CommandQueue(Context context) {
@@ -966,6 +974,21 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         }
     }
 
+    public void toggleCameraFlash() {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_TOGGLE_CAMERA_FLASH);
+            mHandler.sendEmptyMessage(MSG_TOGGLE_CAMERA_FLASH);
+        }
+    }
+
+    @Override
+    public void toggleCameraFlashState(boolean enable) {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_TOGGLE_CAMERA_FLASH_STATE);
+            mHandler.obtainMessage(MSG_TOGGLE_CAMERA_FLASH_STATE,enable ? 1 : 0, 0, null).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         private H(Looper l) {
             super(l);
@@ -1304,6 +1327,11 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                 case MSG_SUPPRESS_AMBIENT_DISPLAY:
                     for (Callbacks callbacks: mCallbacks) {
                         callbacks.suppressAmbientDisplay((boolean) msg.obj);
+                    }
+                    break;
+                case MSG_TOGGLE_CAMERA_FLASH_STATE:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).toggleCameraFlashState(msg.arg1 != 0);
                     }
                     break;
             }
