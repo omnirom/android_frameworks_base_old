@@ -106,4 +106,5 @@ interface IStatusBarService
      * ABC
      */
     void toggleCameraFlash();
+    void toggleCameraFlashState(boolean enable);
 }
