@@ -115,4 +115,5 @@ interface IStatusBarService
      * Omni
      */
     void toggleCameraFlash();
+    void toggleCameraFlashState(boolean enable);
 }
