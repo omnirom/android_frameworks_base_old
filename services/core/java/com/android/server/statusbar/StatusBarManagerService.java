@@ -616,6 +616,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
+    public void toggleCameraFlashState(boolean enable) {
+        if (mBar != null) {
+            try {
+                mBar.toggleCameraFlashState(enable);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
     public void disable(int what, IBinder token, String pkg) {
         disableForUser(what, token, pkg, mCurrentUserId);
     }

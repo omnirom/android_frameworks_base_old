@@ -153,4 +153,6 @@ oneway interface IStatusBar
     void handleInDisplayFingerprintView(boolean show, boolean isEnrolling);
 
     void toggleCameraFlash();
+    void toggleCameraFlashState(boolean enable);
+
 }
