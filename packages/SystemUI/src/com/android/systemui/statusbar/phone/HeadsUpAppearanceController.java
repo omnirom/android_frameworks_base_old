@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.WindowInsets;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -66,6 +67,13 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     private final View.OnLayoutChangeListener mStackScrollLayoutChangeListener =
             (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
                     -> updatePanelTranslation();
+    private final ViewClippingUtil.ClippingParameters mParentClippingParams =
+            new ViewClippingUtil.ClippingParameters() {
+                @Override
+                public boolean shouldFinish(View view) {
+                    return view.getId() == R.id.status_bar;
+                }
+            };
     Point mPoint;
 
     public HeadsUpAppearanceController(
@@ -231,6 +239,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
             mShown = isShown;
             if (isShown) {
                 mHeadsUpStatusBarView.setVisibility(View.VISIBLE);
+                updateParentClipping(false /* shouldClip */);
                 CrossFadeHelper.fadeIn(mHeadsUpStatusBarView, CONTENT_FADE_DURATION /* duration */,
                         CONTENT_FADE_DELAY /* delay */);
                 if (mClockView.isClockVisible()) {
@@ -242,11 +251,17 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
                     CrossFadeHelper.fadeIn(mClockView, CONTENT_FADE_DURATION /* duration */,
                             CONTENT_FADE_DELAY /* delay */);
                 }
+                updateParentClipping(true /* shouldClip */);
                 CrossFadeHelper.fadeOut(mHeadsUpStatusBarView, CONTENT_FADE_DURATION/* duration */,
                         0 /* delay */, () -> mHeadsUpStatusBarView.setVisibility(View.GONE));
 
             }
         }
+    }
+
+    private void updateParentClipping(boolean shouldClip) {
+        ViewClippingUtil.setClippingDeactivated(
+                mHeadsUpStatusBarView, !shouldClip, mParentClippingParams);
     }
 
     @VisibleForTesting
