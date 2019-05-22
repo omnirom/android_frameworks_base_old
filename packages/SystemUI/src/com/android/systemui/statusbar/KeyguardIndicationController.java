@@ -433,27 +433,32 @@ public class KeyguardIndicationController {
             return "";
         }
 
-        final StringBuilder powerString = new StringBuilder("\n");
+        boolean tooLong = (((mShowChargingWatts && mShowChargingCurrent)
+                || (mShowBatteryTemp && mShowChargingCurrent)
+                || (mShowChargingWatts && mShowChargingCurrent && mShowBatteryTemp))
+                ? true : false);
+        final StringBuilder powerString = new StringBuilder();
         final String SPACER = " • ";
 
+        if (tooLong) {
+            powerString.append(SPACER);
+            powerString.append("\n");
+        }
         if (mShowChargingWatts) {
+            powerString.append(SPACER);
             powerString.append(String.format("%.1f", (float) mChargingWattage / 1000000));
             powerString.append(" W");
         }
         if (mShowChargingCurrent) {
-            if (mShowChargingWatts) {
-                powerString.append(SPACER);
-            }
-            powerString.append(String.format("%.3f", mChargingVolt / 1000));
+            powerString.append(SPACER);
+            powerString.append(String.format("%.1f", mChargingVolt / 1000));
             powerString.append(" V");
             powerString.append(SPACER);
             powerString.append(Math.round(mChargingWattage / mChargingVolt));
             powerString.append(" mA");
         }
         if (mShowBatteryTemp) {
-            if (mShowChargingWatts || mShowChargingCurrent) {
-                powerString.append(SPACER);
-            }
+            powerString.append(SPACER);
             powerString.append(String.format("%.1f", (float) mBatteryTemp / mBatteryTempDivider));
             powerString.append(" °C");
         }
