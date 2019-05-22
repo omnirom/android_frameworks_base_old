@@ -522,8 +522,14 @@ public class KeyguardIndicationController implements StateListener,
             return "";
         }
 
-        final StringBuilder powerString = new StringBuilder("\n");
+        boolean tooLong = ((mShowChargingWatts && mShowChargingCurrent)
+                || (mShowBatteryTemp && mShowChargingCurrent)
+                || (mShowChargingWatts && mShowBatteryTemp));
+
+        final StringBuilder powerString = new StringBuilder();
         final String SPACER = " • ";
+
+        powerString.append(tooLong ? "\n" : SPACER);
 
         if (mShowChargingWatts) {
             powerString.append(String.format("%.1f", (float) mChargingWattage / 1000000));
@@ -533,7 +539,7 @@ public class KeyguardIndicationController implements StateListener,
             if (mShowChargingWatts) {
                 powerString.append(SPACER);
             }
-            powerString.append(String.format("%.3f", mChargingVolt / 1000));
+            powerString.append(String.format("%.1f", mChargingVolt / 1000));
             powerString.append(" V");
             powerString.append(SPACER);
             powerString.append(Math.round(mChargingWattage / mChargingVolt));
