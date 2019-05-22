@@ -65,10 +65,11 @@
             android:id="@+id/keyguard_indication_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:singleLine="false"
             android:gravity="center_horizontal"
             android:textStyle="italic"
             android:textColor="?attr/wallpaperTextColorSecondary"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:accessibilityLiveRegion="polite" />
 

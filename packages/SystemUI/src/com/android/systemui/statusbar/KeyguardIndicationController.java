@@ -433,17 +433,16 @@ public class KeyguardIndicationController {
             return "";
         }
 
-        final StringBuilder powerString = new StringBuilder("\n");
+        final StringBuilder powerString = new StringBuilder();
         final String SPACER = " • ";
 
         if (mShowChargingWatts) {
+            powerString.append(SPACER);
             powerString.append(String.format("%.1f", (float) mChargingWattage / 1000000));
             powerString.append(" W");
         }
         if (mShowChargingCurrent) {
-            if (mShowChargingWatts) {
-                powerString.append(SPACER);
-            }
+            powerString.append(SPACER);
             powerString.append(String.format("%.3f", mChargingVolt / 1000));
             powerString.append(" V");
             powerString.append(SPACER);
@@ -451,9 +450,7 @@ public class KeyguardIndicationController {
             powerString.append(" mA");
         }
         if (mShowBatteryTemp) {
-            if (mShowChargingWatts || mShowChargingCurrent) {
-                powerString.append(SPACER);
-            }
+            powerString.append(SPACER);
             powerString.append(String.format("%.1f", (float) mBatteryTemp / mBatteryTempDivider));
             powerString.append(" °C");
         }
