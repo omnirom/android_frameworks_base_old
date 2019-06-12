@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "01fcc0f1_5d786794",
+        "filename": "packages/SystemUI/res/xml/tuner_prefs.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-06-12T15:17:21Z",
+      "side": 1,
+      "message": "why true? its not shown in AOSP by default IIRC",
+      "revId": "2f9bd5de4e9605748fd4fa01da8f10cc74d72e42",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5e1edc2_d548d7c3",
+        "filename": "packages/SystemUI/src/com/android/systemui/qs/QSPanel.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-06-12T15:17:21Z",
+      "side": 1,
+      "message": "and its also false by default here :)",
+      "revId": "2f9bd5de4e9605748fd4fa01da8f10cc74d72e42",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
