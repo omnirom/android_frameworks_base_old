@@ -18,16 +18,20 @@ package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
+import android.content.ContentResolver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -110,8 +114,35 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private ImageView mAutoBrightnessIcon;
     protected View mAutoBrightnessContainer;
-    private boolean mShowAutoBrightnessButton = false;
+    private boolean mShowAutoBrightnessButton;
     private boolean mAutoBrightOn;
+    private final Handler mHandler = new Handler();
+
+    private class OmniSettingsObserver extends ContentObserver {
+        private final Uri BRIGHTNESS_MODE_URI =
+                Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_MODE);
+
+        OmniSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            setAutoBrightnessIcon();
+        }
+
+        public void startObserving() {
+            mContext.getContentResolver().registerContentObserver(
+                    BRIGHTNESS_MODE_URI,
+                    false, this, UserHandle.USER_ALL);
+        }
+
+        public void stopObserving() {
+            mContext.getContentResolver().unregisterContentObserver(this);
+        }
+    }
+
+    private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
 
     public QSFooterImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -257,6 +288,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     @Override
     @VisibleForTesting
     public void onDetachedFromWindow() {
+        // cleanup
+        mOmniSettingsObserver.stopObserving();
         Dependency.get(TunerService.class).removeTunable(this);
         setListening(false);
         super.onDetachedFromWindow();
@@ -268,7 +301,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
             setHideDragHandle(newValue != null && Integer.parseInt(newValue) == 0);
         }
         if (QS_SHOW_AUTO_BRIGHTNESS_BUTTON.equals(key)) {
-            setHideAutoBright(newValue != null && Integer.parseInt(newValue) == 0);
+            setHideAutoBright(newValue == null || Integer.parseInt(newValue) == 0);
         }
     }
 
@@ -311,24 +344,15 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
             updateVisibilities();
             setClickable(false);
         });
-        if (mShowAutoBrightnessButton) {
-            mAutoBrightOn = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.SCREEN_BRIGHTNESS_MODE,
-                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
-                    UserHandle.USER_CURRENT) != Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL;
-            setAutoBrightnessIcon(mAutoBrightOn);
-        }
     }
 
     private void updateVisibilities() {
         mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
-        mAutoBrightnessContainer.setVisibility(mShowAutoBrightnessButton ? View.GONE : View.VISIBLE);
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
         mMultiUserSwitch.setVisibility(showUserSwitcher(isDemo) ? View.VISIBLE : View.INVISIBLE);
         mEdit.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
         mSettingsButton.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
-        mAutoBrightnessIcon.setVisibility(mShowAutoBrightnessButton
-                || !mExpanded ? View.INVISIBLE : View.VISIBLE);
+        mAutoBrightnessContainer.setVisibility(!mShowAutoBrightnessButton || !mExpanded ? View.GONE : View.VISIBLE);
     }
 
     private boolean showUserSwitcher(boolean isDemo) {
@@ -521,11 +545,26 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     }
 
     private void setHideAutoBright(boolean hide) {
-        mAutoBrightnessIcon.setVisibility(hide ? View.GONE : View.VISIBLE);
-        mShowAutoBrightnessButton = hide;
+        mShowAutoBrightnessButton = !hide;
+        mAutoBrightnessContainer.setVisibility(!mShowAutoBrightnessButton ? View.GONE : View.VISIBLE);
+        if (mShowAutoBrightnessButton) {
+            setAutoBrightnessIcon();
+            mOmniSettingsObserver.startObserving();
+        } else {
+            mOmniSettingsObserver.stopObserving();
+        }
+    }
+
+    private void setAutoBrightnessIcon() {
+        boolean automatic = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
+                UserHandle.USER_CURRENT) != Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL;
+        setAutoBrightnessIcon(automatic);
     }
 
     private void setAutoBrightnessIcon(boolean automatic) {
+        mAutoBrightOn = automatic;
         mAutoBrightnessIcon.setImageResource(automatic ?
                 com.android.systemui.R.drawable.ic_qs_brightness_auto_on_new :
                 com.android.systemui.R.drawable.ic_qs_brightness_auto_off_new);
