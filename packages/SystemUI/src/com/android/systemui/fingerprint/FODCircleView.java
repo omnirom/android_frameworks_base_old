@@ -61,10 +61,6 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     private boolean mInsideCircle = false;
     private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
 
-    private final static float UNTOUCHED_DIM = .1f;
-    private final static float UNTOUCHED_DOZE_DIM = .4f;
-    private final static float TOUCHED_DIM = .9f;
-
     private final int DISPLAY_AOD_MODE = 8;
     private final int DISPLAY_APPLY_HIDE_AOD = 11;
     private final int DISPLAY_NOTIFY_PRESS = 9;
@@ -127,11 +123,8 @@ public class FODCircleView extends ImageView implements OnTouchListener {
 
         @Override
         public void onStartedWakingUp() {
-            try {
-                mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 0);
-                mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 0);
-            } catch (RemoteException e) {}
             super.onStartedWakingUp();
+            setDim(false);
             mChange = true;
         }
 
@@ -170,10 +163,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         public void onFingerprintAuthenticated(int userId) {
             super.onFingerprintAuthenticated(userId);
             mInsideCircle = false;
-            try {
-                mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 0);
-                mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 0);
-            } catch (RemoteException e) {}
+            setDim(false);
             mChange = true;
         }
     };
@@ -211,19 +201,10 @@ public class FODCircleView extends ImageView implements OnTouchListener {
 
         if(mInsideCircle) {
             canvas.drawCircle(mW/2, mH/2, (float) (mW/2.0f), this.mPaintFingerprint);
-            try {
-                //if (mIsDreaming) {
-                    mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 2);
-                //}
-                mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 1);
-            } catch (RemoteException e) {}
+            setDim(true);
         } else {
             if (mChange) {
-                try {
-                    mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 0);
-                    mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 0);
-                    //canvas.drawCircle(mW/2, mH/2, (float) (mW/2.0f), this.mPaintShow);
-                } catch (RemoteException e) {}
+                setDim(false);
             }
         }
         mChange = false;
@@ -238,11 +219,8 @@ public class FODCircleView extends ImageView implements OnTouchListener {
 
         if(event.getAction() == MotionEvent.ACTION_UP) {
             newInside = false;
-            try {
-                setCustomIcon();
-                mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 0);
-                mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 0);
-            } catch (RemoteException e) {}
+            setCustomIcon();
+            setDim(false);
         }
 
         if(newInside == mInsideCircle) return mInsideCircle;
@@ -252,17 +230,11 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         invalidate();
 
         if(!mInsideCircle) {
-            //mParams.screenBrightness = .0f;
             setCustomIcon();
-            mParams.dimAmount = mIsDreaming ? UNTOUCHED_DOZE_DIM : UNTOUCHED_DIM;
-            mWM.updateViewLayout(this, mParams);
             return false;
         }
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             setImageResource(R.drawable.fod_icon_empty);
-            mParams.dimAmount = TOUCHED_DIM;
-            //mParams.screenBrightness = 1.0f;
-            mWM.updateViewLayout(this, mParams);
         }
         return true;
     }
@@ -291,19 +263,16 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH |
             WindowManager.LayoutParams.FLAG_DIM_BEHIND |
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-        mParams.dimAmount = UNTOUCHED_DIM;
 
         mParams.packageName = "android";
 
         setCustomIcon();
-        mIsEnrolling = isEnrolling;
-        if (mIsEnrolling) {
-            try {
-               mDisplayDaemon.setMode(DISPLAY_SET_DIM, 1);
-            } catch (RemoteException e) {}
-        }
         mParams.gravity = Gravity.TOP | Gravity.LEFT;
         mWM.addView(this, mParams);
+        mIsEnrolling = isEnrolling;
+        if (mIsEnrolling) {
+            setDim(true);
+        }
         viewAdded = true;
         mChange = true;
     }
@@ -311,18 +280,33 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     public void hide() {
         if(mX == -1 || mY == -1 || mW == -1 || mH == -1) return;
 
-        try {
-            mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 0);
-            mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 0);
-        } catch (RemoteException e) {}
-        if (mIsEnrolling) {
-            try {
-               mDisplayDaemon.setMode(DISPLAY_SET_DIM, 0);
-            } catch (RemoteException e) {}
-        }
         mInsideCircle = false;
         mWM.removeView(this);
         viewAdded = false;
+        setDim(false);
+    }
+
+    private void setDim(boolean dim) {
+        if (dim) {
+            int curBrightness = Settings.System.getInt(getContext().getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS, 100);
+            float dimAmount = ((float) Math.pow(2, 1.0f - ((float) curBrightness) / 255.0f)) - 1.2f;
+            if (dimAmount < 0) dimAmount = 0f;
+            mParams.dimAmount = dimAmount;
+            try {
+                mDisplayDaemon.setMode(DISPLAY_SET_DIM, 1);
+                mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 2);
+                mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 1);
+            } catch (RemoteException e) {}
+        } else {
+            try {
+                mDisplayDaemon.setMode(DISPLAY_SET_DIM, 0);
+                mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 0);
+                mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 0);
+            } catch (RemoteException e) {}
+            mParams.dimAmount = .0f;
+        }
+        mWM.updateViewLayout(this, mParams);
     }
 
     private void setCustomIcon(){
