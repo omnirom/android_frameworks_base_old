@@ -851,6 +851,19 @@ public class CarrierConfigManager {
             "carrier_metered_iwlan_apn_types_strings";
 
     /**
+     * APN types that are not allowed on cellular
+     * @hide
+     */
+    public static final String KEY_CARRIER_WWAN_DISALLOWED_APN_TYPES_STRING_ARRAY =
+            "carrier_wwan_disallowed_apn_types_string_array";
+
+    /**
+     * APN types that are not allowed on IWLAN
+     * @hide
+     */
+    public static final String KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY =
+            "carrier_wlan_disallowed_apn_types_string_array";
+    /**
      * CDMA carrier ERI (Enhanced Roaming Indicator) file name
      * @hide
      */
@@ -3169,6 +3182,10 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
         sDefaults.putBoolean(KEY_CDMA_CW_CF_ENABLED_BOOL, false);
+        sDefaults.putStringArray(KEY_CARRIER_WWAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
+                new String[]{""});
+        sDefaults.putStringArray(KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
+                new String[]{""});
         sDefaults.putIntArray(KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY,
                 new int[]{
                     4, /* IS95A */
