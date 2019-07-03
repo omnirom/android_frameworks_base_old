@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.Display;
@@ -66,10 +67,6 @@ public class FODCircleView extends ImageView implements OnTouchListener {
 
     private final WindowManager mWM;
     private final DisplayManager mDisplayManager;
-
-    private final int mCircleX = 444;
-    private final int mCircleY = 1966;
-    private final int mCircleSize = 190;
 
     private boolean mIsDreaming;
     private boolean mIsPulsing;
@@ -157,10 +154,21 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     FODCircleView(Context context) {
         super(context);
 
-        mX = mCircleX;
-        mY = mCircleY;
-        mW = mCircleSize;
-        mH = mCircleSize;
+        String[] location = SystemProperties.get(
+                "persist.vendor.sys.fp.fod.location.X_Y", "").split(",");
+        String[] size = SystemProperties.get(
+                "persist.vendor.sys.fp.fod.size.width_height", "").split(",");
+        if (size.length == 2 && location.length == 2) {
+            mX = Integer.parseInt(location[0]);
+            mY = Integer.parseInt(location[1]);
+            mW = Integer.parseInt(size[0]);
+            mH = Integer.parseInt(size[1]);
+        } else {
+            mX = -1;
+            mY = -1;
+            mW = -1;
+            mH = -1;
+        }
 
         mPaintFingerprint.setAntiAlias(true);
         mPaintFingerprint.setColor(Color.GREEN);
