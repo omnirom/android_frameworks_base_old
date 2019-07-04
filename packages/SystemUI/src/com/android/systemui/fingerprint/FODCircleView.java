@@ -53,10 +53,14 @@ import com.android.systemui.R;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import vendor.oneplus.hardware.display.V1_0.IOneplusDisplay;
 
 public class FODCircleView extends ImageView implements OnTouchListener {
     private final int mX, mY, mW, mH;
+    private final int mDreamingMaxOffset;
     private final Paint mPaintFingerprint = new Paint();
     private final Paint mPaintShow = new Paint();
     private IOneplusDisplay mDisplayDaemon = null;
@@ -71,12 +75,15 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     private final WindowManager mWM;
     private final DisplayManager mDisplayManager;
 
+    private int mDreamingOffsetX = 0, mDreamingOffsetY = 0;
     private boolean mIsDreaming;
     private boolean mIsPulsing;
     private boolean mIsScreenOn;
 
     public boolean viewAdded;
     private boolean mIsEnrolling;
+    
+    private Timer mBurnInProtectionTimer = null;
 
     KeyguardUpdateMonitor mUpdateMonitor;
 
@@ -86,6 +93,17 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             super.onDreamingStateChanged(dreaming);
             mIsDreaming = dreaming;
             mInsideCircle = false;
+            if (dreaming) {
+                mBurnInProtectionTimer = new Timer();
+                mBurnInProtectionTimer.schedule(new BurnInProtectionTask(), 0, 60 * 1000);
+            } else {
+                mBurnInProtectionTimer.cancel();
+            }
+
+            if (viewAdded) {
+                resetPosition();
+                invalidate();
+            }
             setCustomIcon();
         }
 
@@ -173,6 +191,8 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             mH = -1;
         }
 
+        mDreamingMaxOffset = (int) (mW * 0.1f);
+        
         mPaintFingerprint.setAntiAlias(true);
         mPaintFingerprint.setColor(Color.GREEN);
 
@@ -200,8 +220,13 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         //TODO w!=h?
 
         if(mInsideCircle) {
+            if (mIsDreaming) {
+                setAlpha(1.0f);
+            }
             canvas.drawCircle(mW/2, mH/2, (float) (mW/2.0f), this.mPaintFingerprint);
             setDim(true);
+        } else {
+            setAlpha(mIsDreaming ? 0.5f : 1.0f);
         }
     }
 
@@ -308,7 +333,15 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 default:
                         mParams.x = mX;
                         mParams.y = mY;
-	}
+        }
+        if (mIsDreaming) {
+            mParams.x += mDreamingOffsetX;
+            mParams.y += mDreamingOffsetY;
+        }
+
+        if (viewAdded) {
+            mWM.updateViewLayout(this, mParams);
+        }
     }
 
     private void setDim(boolean dim) {
@@ -368,4 +401,28 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             setImageResource(R.drawable.fod_icon_default);
         }
     }
+
+    private class BurnInProtectionTask extends TimerTask {
+        @Override
+        public void run() {
+            // It is fine to modify the variables here because
+            // no other thread will be modifying it
+            long now = System.currentTimeMillis() / 1000 / 60;
+            mDreamingOffsetX = (int) (now % (mDreamingMaxOffset * 4));
+            if (mDreamingOffsetX > mDreamingMaxOffset * 2) {
+                mDreamingOffsetX = mDreamingMaxOffset * 4 - mDreamingOffsetX;
+            }
+            // Let y to be not synchronized with x, so that we get maximum movement
+            mDreamingOffsetY = (int) ((now + mDreamingMaxOffset / 3) % (mDreamingMaxOffset * 2));
+            if (mDreamingOffsetY > mDreamingMaxOffset * 2) {
+                mDreamingOffsetY = mDreamingMaxOffset * 4 - mDreamingOffsetY;
+            }
+            mDreamingOffsetX -= mDreamingMaxOffset;
+            mDreamingOffsetY -= mDreamingMaxOffset;
+            if (viewAdded) {
+                resetPosition();
+                invalidate();
+            }
+        }
+    };
 }
