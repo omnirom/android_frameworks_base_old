@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb7782e3_68d4e1e2",
+        "filename": "packages/SystemUI/src/com/android/systemui/fingerprint/FODCircleView.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-07-04T12:54:03Z",
+      "side": 1,
+      "message": "variables deserve their own lines",
+      "revId": "f076cb60f50d9c08a299e6abb9f0ef5735e24975",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e718f0a5_af14c6bb",
+        "filename": "packages/SystemUI/src/com/android/systemui/fingerprint/FODCircleView.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-07-04T12:54:03Z",
+      "side": 1,
+      "message": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa :)",
+      "revId": "f076cb60f50d9c08a299e6abb9f0ef5735e24975",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9729c0d_17e9a421",
+        "filename": "packages/SystemUI/src/com/android/systemui/fingerprint/FODCircleView.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-07-04T12:54:03Z",
+      "side": 1,
+      "message": "UUUUUUUUUUUUUUUUUUUUUUUUUUU",
+      "revId": "f076cb60f50d9c08a299e6abb9f0ef5735e24975",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
