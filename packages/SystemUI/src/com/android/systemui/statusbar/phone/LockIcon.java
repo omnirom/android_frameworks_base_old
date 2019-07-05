@@ -232,7 +232,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
                 || mLastBouncerVisible != mBouncerVisible || force) {
             int iconAnimRes = getAnimationResForTransition(mLastState, state, mLastPulsing,
                     mPulsing, mLastDozing, mDozing, mBouncerVisible);
-            boolean isAnim = iconAnimRes != -1;
+            boolean isAnim = false; // iconAnimRes != -1;
 
             int iconRes = isAnim ? iconAnimRes : getIconForState(state);
             if (iconRes != mIconRes) {
