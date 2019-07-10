@@ -667,6 +667,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     private boolean mRotatingSeamlessly = false;
 
+    static DisplayModeManager mDisplayModeManager;
+
     private final class SettingsObserver extends ContentObserver {
         private final Uri mDisplayInversionEnabledUri =
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
@@ -3500,6 +3502,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Make sure the last requested orientation has been applied.
         updateRotationUnchecked(false, false);
+
+        mDisplayModeManager = new DisplayModeManager(this, mContext);
     }
 
     private boolean checkBootAnimationCompleteLocked() {
