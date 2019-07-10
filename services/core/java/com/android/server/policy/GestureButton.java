@@ -69,7 +69,7 @@ public class GestureButton implements PointerEventListener {
     private int mScreenHeight = -1;
     private int mScreenWidth = -1;
     private boolean mSwipeStartFromEdge;
-    private final int mSwipeStartThreshold;
+    private int mSwipeStartThreshold;
     private boolean mKeyEventHandled;
     private boolean mRecentsTriggered;
     private boolean mLongSwipePossible;
@@ -119,7 +119,7 @@ public class GestureButton implements PointerEventListener {
         windowManager.getDefaultDisplay().getRealMetrics(displayMetrics);
         mScreenHeight = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
         mScreenWidth = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        mSwipeStartThreshold = 20;
+        mSwipeStartThreshold = context.getResources().getInteger(R.integer.nav_gesture_swipe_start);
         mSwipeMinLength = getSwipeLengthInPixel(context.getResources().getInteger(R.integer.nav_gesture_swipe_min_length));
         mMoveTolerance = context.getResources().getInteger(R.integer.nav_gesture_move_threshold);
         mSwipeTriggerTimeout  = context.getResources().getInteger(R.integer.nav_gesture_swipe_timout);
@@ -317,6 +317,11 @@ public class GestureButton implements PointerEventListener {
                 Settings.System.OMNI_BOTTOM_GESTURE_SWIPE_LIMIT,
                 getSwipeLengthInPixel(mContext.getResources().getInteger(R.integer.nav_gesture_swipe_min_length)),
                 UserHandle.USER_CURRENT);
+        mSwipeStartThreshold = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_BOTTOM_GESTURE_SWIPE_START,
+                getSwipeLengthInPixel(mContext.getResources().getInteger(R.integer.nav_gesture_swipe_start)),
+                UserHandle.USER_CURRENT);
+
         if (DEBUG) Slog.i(TAG, "updateSettings mSwipeTriggerTimeout = " + mSwipeTriggerTimeout + " mSwipeMinLength = " + mSwipeMinLength);
     }
 
