@@ -26,6 +26,7 @@ import android.graphics.PixelFormat;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -64,6 +65,8 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     private final int DISPLAY_APPLY_HIDE_AOD = 11;
     private final int DISPLAY_NOTIFY_PRESS = 9;
     private final int DISPLAY_SET_DIM = 10;
+
+    private int mCurrentBrightness;
 
     private final WindowManager mWM;
     private final DisplayManager mDisplayManager;
@@ -276,12 +279,19 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         mWM.removeView(this);
         viewAdded = false;
         setDim(false);
+        AsyncTask.execute(new Runnable() {
+                public void run() {
+                    Settings.System.putIntForUser(mContext.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS,
+                                    mCurrentBrightness, UserHandle.USER_CURRENT);
+                }
+            });
     }
 
     private void setDim(boolean dim) {
-        int curBrightness = Settings.System.getInt(getContext().getContentResolver(),
+        mCurrentBrightness = Settings.System.getInt(getContext().getContentResolver(),
                         Settings.System.SCREEN_BRIGHTNESS, 100);
-        float dimAmount = (float) curBrightness / 255.0f;
+        float dimAmount = (float) mCurrentBrightness / 255.0f;
         dimAmount = 0.80f - dimAmount;
 
         if (dimAmount < 0) {
@@ -299,13 +309,11 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         } else {
             mParams.dimAmount = .0f;
             mWM.updateViewLayout(this, mParams);
-            mDisplayManager.setTemporaryBrightness(curBrightness);
+            mDisplayManager.setTemporaryBrightness(mCurrentBrightness);
             try {
                 mDisplayDaemon.setMode(DISPLAY_SET_DIM, 0);
                 mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 0);
             } catch (RemoteException e) {}
-            Settings.System.putIntForUser(mContext.getContentResolver(),
-                    Settings.System.SCREEN_BRIGHTNESS, curBrightness, UserHandle.USER_CURRENT);
         }
     }
 
