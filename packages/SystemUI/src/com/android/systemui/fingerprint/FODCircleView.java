@@ -28,7 +28,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -288,13 +287,6 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         mWM.removeView(this);
         viewAdded = false;
         setDim(false);
-        AsyncTask.execute(new Runnable() {
-                public void run() {
-                    Settings.System.putIntForUser(mContext.getContentResolver(),
-                            Settings.System.SCREEN_BRIGHTNESS,
-                                    mCurrentBrightness, UserHandle.USER_CURRENT);
-                }
-            });
     }
 
     private void resetPosition() {
@@ -347,6 +339,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 mDisplayDaemon.setMode(DISPLAY_SET_DIM, 0);
                 mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 0);
             } catch (RemoteException e) {}
+            mDisplayManager.setTemporaryBrightness(-1);
         }
     }
 
