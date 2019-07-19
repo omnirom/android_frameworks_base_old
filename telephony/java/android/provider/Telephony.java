@@ -4106,8 +4106,13 @@ public final class Telephony {
         public static final String DEFAULT_SORT_ORDER = DELIVERY_TIME + " DESC";
 
         /**
+<<<<<<< HEAD
          * The timestamp in millisecond of when the device received the message.
          * <P>Type: BIGINT</P>
+=======
+         * The Epoch Unix timestamp when the device received the message.
+         * <P>Type: INTEGER</P>
+>>>>>>> 92cc39530cc... Add fileds to Cellbroadcast
          */
         public static final String RECEIVED_TIME = "received_time";
 
@@ -4153,6 +4158,7 @@ public final class Telephony {
         public static final String GEOMETRIES = "geometries";
 
         /**
+<<<<<<< HEAD
          * Geo-Fencing Maximum Wait Time in second. The range of the time is [0, 255]. A device
          * shall allow to determine its position meeting operator policy. If the device is unable to
          * determine its position meeting operator policy within the GeoFencing Maximum Wait Time,
@@ -4164,6 +4170,8 @@ public final class Telephony {
         public static final String MAXIMUM_WAIT_TIME = "maximum_wait_time";
 
         /**
+=======
+>>>>>>> 92cc39530cc... Add fileds to Cellbroadcast
          * Query columns for instantiating {@link android.telephony.CellBroadcastMessage} objects.
          */
         public static final String[] QUERY_COLUMNS = {
