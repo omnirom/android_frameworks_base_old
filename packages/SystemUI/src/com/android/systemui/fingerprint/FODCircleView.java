@@ -152,7 +152,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         public void onFingerprintAuthenticated(int userId) {
             super.onFingerprintAuthenticated(userId);
             mInsideCircle = false;
-            setDim(false);
+            //setDim(false);
         }
 
         @Override
@@ -271,11 +271,12 @@ public class FODCircleView extends ImageView implements OnTouchListener {
 
         mParams.type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
         mParams.setTitle("Fingerprint on display");
-        mParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+        mParams.flags = WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM |
             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH |
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
             WindowManager.LayoutParams.FLAG_DIM_BEHIND |
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-        mParams.dimAmount = .1f;
+        mParams.dimAmount = .0f;
 
         mParams.packageName = "android";
 
