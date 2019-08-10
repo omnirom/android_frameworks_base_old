@@ -76,6 +76,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     private boolean mIsDreaming;
     private boolean mIsPulsing;
     private boolean mIsScreenOn;
+    private boolean mShouldHide = false;
 
     public boolean viewAdded;
     private boolean mIsEnrolling;
@@ -163,6 +164,13 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 hide();
             }
         }
+
+        @Override
+        public void onTrustChanged(int userId) {
+            super.onTrustChanged(userId);
+            int mUserId = userId;
+            mShouldHide = (mUpdateMonitor.getUserHasTrust(mUserId) ? true : false);
+        }
     };
 
     FODCircleView(Context context) {
@@ -210,7 +218,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         super.onDraw(canvas);
         //TODO w!=h?
 
-        if(mInsideCircle) {
+        if(mInsideCircle && (!mShouldHide || mIsPulsing)) {
             canvas.drawCircle(mW/2, mH/2, (float) (mW/2.0f), this.mPaintFingerprint);
             setDim(true);
         }
@@ -358,7 +366,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 Settings.System.OMNI_CUSTOM_FP_ICON,
                 UserHandle.USER_CURRENT);
 
-        if (mIsDreaming && !mIsPulsing) {
+        if (!mIsPulsing && (mIsDreaming || mShouldHide)) {
             setImageResource(R.drawable.fod_icon_empty);
             return;
         }
