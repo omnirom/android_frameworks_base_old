@@ -77,6 +77,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     private boolean mIsPulsing;
     private boolean mIsScreenOn;
     private boolean mShouldHide = false;
+    private boolean mShouldNotHide = false;
 
     public boolean viewAdded;
     private boolean mIsEnrolling;
@@ -127,12 +128,14 @@ public class FODCircleView extends ImageView implements OnTouchListener {
            super.onScreenTurnedOn();
            mIsScreenOn = true;
            mInsideCircle = false;
+           setCustomIcon();
         }
 
         @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
             super.onKeyguardVisibilityChanged(showing);
             mInsideCircle = false;
+            mShouldNotHide = showing ? true : false;
         }
 
         @Override
@@ -170,6 +173,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             super.onTrustChanged(userId);
             int mUserId = userId;
             mShouldHide = (mUpdateMonitor.getUserHasTrust(mUserId) ? true : false);
+            setCustomIcon();
         }
     };
 
@@ -218,7 +222,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         super.onDraw(canvas);
         //TODO w!=h?
 
-        if(mInsideCircle && (!mShouldHide || mIsPulsing)) {
+        if(mInsideCircle && ((!mShouldHide || !mShouldNotHide) || mIsPulsing)) {
             canvas.drawCircle(mW/2, mH/2, (float) (mW/2.0f), this.mPaintFingerprint);
             setDim(true);
         }
@@ -344,6 +348,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         if (dim) {
             mParams.dimAmount = dimAmount;
             try {
+                mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 1);
                 mDisplayDaemon.setMode(DISPLAY_SET_DIM, 1);
                 mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 1);
             } catch (RemoteException e) {}
@@ -354,6 +359,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             mWM.updateViewLayout(this, mParams);
             mDisplayManager.setTemporaryBrightness(mCurrentBrightness);
             try {
+                mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 0);
                 mDisplayDaemon.setMode(DISPLAY_SET_DIM, 0);
                 mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 0);
             } catch (RemoteException e) {}
@@ -366,7 +372,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 Settings.System.OMNI_CUSTOM_FP_ICON,
                 UserHandle.USER_CURRENT);
 
-        if (!mIsPulsing && (mIsDreaming || mShouldHide)) {
+        if (!mIsPulsing && (mIsDreaming || (mShouldHide && mShouldNotHide))) {
             setImageResource(R.drawable.fod_icon_empty);
             return;
         }
