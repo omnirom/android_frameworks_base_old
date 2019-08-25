@@ -348,7 +348,6 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         if (dim) {
             mParams.dimAmount = dimAmount;
             try {
-                mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 1);
                 mDisplayDaemon.setMode(DISPLAY_SET_DIM, 1);
                 mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 1);
             } catch (RemoteException e) {}
@@ -359,7 +358,6 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             mWM.updateViewLayout(this, mParams);
             mDisplayManager.setTemporaryBrightness(mCurrentBrightness);
             try {
-                mDisplayDaemon.setMode(DISPLAY_AOD_MODE, 0);
                 mDisplayDaemon.setMode(DISPLAY_SET_DIM, 0);
                 mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 0);
             } catch (RemoteException e) {}
