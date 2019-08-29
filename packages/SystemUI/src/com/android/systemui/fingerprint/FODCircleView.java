@@ -339,7 +339,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         mCurrentBrightness = Settings.System.getInt(getContext().getContentResolver(),
                         Settings.System.SCREEN_BRIGHTNESS, 100);
         float dimAmount = (float) mCurrentBrightness / 255.0f;
-        dimAmount = 0.80f - dimAmount;
+        dimAmount = 0.82f - dimAmount;
 
         if (dimAmount < 0) {
             dimAmount = 0f;
@@ -348,20 +348,19 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         if (dim) {
             mParams.dimAmount = dimAmount;
             try {
-                mDisplayDaemon.setMode(DISPLAY_SET_DIM, 1);
+                mDisplayDaemon.setMode(DISPLAY_APPLY_HIDE_AOD, 1);
+                mWM.updateViewLayout(this, mParams);
+                mDisplayManager.setTemporaryBrightness(255);
                 mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 1);
             } catch (RemoteException e) {}
-            mWM.updateViewLayout(this, mParams);
-            mDisplayManager.setTemporaryBrightness(255);
         } else {
             mParams.dimAmount = .0f;
             mWM.updateViewLayout(this, mParams);
             mDisplayManager.setTemporaryBrightness(mCurrentBrightness);
+            mDisplayManager.setTemporaryBrightness(-1);
             try {
-                mDisplayDaemon.setMode(DISPLAY_SET_DIM, 0);
                 mDisplayDaemon.setMode(DISPLAY_NOTIFY_PRESS, 0);
             } catch (RemoteException e) {}
-            mDisplayManager.setTemporaryBrightness(-1);
         }
     }
 
