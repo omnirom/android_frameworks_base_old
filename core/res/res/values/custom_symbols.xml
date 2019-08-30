@@ -71,4 +71,8 @@
 
   <java-symbol type="integer" name="config_defaultMaxCachedProcesses" />
   <java-symbol type="integer" name="config_defaultTrimCachedProcesses" />
+
+  <!-- Whether to send camera status intent -->
+  <java-symbol type="bool" name="config_sendCameraStatusIntent" />
+
 </resources>
