@@ -7435,5 +7435,8 @@ message MetricsEvent {
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
+
+    // ACTION: Custom Omni metrics
+    CUSTOM_QUICK_TILES = 9001;
   }
 }
