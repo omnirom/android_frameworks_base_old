@@ -32,7 +32,7 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
 
     @Override
     public void start() {
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FOD)) {
             return;
         }
         getComponent(CommandQueue.class).addCallback(this);
