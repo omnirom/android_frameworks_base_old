@@ -100,7 +100,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private BrightnessMirrorController mBrightnessMirrorController;
     private View mDivider;
 
+    // omni
     private boolean mBrightnessBottom;
+    private View mBrightnessPlaceholder;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -120,6 +122,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         mBrightnessView = LayoutInflater.from(mContext).inflate(
             R.layout.quick_settings_brightness_dialog, this, false);
+        mBrightnessPlaceholder = LayoutInflater.from(mContext).inflate(
+            R.layout.quick_settings_brightness_placeholder, this, false);
         addView(mBrightnessView);
 
         mTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
@@ -224,10 +228,12 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (QS_BRIGHTNESS_POSITION_BOTTOM.equals(key)) {
             if (newValue == null || Integer.parseInt(newValue) == 0) {
                 removeView(mBrightnessView);
+                removeView(mBrightnessPlaceholder);
                 addView(mBrightnessView, 0);
                 mBrightnessBottom = false;
             } else {
                 removeView(mBrightnessView);
+                addView(mBrightnessPlaceholder, 0);
                 addView(mBrightnessView, getBrightnessViewPositionBottom());
                 mBrightnessBottom = true;
             }
@@ -245,7 +251,14 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     private void updateViewVisibilityForTuningValue(View view, @Nullable String newValue) {
-        view.setVisibility(TunerService.parseIntegerSwitch(newValue, true) ? VISIBLE : GONE);
+        boolean visible = TunerService.parseIntegerSwitch(newValue, true);
+        if (visible) {
+            view.setVisibility(VISIBLE);
+            removeView(mBrightnessPlaceholder);
+        } else {
+            view.setVisibility(GONE);
+            addView(mBrightnessPlaceholder, 0);
+        }
     }
 
     public void openDetails(String subPanel) {
