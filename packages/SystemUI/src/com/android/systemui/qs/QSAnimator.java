@@ -278,16 +278,20 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             count++;
         }
 
+        View brightnessPlaceholder = mQsPanel.getBrightnessPlaceholder();
+
         if (mAllowFancy) {
             // Make brightness appear static position and alpha in through second half.
             View brightness = mQsPanel.getBrightnessView();
             if (brightness != null) {
                 firstPageBuilder.addFloat(brightness, "translationY", heightDiff, 0);
+                firstPageBuilder.addFloat(brightnessPlaceholder, "translationY", heightDiff, 0);
                 mBrightnessAnimator = new TouchAnimator.Builder()
                         .addFloat(brightness, "alpha", 0, 1)
                         .setStartDelay(.5f)
                         .build();
                 mAllViews.add(brightness);
+                mAllViews.add(brightnessPlaceholder);
             } else {
                 mBrightnessAnimator = null;
             }
