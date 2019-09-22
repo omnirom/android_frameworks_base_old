@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0f6abef4_83943710",
+        "filename": "packages/SystemUI/res-keyguard/layout/keyguard_status_view.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-09-22T21:48:11Z",
+      "side": 1,
+      "message": "ahem - no tabs",
+      "revId": "bcaf9280b9b1bce174ace50997249051769a977e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15393197_8d4ed153",
+        "filename": "packages/SystemUI/res-keyguard/layout/keyguard_status_view.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-09-22T21:48:11Z",
+      "side": 1,
+      "message": "ahem",
+      "revId": "bcaf9280b9b1bce174ace50997249051769a977e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
