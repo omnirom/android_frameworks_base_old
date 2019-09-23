@@ -811,6 +811,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_HIDE_NOTCH), false, this,
+                    UserHandle.USER_ALL);
             updateSettings();
         }
 
@@ -2119,6 +2122,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             com.android.internal.R.integer.config_veryLongPressOnPowerBehavior));
             mProxiWakeupCheckEnabled = Settings.System.getIntForUser(resolver,
                     Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED, 0,
+                    UserHandle.USER_CURRENT) != 0;
+            mDefaultDisplayPolicy.mHideNotch = Settings.System.getIntForUser(resolver,
+                    Settings.System.OMNI_HIDE_NOTCH, 0,
                     UserHandle.USER_CURRENT) != 0;
         }
         if (updateRotation) {
