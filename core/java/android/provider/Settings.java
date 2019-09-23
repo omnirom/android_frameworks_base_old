@@ -4515,6 +4515,15 @@ public final class Settings {
                 ANY_STRING_VALIDATOR;
 
         /**
+         * @hide
+         */
+        public static final String OMNI_CUSTOM_FP_ICON = "custom_fingerprint_icon";
+
+        /** @hide */
+        private static final Validator OMNI_CUSTOM_FP_ICON_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
          * Disable hw buttons - actions, brightness, haptic feedback, overflow menu
          * @hide
          */
@@ -4899,6 +4908,7 @@ public final class Settings {
             OMNI_NAVIGATION_BAR_RECENTS,
             OMNI_SYSTEM_PROXI_CHECK_ENABLED,
             OMNI_BUTTON_EXTRA_KEY_MAPPING,
+            OMNI_CUSTOM_FP_ICON,
             OMNI_HARDWARE_KEYS_DISABLE,
             OMNI_DEVICE_PROXI_CHECK_ENABLED,
             OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED,
@@ -5052,6 +5062,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_RECENTS);
             PRIVATE_SETTINGS.add(OMNI_SYSTEM_PROXI_CHECK_ENABLED);
             PRIVATE_SETTINGS.add(OMNI_BUTTON_EXTRA_KEY_MAPPING);
+            PRIVATE_SETTINGS.add(OMNI_CUSTOM_FP_ICON);
             PRIVATE_SETTINGS.add(OMNI_HARDWARE_KEYS_DISABLE);
             PRIVATE_SETTINGS.add(OMNI_DEVICE_PROXI_CHECK_ENABLED);
             PRIVATE_SETTINGS.add(OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED);
@@ -5183,6 +5194,8 @@ public final class Settings {
                     OMNI_SYSTEM_PROXI_CHECK_ENABLED_VALIDATOR);
             VALIDATORS.put(OMNI_BUTTON_EXTRA_KEY_MAPPING,
                     OMNI_BUTTON_EXTRA_KEY_MAPPING_VALIDATOR);
+            VALIDATORS.put(OMNI_CUSTOM_FP_ICON,
+                    OMNI_CUSTOM_FP_ICON_VALIDATOR);
             VALIDATORS.put(OMNI_HARDWARE_KEYS_DISABLE, OMNI_HARDWARE_KEYS_DISABLE_VALIDATOR);
             VALIDATORS.put(OMNI_DEVICE_PROXI_CHECK_ENABLED,
                     OMNI_DEVICE_PROXI_CHECK_ENABLED_VALIDATOR);
