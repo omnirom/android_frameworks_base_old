@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "67b6efb6_f7a57f25",
+        "filename": "core/res/res/values/config.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 1875,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-09-23T15:25:39Z",
+      "side": 1,
+      "message": "that belong into custom_config actually - was always wrong :)",
+      "revId": "44ccafa2f259bbefeef7728863301bad2eecc584",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
