@@ -4813,6 +4813,13 @@ public final class Settings {
         private static final Validator OMNI_LOCK_POWER_MENU_DISABLED_VALIDATOR =
                 BOOLEAN_VALIDATOR;
 
+        /** @hide */
+        public static final String OMNI_BACK_GESTURE_HEIGHT = "back_gesture_height";
+
+        /** @hide */
+        private static final Validator OMNI_BACK_GESTURE_HEIGHT_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
@@ -4918,6 +4925,7 @@ public final class Settings {
             OMNI_ASPECT_RATIO_APPS_ENABLED,
             OMNI_ASPECT_RATIO_APPS_LIST,
             OMNI_LOCK_POWER_MENU_DISABLED,
+            OMNI_BACK_GESTURE_HEIGHT,
         };
 
         /**
@@ -5072,6 +5080,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_ASPECT_RATIO_APPS_ENABLED);
             PRIVATE_SETTINGS.add(OMNI_ASPECT_RATIO_APPS_LIST);
             PRIVATE_SETTINGS.add(OMNI_LOCK_POWER_MENU_DISABLED);
+            PRIVATE_SETTINGS.add(OMNI_BACK_GESTURE_HEIGHT);
         }
 
         /**
@@ -5221,6 +5230,7 @@ public final class Settings {
                     OMNI_ASPECT_RATIO_APPS_LIST_VALIDATOR);
             VALIDATORS.put(OMNI_LOCK_POWER_MENU_DISABLED,
                     OMNI_LOCK_POWER_MENU_DISABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_BACK_GESTURE_HEIGHT, OMNI_BACK_GESTURE_HEIGHT_VALIDATOR);
         }
 
         /**
