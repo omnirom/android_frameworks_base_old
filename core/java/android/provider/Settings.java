@@ -5376,6 +5376,9 @@ public final class Settings {
          */
         public static final String OMNI_NAVIGATION_BAR_RECENTS = "navigation_bar_recents";
 
+        /** @hide */
+        public static final String OMNI_BACK_GESTURE_HEIGHT = "back_gesture_height";
+
         /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
@@ -5404,6 +5407,7 @@ public final class Settings {
             OMNI_NOTIFICATION_PULSE_COLOR,
             OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC,
             OMNI_NAVIGATION_BAR_RECENTS,
+            OMNI_BACK_GESTURE_HEIGHT,
         };
 
         /**
@@ -5440,6 +5444,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NOTIFICATION_PULSE_COLOR, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_RECENTS, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_BACK_GESTURE_HEIGHT, 1);
         }
     }
 
