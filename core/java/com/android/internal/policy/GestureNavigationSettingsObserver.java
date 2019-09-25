@@ -70,6 +70,9 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
         r.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE),
                 false, this, UserHandle.USER_ALL);
+        r.registerContentObserver(
+                Settings.System.getUriFor(Settings.System.OMNI_BACK_GESTURE_HEIGHT),
+                false, this, UserHandle.USER_ALL);
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 runnable -> mMainHandler.post(runnable),
@@ -89,6 +92,9 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
                 false, this);
         r.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE),
+                false, this);
+        r.registerContentObserver(
+                Settings.System.getUriFor(Settings.System.OMNI_BACK_GESTURE_HEIGHT),
                 false, this);
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
