@@ -17,6 +17,7 @@
 package com.android.systemui.navigationbar;
 
 import static android.content.Intent.ACTION_OVERLAY_CHANGED;
+import static android.provider.Settings.System.OMNI_BACK_GESTURE_HEIGHT;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,9 +34,11 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.util.Log;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -51,13 +54,14 @@ import javax.inject.Inject;
  * Controller for tracking the current navigation bar mode.
  */
 @SysUISingleton
-public class NavigationModeController implements Dumpable {
+public class NavigationModeController implements Dumpable, OmniSettingsService.OmniSettingsObserver {
 
     private static final String TAG = NavigationModeController.class.getSimpleName();
     private static final boolean DEBUG = true;
 
     public interface ModeChangedListener {
         void onNavigationModeChanged(int mode);
+        default void onSettingsChanged() {}
     }
 
     private final Context mContext;
@@ -121,6 +125,9 @@ public class NavigationModeController implements Dumpable {
                 updateCurrentInteractionMode(true /* notify */);
             }
         });
+
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                OMNI_BACK_GESTURE_HEIGHT);
 
         updateCurrentInteractionMode(false /* notify */);
     }
@@ -201,6 +208,15 @@ public class NavigationModeController implements Dumpable {
         ApkAssets[] assets = context.getResources().getAssets().getApkAssets();
         for (ApkAssets a : assets) {
             Log.d(TAG, "    " + a.getDebugName());
+        }
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        if (OMNI_BACK_GESTURE_HEIGHT.equals(key)) {
+            for (int i = 0; i < mListeners.size(); i++) {
+                mListeners.get(i).onSettingsChanged();
+            }
         }
     }
 }
