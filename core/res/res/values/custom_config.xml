@@ -66,4 +66,5 @@
     <!-- Aspect ratio of screen -->
     <item name="config_screenAspectRatio" format="float" type="dimen">2.1</item>
 
+    <dimen name="config_backGestureHeightSmall">120dp</dimen>
 </resources>
