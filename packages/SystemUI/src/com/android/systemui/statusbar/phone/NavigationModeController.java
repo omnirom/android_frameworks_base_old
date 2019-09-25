@@ -29,6 +29,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -36,6 +37,9 @@ import android.content.om.IOverlayManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ApkAssets;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -77,6 +81,7 @@ public class NavigationModeController implements Dumpable {
 
     public interface ModeChangedListener {
         void onNavigationModeChanged(int mode);
+        default void onSettingsChanged() {}
     }
 
     private final Context mContext;
@@ -157,6 +162,21 @@ public class NavigationModeController implements Dumpable {
                 }
             };
 
+    private final class OmniSettingsObserver extends ContentObserver {
+        public OmniSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            for (int i = 0; i < mListeners.size(); i++) {
+                mListeners.get(i).onSettingsChanged();
+            }
+        }
+    }
+
+    private OmniSettingsObserver mSettingsObserver;
+
     @Inject
     public NavigationModeController(Context context,
             DeviceProvisionedController deviceProvisionedController,
@@ -173,6 +193,11 @@ public class NavigationModeController implements Dumpable {
         overlayFilter.addDataScheme("package");
         overlayFilter.addDataSchemeSpecificPart("android", PatternMatcher.PATTERN_LITERAL);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, overlayFilter, null, null);
+
+        mSettingsObserver = new OmniSettingsObserver(new Handler());
+        mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                Settings.System.OMNI_BACK_GESTURE_HEIGHT),
+                false, mSettingsObserver, UserHandle.USER_ALL);
 
         IntentFilter preferredActivityFilter = new IntentFilter(ACTION_PREFERRED_ACTIVITY_CHANGED);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, preferredActivityFilter, null,
