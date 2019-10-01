@@ -57,7 +57,7 @@ public class ApduServiceInfo implements Parcelable {
      * The service that implements this
      */
     @UnsupportedAppUsage
-    protected ResolveInfo mService;
+    protected  ResolveInfo mService;
 
     /**
      * Description of the service
@@ -85,13 +85,13 @@ public class ApduServiceInfo implements Parcelable {
      * Mapping from category to static AID group
      */
     @UnsupportedAppUsage
-    protected HashMap<String, AidGroup> mStaticAidGroups;
+    protected  HashMap<String, AidGroup> mStaticAidGroups;
 
     /**
      * Mapping from category to dynamic AID group
      */
     @UnsupportedAppUsage
-    protected HashMap<String, AidGroup> mDynamicAidGroups;
+    protected  HashMap<String, AidGroup> mDynamicAidGroups;
 
     /**
      * Whether this service should only be started when the device is unlocked.
