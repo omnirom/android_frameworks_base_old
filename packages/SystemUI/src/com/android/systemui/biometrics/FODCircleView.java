@@ -84,10 +84,9 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     private boolean mIsScreenOn;
     private boolean mIsViewAdded;
     private boolean mIsRemoving;
+    private boolean mHasTrust = false;
 
     private Handler mHandler;
-
-    private Timer mBurnInProtectionTimer;
 
     private IFingerprintInscreenCallback mFingerprintInscreenCallback =
             new IFingerprintInscreenCallback.Stub() {
@@ -124,13 +123,18 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             super.onDreamingStateChanged(dreaming);
             mIsDreaming = dreaming;
             mIsInsideCircle = false;
-            if (dreaming) {
-                mBurnInProtectionTimer = new Timer();
-                mBurnInProtectionTimer.schedule(new BurnInProtectionTask(), 0, 60 * 1000);
-            } else if (mBurnInProtectionTimer != null) {
-                mBurnInProtectionTimer.cancel();
+            if (mIsViewAdded) {
+                resetPosition();
+                invalidate();
             }
+        }
 
+        @Override
+        public void onPulsing(boolean pulsing) {
+            super.onPulsing(pulsing);
+            mIsPulsing = pulsing;
+	    if (mIsPulsing) mIsDreaming = false;
+            mIsInsideCircle = false;
             if (mIsViewAdded) {
                 resetPosition();
                 invalidate();
@@ -203,6 +207,18 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 hide();
             }
         }
+
+        @Override
+        public void onTrustChanged(int userId) {
+            super.onTrustChanged(userId);
+            int mUserId = userId;
+	    mHasTrust = (mUpdateMonitor.getUserHasTrust(mUserId) ? true : false);
+            if (mHasTrust) {
+                hide();
+            } else if (mUpdateMonitor.isFingerprintDetectionRunning()) {
+                show();
+            }
+        }
     };
 
     public FODCircleView(Context context) {
@@ -269,7 +285,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         // the HAL is expected (if supported) to set the screen brightness
         // to maximum / minimum immediately when called
         if (mIsInsideCircle) {
-            if (mIsDreaming) {
+            if (mIsDreaming || mIsPulsing) {
                 setAlpha(1.0f);
             }
             if (!mIsPressed) {
@@ -284,7 +300,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 mIsPressed = true;
             }
         } else {
-            setAlpha(mIsDreaming ? 0.5f : 1.0f);
+            setAlpha(mIsDreaming ? 0.0f : 1.0f);
             if (mIsPressed) {
                 IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
                 if (daemon != null) {
@@ -401,10 +417,17 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         if (mIsViewAdded) {
             return;
         }
-
+        if (!mUpdateMonitor.isUnlockingWithBiometricsPossible
+			(KeyguardUpdateMonitor.getCurrentUser()) ||
+            !mUpdateMonitor.isUnlockingWithBiometricAllowed()) {
+            return;
+        }
         if (mIsBouncer) {
             return;
         }
+        if (mUpdateMonitor.isKeyguardVisible() && mHasTrust && !mIsPulsing) {
+            return;
+	}
 
         resetPosition();
 
@@ -415,8 +438,9 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         mParams.setTitle("Fingerprint on display");
         mParams.packageName = "android";
         mParams.type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
-        mParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+        mParams.flags = WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM |
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH |
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
                 WindowManager.LayoutParams.FLAG_DIM_BEHIND |
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
         mParams.gravity = Gravity.TOP | Gravity.LEFT;
@@ -469,11 +493,6 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 break;
             default:
                 throw new IllegalArgumentException("Unknown rotation: " + rotation);
-        }
-
-        if (mIsDreaming) {
-            mParams.x += mDreamingOffsetX;
-            mParams.y += mDreamingOffsetY;
         }
 
         if (mIsViewAdded) {
@@ -534,27 +553,4 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             setImageResource(R.drawable.fod_icon_default);
         }
     }
-
-    private class BurnInProtectionTask extends TimerTask {
-        @Override
-        public void run() {
-            // It is fine to modify the variables here because
-            // no other thread will be modifying it
-            long now = System.currentTimeMillis() / 1000 / 60;
-            mDreamingOffsetX = (int) (now % (mDreamingMaxOffset * 4));
-            if (mDreamingOffsetX > mDreamingMaxOffset * 2) {
-                mDreamingOffsetX = mDreamingMaxOffset * 4 - mDreamingOffsetX;
-            }
-            // Let y to be not synchronized with x, so that we get maximum movement
-            mDreamingOffsetY = (int) ((now + mDreamingMaxOffset / 3) % (mDreamingMaxOffset * 2));
-            if (mDreamingOffsetY > mDreamingMaxOffset * 2) {
-                mDreamingOffsetY = mDreamingMaxOffset * 4 - mDreamingOffsetY;
-            }
-            mDreamingOffsetX -= mDreamingMaxOffset;
-            mDreamingOffsetY -= mDreamingMaxOffset;
-            if (mIsViewAdded) {
-                mHandler.post(() -> resetPosition());
-            }
-        }
-    };
 }
