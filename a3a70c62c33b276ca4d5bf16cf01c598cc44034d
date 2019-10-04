@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "25b8ad16_27b1acab",
+        "filename": "api/system-current.txt",
+        "patchSetId": 2
+      },
+      "lineNbr": 9291,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-10-04T17:52:36Z",
+      "side": 1,
+      "message": "normally we NEVER change current api but add the missing @hide",
+      "revId": "a3a70c62c33b276ca4d5bf16cf01c598cc44034d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
