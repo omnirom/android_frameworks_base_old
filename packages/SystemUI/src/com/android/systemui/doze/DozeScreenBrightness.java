@@ -18,6 +18,7 @@ package com.android.systemui.doze;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.Sensor;
@@ -59,6 +60,9 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private boolean mScreenOff = false;
     private int mLastSensorValue = -1;
 
+    // omni additions start
+    private int mDefaultPulseBrightness;
+
     /**
      * Debug value used for emulating various display brightness buckets:
      *
@@ -71,7 +75,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     public DozeScreenBrightness(Context context, DozeMachine.Service service,
             SensorManager sensorManager, Sensor lightSensor, DozeHost host,
             Handler handler, int defaultDozeBrightness, int[] sensorToBrightness,
-            int[] sensorToScrimOpacity, boolean debuggable) {
+            int[] sensorToScrimOpacity, boolean debuggable, int defaultPulseBrightness) {
         mContext = context;
         mDozeService = service;
         mSensorManager = sensorManager;
@@ -83,6 +87,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         mDefaultDozeBrightness = defaultDozeBrightness;
         mSensorToBrightness = sensorToBrightness;
         mSensorToScrimOpacity = sensorToScrimOpacity;
+        mDefaultPulseBrightness = defaultPulseBrightness != -1 ? defaultPulseBrightness : defaultDozeBrightness;
 
         if (mDebuggable) {
             IntentFilter filter = new IntentFilter();
@@ -97,7 +102,10 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         this(context, service, sensorManager, lightSensor, host, handler,
                 context.getResources().getInteger(
                         com.android.internal.R.integer.config_screenBrightnessDoze),
-                policy.screenBrightnessArray, policy.dimmingScrimArray, DEBUG_AOD_BRIGHTNESS);
+                policy.screenBrightnessArray, policy.dimmingScrimArray, DEBUG_AOD_BRIGHTNESS,
+                Settings.System.getIntForUser(context.getContentResolver(),
+			Settings.System.OMNI_PULSE_BRIGHTNESS, -1,
+		        UserHandle.USER_CURRENT));
     }
 
     @Override
@@ -107,7 +115,11 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
                 resetBrightnessToDefault();
                 break;
             case DOZE_AOD:
+                setBrightnessToValue(mDefaultDozeBrightness);
+                setLightSensorEnabled(true);
+                break;
             case DOZE_REQUEST_PULSE:
+                setBrightnessToValue(mDefaultPulseBrightness);
                 setLightSensorEnabled(true);
                 break;
             case DOZE:
@@ -192,6 +204,10 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private void resetBrightnessToDefault() {
         mDozeService.setDozeScreenBrightness(clampToUserSetting(mDefaultDozeBrightness));
         mDozeHost.setAodDimmingScrim(0f);
+    }
+
+    private void setBrightnessToValue(int value) {
+        mDozeService.setDozeScreenBrightness(clampToUserSetting(value));
     }
 
     private int clampToUserSetting(int brightness) {
