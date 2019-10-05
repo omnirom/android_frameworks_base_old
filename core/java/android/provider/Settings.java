@@ -4902,6 +4902,15 @@ public final class Settings {
 
         /** @hide */
         private static final Validator OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR =
+
+        /**
+         * Disable expanding quick settings on secure lock screens
+         *
+         * @hide
+         */
+        public static final String OMNI_LOCK_QS_DISABLED = "lockscreen_qs_disabled";
+
+        private static final Validator OMNI_LOCK_QS_DISABLED_VALIDATOR =
                 BOOLEAN_VALIDATOR;
 
         /**
@@ -5018,6 +5027,7 @@ public final class Settings {
             OMNI_DOZE_BRIGHTNESS,
             OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
             OMNI_FINGERPRINT_SUCCESS_VIB,
+            OMNI_LOCK_QS_DISABLED,
         };
 
         /**
@@ -5181,6 +5191,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_DOZE_BRIGHTNESS);
             PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN);
             PRIVATE_SETTINGS.add(OMNI_FINGERPRINT_SUCCESS_VIB);
+            PRIVATE_SETTINGS.add(OMNI_LOCK_QS_DISABLED);
         }
 
         /**
@@ -5345,6 +5356,7 @@ public final class Settings {
                     OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR);
             VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB,
                     OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR);
+            VALIDATORS.put(OMNI_LOCK_QS_DISABLED, OMNI_LOCK_QS_DISABLED_VALIDATOR);
         }
 
         /**
