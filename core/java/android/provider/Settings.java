@@ -4862,6 +4862,15 @@ public final class Settings {
         private static final Validator OMNI_VOLUME_BUTTON_MUSIC_CONTROL_VALIDATOR =
                 BOOLEAN_VALIDATOR;
 
+        /** Whether to allow one finger quick settings expansion on the right side of the statusbar.
+         *
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_QUICK_QS_PULLDOWN = "status_bar_quick_qs_pulldown";
+
+        private static final Validator OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
         /**
          * User definable value of pulse notification screen brightness
          *
@@ -4996,6 +5005,7 @@ public final class Settings {
             OMNI_VOLUME_BUTTON_MUSIC_CONTROL,
             OMNI_PULSE_BRIGHTNESS,
             OMNI_DOZE_BRIGHTNESS,
+            OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
         };
 
         /**
@@ -5157,6 +5167,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_VOLUME_BUTTON_MUSIC_CONTROL);
             PRIVATE_SETTINGS.add(OMNI_PULSE_BRIGHTNESS);
             PRIVATE_SETTINGS.add(OMNI_DOZE_BRIGHTNESS);
+            PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN);
         }
 
         /**
@@ -5317,6 +5328,8 @@ public final class Settings {
                     OMNI_VOLUME_BUTTON_MUSIC_CONTROL_VALIDATOR);
             VALIDATORS.put(OMNI_PULSE_BRIGHTNESS, OMNI_PULSE_BRIGHTNESS_VALIDATOR);
             VALIDATORS.put(OMNI_DOZE_BRIGHTNESS, OMNI_DOZE_BRIGHTNESS_VALIDATOR);
+            VALIDATORS.put(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
+                    OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR);
         }
 
         /**
