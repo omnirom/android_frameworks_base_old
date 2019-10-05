@@ -4863,6 +4863,17 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * User definable value of pulse notification screen brightness
+         *
+         * @hide
+         */
+        public static final String OMNI_PULSE_BRIGHTNESS = "pulse_brightness";
+
+        /** @hide */
+        private static final Validator OMNI_PULSE_BRIGHTNESS_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4972,6 +4983,7 @@ public final class Settings {
             OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN,
             OMNI_SHOW_CPU_OVERLAY,
             OMNI_VOLUME_BUTTON_MUSIC_CONTROL,
+            OMNI_PULSE_BRIGHTNESS,
         };
 
         /**
@@ -5131,6 +5143,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN);
             PRIVATE_SETTINGS.add(OMNI_SHOW_CPU_OVERLAY);
             PRIVATE_SETTINGS.add(OMNI_VOLUME_BUTTON_MUSIC_CONTROL);
+            PRIVATE_SETTINGS.add(OMNI_PULSE_BRIGHTNESS);
         }
 
         /**
@@ -5289,6 +5302,8 @@ public final class Settings {
                     OMNI_SHOW_CPU_OVERLAY_VALIDATOR);
             VALIDATORS.put(OMNI_VOLUME_BUTTON_MUSIC_CONTROL,
                     OMNI_VOLUME_BUTTON_MUSIC_CONTROL_VALIDATOR);
+            VALIDATORS.put(OMNI_PULSE_BRIGHTNESS,
+                    OMNI_PULSE_BRIGHTNESS_VALIDATOR);
         }
 
         /**
