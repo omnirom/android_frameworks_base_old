@@ -18,18 +18,12 @@
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:title="@string/nav_bar">
 
-    <com.android.systemui.tuner.RadioListPreference
+    <ListPreference
         android:key="layout"
         android:title="@string/nav_bar_layout"
         android:summary="%s"
         android:persistent="false"
         android:entries="@array/nav_bar_layouts"
         android:entryValues="@array/nav_bar_layouts_values" />
-
-    <Preference
-        android:key="navbar_editor"
-        android:title="@string/navbar_editor_title"
-        android:summary="@string/navbar_editor_summary"
-        android:fragment="com.android.systemui.tuner.NavBarEditor" />
 
 </PreferenceScreen>
