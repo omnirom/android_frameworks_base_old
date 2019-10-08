@@ -658,6 +658,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_MOVE_DISPLAY_TO_TOP = 28;
     private static final int MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK = 29;
     private static final int MSG_TOGGLE_TORCH = 30;
+    private static final int MSG_DISPATCH_VOLKEY_SKIP_TRACK = 31;
+
 
     // omni additions start
     private boolean mOmniSwitchRecents;
@@ -777,6 +779,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case MSG_TOGGLE_TORCH:
                     performKeyAction(KEY_ACTION_TOGGLE_TORCH);
                     break;
+                case MSG_DISPATCH_VOLKEY_SKIP_TRACK: {
+                    sendSkipTrackEventToStatusBar(msg.arg1);
+                    mVolumeMusicControlActive = true;
+                    break;
+                }
             }
         }
     }
@@ -4055,18 +4062,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // {@link interceptKeyBeforeDispatching()}.
                     result |= ACTION_PASS_TO_USER;
                 } else if ((result & ACTION_PASS_TO_USER) == 0) {
-                    if (!interactive && mVolumeMusicControl && isMusicActive()) {
+                    if (!interactive && mVolumeMusicControl) {
                         boolean notHandledMusicControl = false;
                         if (down) {
                             if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-                                scheduleLongPressKeyEvent(event, KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+                                scheduleLongPressKeyEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS);
                                 break;
                             } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-                                scheduleLongPressKeyEvent(event, KeyEvent.KEYCODE_MEDIA_NEXT);
+                                scheduleLongPressKeyEvent(KeyEvent.KEYCODE_MEDIA_NEXT);
                                 break;
                             }
                         } else {
-                            mHandler.removeMessages(MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK);
+                            mHandler.removeMessages(MSG_DISPATCH_VOLKEY_SKIP_TRACK);
                             notHandledMusicControl = true;
                         }
 
@@ -4355,6 +4362,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         Message message = mHandler.obtainMessage(MSG_SYSTEM_KEY_PRESS, keyCode, 0);
         message.setAsynchronous(true);
         mHandler.sendMessage(message);
+    }
+
+    private void sendSkipTrackEventToStatusBar(int keyCode) {
+        sendSystemKeyToStatusBar(keyCode);
     }
 
     /**
@@ -6072,5 +6083,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             }
         }
+    }
+
+    private void scheduleLongPressKeyEvent(int keyCode) {
+        Message msg = mHandler.obtainMessage(MSG_DISPATCH_VOLKEY_SKIP_TRACK, keyCode, 0);
+        msg.setAsynchronous(true);
+        mHandler.sendMessageDelayed(msg, ViewConfiguration.getLongPressTimeout());
     }
 }
