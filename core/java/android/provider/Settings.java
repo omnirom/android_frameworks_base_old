@@ -5043,6 +5043,44 @@ public final class Settings {
         private static final Validator OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR =
                 ANY_INTEGER_VALIDATOR;
 
+         /**
+         * Whether to enable PULSE Edge lights
+         * @hide
+         */
+        public static final String OMNI_PULSE_AMBIENT_LIGHT = "pulse_ambient_light";
+
+        private static final Validator OMNI_PULSE_AMBIENT_LIGHT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+         /**
+         * Whether to enable Ambient Edge lights
+         * @hide
+         */
+
+        public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED = "ambient_notification_light_enabled";
+
+        private static final Validator OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+         /**
+         * Whether to enable Ambient Edge lights
+         * @hide
+         */
+
+        public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT = "ambient_notification_light";
+
+        private static final Validator OMNI_AMBIENT_NOTIFICATION_LIGHT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+         /**
+         * Whether Ambient Edge lights are activated
+         * @hide
+         */
+
+        public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED = "ambient_notification_light_activated";
+
+        private static final Validator OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
         /**
          * @hide
          */
@@ -5199,6 +5237,10 @@ public final class Settings {
             OMNI_USE_OLD_MOBILETYPE,
             OMNI_NAVIGATION_BAR_ARROW_KEYS,
             OMNI_LOCKSCREEN_HIDE_MEDIA,
+            OMNI_PULSE_AMBIENT_LIGHT,
+            OMNI_AMBIENT_NOTIFICATION_LIGHT,
+            OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED,
+            OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED,
         };
 
         /**
@@ -5378,6 +5420,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_USE_OLD_MOBILETYPE);
             PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_ARROW_KEYS);
             PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_HIDE_MEDIA);
+            PRIVATE_SETTINGS.add(OMNI_PULSE_AMBIENT_LIGHT);
+            PRIVATE_SETTINGS.add(OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED);
         }
 
         /**
@@ -5569,6 +5613,10 @@ public final class Settings {
             VALIDATORS.put(OMNI_NAVIGATION_BAR_ARROW_KEYS,
                     OMNI_NAVIGATION_BAR_ARROW_KEYS_VALIDATOR);
             VALIDATORS.put(OMNI_LOCKSCREEN_HIDE_MEDIA,OMNI_LOCKSCREEN_HIDE_MEDIA_VALIDATOR);
+            VALIDATORS.put(OMNI_PULSE_AMBIENT_LIGHT, OMNI_PULSE_AMBIENT_LIGHT_VALIDATOR);
+            VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT, OMNI_AMBIENT_NOTIFICATION_LIGHT_VALIDATOR);
+            VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED, OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED_VALIDATOR);
+            VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED, OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED_VALIDATOR);
         }
 
         /**
