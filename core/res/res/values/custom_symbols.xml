@@ -31,4 +31,7 @@
     
     <java-symbol type="color" name="primary_text_material_light" />
     <java-symbol type="color" name="primary_text_material_dark" />
+
+    <!-- Ambient notification light color -->
+    <java-symbol type="integer" name="config_ambientNotificationDefaultColor" />
 </resources>
