@@ -47,9 +47,11 @@
     <string name="qs_menu_item_reset">Zurücksetzen</string>
     <string name="qs_menu_item_titles">Beschriftungen anzeigen</string>
     <string name="qs_menu_item_qs_columns">Quickbar Spalten</string>
+    <string name="qs_menu_item_columns_auto">Automatisch</string>
     <string name="tuner_quick_settings">Schnelleinstellungen</string>
     <string name="tuner_show_brightness_new">Zeige Helligkeitsregler</string>
     <string name="tuner_brightness_position_bottom">Helligkeitsregler unten</string>
+    <string name="tuner_show_secure_title">Sicherheitsfußzeile anzeigen</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Aktiviert</string>
     <string name="quick_settings_network_adb_disabled_label">Deaktiviert</string>
@@ -62,6 +64,10 @@
     <string name="accessibility_quick_settings_heads_up_changed_off">Kurzes Einblenden ausgeschaltet.</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Kurzes Einblenden eingeschaltet.</string>
     <string name="quick_settings_screenrecord_label">Bildschirmaufnahme</string>
+    <string name="tuner_keyguard_show_battery_bar_title">Batterie Bar anzeigen</string>
+    <string name="tuner_keyguard_show_battery_bar_summary">Batterie Bar bei \"nur beim Laden\" AOD-Modus anzeigen</string>
+    <string name="tuner_keyguard_show_battery_bar_always_title">Batterie Bar immer anzeigen</string>
+    <string name="tuner_keyguard_show_battery_bar_always_summary">Batterie Bar beim Laden immer anzeigen</string>
     <string name="omnijaws_service_error">Fehler</string>
     <string name="omnijaws_service_unkown">Keine Wetterdaten</string>
     <string name="omnijaws_service_error_long">Fehler beim Laden der Wetterdaten</string>
@@ -76,6 +82,8 @@
     <string name="keycode">Tastencode</string>
     <string name="no_home_title">Keine \"Home\"-Taste gefunden</string>
     <string name="no_home_message">Eine \"Home\"-Taste ist erforderlich, um dieses Gerät zu bedienen. Bitte fügen Sie eine \"Home\"-Taste vor dem Speichern hinzu.</string>
+    <string name="clipboard_description">Die Zwischenablage erlaubt es Elemente direkt in die Zwischenablage zu verschieben. Ebenso können vorhandene Elemente direkt aus der Zwischenablage gezogen werden.</string>
+    <string name="keycode_description">Tastencode-Schaltflächen erlauben es, Tastaturtasten zur Navigationsleiste hinzuzufügen. Wenn sie gedrückt werden, emulieren sie die gewählte Tastaturtaste. Zuerst muss die Taste für die Schaltfläche ausgewählt werden, danach ein Bild, das auf der Schaltfläche angezeigt wird.</string>
     <string name="start">Start</string>
     <string name="center">Mitte</string>
     <string name="end">Ende</string>
@@ -89,4 +97,5 @@
     <string name="left">Links</string>
     <string name="right">Rechts</string>
     <string name="navbar_editor_title">Editor</string>
+    <string name="navbar_editor_summary">Navigationsleiste konfigurieren</string>
 </resources>

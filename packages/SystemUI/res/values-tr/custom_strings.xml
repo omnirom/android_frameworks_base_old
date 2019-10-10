@@ -51,6 +51,7 @@
     <string name="tuner_quick_settings">Hızlı ayarlar</string>
     <string name="tuner_show_brightness_new">Parlaklık kaydırağını göster</string>
     <string name="tuner_brightness_position_bottom">Parlaklık kaydırağı altta</string>
+    <string name="tuner_show_secure_title">Güvenliğe dair alt bilgiyi göster</string>
     <string name="tuner_show_drag_handle">Sürükleme kolunu göster</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Devrede</string>
@@ -65,6 +66,7 @@
     <string name="accessibility_quick_settings_heads_up_changed_on">Ekran üstü bildirimler devrede.</string>
     <string name="quick_settings_screenrecord_label">Ekran kaydı</string>
     <string name="tuner_keyguard_show_battery_bar_title">Pil çubuğunu göster</string>
+    <string name="tuner_keyguard_show_battery_bar_summary">Always on display\'de şarj esnasında pil çubuğunu gösterir</string>
     <string name="tuner_keyguard_show_battery_bar_always_title">Pil çubuğunu daima göster</string>
     <string name="tuner_keyguard_show_battery_bar_always_summary">Pil çubuğunu şarj esnasında daima göster</string>
     <string name="omnijaws_service_error">Hatâ</string>
