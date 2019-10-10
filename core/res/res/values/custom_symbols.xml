@@ -48,6 +48,9 @@
   <java-symbol type="bool" name="config_FastChargingLedSupported" />
   <java-symbol type="integer" name="config_notificationsFastBatteryARGB" />
 
+  <!-- Ambiant Pulse Light -->
+  <java-symbol type="integer" name="config_AmbiantPulseLightColor" />
+
   <java-symbol type="string" name="config_comboNetworkLocationProvider" />
 
   <!-- Caf IMS -->

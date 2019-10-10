@@ -58,6 +58,9 @@
     <!-- Default value for led color when fast charging is active -->
     <integer name="config_notificationsFastBatteryARGB">0x0000FF</integer>
 
+    <!-- Default value for Ambiant Pulse light color -->
+    <integer name="config_AmbiantPulseLightColor" >0x3980FF</integer>
+
     <!-- Component name of the combo network location provider. -->
     <string name="config_comboNetworkLocationProvider" translatable="false">@null</string>
 

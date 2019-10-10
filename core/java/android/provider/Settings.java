@@ -4782,6 +4782,27 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether Ambiant Pulse Notification light is enabled
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String OMNI_PULSE_AMBIANT_LIGHT_ENABLED = "pulse_ambient_light_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_PULSE_AMBIANT_LIGHT_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * What color to use for the battery LED while charging - low
+         * @hide
+         */
+        public static final String OMNI_PULSE_AMBIANT_LIGHT_COLOR = "pulse_ambient_light_color";
+
+        /** @hide */
+        private static final Validator OMNI_PULSE_AMBIANT_LIGHT_COLOR_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
          * @hide
          */
         public static final String OMNIJAWS_WEATHER_ICON_PACK = "omnijaws_weather_icon_pack";
@@ -5042,6 +5063,15 @@ public final class Settings {
         private static final Validator OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR =
                 ANY_INTEGER_VALIDATOR;
 
+         /**
+         * Whether to enable PULSE Ambient light
+         * @hide
+         */
+        public static final String OMNI_PULSE_AMBIENT_LIGHT = "pulse_ambient_light";
+
+        private static final Validator OMNI_PULSE_AMBIENT_LIGHT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
@@ -5169,6 +5199,7 @@ public final class Settings {
             OMNI_VIBRATE_ON_DISCONNECT,
             OMNI_DOZE_ON_CHARGE,
             OMNI_LOCKSCREEN_MEDIA_BLUR,
+            OMNI_PULSE_AMBIENT_LIGHT,
         };
 
         /**
@@ -5318,6 +5349,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_FAST_BATTERY_LIGHT_COLOR);
             PRIVATE_SETTINGS.add(OMNI_FAST_CHARGING_LED_ENABLED);
             PRIVATE_SETTINGS.add(OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED);
+            PRIVATE_SETTINGS.add(OMNI_PULSE_AMBIANT_LIGHT_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_PULSE_AMBIANT_LIGHT_COLOR);
             PRIVATE_SETTINGS.add(OMNIJAWS_WEATHER_ICON_PACK);
             PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_WEATHER_ENABLED);
             PRIVATE_SETTINGS.add(OMNI_ASPECT_RATIO_APPS_ENABLED);
@@ -5345,6 +5378,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_DISCONNECT);
             PRIVATE_SETTINGS.add(OMNI_DOZE_ON_CHARGE);
             PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_MEDIA_BLUR);
+            PRIVATE_SETTINGS.add(OMNI_PULSE_AMBIENT_LIGHT);
         }
 
         /**
@@ -5485,6 +5519,10 @@ public final class Settings {
                     OMNI_FAST_CHARGING_LED_ENABLED_VALIDATOR);
             VALIDATORS.put(OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED,
                     OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED_VALIDATOR);
+            VALIDATORS.put(OMNI_PULSE_AMBIANT_LIGHT_ENABLED,
+                    OMNI_PULSE_AMBIANT_LIGHT_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_PULSE_AMBIANT_LIGHT_COLOR,
+                    OMNI_PULSE_AMBIANT_LIGHT_COLOR_VALIDATOR);
             VALIDATORS.put(OMNIJAWS_WEATHER_ICON_PACK, OMNIJAWS_WEATHER_ICON_PACK_VALIDATOR);
             VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED,
                     OMNI_LOCKSCREEN_WEATHER_ENABLED_VALIDATOR);
@@ -5532,6 +5570,7 @@ public final class Settings {
             VALIDATORS.put(OMNI_DOZE_ON_CHARGE,
                     OMNI_DOZE_ON_CHARGE_VALIDATOR);
             VALIDATORS.put(OMNI_LOCKSCREEN_MEDIA_BLUR, OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR);
+            VALIDATORS.put(OMNI_PULSE_AMBIENT_LIGHT, OMNI_PULSE_AMBIENT_LIGHT_VALIDATOR);
         }
 
         /**

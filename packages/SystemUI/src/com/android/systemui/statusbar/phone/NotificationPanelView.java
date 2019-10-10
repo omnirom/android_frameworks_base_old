@@ -42,9 +42,13 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.PowerManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.os.SystemClock;
+import android.service.dreams.IDreamManager;
+import android.service.dreams.DreamService;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -106,6 +110,8 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
+
+import com.android.systemui.omni.NotificationLightsView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -296,6 +302,7 @@ public class NotificationPanelView extends PanelView implements
     // Omni additions
     private boolean mQsSecureExpandDisabled;
     private LockPatternUtils mLockPatternUtils;
+    private NotificationLightsView mPulseLightsView;
 
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
@@ -495,6 +502,7 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardBottomArea = findViewById(R.id.keyguard_bottom_area);
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mLastOrientation = getResources().getConfiguration().orientation;
+        mPulseLightsView = (NotificationLightsView) findViewById(R.id.lights_container);
 
         initBottomArea();
 
@@ -3306,11 +3314,21 @@ public class NotificationPanelView extends PanelView implements
         positionClockAndNotifications();
     }
 
+    private IDreamManager mDreamManager;
+    
+
     public void setPulsing(boolean pulsing) {
         mPulsing = pulsing;
         DozeParameters dozeParameters = DozeParameters.getInstance(mContext);
         final boolean animatePulse = !dozeParameters.getDisplayNeedsBlanking()
                 && dozeParameters.getAlwaysOn();
+        boolean pulseLights = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_PULSE_AMBIENT_LIGHT,
+                0, UserHandle.USER_CURRENT) != 0;
+
+        mDreamManager = IDreamManager.Stub.asInterface(
+                ServiceManager.getService(DreamService.DREAM_SERVICE));
+
         if (animatePulse) {
             mAnimateNextPositionUpdate = true;
         }
@@ -3319,8 +3337,53 @@ public class NotificationPanelView extends PanelView implements
         if (!mPulsing && !mDozing) {
             mAnimateNextPositionUpdate = false;
         }
+        if ((mPulseLightsView != null) && (pulseLights)) {
+            //mPulsing = mHeadsUpManager.hasPinnedHeadsUp();
+            //mHeadsUpManager.getShowingEntry()
+            boolean mKHasNotifications = mEntryManager.getNotificationData().getActiveNotifications().size() > 0;
+            Log.d(TAG, "mEntryManager.getNotificationData() : " + mKHasNotifications);
+            //mHasNotifications = mEntryManager.getNotificationData().getActiveNotifications().size() > 0;
+            /*if (mBarState == StatusBarState.SHADE){
+                mPulseLightsView.setVisibility(mKHasNotifications ? View.VISIBLE : View.GONE);
+                Log.d(TAG, "mEntryManager.getNotificationData() : " + mKHasNotifications);
+            }*/
+            if (mPulsing) {
+                mPulseLightsView.setVisibility(mPulsing ? View.VISIBLE : View.GONE);
+                mPulseLightsView.animateNotification(mKHasNotifications);
+                mPulseLightsView.setPulsing(mPulsing);
+                Log.d(TAG, "mEntryManager.getNotificationData() : " + mKHasNotifications);
+                /*try {
+                    mDreamManager.dream();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to dream", e);
+                }*/
+                //mKeyguardStatusView.setHasVisibleNotifications(mKHasNotifications);
+                
+            /*} else if (!mPulsing && !mKHasNotifications) {
+                mPulseLightsView.animateNotification(mPulsing);
+                mPulseLightsView.clearAnimation();
+                mPulseLightsView.setVisibility(View.GONE);
+                //mKeyguardStatusView.setVisibility(View.GONE);
+                //mDreamManager.awaken();
+            } else*/
+            } else if (!mPulsing && mKHasNotifications) {
+                mPulseLightsView.setVisibility(mKHasNotifications ? View.VISIBLE : View.GONE);
+                mPulseLightsView.animateNotification(mKHasNotifications);
+                //mPulseLightsView.setPulsing(mPulsing);
+                Log.d(TAG, "mEntryManager.getNotificationData() : " + mKHasNotifications);
+                try {
+                    mDreamManager.dream();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to dream", e);
+                }
+            } else {}
+        }
         mNotificationStackScroller.setPulsing(pulsing, animatePulse);
         mKeyguardStatusView.setPulsing(pulsing);
+    }
+
+    public boolean isPulsing() {
+        return mPulsing;
     }
 
     public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
