@@ -47,9 +47,11 @@
     <string name="qs_menu_item_reset">Сбросить</string>
     <string name="qs_menu_item_titles">Показать метки</string>
     <string name="qs_menu_item_qs_columns">Столбцы быстрой панели</string>
+    <string name="qs_menu_item_columns_auto">Авто</string>
     <string name="tuner_quick_settings">Быстрые настройки</string>
     <string name="tuner_show_brightness_new">Отображать ползунок яркости</string>
     <string name="tuner_brightness_position_bottom">Ползунок яркости внизу</string>
+    <string name="tuner_show_secure_title">Показать колонтитул безопасности</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Включено</string>
     <string name="quick_settings_network_adb_disabled_label">Выключено</string>
@@ -62,6 +64,10 @@
     <string name="accessibility_quick_settings_heads_up_changed_off">Всплывающие уведомления выключены.</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Всплывающие уведомления включены.</string>
     <string name="quick_settings_screenrecord_label">Запись экрана</string>
+    <string name="tuner_keyguard_show_battery_bar_title">Показать панель батареи</string>
+    <string name="tuner_keyguard_show_battery_bar_summary">Показывать панель батареи на AOD</string>
+    <string name="tuner_keyguard_show_battery_bar_always_title">Всегда показывать панель батареи</string>
+    <string name="tuner_keyguard_show_battery_bar_always_summary">Всегда показывать панель батареи при зарядке</string>
     <string name="omnijaws_service_error">Ошибка</string>
     <string name="omnijaws_service_unkown">Нет данных погоды</string>
     <string name="omnijaws_service_error_long">Ошибка загрузки данных о погоде</string>
@@ -76,6 +82,8 @@
     <string name="keycode">Ключевой код</string>
     <string name="no_home_title">Не найдена кнопка \"Домой\"</string>
     <string name="no_home_message">Для навигации по этому устройству требуется кнопка \"Домой\". Перед сохранением добавьте кнопку \"Домой\".</string>
+    <string name="clipboard_description">Буфер обмена позволяет перемещать элементы непосредственно в буфер обмена. Элементы также можно перетаскивать непосредственно из буфера обмена, когда они присутствуют.</string>
+    <string name="keycode_description">Кнопки клавиш позволяют добавлять клавиши клавиатуры в панель навигации. При нажатии они эмулируют выбранную клавишу клавиатуры. Сначала необходимо выбрать клавишу, затем изображение будет показано на кнопке.</string>
     <string name="start">В начале</string>
     <string name="center">В середине</string>
     <string name="end">В конце</string>
@@ -89,4 +97,5 @@
     <string name="left">Слева</string>
     <string name="right">Справа</string>
     <string name="navbar_editor_title">Редактор</string>
+    <string name="navbar_editor_summary">Настройка панели навигации</string>
 </resources>
