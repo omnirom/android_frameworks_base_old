@@ -5033,6 +5033,15 @@ public final class Settings {
         private static final Validator OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR =
                 ANY_INTEGER_VALIDATOR;
 
+         /**
+         * Whether to enable PULSE Ambient light
+         * @hide
+         */
+        public static final String OMNI_PULSE_AMBIENT_LIGHT = "pulse_ambient_light";
+
+        private static final Validator OMNI_PULSE_AMBIENT_LIGHT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
@@ -5160,6 +5169,7 @@ public final class Settings {
             OMNI_VIBRATE_ON_DISCONNECT,
             OMNI_DOZE_ON_CHARGE,
             OMNI_LOCKSCREEN_MEDIA_BLUR,
+            OMNI_PULSE_AMBIENT_LIGHT,
         };
 
         /**
@@ -5336,6 +5346,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_DISCONNECT);
             PRIVATE_SETTINGS.add(OMNI_DOZE_ON_CHARGE);
             PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_MEDIA_BLUR);
+            PRIVATE_SETTINGS.add(OMNI_PULSE_AMBIENT_LIGHT);
         }
 
         /**
@@ -5523,6 +5534,7 @@ public final class Settings {
             VALIDATORS.put(OMNI_DOZE_ON_CHARGE,
                     OMNI_DOZE_ON_CHARGE_VALIDATOR);
             VALIDATORS.put(OMNI_LOCKSCREEN_MEDIA_BLUR, OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR);
+            VALIDATORS.put(OMNI_PULSE_AMBIENT_LIGHT, OMNI_PULSE_AMBIENT_LIGHT_VALIDATOR);
         }
 
         /**
