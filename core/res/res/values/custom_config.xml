@@ -28,4 +28,7 @@
          platform signatures, specifically for use on devices with a vendor partition. -->
     <string-array name="config_vendorPlatformSignatures">
     </string-array>
+
+    <!-- Default value for Ambiant Pulse light color -->
+    <integer name="config_ambientNotificationDefaultColor">0xFF3980FF</integer>
 </resources>
