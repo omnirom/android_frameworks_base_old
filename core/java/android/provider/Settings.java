@@ -5320,6 +5320,30 @@ public final class Settings {
          */
         public static final String OMNI_DOZE_ON_CHARGE_NOW = "doze_on_charge_now";
 
+         /**
+         * Whether to enable PULSE Edge lights
+         * @hide
+         */
+        public static final String OMNI_PULSE_AMBIENT_LIGHT = "pulse_ambient_light";
+
+         /**
+         * Whether to enable Ambient Edge lights
+         * @hide
+         */
+        public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED = "ambient_notification_light_enabled";
+
+         /**
+         * Whether to enable Ambient Edge lights
+         * @hide
+         */
+        public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT = "ambient_notification_light";
+
+         /**
+         * Whether Ambient Edge lights are activated
+         * @hide
+         */
+        public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED = "ambient_notification_light_activated";
+
         /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
@@ -5341,6 +5365,10 @@ public final class Settings {
             OMNI_DEVICE_FEATURE_SETTINGS,
             OMNI_CUSTOM_FP_ICON,
             OMNI_DOZE_ON_CHARGE,
+            OMNI_PULSE_AMBIENT_LIGHT,
+            OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED,
+            OMNI_AMBIENT_NOTIFICATION_LIGHT,
+            OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED,
         };
 
         /**
@@ -5370,6 +5398,10 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_CUSTOM_FP_ICON, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DOZE_ON_CHARGE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_PULSE_AMBIENT_LIGHT, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED, 0);
         }
     }
 

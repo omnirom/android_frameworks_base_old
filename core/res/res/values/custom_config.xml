@@ -26,4 +26,6 @@
     <!-- Device uses Fingerprint On Display -->
     <bool name="config_usesFOD">false</bool>
 
+    <!-- Default value for Ambiant Pulse light color -->
+    <integer name="config_AmbiantPulseLightColor" >0x3980FF</integer>
 </resources>

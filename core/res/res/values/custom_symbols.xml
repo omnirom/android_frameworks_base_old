@@ -29,4 +29,8 @@
   <java-symbol type="anim" name="last_app_out" />
 
   <java-symbol type="bool" name="config_usesFOD" />
+
+  <!-- Ambiant Pulse Light -->
+  <java-symbol type="integer" name="config_AmbiantPulseLightColor" />
+
 </resources>
