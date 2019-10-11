@@ -27,6 +27,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IHwBinder;
@@ -211,6 +212,23 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 hide();
             }
         }
+    };
+
+    private AuthenticationCallback mFingerprintAuthenticationCallback
+        = new AuthenticationCallback() {
+
+        @Override
+        public void onAuthenticationError(int errorCode, CharSequence errString) {
+            super.onAuthenticationError(errorCode, errString);
+            if (errorCode == 8) {
+                if (errString.equals("6")) {
+                    mIsInsideCircle = false;
+                    setCustomIcon();
+                    invalidate();
+                }
+            }
+        }
+
     };
 
     public FODCircleView(Context context) {
