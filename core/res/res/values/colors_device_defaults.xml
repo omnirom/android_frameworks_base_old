@@ -69,8 +69,13 @@
     <color name="error_color_device_default_dark">@color/error_color_material_dark</color>
     <color name="error_color_device_default_light">@color/error_color_material_light</color>
 
+<<<<<<< HEAD   (33b4f2 SystemUI: add missing initial call to updateResources in bri)
     <color name="list_divider_color_light">@color/system_neutral1_200</color>
     <color name="list_divider_color_dark">@color/system_neutral1_700</color>
+=======
+    <color name="list_divider_color_light">#ffdadce0</color>
+    <color name="list_divider_color_dark">#20ffffff</color>
+>>>>>>> CHANGE (f4741d base: change default list_divider_color_dark)
     <color name="list_divider_opacity_device_default_light">@android:color/white</color>
     <color name="list_divider_opacity_device_default_dark">@android:color/white</color>
 
