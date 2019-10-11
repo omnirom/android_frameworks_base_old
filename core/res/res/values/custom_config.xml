@@ -86,4 +86,7 @@
 
     <!-- -1 means use same as config_screenBrightnessDoze -->
     <integer name="config_screenBrightnessPulse">-1</integer>
+
+    <integer name="config_defaultMaxCachedProcesses">32</integer>
+
 </resources>

@@ -211,6 +211,12 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 hide();
             }
         }
+
+        @Override
+        public void onAuthenticationError(int errMsgId, CharSequence errString) {
+            super.onAuthenticationError(errMsgId, errString);
+            mIsInsideCircle = false;
+        }
     };
 
     public FODCircleView(Context context) {
