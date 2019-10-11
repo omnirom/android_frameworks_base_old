@@ -67,4 +67,5 @@
 
   <java-symbol type="integer" name="config_screenBrightnessPulse" />
 
+  <java-symbol type="integer" name="config_defaultMaxCachedProcesses" />
 </resources>

@@ -259,6 +259,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
     private int mOverrideMaxCachedProcesses = -1;
+    private int deviceMaxCachedProcessesFlag;
 
     // The maximum number of cached processes we will keep around before killing them.
     // NOTE: this constant is *only* a control to not let us go too crazy with
@@ -334,6 +335,8 @@ final class ActivityManagerConstants extends ContentObserver {
                 MIN_AUTOMATIC_HEAP_DUMP_PSS_THRESHOLD_BYTES,
                 context.getResources().getInteger(
                         com.android.internal.R.integer.config_debugSystemServerPssThresholdBytes));
+        deviceMaxCachedProcessesFlag = context.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultMaxCachedProcesses);
     }
 
     public void start(ContentResolver resolver) {
@@ -503,6 +506,9 @@ final class ActivityManagerConstants extends ContentObserver {
             Slog.e(TAG,
                     "Unable to parse flag for max_cached_processes: " + maxCachedProcessesFlag, e);
             CUR_MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
+        }
+        if (deviceMaxCachedProcessesFlag != CUR_MAX_CACHED_PROCESSES) {
+            CUR_MAX_CACHED_PROCESSES = deviceMaxCachedProcessesFlag;
         }
         CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
 
