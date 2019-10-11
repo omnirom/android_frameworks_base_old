@@ -44,4 +44,6 @@
   <java-symbol type="integer" name="config_ambientNotificationDefaultColor" />
 
   <java-symbol type="array" name="config_vendorPlatformSignatures" />
+  <java-symbol type="integer" name="config_defaultMaxCachedProcesses" />
+  <java-symbol type="integer" name="config_defaultTrimCachedProcesses" />
 </resources>
