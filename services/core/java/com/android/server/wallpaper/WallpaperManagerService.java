@@ -131,7 +131,7 @@ import java.util.function.Predicate;
 public class WallpaperManagerService extends IWallpaperManager.Stub
         implements IWallpaperManagerService {
     private static final String TAG = "WallpaperManagerService";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final boolean DEBUG_LIVE = true;
 
     public static class Lifecycle extends SystemService {

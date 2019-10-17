@@ -52,6 +52,8 @@
     <string name="tuner_show_brightness_new">Отображать ползунок яркости</string>
     <string name="tuner_brightness_position_bottom">Ползунок яркости внизу</string>
     <string name="tuner_show_secure_title">Показать колонтитул безопасности</string>
+    <string name="tuner_show_drag_handle">Показывать плашку для перетаскивания</string>
+    <string name="tuner_battery_location_bar">Показывать батарею в строке состояния</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Включено</string>
     <string name="quick_settings_network_adb_disabled_label">Выключено</string>
@@ -68,6 +70,14 @@
     <string name="tuner_keyguard_show_battery_bar_summary">Показывать панель батареи на AOD</string>
     <string name="tuner_keyguard_show_battery_bar_always_title">Всегда показывать панель батареи</string>
     <string name="tuner_keyguard_show_battery_bar_always_summary">Всегда показывать панель батареи при зарядке</string>
+    <string name="tuner_keyguard_battery_percent_title">Показывать процент заряда батареи</string>
+    <string name="tuner_keyguard_battery_percent_summary">Принудительно показывать процент батареи в строке состояния при зарядке</string>
+    <string name="tuner_keyguard_show_watt_title">Показывать мощность тока при зарядке</string>
+    <string name="tuner_keyguard_show_watt_summary">Показывать мощность тока при зарядке в мВт</string>
+    <string name="tuner_keyguard_show_current_title">Показывать скорость зарядки</string>
+    <string name="tuner_keyguard_show_current_summary">Показывать значение скорости зарядки</string>
+    <string name="tuner_keyguard_show_battery_temp_title">Показывать температуру батареи</string>
+    <string name="tuner_keyguard_show_battery_temp_summary">Показывать значение температуры батареи</string>
     <string name="omnijaws_service_error">Ошибка</string>
     <string name="omnijaws_service_unkown">Нет данных погоды</string>
     <string name="omnijaws_service_error_long">Ошибка загрузки данных о погоде</string>

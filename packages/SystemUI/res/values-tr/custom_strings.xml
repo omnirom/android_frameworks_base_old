@@ -53,6 +53,7 @@
     <string name="tuner_brightness_position_bottom">Parlaklık kaydırağı altta</string>
     <string name="tuner_show_secure_title">Güvenliğe dair alt bilgiyi göster</string>
     <string name="tuner_show_drag_handle">Sürükleme kolunu göster</string>
+    <string name="tuner_battery_location_bar">Durum çubuğunda pili göster</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Devrede</string>
     <string name="quick_settings_network_adb_disabled_label">Devre dışı</string>
@@ -69,6 +70,14 @@
     <string name="tuner_keyguard_show_battery_bar_summary">Always on display\'de şarj esnasında pil çubuğunu gösterir</string>
     <string name="tuner_keyguard_show_battery_bar_always_title">Pil çubuğunu daima göster</string>
     <string name="tuner_keyguard_show_battery_bar_always_summary">Pil çubuğunu şarj esnasında daima göster</string>
+    <string name="tuner_keyguard_battery_percent_title">Pil yüzdesini göster</string>
+    <string name="tuner_keyguard_battery_percent_summary">Şarj esnâsında pil yüzdesi durum çubuğunda görünmeye mecbur edilir</string>
+    <string name="tuner_keyguard_show_watt_title">Şarj edilme watt\'ını göster</string>
+    <string name="tuner_keyguard_show_watt_summary">Şarj edilme watt\'ı değerini mW biriminde gösterir</string>
+    <string name="tuner_keyguard_show_current_title">Şarj akımını göster</string>
+    <string name="tuner_keyguard_show_current_summary">Şarj akımı değerlerini gösterir</string>
+    <string name="tuner_keyguard_show_battery_temp_title">Pil sıcaklığını göster</string>
+    <string name="tuner_keyguard_show_battery_temp_summary">Pil sıcaklığı değerini gösterir</string>
     <string name="omnijaws_service_error">Hatâ</string>
     <string name="omnijaws_service_unkown">Hava durumu verisi yok</string>
     <string name="omnijaws_service_error_long">Hava durumuna dair veriler yüklenemedi</string>

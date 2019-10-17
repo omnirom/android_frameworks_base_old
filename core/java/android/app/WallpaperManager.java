@@ -92,7 +92,7 @@ import java.util.concurrent.TimeUnit;
 @SystemService(Context.WALLPAPER_SERVICE)
 public class WallpaperManager {
     private static String TAG = "WallpaperManager";
-    private static boolean DEBUG = false;
+    private static boolean DEBUG = true;
     private float mWallpaperXStep = -1;
     private float mWallpaperYStep = -1;
 
