@@ -53,6 +53,7 @@
     <string name="tuner_brightness_position_bottom">Posuvník jasu ve spodní části</string>
     <string name="tuner_show_secure_title">Zobrazit bezpečnostní zápatí</string>
     <string name="tuner_show_drag_handle">Zobrazit táhnutí</string>
+    <string name="tuner_battery_location_bar">Zobrazit baterii ve stavové liště</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Povoleno</string>
     <string name="quick_settings_network_adb_disabled_label">Zakázáno</string>
@@ -65,6 +66,18 @@
     <string name="accessibility_quick_settings_heads_up_changed_off">Prohlížení oznámení vypnuto.</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Prohlížení oznámení zapnuto.</string>
     <string name="quick_settings_screenrecord_label">Nahrávání obrazovky</string>
+    <string name="tuner_keyguard_show_battery_bar_title">Zobrazit pruh baterie</string>
+    <string name="tuner_keyguard_show_battery_bar_summary">Zobrazit pruh baterie při nabíjení v režimu AOD</string>
+    <string name="tuner_keyguard_show_battery_bar_always_title">Vždy zobrazit pruh baterie</string>
+    <string name="tuner_keyguard_show_battery_bar_always_summary">Vždy zobrazit pruh baterie při nabíjení</string>
+    <string name="tuner_keyguard_battery_percent_title">Zobrazit procenta baterie</string>
+    <string name="tuner_keyguard_battery_percent_summary">Vynuceně zobrazit procenta baterie při nabíjení ve stavové liště</string>
+    <string name="tuner_keyguard_show_watt_title">Zobrazit příkon nabíjení</string>
+    <string name="tuner_keyguard_show_watt_summary">Zobrazit příkon nabíjení v mW</string>
+    <string name="tuner_keyguard_show_current_title">Zobrazit nabíjecí proud</string>
+    <string name="tuner_keyguard_show_current_summary">Zobrazit hodnotu nabíjecího proudu</string>
+    <string name="tuner_keyguard_show_battery_temp_title">Zobrazit teplotu baterie</string>
+    <string name="tuner_keyguard_show_battery_temp_summary">Zobrazit hodnotu teploty baterie</string>
     <string name="omnijaws_service_error">Chyba</string>
     <string name="omnijaws_service_unkown">Žádné údaje o počasí</string>
     <string name="omnijaws_service_error_long">Chyba při načítání údajů o počasí</string>

@@ -47,9 +47,13 @@
     <string name="qs_menu_item_reset">Lähtesta</string>
     <string name="qs_menu_item_titles">Kuva sildid</string>
     <string name="qs_menu_item_qs_columns">Kiirriba veerud</string>
+    <string name="qs_menu_item_columns_auto">Automaatne</string>
     <string name="tuner_quick_settings">Kiirseaded</string>
     <string name="tuner_show_brightness_new">Kuva heledusliugurit</string>
     <string name="tuner_brightness_position_bottom">Heledusliugur all</string>
+    <string name="tuner_show_secure_title">Kuva turvalisuse jalus</string>
+    <string name="tuner_show_drag_handle">Kuva sikutushoob</string>
+    <string name="tuner_battery_location_bar">Kuva aku olekuribal</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Sees</string>
     <string name="quick_settings_network_adb_disabled_label">Keelatud</string>
@@ -62,6 +66,18 @@
     <string name="accessibility_quick_settings_heads_up_changed_off">Piiluvad teated välja lülitatud.</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Piiluvad teated sisse lülitatud.</string>
     <string name="quick_settings_screenrecord_label">Kuva lindistamine</string>
+    <string name="tuner_keyguard_show_battery_bar_title">Kuva akuriba</string>
+    <string name="tuner_keyguard_show_battery_bar_summary">Kuva akuriba laadimise ajal alati sees ekraanil</string>
+    <string name="tuner_keyguard_show_battery_bar_always_title">Kuva akuriba alati</string>
+    <string name="tuner_keyguard_show_battery_bar_always_summary">Kuva akuriba alati laadimise ajal</string>
+    <string name="tuner_keyguard_battery_percent_title">Kuva akuprotsenti</string>
+    <string name="tuner_keyguard_battery_percent_summary">Sunni akuprotsendi kuvamine laadimise ajal olekuribal</string>
+    <string name="tuner_keyguard_show_watt_title">Kuva laadimise vatte</string>
+    <string name="tuner_keyguard_show_watt_summary">Kuva laadimise vatte millivattides</string>
+    <string name="tuner_keyguard_show_current_title">Kuva laadimise voolu</string>
+    <string name="tuner_keyguard_show_current_summary">Kuva laadimise voolu väärtusi</string>
+    <string name="tuner_keyguard_show_battery_temp_title">Kuva aku temperatuuri</string>
+    <string name="tuner_keyguard_show_battery_temp_summary">Kuva aku temperatuuri väärtust</string>
     <string name="omnijaws_service_error">Viga</string>
     <string name="omnijaws_service_unkown">Ilmateade puudub</string>
     <string name="omnijaws_service_error_long">Ilmateate laadimisel esines viga</string>
@@ -76,6 +92,8 @@
     <string name="keycode">Nupukood</string>
     <string name="no_home_title">Kodunuppu ei leitud</string>
     <string name="no_home_message">Kodunupp on vajalik selles seadmes navigeerimiseks. Palun lisa kodunupp enne salvestamist.</string>
+    <string name="clipboard_description">Lõikelaud võimaldab üksusi otse lõikelauda lohistada. Üksusi saab ka otse välja lohistada, kui need on olemas.</string>
+    <string name="keycode_description">Nupukoodiga nupud võimaldavad klaviatuuriklahvide lisamist navigatsiooniribale. Vajutades need emuleerivad valitud klaviatuuriklahvi. Kõigepealt tuleb valida nupu jaoks klahv, seejärel nupul kuvatav pilt.</string>
     <string name="start">Algus</string>
     <string name="center">Keskkoht</string>
     <string name="end">Lõpp</string>
@@ -89,4 +107,5 @@
     <string name="left">Vasakule</string>
     <string name="right">Paremale</string>
     <string name="navbar_editor_title">Redaktor</string>
+    <string name="navbar_editor_summary">Seadista navigeerimisriba</string>
 </resources>
