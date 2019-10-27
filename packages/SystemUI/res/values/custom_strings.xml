@@ -141,4 +141,6 @@
     <!-- Navigation bar dpad -->
     <string name="accessibility_dpad_left">Cursor left</string>
     <string name="accessibility_dpad_right">Cursor right</string>
+
+    <string name="screenrecord_stopdot_label">Show stop dot</string>
 </resources>
