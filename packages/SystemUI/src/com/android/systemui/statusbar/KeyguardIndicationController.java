@@ -408,7 +408,7 @@ public class KeyguardIndicationController implements StateListener,
 
         if (mVisible) {
             boolean showBatteryBar = Settings.System.getIntForUser(mContext.getContentResolver(),
-                     Settings.System.OMNI_KEYGUARD_SHOW_BATTERY_BAR, 1, UserHandle.USER_CURRENT) == 1;
+                     Settings.System.OMNI_KEYGUARD_SHOW_BATTERY_BAR, 0, UserHandle.USER_CURRENT) == 1;
             boolean showBatteryBarAlways = Settings.System.getIntForUser(mContext.getContentResolver(),
                      Settings.System.OMNI_KEYGUARD_SHOW_BATTERY_BAR_ALWAYS, 0, UserHandle.USER_CURRENT) == 1;
             mShowChargingWatts  = Settings.System.getIntForUser(mContext.getContentResolver(),
