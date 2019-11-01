@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "81b28f83_bf326ce0",
+        "filename": "services/core/java/com/android/server/pm/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 5154,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-11-01T22:59:33Z",
+      "side": 1,
+      "message": "you should not hardcode that here - better set where this is called",
+      "revId": "3a395698c9fa88ac5dd36862d87bed6ca5dd7e5e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
