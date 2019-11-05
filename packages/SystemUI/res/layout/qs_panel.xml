@@ -63,6 +63,8 @@
         android:background="@android:color/transparent"
         android:focusable="true"
         android:accessibilityTraversalBefore="@android:id/edit"
+        android:layout_marginStart="@dimen/qs_tile_margin_horizontal"
+        android:layout_marginEnd="@dimen/qs_tile_margin_horizontal"
     />
 
     <include layout="@layout/quick_status_bar_expanded_header" />
