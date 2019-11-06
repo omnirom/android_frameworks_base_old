@@ -463,7 +463,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        DisplayCutout cutout = insets.getDisplayCutout();
+        // device overlays should take care of this by choosing a correct
+        // status_bar_padding_start and status_bar_padding_end
+        // and this gets already applied in the xml file
+        // so no need to do anything here
+        /*DisplayCutout cutout = insets.getDisplayCutout();
         Pair<Integer, Integer> padding = PhoneStatusBarView.cornerCutoutMargins(
                 cutout, getDisplay());
         if (padding == null) {
@@ -473,7 +477,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         } else {
             mSystemIconsView.setPadding(padding.first, 0, padding.second, 0);
 
-        }
+        }*/
         return super.onApplyWindowInsets(insets);
     }
 
