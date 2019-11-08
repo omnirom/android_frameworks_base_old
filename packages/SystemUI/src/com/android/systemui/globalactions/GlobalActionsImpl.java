@@ -32,6 +32,7 @@ import android.widget.TextView;
 import com.android.internal.R;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.colorextraction.drawable.ScrimDrawable;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysUiServiceProvider;
@@ -83,6 +84,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         mGlobalActions.showDialog(mKeyguardMonitor.isShowing(),
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 mPanelExtension.get());
+        KeyguardUpdateMonitor.getInstance(mContext).requestFaceAuth();
     }
 
     @Override

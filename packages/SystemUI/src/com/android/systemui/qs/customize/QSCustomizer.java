@@ -401,10 +401,13 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mY = y - containerLocation[1];
     }
 
-    private final Callback mKeyguardCallback = () -> {
-        if (!isAttachedToWindow()) return;
-        if (Dependency.get(KeyguardMonitor.class).isShowing() && !mOpening) {
-            hide();
+    private final Callback mKeyguardCallback = new Callback() {
+        @Override
+        public void onKeyguardShowingChanged() {
+            if (!isAttachedToWindow()) return;
+            if (Dependency.get(KeyguardMonitor.class).isShowing() && !mOpening) {
+                hide();
+            }
         }
     };
 

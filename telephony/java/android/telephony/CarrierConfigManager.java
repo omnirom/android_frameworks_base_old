@@ -468,6 +468,14 @@ public class CarrierConfigManager {
             "notify_handover_video_from_wifi_to_lte_bool";
 
     /**
+     * Flag specifying whether the carrier supports merging a RTT call with a voice call,
+     * downgrading the call in the process.
+     * @hide
+     */
+    public static final String KEY_ALLOW_MERGING_RTT_CALLS_BOOL =
+             "allow_merging_rtt_calls_bool";
+
+    /**
      * Flag specifying whether the carrier wants to notify the user when a VT call has been handed
      * over from LTE to WIFI.
      * <p>
@@ -1017,6 +1025,18 @@ public class CarrierConfigManager {
             "call_forwarding_map_non_number_to_voicemail_bool";
 
     /**
+     * When {@code true}, the phone will always tell the IMS stack to keep RTT enabled and
+     * determine on a per-call basis (based on extras from the dialer app) whether a call should be
+     * an RTT call or not.
+     *
+     * When {@code false}, the old behavior is used, where the toggle in accessibility settings is
+     * used to set the IMS stack's RTT enabled state.
+     * @hide
+     */
+    public static final String KEY_IGNORE_RTT_MODE_SETTING_BOOL =
+            "ignore_rtt_mode_setting_bool";
+
+    /**
      * Determines whether conference calls are supported by a carrier.  When {@code true},
      * conference calling is supported, {@code false otherwise}.
      */
@@ -1410,6 +1430,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL =
             "show_4g_for_lte_data_icon_bool";
+
+    /**
+     * Boolean indicating if default data account should show 4G icon when in 3G.
+     * @hide
+     */
+    public static final String KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL =
+            "show_4g_for_3g_data_icon_bool";
 
     /**
      * Boolean indicating if lte+ icon should be shown if available
@@ -2163,6 +2190,15 @@ public class CarrierConfigManager {
             "data_warning_notification_bool";
 
     /**
+     * Controls if the device should automatically warn the user that sim voice & data function
+     * might be limited due to dual sim scenario. When set to {@true} display the notification,
+     * {@code false} otherwise.
+     * @hide
+     */
+    public static final String KEY_LIMITED_SIM_FUNCTION_NOTIFICATION_FOR_DSDS_BOOL =
+            "limited_sim_function_notification_for_dsds_bool";
+
+    /**
      * Controls the cellular data limit.
      * <p>
      * If the user uses more than this amount of data in their billing cycle, as defined by
@@ -2337,6 +2373,13 @@ public class CarrierConfigManager {
     public static final String KEY_RTT_ALWAYS_ENABLED_BOOL = "rtt_always_enabled_bool";
 
     /**
+     * Indicates if the TTY HCO and VCO options should be hidden in the accessibility menu
+     * if the device is capable of RTT.
+     * @hide
+     */
+    public static final String KEY_HIDE_TTY_HCO_VCO_WITH_RTT_BOOL = "hide_tty_hco_vco_with_rtt";
+
+    /**
      * The flag to disable the popup dialog which warns the user of data charges.
      * @hide
      */
@@ -2415,6 +2458,14 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL =
             "check_pricing_with_carrier_data_roaming_bool";
+
+     /**
+      * Determines whether we should show a notification when the phone established a data
+      * connection in roaming network, to warn users about possible roaming charges.
+      * @hide
+      */
+    public static final String KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL =
+            "show_data_connected_roaming_notification";
 
     /**
      * A list of 4 LTE RSRP thresholds above which a signal level is considered POOR,
@@ -3067,6 +3118,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_WIFI_TO_LTE_BOOL, false);
+        sDefaults.putBoolean(KEY_ALLOW_MERGING_RTT_CALLS_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_LTE_TO_WIFI_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_DOWNGRADE_VT_TO_AUDIO_BOOL, true);
         sDefaults.putString(KEY_DEFAULT_VM_NUMBER_STRING, "");
@@ -3206,6 +3258,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_MAP_NON_NUMBER_TO_VOICEMAIL_BOOL, false);
+        sDefaults.putBoolean(KEY_IGNORE_RTT_MODE_SETTING_BOOL, false);
         sDefaults.putInt(KEY_CDMA_3WAYCALL_FLASH_DELAY_INT , 0);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, true);
@@ -3323,6 +3376,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_MONTHLY_DATA_CYCLE_DAY_INT, DATA_CYCLE_USE_PLATFORM_DEFAULT);
         sDefaults.putLong(KEY_DATA_WARNING_THRESHOLD_BYTES_LONG, DATA_CYCLE_USE_PLATFORM_DEFAULT);
         sDefaults.putBoolean(KEY_DATA_WARNING_NOTIFICATION_BOOL, true);
+        sDefaults.putBoolean(KEY_LIMITED_SIM_FUNCTION_NOTIFICATION_FOR_DSDS_BOOL, false);
         sDefaults.putLong(KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG, DATA_CYCLE_USE_PLATFORM_DEFAULT);
         sDefaults.putBoolean(KEY_DATA_LIMIT_NOTIFICATION_BOOL, true);
         sDefaults.putBoolean(KEY_DATA_RAPID_NOTIFICATION_BOOL, true);
@@ -3378,6 +3432,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_ALWAYS_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_TTY_SUPPORTED_BOOL, true);
+        sDefaults.putBoolean(KEY_HIDE_TTY_HCO_VCO_WITH_RTT_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_CHARGE_INDICATION_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_NO_REPLY_TIMER_FOR_CFNRY_BOOL, true);
         sDefaults.putStringArray(KEY_FEATURE_ACCESS_CODES_STRING_ARRAY, null);
@@ -3386,6 +3441,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL, false);
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
@@ -3396,6 +3452,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING, "");
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL, false);
         sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,
                 new int[] {
                         -128, /* SIGNAL_STRENGTH_POOR */

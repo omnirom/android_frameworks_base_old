@@ -305,6 +305,8 @@ public final class DisplayManagerService extends SystemService {
     private final Spline mMinimumBrightnessSpline;
     private final ColorSpace mWideColorSpace;
 
+    private SensorManager mSensorManager;
+
     public DisplayManagerService(Context context) {
         this(context, new Injector());
     }
@@ -432,7 +434,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         mDisplayModeDirector.setListener(new AllowedDisplayModeObserver());
-        mDisplayModeDirector.start();
+        mDisplayModeDirector.start(mSensorManager);
 
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
     }
@@ -2373,6 +2375,7 @@ public final class DisplayManagerService extends SystemService {
                 };
                 mDisplayPowerController = new DisplayPowerController(
                         mContext, callbacks, handler, sensorManager, blanker);
+                mSensorManager = sensorManager;
             }
 
             mHandler.sendEmptyMessage(MSG_LOAD_BRIGHTNESS_CONFIGURATION);

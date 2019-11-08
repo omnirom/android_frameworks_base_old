@@ -428,6 +428,26 @@ public final class DisconnectCause {
     /** @hide */
     public static final int NON_SELECTED_USER_CLEARING = 121;
 
+    /**
+     * Indicates that the call is dropped due to RTCP inactivity, primarily due to media path
+     * disruption.
+     * @hide
+     */
+    public static final int MEDIA_TIMEOUT = 122;
+
+    /**
+     * Indicates that an emergency call cannot be placed over WFC because the service is not
+     * available in the current location.
+     * @hide
+     */
+    public static final int EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE = 123;
+
+    /**
+     * Indicates that WiFi calling service is not available in the current location.
+     * @hide
+     */
+    public static final int WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION = 124;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Please assign the new type the next id value below.
@@ -703,6 +723,12 @@ public final class DisconnectCause {
             return "HO_NOT_FEASIBLE";
         case NON_SELECTED_USER_CLEARING:
             return "NON_SELECTED_USER_CLEARING";
+        case MEDIA_TIMEOUT:
+            return "MEDIA_TIMEOUT";
+        case EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE:
+            return "EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE";
+        case WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION:
+            return "WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION";
         default:
             return "INVALID: " + cause;
         }
