@@ -100,4 +100,8 @@
 
     <!-- Ambient notification light color -->
     <integer name="config_ambientNotificationDefaultColor">0xFF3980FF</integer>
+
+    <!-- Whether to cleanup fingerprints upon connection to the daemon and when user switches -->
+    <bool name="config_cleanupUnusedFingerprints">true</bool>
+
 </resources>
