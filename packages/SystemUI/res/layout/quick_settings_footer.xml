@@ -16,7 +16,7 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/qs_footer_height"
     android:clickable="true"
     android:paddingBottom="@dimen/qs_tile_padding_top"
     android:paddingTop="@dimen/qs_tile_padding_top"
@@ -31,15 +31,16 @@
         android:layout_height="wrap_content"
         android:gravity="start"
         android:layout_weight="1"
-        android:textAppearance="@style/TextAppearance.QS.TileLabel"
+        android:textAppearance="@style/TextAppearance.QS.Status"
         android:textColor="?android:attr/textColorSecondary"/>
 
     <ImageView
         android:id="@+id/footer_icon"
-        android:layout_width="@dimen/qs_footer_icon_size"
-        android:layout_height="@dimen/qs_footer_icon_size"
+        android:layout_width="@dimen/qs_footer_action_button_size"
+        android:layout_height="@dimen/qs_footer_action_button_size"
         android:contentDescription="@null"
         android:src="@drawable/ic_info_outline"
+        android:padding="@dimen/qs_footer_icon_padding"
         android:tint="?android:attr/textColorSecondary"/>
 
 </LinearLayout>
