@@ -597,8 +597,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
         mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_TIMEOUT), 0);
 
-        mNetworkConnectivityHandler = new GnssNetworkConnectivityHandler(context,
-                GnssLocationProvider.this::onNetworkAvailable, looper);
 
         // App ops service to keep track of who is accessing the GPS
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -621,6 +619,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mNIHandler = new GpsNetInitiatedHandler(context,
                 mNetInitiatedListener,
                 mSuplEsEnabled);
+        mNetworkConnectivityHandler = new GnssNetworkConnectivityHandler(context,
+                GnssLocationProvider.this::onNetworkAvailable, looper, mNIHandler);
+
         sendMessage(INITIALIZE_HANDLER, 0, null);
 
         mGnssStatusListenerHelper = new GnssStatusListenerHelper(mContext, mHandler) {
