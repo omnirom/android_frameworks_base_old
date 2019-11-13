@@ -69,12 +69,6 @@ public final class ScanSettings implements Parcelable {
      */
     public static final int CALLBACK_TYPE_MATCH_LOST = 4;
 
-    /**
-     * Provide results to sensor router instead of the apps processor
-     * @hide
-     */
-    public static final int CALLBACK_TYPE_SENSOR_ROUTING = 8;
-
 
     /**
      * Determines how many advertisements to match per filter, as this is scarce hw resource
@@ -308,8 +302,7 @@ public final class ScanSettings implements Parcelable {
         private boolean isValidCallbackType(int callbackType) {
             if (callbackType == CALLBACK_TYPE_ALL_MATCHES
                     || callbackType == CALLBACK_TYPE_FIRST_MATCH
-                    || callbackType == CALLBACK_TYPE_MATCH_LOST
-                    || callbackType == CALLBACK_TYPE_SENSOR_ROUTING) {
+                    || callbackType == CALLBACK_TYPE_MATCH_LOST) {
                 return true;
             }
             return callbackType == (CALLBACK_TYPE_FIRST_MATCH | CALLBACK_TYPE_MATCH_LOST);
