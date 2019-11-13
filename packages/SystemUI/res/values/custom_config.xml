@@ -47,4 +47,6 @@
 
     <bool name="qs_status_bar_hidden">false</bool>
 
+    <color name="dashboard_icon_color">@*android:color/accent_device_default_light</color>
+
 </resources>
