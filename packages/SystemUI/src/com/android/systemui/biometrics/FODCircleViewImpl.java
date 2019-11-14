@@ -17,6 +17,8 @@
 package com.android.systemui.biometrics;
 
 import android.content.pm.PackageManager;
+import android.hardware.display.ColorDisplayManager;
+import android.os.Handler;
 import android.util.Slog;
 import android.view.View;
 
@@ -29,6 +31,9 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
     private static final String TAG = "FODCircleViewImpl";
 
     private FODCircleView mFodCircleView;
+    private boolean mNightMode;
+    private int mNightModeTemp;
+    private static final boolean sIsOnePlus7t = android.os.Build.DEVICE.equals("oneplus7t");
 
     @Override
     public void start() {
@@ -46,6 +51,9 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
     @Override
     public void showInDisplayFingerprintView() {
         if (mFodCircleView != null) {
+            if (sIsOnePlus7t) {
+                setNightMode(true);
+            }
             mFodCircleView.show();
         }
     }
@@ -53,7 +61,30 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
     @Override
     public void hideInDisplayFingerprintView() {
         if (mFodCircleView != null) {
+            if (sIsOnePlus7t) {
+                setNightMode(false);
+            }
             mFodCircleView.hide();
+        }
+    }
+
+    private void setNightMode(boolean state) {      
+        ColorDisplayManager colorDisplayManager = mContext.getSystemService(ColorDisplayManager.class);
+        if (state) {
+            mNightMode = colorDisplayManager.isNightDisplayActivated();
+            colorDisplayManager.setNightDisplayActivated(true);
+            mNightModeTemp = colorDisplayManager.getNightDisplayColorTemperature();
+            colorDisplayManager.setNightDisplayColorTemperature(ColorDisplayManager.getMaximumColorTemperature(mContext));
+        } else {
+            colorDisplayManager.setNightDisplayActivated(mNightMode);
+            colorDisplayManager.setNightDisplayColorTemperature(mNightModeTemp + 1);
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    colorDisplayManager.setNightDisplayColorTemperature(mNightModeTemp);
+                }
+            }, 1500);
         }
     }
 }
