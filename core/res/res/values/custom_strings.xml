@@ -33,6 +33,9 @@
     <!-- advanced reboot system -->
     <string name="reboot_system_title">Restart system</string>
     <string name="reboot_system_message">Restarting system\u2026</string>
+    <!-- advanced reboot to fastboot. -->
+    <string name="reboot_to_fastboot_title">Reboot fastboot</string>
+    <string name="reboot_to_fastboot_message">Rebooting to fastboot\u2026</string>
 
     <!-- MicroG -->
     <string name="permlab_fakePackageSignature">Spoof package signature</string>

@@ -24,6 +24,7 @@
     <string name="global_action_reboot_sub">System</string>
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
+    <string name="global_action_reboot_fastboot">Fastboot</string>
     <!-- Caffeine tile -->
     <string name="quick_settings_caffeine_label">Caffeine</string>
     <string name="accessibility_quick_settings_caffeine_off">Caffeine off</string>

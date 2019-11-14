@@ -583,8 +583,7 @@ public final class PowerManager {
      * The value to pass as the 'reason' argument to reboot() to
      * reboot into bootloader mode
      * <p>
-     * Requires the {@link android.Manifest.permission#RECOVERY}
-     * permission (in addition to
+     * Requires the permission
      * {@link android.Manifest.permission#REBOOT}).
      * </p>
      * @hide
@@ -602,6 +601,17 @@ public final class PowerManager {
      * @hide
      */
     public static final String REBOOT_RECOVERY_UPDATE = "recovery-update";
+
+    /**
+     * The value to pass as the 'reason' argument to reboot() to
+     * reboot into fastboot mode
+     * <p>
+     * Requires the permission
+     * {@link android.Manifest.permission#REBOOT}).
+     * </p>
+     * @hide
+     */
+    public static final String REBOOT_FASTBOOT = "fastboot";
 
     /**
      * The value to pass as the 'reason' argument to reboot() when device owner requests a reboot on
