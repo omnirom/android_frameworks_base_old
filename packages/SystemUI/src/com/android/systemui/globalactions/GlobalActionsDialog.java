@@ -186,6 +186,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
     private static final String GLOBAL_ACTION_KEY_REBOOT_RECOVERY = "reboot_recovery";
     private static final String GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER = "reboot_bootloader";
+    private static final String GLOBAL_ACTION_KEY_REBOOT_FASTBOOT = "reboot_fastboot";
 
     public static final String PREFS_CONTROLS_SEEDING_COMPLETED = "SeedingCompleted";
     public static final String PREFS_CONTROLS_FILE = "controls_prefs";
@@ -617,6 +618,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         RestartAction restartAction = new RestartAction();
         RebootRecoveryAction rebootRecoveryAction = new RebootRecoveryAction();
         RebootBootloaderAction rebootBootloaderAction = new RebootBootloaderAction();
+        RebootFastbootAction rebootFastbootAction = new RebootFastbootAction();
 
         ArraySet<String> addedKeys = new ArraySet<String>();
         List<Action> tempActions = new ArrayList<>();
@@ -676,6 +678,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 addIfShouldShowAction(tempActions, rebootRecoveryAction);
             } else if (GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER.equals(actionKey)) {
                 addIfShouldShowAction(tempActions, rebootBootloaderAction);
+            } else if (GLOBAL_ACTION_KEY_REBOOT_FASTBOOT.equals(actionKey)) {
+                addIfShouldShowAction(tempActions, rebootFastbootAction);
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
@@ -700,8 +704,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         if (advancedRebootEnabled(mContext)) {
             tempActions.remove(rebootRecoveryAction);
             tempActions.remove(rebootBootloaderAction);
+            tempActions.remove(rebootFastbootAction);
             mOverflowItems.add(rebootRecoveryAction);
             mOverflowItems.add(rebootBootloaderAction);
+            mOverflowItems.add(rebootFastbootAction);
         }
         for (Action action : tempActions) {
             addActionItem(action);
@@ -1057,6 +1063,27 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         @Override
         public void onPress() {
             mWindowManagerFuncs.reboot(false, PowerManager.REBOOT_BOOTLOADER);
+        }
+    }
+	
+    private final class RebootFastbootAction extends SinglePressAction {
+        private RebootFastbootAction() {
+            super(com.android.systemui.R.drawable.ic_restart_fastboot, com.android.systemui.R.string.global_action_reboot_fastboot);
+        }
+
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return true;
+        }
+
+        @Override
+        public void onPress() {
+            mWindowManagerFuncs.reboot(false, PowerManager.REBOOT_FASTBOOT);
         }
     }
 
