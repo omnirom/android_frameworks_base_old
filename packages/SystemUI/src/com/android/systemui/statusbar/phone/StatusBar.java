@@ -637,6 +637,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.OMNI_LOCK_QS_DISABLED),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_LOCKSCREEN_MEDIA_BLUR),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -650,6 +653,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             if (mNotificationPanel != null) {
                 mNotificationPanel.updateSettings();
+            }
+            if (mMediaManager != null) {
+                mMediaManager.setLockScreenMediaBlurLevel();
             }
         }
     }
