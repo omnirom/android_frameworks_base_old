@@ -32,9 +32,9 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
     private static final String TAG = "FODCircleViewImpl";
 
     private FODCircleView mFodCircleView;
+    private boolean mDisableNightMode;
     private boolean mNightMode;
-    private int mNightModeTemp;
-    private static final boolean sIsOnePlus7t = android.os.Build.DEVICE.equals("oneplus7t");
+
 
     @Override
     public void start() {
@@ -47,13 +47,14 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
         } catch (RuntimeException e) {
             Slog.e(TAG, "Failed to initialize FODCircleView", e);
         }
+        mDisableNightMode = SystemProperties.getBoolean("persist.fod.night_mode_disabled", false);
     }
 
     @Override
     public void showInDisplayFingerprintView() {
         if (mFodCircleView != null) {
-            if (sIsOnePlus7t) {
-                setNightMode(true);
+            if (mDisableNightMode) {
+                setNightMode(false);
             }
             mFodCircleView.show();
         }
@@ -62,8 +63,8 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
     @Override
     public void hideInDisplayFingerprintView() {
         if (mFodCircleView != null) {
-            if (sIsOnePlus7t) {
-                setNightMode(false);
+            if (mDisableNightMode) {
+                setNightMode(mNightMode);
             }
             mFodCircleView.hide();
         }
@@ -74,21 +75,7 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
             return;
         }
         ColorDisplayManager colorDisplayManager = mContext.getSystemService(ColorDisplayManager.class);
-        if (state) {
-            mNightMode = colorDisplayManager.isNightDisplayActivated();
-            colorDisplayManager.setNightDisplayActivated(true);
-            mNightModeTemp = colorDisplayManager.getNightDisplayColorTemperature();
-            colorDisplayManager.setNightDisplayColorTemperature(ColorDisplayManager.getMaximumColorTemperature(mContext));
-        } else {
-            colorDisplayManager.setNightDisplayActivated(mNightMode);
-            colorDisplayManager.setNightDisplayColorTemperature(mNightModeTemp + 1);
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    colorDisplayManager.setNightDisplayColorTemperature(mNightModeTemp);
-                }
-            }, 1500);
-        }
+        mNightMode = colorDisplayManager.isNightDisplayActivated();
+        colorDisplayManager.setNightDisplayActivated(state);
     }
 }
