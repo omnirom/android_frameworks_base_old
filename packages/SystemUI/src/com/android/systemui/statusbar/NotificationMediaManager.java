@@ -127,6 +127,8 @@ public class NotificationMediaManager implements Dumpable {
     @Nullable
     private LockscreenWallpaper mLockscreenWallpaper;
 
+    private float mLockscreenMediaBlur;
+
     private final Handler mHandler = Dependency.get(MAIN_HANDLER);
 
     private final Context mContext;
@@ -706,7 +708,13 @@ public class NotificationMediaManager implements Dumpable {
     };
 
     private Bitmap processArtwork(Bitmap artwork) {
-        return mMediaArtworkProcessor.processArtwork(mContext, artwork, getLockScreenMediaBlurLevel());
+        return mMediaArtworkProcessor.processArtwork(mContext, artwork, mLockscreenMediaBlur);
+    }
+
+    public void setLockScreenMediaBlurLevel() {
+        mLockscreenMediaBlur = (float) Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.LOCKSCREEN_MEDIA_BLUR, 25,
+                UserHandle.USER_CURRENT);
     }
 
     @MainThread
