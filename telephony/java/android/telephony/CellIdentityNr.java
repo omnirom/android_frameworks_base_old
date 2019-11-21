@@ -39,6 +39,15 @@ public final class CellIdentityNr extends CellIdentity {
     private final int mTac;
     private final long mNci;
 
+    /** @hide */
+    public CellIdentityNr() {
+        super(TAG, CellInfo.TYPE_NR, null, null, null, null);
+        mNrArfcn = CellInfo.UNAVAILABLE;
+        mPci = CellInfo.UNAVAILABLE;
+        mTac = CellInfo.UNAVAILABLE;
+        mNci = CellInfo.UNAVAILABLE;
+    }
+
     /**
      *
      * @param pci Physical Cell Id in range [0, 1007].
@@ -59,6 +68,12 @@ public final class CellIdentityNr extends CellIdentity {
         mTac = inRangeOrUnavailable(tac, 0, MAX_TAC);
         mNrArfcn = inRangeOrUnavailable(nrArfcn, 0, MAX_NRARFCN);
         mNci = inRangeOrUnavailable(nci, 0, MAX_NCI);
+    }
+
+    /** @hide */
+    public CellIdentityNr(android.hardware.radio.V1_4.CellIdentityNr cid) {
+        this(cid.pci, cid.tac, cid.nrarfcn, cid.mcc, cid.mnc,
+                cid.nci, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort);
     }
 
     /** @hide */
