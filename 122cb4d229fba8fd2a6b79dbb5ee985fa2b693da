@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "122435dd_add40314",
+        "filename": "packages/SystemUI/src/com/android/systemui/biometrics/FODCircleViewImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-11-24T23:00:06Z",
+      "side": 1,
+      "message": "you can remove here - you check it above\njust keep in mind that changes require reboot for your solution\nelse keep it here and dotn check above",
+      "revId": "122cb4d229fba8fd2a6b79dbb5ee985fa2b693da",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
