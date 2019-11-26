@@ -27,7 +27,7 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_extra" translatable="false">
-        aod,nfc,screenshot,caffeine
+        aod,nfc,screenshot,caffeine,dataswitch
     </string>
 
     <bool name="always_show_screenshot_dismiss_button">false</bool>
