@@ -22,7 +22,9 @@ import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_WIFI
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.Gravity;
@@ -35,9 +37,11 @@ import android.widget.LinearLayout.LayoutParams;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.BaseStatusBarFrameLayout;
@@ -58,6 +62,8 @@ import com.android.systemui.statusbar.pipeline.wifi.ui.WifiUiAdapter;
 import com.android.systemui.statusbar.pipeline.wifi.ui.view.ModernStatusBarWifiView;
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel;
 import com.android.systemui.util.Assert;
+
+import org.omnirom.omnilib.utils.OmniSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -215,6 +221,7 @@ public interface StatusBarIconController {
                 mDarkIconDispatcher.removeDarkReceiver((DarkReceiver) mGroup.getChildAt(i));
             }
             mGroup.removeAllViews();
+            Dependency.get(OmniSettingsService.class).removeObserver(this);
         }
 
         @Override
@@ -362,7 +369,7 @@ public interface StatusBarIconController {
     /**
      * Turns info from StatusBarIconController into ImageViews in a ViewGroup.
      */
-    class IconManager implements DemoModeCommandReceiver {
+    class IconManager implements DemoModeCommandReceiver, OmniSettingsService.OmniSettingsObserver {
         protected final ViewGroup mGroup;
         private final StatusBarPipelineFlags mStatusBarPipelineFlags;
         private final MobileContextProvider mMobileContextProvider;
@@ -535,6 +542,7 @@ public interface StatusBarIconController {
             StatusBarMobileView mobileView = onCreateStatusBarMobileView(state.subId, slot);
             mobileView.applyMobileState(state);
             mGroup.addView(mobileView, index, onCreateLayoutParams());
+            Dependency.get(OmniSettingsService.class).addIntObserver(this, OmniSettings.OMNI_USE_OLD_MOBILETYPE);
 
             if (mIsInDemoMode) {
                 Context mobileContext = mMobileContextProvider
@@ -607,6 +615,7 @@ public interface StatusBarIconController {
 
         protected void destroy() {
             mGroup.removeAllViews();
+            Dependency.get(OmniSettingsService.class).removeObserver(this);
         }
 
         protected void onDensityOrFontScaleChanged() {
@@ -735,6 +744,16 @@ public interface StatusBarIconController {
                     mLocation,
                     mIconSize
             );
+        }
+
+        @Override
+        public void onIntSettingChanged(String key, Integer newValue) {
+            for (int i = 0; i < mGroup.getChildCount(); i++) {
+                View child = mGroup.getChildAt(i);
+                if (child instanceof StatusBarMobileView) {
+                    ((StatusBarMobileView) child).updateDisplayType(newValue == 1);
+                }
+            }
         }
     }
 }
