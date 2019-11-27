@@ -140,16 +140,18 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 resetPosition();
                 invalidate();
             }
+            setCustomIcon();
         }
 
         @Override
         public void onPulsing(boolean pulsing) {
             super.onPulsing(pulsing);
             mIsPulsing = pulsing;
-	    if (mIsPulsing) {
+	        if (mIsPulsing) {
                 mIsDreaming = false;
-	    }
+	        }
             mIsInsideCircle = false;
+            setCustomIcon();
         }
 
         @Override
@@ -179,12 +181,14 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             super.onScreenTurnedOn();
             mIsScreenOn = true;
             mIsInsideCircle = false;
+            setCustomIcon();
         }
 
         @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
             super.onKeyguardVisibilityChanged(showing);
             mIsInsideCircle = false;
+            setCustomIcon();
         }
 
         @Override
@@ -214,6 +218,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             super.onBiometricRunningStateChanged(running, biometricSourceType);
             if (running) {
                 show();
+                setCustomIcon();
             } else {
                 hide();
             }
@@ -540,10 +545,10 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 setImageBitmap(image);
             }
             catch (Exception e) {
-                setImageResource(R.drawable.fod_icon_default);
+                setImageResource(mIsDreaming ? R.drawable.fod_icon_aod : R.drawable.fod_icon_default);
             }
         } else {
-            setImageResource(R.drawable.fod_icon_default);
+            setImageResource(mIsDreaming ? R.drawable.fod_icon_aod : R.drawable.fod_icon_default);
         }
     }
 
