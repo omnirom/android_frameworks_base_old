@@ -128,9 +128,11 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         @Override
         public void onDreamingStateChanged(boolean dreaming) {
             super.onDreamingStateChanged(dreaming);
+            setCustomIcon();
             mIsDreaming = dreaming;
             mIsInsideCircle = false;
             if (dreaming) {
+                setImageResource(R.drawable.fod_icon_aod);
                 mBurnInProtectionTimer = new Timer();
                 mBurnInProtectionTimer.schedule(new BurnInProtectionTask(), 0, 60 * 1000);
             } else if (mBurnInProtectionTimer != null) {
@@ -146,9 +148,10 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         public void onPulsing(boolean pulsing) {
             super.onPulsing(pulsing);
             mIsPulsing = pulsing;
-	    if (mIsPulsing) {
+            setCustomIcon();
+	        if (mIsPulsing) {
                 mIsDreaming = false;
-	    }
+	        }
             mIsInsideCircle = false;
         }
 
@@ -179,12 +182,14 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             super.onScreenTurnedOn();
             mIsScreenOn = true;
             mIsInsideCircle = false;
+            setCustomIcon();
         }
 
         @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
             super.onKeyguardVisibilityChanged(showing);
             mIsInsideCircle = false;
+            setCustomIcon();
         }
 
         @Override
@@ -214,6 +219,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             super.onBiometricRunningStateChanged(running, biometricSourceType);
             if (running) {
                 show();
+                setCustomIcon();
             } else {
                 hide();
             }
@@ -543,7 +549,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 setImageResource(R.drawable.fod_icon_default);
             }
         } else {
-            setImageResource(R.drawable.fod_icon_default);
+            setImageResource(mIsDreaming ? R.drawable.fod_icon_aod : R.drawable.fod_icon_default);
         }
     }
 
