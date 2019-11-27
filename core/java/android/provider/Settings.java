@@ -5043,6 +5043,14 @@ public final class Settings {
                 ANY_INTEGER_VALIDATOR;
 
         /**
+         * @hide
+         */
+        public static final String OMNI_USE_OLD_MOBILETYPE = "use_old_mobiletype";
+
+        private static final Validator OMNI_USE_OLD_MOBILETYPE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5169,6 +5177,7 @@ public final class Settings {
             OMNI_VIBRATE_ON_DISCONNECT,
             OMNI_DOZE_ON_CHARGE,
             OMNI_LOCKSCREEN_MEDIA_BLUR,
+            OMNI_USE_OLD_MOBILETYPE,
         };
 
         /**
@@ -5345,6 +5354,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_DISCONNECT);
             PRIVATE_SETTINGS.add(OMNI_DOZE_ON_CHARGE);
             PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_MEDIA_BLUR);
+            PRIVATE_SETTINGS.add(OMNI_USE_OLD_MOBILETYPE);
         }
 
         /**
@@ -5532,6 +5542,7 @@ public final class Settings {
             VALIDATORS.put(OMNI_DOZE_ON_CHARGE,
                     OMNI_DOZE_ON_CHARGE_VALIDATOR);
             VALIDATORS.put(OMNI_LOCKSCREEN_MEDIA_BLUR, OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR);
+            VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, OMNI_USE_OLD_MOBILETYPE_VALIDATOR);
         }
 
         /**
