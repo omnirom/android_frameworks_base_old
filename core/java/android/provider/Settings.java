@@ -5415,6 +5415,11 @@ public final class Settings {
         public static final String OMNI_LOCKSCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_USE_OLD_MOBILETYPE = "use_old_mobiletype";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5448,7 +5453,8 @@ public final class Settings {
             OMNI_VIBRATE_ON_DISCONNECT,
             OMNI_FINGERPRINT_SUCCESS_VIB,
             OMNI_SHOW_CPU_OVERLAY,
-            OMNI_LOCKSCREEN_WEATHER_ENABLED
+            OMNI_LOCKSCREEN_WEATHER_ENABLED,
+            OMNI_USE_OLD_MOBILETYPE
         };
 
         /**
@@ -5492,6 +5498,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_CPU_OVERLAY, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, 0);
         }
     }
 
