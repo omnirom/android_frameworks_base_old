@@ -76,6 +76,8 @@ public class FODCircleView extends ImageView implements OnTouchListener {
 
     private int mDreamingOffsetY;
     private int mNavigationBarSize;
+    private int dimAmount;
+    private int curBrightness;
 
     private boolean mIsBouncer;
     private boolean mIsDreaming;
@@ -96,7 +98,6 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             mIsInsideCircle = true;
 
             mHandler.post(() -> {
-                setDim(true);
                 setImageDrawable(null);
 
                 invalidate();
@@ -108,7 +109,6 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             mIsInsideCircle = false;
 
             mHandler.post(() -> {
-                setDim(false);
                 setCustomIcon();
 
                 invalidate();
@@ -123,12 +123,14 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         public void onDreamingStateChanged(boolean dreaming) {
             super.onDreamingStateChanged(dreaming);
             mIsDreaming = dreaming;
-            mIsInsideCircle = false;
+            setDim(true);
             if (dreaming) {
+                setImageResource(R.drawable.fod_icon_disabled);
                 mBurnInProtectionTimer = new Timer();
                 mBurnInProtectionTimer.schedule(new BurnInProtectionTask(), 0, 60 * 1000);
             } else if (mBurnInProtectionTimer != null) {
                 mBurnInProtectionTimer.cancel();
+                setCustomIcon();
             }
             if (mIsViewAdded) {
                 resetPosition();
@@ -140,10 +142,11 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         public void onPulsing(boolean pulsing) {
             super.onPulsing(pulsing);
             mIsPulsing = pulsing;
-	    if (mIsPulsing) {
+            setCustomIcon();
+	        if (mIsPulsing) {
                 mIsDreaming = false;
-	    }
-            mIsInsideCircle = false;
+	        }
+            setDim(true);
         }
 
         @Override
@@ -166,6 +169,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         @Override
         public void onStartedWakingUp() {
             super.onStartedWakingUp();
+            mIsInsideCircle = false;
         }
 
         @Override
@@ -173,12 +177,17 @@ public class FODCircleView extends ImageView implements OnTouchListener {
             super.onScreenTurnedOn();
             mIsScreenOn = true;
             mIsInsideCircle = false;
+            setDim(true);
         }
 
         @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
             super.onKeyguardVisibilityChanged(showing);
             mIsInsideCircle = false;
+            setCustomIcon();
+            if (showing) {
+               setDim(true);
+            }
         }
 
         @Override
@@ -200,6 +209,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) {
             super.onBiometricAuthenticated(userId, biometricSourceType);
             mIsInsideCircle = false;
+            setDim(false);
         }
 
         @Override
@@ -295,7 +305,13 @@ public class FODCircleView extends ImageView implements OnTouchListener {
                 mIsPressed = true;
             }
         } else {
-            setAlpha(mIsDreaming ? (mIsPulsing ? 1.0f : 0.8f) : 1.0f);
+            if (mIsDreaming) {
+                setAlpha(0.8f);
+                setImageResource(R.drawable.fod_icon_disabled);
+            } else if (mIsPulsing) {
+                setAlpha(1.0f);
+                setCustomIcon();
+            }
             if (mIsPressed) {
                 IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
                 if (daemon != null) {
@@ -319,7 +335,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
             newInside = false;
-            setDim(false);
+            setDim(true);
             setCustomIcon();
         }
 
@@ -337,7 +353,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         }
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            setDim(true);
+            fingerPress();
             setImageDrawable(null);
         }
 
@@ -369,7 +385,6 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
         IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
         if (daemon != null) {
             try {
@@ -428,7 +443,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         mIsViewAdded = true;
 
         mIsPressed = false;
-        setDim(false);
+        setDim(true);
     }
 
     public void hide() {
@@ -481,28 +496,38 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         }
     }
 
-    private void setDim(boolean dim) {
-        if (dim) {
-            int curBrightness = Settings.System.getInt(getContext().getContentResolver(),
+    private int getBrightness() {
+        if (mShouldBoostBrightness) {
+            return curBrightness = Settings.System.getInt(getContext().getContentResolver(),
                     Settings.System.SCREEN_BRIGHTNESS, 100);
-            int dimAmount = 0;
+        }
+        return 0;
+    }
 
+    private void fingerPress() {
+            if (mShouldBoostBrightness) {
+                mDisplayManager.setTemporaryBrightness(255);
+            }
             IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
             if (daemon != null) {
                 try {
-                    dimAmount = daemon.getDimAmount(curBrightness);
+                    dimAmount = daemon.getDimAmount(getBrightness());
                 } catch (RemoteException e) {
                     // do nothing
                 }
             }
+            mParams.dimAmount = ((float) dimAmount) / 255.0f;
+            mWindowManager.updateViewLayout(this, mParams);
+    }
 
-            if (mShouldBoostBrightness) {
-                mDisplayManager.setTemporaryBrightness(255);
-            }
-
+    private void setDim(boolean dim) {
+        if (mShouldBoostBrightness) {
+            mDisplayManager.setTemporaryBrightness(-1);
+        }
+        if (dim) {
+            dimAmount = getBrightness();
             mParams.dimAmount = ((float) dimAmount) / 255.0f;
         } else {
-            mDisplayManager.setTemporaryBrightness(-1);
             mParams.dimAmount = 0.0f;
         }
 
