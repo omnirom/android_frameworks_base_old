@@ -19,6 +19,8 @@ package com.android.systemui;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.appops.AppOpsControllerImpl;
 import com.android.systemui.classifier.FalsingManagerProxy;
+import com.android.systemui.omni.OmniSettingsService;
+import com.android.systemui.omni.OmniSettingsServiceImpl;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
@@ -241,4 +243,9 @@ public abstract class DependencyBinder {
      */
     @Binds
     public abstract FalsingManager provideFalsingmanager(FalsingManagerProxy falsingManagerImpl);
+
+    /**
+     */
+    @Binds
+    public abstract OmniSettingsService provideOmniSettingsService(OmniSettingsServiceImpl controllerImpl);
 }
