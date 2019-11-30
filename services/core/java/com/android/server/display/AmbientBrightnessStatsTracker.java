@@ -50,7 +50,7 @@ import java.util.Map;
 public class AmbientBrightnessStatsTracker {
 
     private static final String TAG = "AmbientBrightnessStatsTracker";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     @VisibleForTesting
     static final float[] BUCKET_BOUNDARIES_FOR_NEW_STATS =
@@ -93,6 +93,9 @@ public class AmbientBrightnessStatsTracker {
 
     public synchronized void add(@UserIdInt int userId, float newAmbientBrightness) {
         if (mTimer.isRunning()) {
+            if (DEBUG) {
+                Slog.v(TAG, "add " + newAmbientBrightness);
+            }
             if (userId == mCurrentUserId) {
                 mAmbientBrightnessStats.log(mCurrentUserId, mInjector.getLocalDate(),
                         mCurrentAmbientBrightness, mTimer.totalDurationSec());
@@ -113,20 +116,36 @@ public class AmbientBrightnessStatsTracker {
     }
 
     public synchronized void writeStats(OutputStream stream) throws IOException {
+        if (DEBUG) {
+            Slog.v(TAG, "writeStats");
+        }
         mAmbientBrightnessStats.writeToXML(stream);
     }
 
     public synchronized void readStats(InputStream stream) throws IOException {
+        if (DEBUG) {
+            Slog.v(TAG, "readStats");
+        }
         mAmbientBrightnessStats.readFromXML(stream);
     }
 
     public synchronized ArrayList<AmbientBrightnessDayStats> getUserStats(int userId) {
+        if (DEBUG) {
+            Slog.v(TAG, "getUserStats");
+        }
         return mAmbientBrightnessStats.getUserStats(userId);
     }
 
     public synchronized void dump(PrintWriter pw) {
         pw.println("AmbientBrightnessStats:");
         pw.print(mAmbientBrightnessStats);
+    }
+
+    public synchronized void clearUserStats(int userId) {
+        if (DEBUG) {
+            Slog.v(TAG, "clearUserStats");
+        }
+        mAmbientBrightnessStats.clearUserStats(userId);
     }
 
     /**
@@ -299,6 +318,12 @@ public class AmbientBrightnessStatsTracker {
                 }
                 userStats.offer(dayStats);
                 return dayStats;
+            }
+        }
+
+        public void clearUserStats(@UserIdInt int userId) {
+            if (mStats.containsKey(userId)) {
+                mStats.get(userId).clear();
             }
         }
     }
