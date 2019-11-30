@@ -34,8 +34,8 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
     private static final String PERCENT = "percent";
     private static final String DEFAULT = "default";
     private static final String DISABLED = "disabled";
+    private static final String SLOT_BATTERY = "battery";
 
-    private final String mBattery;
     private boolean mBatteryEnabled;
     private boolean mHasPercentage;
     private ArraySet<String> mBlacklist;
@@ -43,7 +43,6 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
 
     public BatteryPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mBattery = context.getString(com.android.internal.R.string.status_bar_battery);
         setEntryValues(new CharSequence[] {PERCENT, DEFAULT, DISABLED });
     }
 
@@ -65,7 +64,7 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
     public void onTuningChanged(String key, String newValue) {
         if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
             mBlacklist = StatusBarIconController.getIconBlacklist(newValue);
-            mBatteryEnabled = !mBlacklist.contains(mBattery);
+            mBatteryEnabled = !mBlacklist.contains(SLOT_BATTERY);
         }
         if (!mHasSetValue) {
             // Because of the complicated tri-state it can end up looping and setting state back to
@@ -88,9 +87,9 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
         MetricsLogger.action(getContext(), MetricsEvent.TUNER_BATTERY_PERCENTAGE, v);
         Settings.System.putInt(getContext().getContentResolver(), SHOW_BATTERY_PERCENT, v ? 1 : 0);
         if (DISABLED.equals(value)) {
-            mBlacklist.add(mBattery);
+            mBlacklist.add(SLOT_BATTERY);
         } else {
-            mBlacklist.remove(mBattery);
+            mBlacklist.remove(SLOT_BATTERY);
         }
         Dependency.get(TunerService.class).setValue(StatusBarIconController.ICON_BLACKLIST,
                 TextUtils.join(",", mBlacklist));
