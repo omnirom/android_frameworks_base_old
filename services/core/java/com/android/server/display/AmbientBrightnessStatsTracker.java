@@ -129,6 +129,10 @@ public class AmbientBrightnessStatsTracker {
         pw.print(mAmbientBrightnessStats);
     }
 
+    public synchronized void clearUserStats(int userId) {
+        mAmbientBrightnessStats.clearUserStats(userId);
+    }
+
     /**
      * AmbientBrightnessStats tracks ambient brightness stats across users over multiple days.
      * This class is not ThreadSafe.
@@ -299,6 +303,12 @@ public class AmbientBrightnessStatsTracker {
                 }
                 userStats.offer(dayStats);
                 return dayStats;
+            }
+        }
+
+        public void clearUserStats(@UserIdInt int userId) {
+            if (mStats.containsKey(userId)) {
+                mStats.get(userId).clear();
             }
         }
     }

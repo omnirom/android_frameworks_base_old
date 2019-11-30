@@ -831,6 +831,12 @@ public class BrightnessTracker {
         return ParceledListSlice.emptyList();
     }
 
+    public void clearAmbientBrightnessStats(int userId) {
+        if (mAmbientBrightnessStatsTracker != null) {
+            mAmbientBrightnessStatsTracker.clearUserStats(userId);
+        }
+    }
+
     // Not allowed to keep the SensorEvent so used to copy the data we care about.
     private static class LightData {
         public float lux;
