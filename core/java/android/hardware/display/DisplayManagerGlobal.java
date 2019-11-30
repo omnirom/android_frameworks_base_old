@@ -662,6 +662,17 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Clear ambient brightness stats.
+     */
+    public void clearAmbientBrightnessStats() {
+        try {
+            mDm.clearAmbientBrightnessStats();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     private final class DisplayManagerCallback extends IDisplayManagerCallback.Stub {
         @Override
         public void onDisplayEvent(int displayId, int event) {

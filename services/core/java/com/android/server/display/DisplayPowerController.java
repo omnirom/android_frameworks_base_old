@@ -593,6 +593,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mBrightnessTracker.persistBrightnessTrackerState();
     }
 
+    public void clearAmbientBrightnessStats(@UserIdInt int userId) {
+        mBrightnessTracker.clearAmbientBrightnessStats(userId);
+    }
+
     /**
      * Requests a new power state.
      * The controller makes a copy of the provided object and then
