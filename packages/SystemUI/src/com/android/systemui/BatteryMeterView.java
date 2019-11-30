@@ -287,6 +287,7 @@ public class BatteryMeterView extends LinearLayout implements
     public void onTuningChanged(String key, String newValue) {
         if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
             ArraySet<String> icons = StatusBarIconController.getIconBlacklist(newValue);
+            setVisibility(!icons.contains("battery") ? View.GONE : View.VISIBLE);
         }
     }
 
