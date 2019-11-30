@@ -26,74 +26,59 @@ import androidx.preference.DropDownPreference;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 
-public class BatteryPreference extends DropDownPreference implements TunerService.Tunable {
+public class BatteryPreference extends DropDownPreference {
 
+    private static final String NO_PERCENT = "no_percent";
     private static final String PERCENT = "percent";
     private static final String DEFAULT = "default";
-    private static final String DISABLED = "disabled";
 
-    private final String mBattery;
-    private boolean mBatteryEnabled;
     private boolean mHasPercentage;
-    private ArraySet<String> mBlacklist;
-    private boolean mHasSetValue;
+    private boolean mShowCharging;
 
     public BatteryPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mBattery = context.getString(com.android.internal.R.string.status_bar_battery);
-        setEntryValues(new CharSequence[] {PERCENT, DEFAULT, DISABLED });
+        setEntryValues(new CharSequence[] {NO_PERCENT, PERCENT, DEFAULT });
     }
 
     @Override
     public void onAttached() {
         super.onAttached();
-        mHasPercentage = Settings.System.getInt(getContext().getContentResolver(),
-                SHOW_BATTERY_PERCENT, 0) != 0;
-        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+        int v = Settings.System.getInt(getContext().getContentResolver(),
+                SHOW_BATTERY_PERCENT, 0);
+        mHasPercentage = v == 1;
+        mShowCharging = v == 2;
+
+        if (mHasPercentage) {
+            setValue(PERCENT);
+        } else if (mShowCharging) {
+            setValue(DEFAULT);
+        } else {
+            setValue(NO_PERCENT);
+        }
     }
 
     @Override
     public void onDetached() {
-        Dependency.get(TunerService.class).removeTunable(this);
         super.onDetached();
     }
 
     @Override
-    public void onTuningChanged(String key, String newValue) {
-        if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
-            mBlacklist = StatusBarIconController.getIconBlacklist(newValue);
-            mBatteryEnabled = !mBlacklist.contains(mBattery);
-        }
-        if (!mHasSetValue) {
-            // Because of the complicated tri-state it can end up looping and setting state back to
-            // what the user didn't choose.  To avoid this, just set the state once and rely on the
-            // preference to handle updates.
-            mHasSetValue = true;
-            if (mBatteryEnabled && mHasPercentage) {
-                setValue(PERCENT);
-            } else if (mBatteryEnabled) {
-                setValue(DEFAULT);
-            } else {
-                setValue(DISABLED);
-            }
-        }
-    }
-
-    @Override
     protected boolean persistString(String value) {
-        final boolean v = PERCENT.equals(value);
-        MetricsLogger.action(getContext(), MetricsEvent.TUNER_BATTERY_PERCENTAGE, v);
-        Settings.System.putInt(getContext().getContentResolver(), SHOW_BATTERY_PERCENT, v ? 1 : 0);
-        if (DISABLED.equals(value)) {
-            mBlacklist.add(mBattery);
-        } else {
-            mBlacklist.remove(mBattery);
+        final boolean percent = PERCENT.equals(value);
+        MetricsLogger.action(getContext(), MetricsEvent.TUNER_BATTERY_PERCENTAGE, percent);
+        if (percent) {
+            Settings.System.putInt(getContext().getContentResolver(), SHOW_BATTERY_PERCENT, 1);
         }
-        Dependency.get(TunerService.class).setValue(StatusBarIconController.ICON_BLACKLIST,
-                TextUtils.join(",", mBlacklist));
+        final boolean noPercent = NO_PERCENT.equals(value);
+        if (noPercent) {
+            Settings.System.putInt(getContext().getContentResolver(), SHOW_BATTERY_PERCENT, 0);
+        }
+        final boolean charging = DEFAULT.equals(value);
+        if (charging) {
+            Settings.System.putInt(getContext().getContentResolver(), SHOW_BATTERY_PERCENT, 2);
+        }
         return true;
     }
 }

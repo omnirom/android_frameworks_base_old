@@ -87,7 +87,12 @@
     <string name="tuner_keyguard_show_current_summary">Show charging current values</string>
     <string name="tuner_keyguard_show_battery_temp_title">Show battery temperature</string>
     <string name="tuner_keyguard_show_battery_temp_summary">Show battery temperature value</string>
-
+    <string name="tuner_battery_percent_disable">Don\'t show percentage</string>
+    <string name="tuner_battery_percent_enable">Always show percentage</string>
+    <string name="tuner_battery_percent_charging">Show percentage when charging</string>
+    <string name="tuner_battery_percent_hide">Don\'t show this icon</string>
+    <string name="tuner_battery_percent_title">Battery percent</string>
+    <string name="tuner_status_bar_show_battery_image">Show battery image</string>
 
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>
