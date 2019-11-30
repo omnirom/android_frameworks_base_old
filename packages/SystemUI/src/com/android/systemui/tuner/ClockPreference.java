@@ -29,8 +29,8 @@ public class ClockPreference extends DropDownPreference implements TunerService.
     private static final String SECONDS = "seconds";
     private static final String DEFAULT = "default";
     private static final String DISABLED = "disabled";
+    private static final String SLOT_CLOCK = "clock";
 
-    private final String mClock;
     private boolean mClockEnabled;
     private boolean mHasSeconds;
     private ArraySet<String> mBlacklist;
@@ -40,7 +40,6 @@ public class ClockPreference extends DropDownPreference implements TunerService.
 
     public ClockPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mClock = context.getString(com.android.internal.R.string.status_bar_clock);
         setEntryValues(new CharSequence[] { SECONDS, DEFAULT, DISABLED });
     }
 
@@ -62,7 +61,7 @@ public class ClockPreference extends DropDownPreference implements TunerService.
         if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
             mReceivedClock = true;
             mBlacklist = StatusBarIconController.getIconBlacklist(newValue);
-            mClockEnabled = !mBlacklist.contains(mClock);
+            mClockEnabled = !mBlacklist.contains(SLOT_CLOCK);
         } else if (Clock.CLOCK_SECONDS.equals(key)) {
             mReceivedSeconds = true;
             mHasSeconds = newValue != null && Integer.parseInt(newValue) != 0;
@@ -87,9 +86,9 @@ public class ClockPreference extends DropDownPreference implements TunerService.
         Dependency.get(TunerService.class).setValue(Clock.CLOCK_SECONDS, SECONDS.equals(value) ? 1
                 : 0);
         if (DISABLED.equals(value)) {
-            mBlacklist.add(mClock);
+            mBlacklist.add(SLOT_CLOCK);
         } else {
-            mBlacklist.remove(mClock);
+            mBlacklist.remove(SLOT_CLOCK);
         }
         Dependency.get(TunerService.class).setValue(StatusBarIconController.ICON_BLACKLIST,
                 TextUtils.join(",", mBlacklist));
