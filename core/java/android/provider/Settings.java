@@ -5051,6 +5051,15 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * @hide
+         */
+        public static final String OMNI_SHOW_BATTERY_IMAGE = "status_bar_show_battery_image";
+
+        /** @hide */
+        private static final Validator OMNI_SHOW_BATTERY_IMAGE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5178,6 +5187,7 @@ public final class Settings {
             OMNI_DOZE_ON_CHARGE,
             OMNI_LOCKSCREEN_MEDIA_BLUR,
             OMNI_USE_OLD_MOBILETYPE,
+            OMNI_SHOW_BATTERY_IMAGE,
         };
 
         /**
@@ -5355,6 +5365,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_DOZE_ON_CHARGE);
             PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_MEDIA_BLUR);
             PRIVATE_SETTINGS.add(OMNI_USE_OLD_MOBILETYPE);
+            PRIVATE_SETTINGS.add(OMNI_SHOW_BATTERY_IMAGE);
         }
 
         /**
@@ -5543,6 +5554,7 @@ public final class Settings {
                     OMNI_DOZE_ON_CHARGE_VALIDATOR);
             VALIDATORS.put(OMNI_LOCKSCREEN_MEDIA_BLUR, OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR);
             VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, OMNI_USE_OLD_MOBILETYPE_VALIDATOR);
+            VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, OMNI_SHOW_BATTERY_IMAGE_VALIDATOR);
         }
 
         /**

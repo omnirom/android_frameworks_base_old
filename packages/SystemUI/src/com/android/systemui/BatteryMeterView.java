@@ -18,6 +18,7 @@ package com.android.systemui;
 import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
+import static android.provider.Settings.System.OMNI_SHOW_BATTERY_IMAGE;
 
 import static com.android.systemui.util.SysuiLifecycle.viewAttachLifecycle;
 
@@ -41,6 +42,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -83,7 +85,7 @@ public class BatteryMeterView extends LinearLayout implements
     private final String mSlotBattery;
     private final ImageView mBatteryIconView;
     private final CurrentUserTracker mUserTracker;
-    private TextView mBatteryPercentView;
+    private final TextView mBatteryPercentView;
 
     private BatteryController mBatteryController;
     private SettingObserver mSettingObserver;
@@ -109,6 +111,8 @@ public class BatteryMeterView extends LinearLayout implements
     private int mNonAdaptedSingleToneColor;
     private int mNonAdaptedForegroundColor;
     private int mNonAdaptedBackgroundColor;
+    private boolean mPowerSaveEnabled;
+    private boolean mCharging;
 
     public BatteryMeterView(Context context) {
         this(context, null, 0);
@@ -152,6 +156,12 @@ public class BatteryMeterView extends LinearLayout implements
         mlp.setMargins(0, 0, 0,
                 getResources().getDimensionPixelOffset(R.dimen.battery_margin_bottom));
         addView(mBatteryIconView, mlp);
+
+        mBatteryPercentView = (TextView) LayoutInflater.from(getContext())
+                .inflate(R.layout.battery_percentage_view, null);
+        addView(mBatteryPercentView, new ViewGroup.LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.MATCH_PARENT));
 
         updateShowPercent();
         mDualToneHandler = new DualToneHandler(context);
@@ -287,6 +297,7 @@ public class BatteryMeterView extends LinearLayout implements
     public void onTuningChanged(String key, String newValue) {
         if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
             ArraySet<String> icons = StatusBarIconController.getIconBlacklist(newValue);
+            setVisibility(icons.contains("battery") ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -296,12 +307,20 @@ public class BatteryMeterView extends LinearLayout implements
         mBatteryController = Dependency.get(BatteryController.class);
         mBatteryController.addCallback(this);
         mUser = ActivityManager.getCurrentUser();
+        Dependency.get(TunerService.class)
+                .addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+
         getContext().getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver, mUser);
         getContext().getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME),
                 false, mSettingObserver);
         updateShowPercent();
+
+        getContext().getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(OMNI_SHOW_BATTERY_IMAGE), false, mSettingObserver);
+        updateShowImage();
+
         subscribeForTunerUpdates();
         mUserTracker.startTracking();
     }
@@ -408,6 +427,12 @@ public class BatteryMeterView extends LinearLayout implements
         }
     }
 
+    private void updateShowImage() {
+        final boolean showImage = Settings.System.getInt(getContext().getContentResolver(),
+                OMNI_SHOW_BATTERY_IMAGE, 1) == 1;
+        mBatteryIconView.setVisibility(showImage ? View.VISIBLE : View.GONE);
+    }
+
     @Override
     public void onDensityOrFontScaleChanged() {
         scaleBatteryMeterViews();
@@ -480,6 +505,7 @@ public class BatteryMeterView extends LinearLayout implements
                 // update the text for sure if the estimate in the cache was updated
                 updatePercentText();
             }
+            updateShowImage();
         }
     }
 }

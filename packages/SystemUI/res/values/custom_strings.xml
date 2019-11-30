@@ -88,7 +88,6 @@
     <string name="tuner_keyguard_show_battery_temp_title">Show battery temperature</string>
     <string name="tuner_keyguard_show_battery_temp_summary">Show battery temperature value</string>
 
-
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>
     <string name="omnijaws_service_error_long">Error loading weather data</string>

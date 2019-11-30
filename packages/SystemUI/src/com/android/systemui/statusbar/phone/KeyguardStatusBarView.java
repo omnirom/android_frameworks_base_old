@@ -58,9 +58,6 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
 /**
  * The header group on Keyguard.
  */
