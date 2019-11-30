@@ -48,6 +48,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -175,6 +176,8 @@ public class BrightnessTracker {
 
     private final Injector mInjector;
 
+    private boolean mBrightnessStatsDisabled;
+
     public BrightnessTracker(Context context, @Nullable Injector injector) {
         // Note this will be called very early in boot, other system
         // services may not be present.
@@ -187,6 +190,7 @@ public class BrightnessTracker {
         }
         mBgHandler = new TrackerHandler(mInjector.getBackgroundHandler().getLooper());
         mUserManager = mContext.getSystemService(UserManager.class);
+        mBrightnessStatsDisabled = SystemProperties.getBoolean("persist.display.ambient_stats.disabled", false);
     }
 
     /**
@@ -831,6 +835,12 @@ public class BrightnessTracker {
         return ParceledListSlice.emptyList();
     }
 
+    public void clearAmbientBrightnessStats(int userId) {
+        if (mAmbientBrightnessStatsTracker != null) {
+            mAmbientBrightnessStatsTracker.clearUserStats(userId);
+        }
+    }
+
     // Not allowed to keep the SensorEvent so used to copy the data we care about.
     private static class LightData {
         public float lux;
@@ -882,7 +892,9 @@ public class BrightnessTracker {
         @Override
         public void onSensorChanged(SensorEvent event) {
             recordSensorEvent(event);
-            recordAmbientBrightnessStats(event);
+            if (!mBrightnessStatsDisabled) {
+                recordAmbientBrightnessStats(event);
+            }
         }
 
         @Override
