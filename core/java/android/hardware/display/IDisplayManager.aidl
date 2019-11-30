@@ -97,6 +97,9 @@ interface IDisplayManager {
     // Requires ACCESS_AMBIENT_LIGHT_STATS permission.
     ParceledListSlice getAmbientBrightnessStats();
 
+    // Requires ACCESS_AMBIENT_LIGHT_STATS permission.
+    void clearAmbientBrightnessStats();
+
     // Sets the global brightness configuration for a given user. Requires
     // CONFIGURE_DISPLAY_BRIGHTNESS, and INTERACT_ACROSS_USER if the user being configured is not
     // the same as the calling user.

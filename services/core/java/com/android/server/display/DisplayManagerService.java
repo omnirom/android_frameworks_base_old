@@ -2138,6 +2138,23 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public void clearAmbientBrightnessStats() {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS,
+                    "Permission required to to access ambient light stats.");
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    mDisplayPowerController.clearAmbientBrightnessStats(userId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
         public void setBrightnessConfigurationForUser(
                 BrightnessConfiguration c, @UserIdInt int userId, String packageName) {
             mContext.enforceCallingOrSelfPermission(

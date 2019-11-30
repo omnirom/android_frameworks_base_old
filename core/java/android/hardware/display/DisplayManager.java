@@ -685,6 +685,18 @@ public final class DisplayManager {
     }
 
     /**
+     * Clear {@link AmbientBrightnessDayStats}s.
+     *
+     * @hide until we make it a system api
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS)
+    public void clearAmbientBrightnessStats() {
+        mGlobal.clearAmbientBrightnessStats();
+    }
+
+    /**
      * Sets the global display brightness configuration.
      *
      * @hide
