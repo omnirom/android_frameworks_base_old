@@ -107,13 +107,6 @@
             android:key="airplane"
             android:title="@string/status_bar_airplane" />
 
-        <!-- other weird signal stuff -->
-
-        <com.android.systemui.tuner.BatteryPreference
-            android:title="@string/battery"
-            android:summary="%s"
-            android:entries="@array/battery_options" />
-
         <com.android.systemui.tuner.StatusBarSwitch
             android:key="alarm_clock"
             android:title="@string/status_bar_alarm" />
@@ -122,7 +115,10 @@
             android:key="vpn"
             android:title="@string/status_bar_vpn" />
 
-        <!-- secure -->
+        <com.android.systemui.tuner.BatteryPreference
+            android:title="@string/battery"
+            android:summary="%s"
+            android:entries="@array/battery_options_new" />
 
         <com.android.systemui.tuner.ClockPreference
             android:title="@string/tuner_time"
