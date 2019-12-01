@@ -27,7 +27,9 @@
     <dimen name="qs_header_image_bottom_margin">4dp</dimen>
     <dimen name="dashboard_tile_image_size">36dp</dimen>
     <dimen name="dashboard_tile_foreground_image_size">24dp</dimen>
-    <dimen name="status_bar_mobile_signal_with_type_width">22dp</dimen>
+    <dimen name="status_bar_mobile_signal_with_type_width">18dp</dimen>
     <dimen name="status_bar_mobile_signal_width">16dp</dimen>
-    <dimen name="status_bar_mobile_type_height">10dp</dimen>
+    <dimen name="status_bar_mobile_type_height">8dp</dimen>
+    <dimen name="status_bar_mobile_type_padding">2dp</dimen>
+    <dimen name="status_bar_mobile_type_padding_limit">10dp</dimen>
 </resources>
