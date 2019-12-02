@@ -116,6 +116,10 @@
             android:title="@string/status_bar_vpn" />
 
         <com.android.systemui.tuner.StatusBarSwitch
+            android:key="location"
+            android:title="@string/status_bar_location" />
+
+        <com.android.systemui.tuner.StatusBarSwitch
             android:key="battery"
             android:title="@string/battery" />
 
