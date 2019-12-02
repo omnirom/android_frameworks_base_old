@@ -92,7 +92,7 @@
     <string name="tuner_battery_percent_charging">Show percentage when charging</string>
     <string name="tuner_battery_percent_hide">Don\'t show this icon</string>
     <string name="tuner_battery_percent_title">Battery percent</string>
-    <string name="tuner_status_bar_show_battery_image">Show battery image</string>
+    <string name="tuner_status_bar_show_battery_image">Battery image</string>
 
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>
@@ -127,5 +127,6 @@
     <string name="navbar_editor_summary">Configure navigaton bar</string>
     <string name="status_bar_vpn">VPN</string>
     <string name="quick_settings_roaming_title">Roaming indicator</string>
+    <string name="status_bar_location">Location</string>
 
 </resources>
