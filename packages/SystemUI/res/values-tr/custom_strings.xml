@@ -96,7 +96,7 @@
     <string name="keycode_description">Tuş kodu düğmeleri, klavye tuşlarının Gezinti Çubuğuna ilâve edilmesine imkân sağlar. Dokunulduğunda seçilen klavye tuşunu taklit eder. Düğme üzerinde gösterilecek olan bir resimden sonra düğme için bir tuş seçilmeli.</string>
     <string name="start">Başlat</string>
     <string name="center">Merkezle</string>
-    <string name="end">Sonlandır</string>
+    <string name="end">Sona erdir</string>
     <string name="space">Ara kısım</string>
     <string name="menu_ime">Menü veyâ Klavye Değiştirici</string>
     <string name="select_button">İlâve edilecek düğmeyi seçin</string>

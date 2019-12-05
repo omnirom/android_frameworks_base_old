@@ -52,7 +52,7 @@
     <string name="tuner_show_brightness_new">Zeige Helligkeitsregler</string>
     <string name="tuner_brightness_position_bottom">Helligkeitsregler unten</string>
     <string name="tuner_show_secure_title">Sicherheitsfußzeile anzeigen</string>
-    <string name="tuner_show_drag_handle">Drag-Handle anzeigen</string>
+    <string name="tuner_show_drag_handle">Ziehschalter anzeigen</string>
     <string name="tuner_battery_location_bar">Zeige Akkusymbol in der Statusleiste</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Aktiviert</string>
@@ -77,7 +77,7 @@
     <string name="tuner_keyguard_show_current_title">Ladestrom anzeigen</string>
     <string name="tuner_keyguard_show_current_summary">Ladestromwerte anzeigen</string>
     <string name="tuner_keyguard_show_battery_temp_title">Akkutemperatur anzeigen</string>
-    <string name="tuner_keyguard_show_battery_temp_summary">Akkutemperaturwert anzeigen</string>
+    <string name="tuner_keyguard_show_battery_temp_summary">Zeigt die aktuelle Akkutemperatur an</string>
     <string name="omnijaws_service_error">Fehler</string>
     <string name="omnijaws_service_unkown">Keine Wetterdaten</string>
     <string name="omnijaws_service_error_long">Fehler beim Laden der Wetterdaten</string>

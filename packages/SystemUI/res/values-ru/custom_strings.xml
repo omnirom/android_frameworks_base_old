@@ -74,8 +74,8 @@
     <string name="tuner_keyguard_battery_percent_summary">Принудительно показывать процент батареи в строке состояния при зарядке</string>
     <string name="tuner_keyguard_show_watt_title">Показывать мощность тока при зарядке</string>
     <string name="tuner_keyguard_show_watt_summary">Показывать мощность тока при зарядке в мВт</string>
-    <string name="tuner_keyguard_show_current_title">Показывать скорость зарядки</string>
-    <string name="tuner_keyguard_show_current_summary">Показывать значение скорости зарядки</string>
+    <string name="tuner_keyguard_show_current_title">Показывать силу тока при зарядке</string>
+    <string name="tuner_keyguard_show_current_summary">Показывать значение силы тока при зарядке</string>
     <string name="tuner_keyguard_show_battery_temp_title">Показывать температуру батареи</string>
     <string name="tuner_keyguard_show_battery_temp_summary">Показывать значение температуры батареи</string>
     <string name="omnijaws_service_error">Ошибка</string>
