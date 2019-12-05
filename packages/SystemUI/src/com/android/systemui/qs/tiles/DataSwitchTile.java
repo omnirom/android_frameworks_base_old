@@ -122,6 +122,7 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
         } else if (mSimCount == 1) {
             Log.d(TAG, "handleClick:only one sim card");
         } else {
+            mHost.collapsePanels();
             AsyncTask.execute(new Runnable() {
                 public final void run() {
                     toggleMobileDataEnabled();
