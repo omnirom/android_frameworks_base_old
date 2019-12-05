@@ -485,6 +485,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * device is dozing when the light sensor is on.
      */
     public void setAodFrontScrimAlpha(float alpha) {
+        Log.d(TAG, "setAodFrontScrimAlpha " + alpha);
         if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()
                 && mCurrentInFrontAlpha != alpha) {
             mCurrentInFrontAlpha = alpha;
@@ -499,6 +500,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * away once the display turns on.
      */
     public void prepareForGentleWakeUp() {
+        Log.d(TAG, "prepareForGentleWakeUp " + mState);
         if (mState == ScrimState.AOD) {
             mCurrentInFrontAlpha = 1f;
             mCurrentInFrontTint = Color.BLACK;

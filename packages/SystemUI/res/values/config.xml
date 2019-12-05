@@ -298,6 +298,7 @@
         <item>com.android.systemui.SizeCompatModeActivityController</item>
         <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
         <item>com.android.systemui.theme.ThemeOverlayController</item>
+        <item>com.android.systemui.omni.OmniSystemUIObserver</item>
     </string-array>
 
     <!-- SystemUI vender service, used in config_systemUIServiceComponents. -->
