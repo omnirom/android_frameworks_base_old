@@ -19,7 +19,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.hardware.display.AmbientDisplayConfiguration;
+//import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -73,10 +73,10 @@ public class TunerFragment extends PreferenceFragment {
         if (!PluginPrefs.hasPlugins(getContext())) {
             getPreferenceScreen().removePreference(findPreference(KEY_PLUGINS));
         }
-        if (!alwaysOnAvailable()) {
+        /*if (!alwaysOnAvailable()) {
             getPreferenceScreen().removePreference(findPreference(KEY_DOZE));
         }
-        /*if (!Build.IS_DEBUGGABLE) {
+        if (!Build.IS_DEBUGGABLE) {
             for (int i = 0; i < DEBUG_ONLY.length; i++) {
                 Preference preference = findPreference(DEBUG_ONLY[i]);
                 if (preference != null) getPreferenceScreen().removePreference(preference);
@@ -91,9 +91,9 @@ public class TunerFragment extends PreferenceFragment {
         }
     }
 
-    private boolean alwaysOnAvailable() {
+    /*private boolean alwaysOnAvailable() {
         return new AmbientDisplayConfiguration(getContext()).alwaysOnAvailable();
-    }
+    }*/
 
     @Override
     public void onResume() {
