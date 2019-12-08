@@ -19,7 +19,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -73,15 +72,6 @@ public class TunerFragment extends PreferenceFragment {
         if (!PluginPrefs.hasPlugins(getContext())) {
             getPreferenceScreen().removePreference(findPreference(KEY_PLUGINS));
         }
-        if (!alwaysOnAvailable()) {
-            getPreferenceScreen().removePreference(findPreference(KEY_DOZE));
-        }
-        /*if (!Build.IS_DEBUGGABLE) {
-            for (int i = 0; i < DEBUG_ONLY.length; i++) {
-                Preference preference = findPreference(DEBUG_ONLY[i]);
-                if (preference != null) getPreferenceScreen().removePreference(preference);
-            }
-        }*/
 
         if (Settings.Secure.getInt(getContext().getContentResolver(), SETTING_SEEN_TUNER_WARNING,
                 0) == 0) {
@@ -89,10 +79,6 @@ public class TunerFragment extends PreferenceFragment {
                 new TunerWarningFragment().show(getFragmentManager(), WARNING_TAG);
             }
         }
-    }
-
-    private boolean alwaysOnAvailable() {
-        return new AmbientDisplayConfiguration(getContext()).alwaysOnAvailable();
     }
 
     @Override
