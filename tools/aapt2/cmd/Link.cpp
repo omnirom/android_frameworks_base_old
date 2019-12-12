@@ -489,7 +489,7 @@ ResourceFile::Type XmlFileTypeForOutputFormat(OutputFormat format) {
 }
 
 static auto kDrawableVersions = std::map<std::string, ApiVersion>{
-    { "adaptive-icon" , SDK_O },
+    //{ "adaptive-icon" , SDK_O },
 };
 
 bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archive_writer) {

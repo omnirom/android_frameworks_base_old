@@ -154,8 +154,7 @@ public class AmbientDisplayConfiguration {
      */
     @TestApi
     public boolean alwaysOnEnabled(int user) {
-        return boolSetting(Settings.Secure.DOZE_ALWAYS_ON, user, mAlwaysOnByDefault ? 1 : 0)
-                && alwaysOnAvailable() && !accessibilityInversionEnabled(user);
+        return alwaysOnEnabledSetting(user) || alwaysOnChargingEnabled(user);
     }
 
     /**
@@ -212,5 +211,26 @@ public class AmbientDisplayConfiguration {
 
     private boolean boolSetting(String name, int user, int def) {
         return Settings.Secure.getIntForUser(mContext.getContentResolver(), name, def, user) != 0;
+    }
+
+    // omni additions start
+    private boolean boolSettingSystem(String name, int user, int def) {
+        return Settings.System.getIntForUser(mContext.getContentResolver(), name, def, user) != 0;
+    }
+
+    /** {@hide} */
+    public boolean alwaysOnEnabledSetting(int user) {
+        boolean alwaysOnEnabled = boolSetting(Settings.Secure.DOZE_ALWAYS_ON, user, mAlwaysOnByDefault ? 1 : 0);
+        return alwaysOnEnabled && alwaysOnAvailable() && !accessibilityInversionEnabled(user);
+    }
+
+    /** {@hide} */
+    public boolean alwaysOnChargingEnabled(int user) {
+        final boolean dozeOnChargeEnabled = boolSettingSystem(Settings.System.OMNI_DOZE_ON_CHARGE, user, 0);
+        if (dozeOnChargeEnabled) {
+            final boolean dozeOnChargeEnabledNow = boolSettingSystem(Settings.System.OMNI_DOZE_ON_CHARGE_NOW, user, 0);
+            return dozeOnChargeEnabledNow && alwaysOnAvailable() && !accessibilityInversionEnabled(user);
+        }
+        return false;
     }
 }

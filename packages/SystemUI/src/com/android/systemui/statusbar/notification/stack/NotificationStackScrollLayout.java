@@ -87,6 +87,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -500,6 +501,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mNotificationGutsManager = Dependency.get(NotificationGutsManager.class);
     private final NotificationSectionsManager mSectionsManager;
     private boolean mAnimateBottomOnLayout;
+    private int mPulseReason;
     private float mLastSentAppear;
     private float mLastSentExpandedHeight;
     private boolean mWillExpand;
@@ -5153,6 +5155,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return;
         }
         mPulsing = pulsing;
+        updateClipping();
         mAmbientState.setPulsing(pulsing);
         mSwipeHelper.setPulsing(pulsing);
         updateNotificationAnimationStates();

@@ -21,6 +21,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.os.PowerManager;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -31,6 +33,8 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+
+import com.android.internal.util.omni.OmniUtils;
 
 /**
  * A utility class to enable the downward swipe on the lockscreen to go to the full shade and expand
@@ -57,12 +61,20 @@ public class DragDownHelper implements Gefingerpoken {
     private float mLastHeight;
     private FalsingManager mFalsingManager;
 
-    public DragDownHelper(Context context, View host, ExpandHelper.Callback callback,
+    // omni additions start
+    private boolean mDoubleTapToSleepEnabled;
+    private int mStatusBarHeaderHeight;
+    private long mLastDownEvent = -1;
+    private long mDoubleTapTimeout;
+    private Runnable mGoToSleep;
+
+    public DragDownHelper(final Context context, View host, ExpandHelper.Callback callback,
             DragDownCallback dragDownCallback,
             FalsingManager falsingManager) {
         mMinDragDistance = context.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_drag_down_min_distance);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        mDoubleTapTimeout = ViewConfiguration.get(context).getDoubleTapTimeout();
         mCallback = callback;
         mDragDownCallback = dragDownCallback;
         mHost = host;
@@ -81,6 +93,20 @@ public class DragDownHelper implements Gefingerpoken {
                 mStartingChild = null;
                 mInitialTouchY = y;
                 mInitialTouchX = x;
+
+                if (mDoubleTapToSleepEnabled && y < mStatusBarHeaderHeight) {
+                    long eventTime = event.getEventTime();
+                    if (mLastDownEvent != -1) {
+                        long diff = eventTime - mLastDownEvent;
+
+                        if (diff < mDoubleTapTimeout) {
+                            mGoToSleep.run();
+                        }
+                        mLastDownEvent = -1;
+                    } else {
+                        mLastDownEvent = eventTime;
+                    }
+                }
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -272,5 +298,9 @@ public class DragDownHelper implements Gefingerpoken {
          * @return if drag down is enabled anywhere, not just on selected views.
          */
         boolean isDragDownAnywhereEnabled();
+    }
+
+    public void updateDoubleTapToSleep(boolean updateDoubleTapToSleep) {
+        mDoubleTapToSleepEnabled = updateDoubleTapToSleep;
     }
 }

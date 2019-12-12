@@ -601,6 +601,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final String OEM_OVERLAY_DIR = "/oem/overlay";
 
+    private static final String SYSTEM_OVERLAY_DIR = "/system/overlay";
+
     /** Canonical intent used to identify what counts as a "web browser" app */
     private static final Intent sBrowserIntent;
     static {
@@ -1397,6 +1399,7 @@ public class PackageManagerService extends IPackageManager.Stub
             | FLAG_PERMISSION_REVOKE_ON_UPGRADE;
 
     final @Nullable String mRequiredVerifierPackage;
+    final @Nullable String mOptionalVerifierPackage;
     final @NonNull String mRequiredInstallerPackage;
     final @NonNull String mRequiredUninstallerPackage;
     final @NonNull String mRequiredPermissionControllerPackage;
@@ -1413,6 +1416,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private final PackageUsage mPackageUsage = new PackageUsage();
     private final CompilerStats mCompilerStats = new CompilerStats();
+
+    private final Signature[] mVendorPlatformSignatures;
 
     class PackageHandler extends Handler {
 
@@ -2400,6 +2405,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    private static Signature[] createSignatures(String[] hexBytes) {
+        Signature[] sigs = new Signature[hexBytes.length];
+        for (int i = 0; i < sigs.length; i++) {
+            sigs[i] = new Signature(hexBytes[i]);
+        }
+        return sigs;
+    }
+
     public PackageManagerService(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
         LockGuard.installLock(mPackages, LockGuard.INDEX_PACKAGES);
@@ -2412,6 +2425,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         mContext = context;
+
+        mVendorPlatformSignatures = createSignatures(context.getResources().getStringArray(
+                    com.android.internal.R.array.config_vendorPlatformSignatures));
 
         mFactoryTest = factoryTest;
         mOnlyCore = onlyCore;
@@ -2579,10 +2595,10 @@ public class PackageManagerService extends IPackageManager.Stub
             File frameworkDir = new File(Environment.getRootDirectory(), "framework");
 
             final VersionInfo ver = mSettings.getInternalVersion();
-            mIsUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
+            mIsUpgrade = !Build.OMNI_FINGERPRINT.equals(ver.fingerprint);
             if (mIsUpgrade) {
                 logCriticalInfo(Log.INFO,
-                        "Upgrading from " + ver.fingerprint + " to " + Build.FINGERPRINT);
+                        "Upgrading from " + ver.fingerprint + " to " + Build.OMNI_FINGERPRINT);
             }
 
             // when upgrading from pre-M, promote system app permissions from install to runtime
@@ -2658,6 +2674,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     scanFlags
                     | SCAN_AS_SYSTEM
                     | SCAN_AS_OEM,
+                    0);
+            scanDirTracedLI(new File(SYSTEM_OVERLAY_DIR),
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM,
                     0);
 
             mParallelPackageParserCallback.findStaticOverlayPackages();
@@ -3259,7 +3281,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                         | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                     }
                 }
-                ver.fingerprint = Build.FINGERPRINT;
+                ver.fingerprint = Build.OMNI_FINGERPRINT;
             }
 
             // Grandfather existing (installed before Q) non-system apps to hide
@@ -3293,6 +3315,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (!mOnlyCore) {
                 mRequiredVerifierPackage = getRequiredButNotReallyRequiredVerifierLPr();
+                mOptionalVerifierPackage = getOptionalVerifierLPr();
                 mRequiredInstallerPackage = getRequiredInstallerLPr();
                 mRequiredUninstallerPackage = getRequiredUninstallerLPr();
                 mIntentFilterVerifierComponent = getIntentFilterVerifierComponentNameLPr();
@@ -3310,6 +3333,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         SharedLibraryInfo.VERSION_UNDEFINED);
             } else {
                 mRequiredVerifierPackage = null;
+                mOptionalVerifierPackage = null;
                 mRequiredInstallerPackage = null;
                 mRequiredUninstallerPackage = null;
                 mIntentFilterVerifierComponent = null;
@@ -3640,8 +3664,9 @@ public class PackageManagerService extends IPackageManager.Stub
         // There are several items that need to be combined together to safely
         // identify cached items. In particular, changing the value of certain
         // feature flags should cause us to invalidate any caches.
+        // IMPORTANT!!!! switch from FINGERPRINT to OMNI_FINGERPRINT
         final String cacheName = SystemProperties.digestOf(
-                "ro.build.fingerprint",
+                "ro.build.date",
                 StorageManager.PROP_ISOLATED_STORAGE,
                 StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT);
 
@@ -3717,11 +3742,38 @@ public class PackageManagerService extends IPackageManager.Stub
                 UserHandle.USER_SYSTEM, false /*allowDynamicSplits*/);
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
+        } else if (matches.size() > 1) {
+                String optionalVerifierName = mContext.getResources().getString(R.string.config_optionalPackageVerifierName);
+                if (TextUtils.isEmpty(optionalVerifierName))
+                    return matches.get(0).getComponentInfo().packageName;
+            for (int i = 0; i < matches.size(); i++) {
+                if (!matches.get(i).getComponentInfo().packageName.contains(optionalVerifierName))
+                    return matches.get(i).getComponentInfo().packageName;
+            }
         } else if (matches.size() == 0) {
             Log.e(TAG, "There should probably be a verifier, but, none were found");
             return null;
         }
         throw new RuntimeException("There must be exactly one verifier; found " + matches);
+    }
+
+    private @Nullable String getOptionalVerifierLPr() {
+        final Intent intent = new Intent("com.qualcomm.qti.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION");
+
+        final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM, false /*allowDynamicSplits*/);
+        if (matches.size() >= 1) {
+            String optionalVerifierName = mContext.getResources().getString(R.string.config_optionalPackageVerifierName);
+            if (TextUtils.isEmpty(optionalVerifierName))
+                return null;
+            for (int i = 0; i < matches.size(); i++) {
+                if (matches.get(i).getComponentInfo().packageName.contains(optionalVerifierName)) {
+                    return matches.get(i).getComponentInfo().packageName;
+                }
+            }
+        }
+        return null;
     }
 
     private @NonNull String getRequiredSharedLibraryLPr(String name, int version) {
@@ -4108,8 +4160,9 @@ public class PackageManagerService extends IPackageManager.Stub
             final Set<String> permissions = ArrayUtils.isEmpty(p.requestedPermissions)
                     ? Collections.emptySet() : permissionsState.getPermissions(userId);
 
-            PackageInfo packageInfo = PackageParser.generatePackageInfo(p, gids, flags,
-                    ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId);
+            PackageInfo packageInfo = mayFakeSignature(p, PackageParser.generatePackageInfo(p, gids, flags,
+                ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId),
+                permissions);
 
             if (packageInfo == null) {
                 return null;
@@ -4143,6 +4196,24 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             return null;
         }
+    }
+
+    private PackageInfo mayFakeSignature(PackageParser.Package p, PackageInfo pi,
+            Set<String> permissions) {
+        try {
+            if (permissions.contains("android.permission.FAKE_PACKAGE_SIGNATURE")
+                    && p.applicationInfo.targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1
+                    && p.mAppMetaData != null) {
+                String sig = p.mAppMetaData.getString("fake-signature");
+                if (sig != null) {
+                    pi.signatures = new Signature[] {new Signature(sig)};
+                }
+            }
+        } catch (Throwable t) {
+            // We should never die because of any failures, this is system code!
+            Log.w("PackageManagerService.FAKE_PACKAGE_SIGNATURE", t);
+        }
+        return pi;
     }
 
     @Override
@@ -9137,6 +9208,19 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
             PackageParser.collectCertificates(pkg, skipVerify);
+            if (compareSignatures(pkg.mSigningDetails.signatures,
+                  mVendorPlatformSignatures) == PackageManager.SIGNATURE_MATCH) {
+                // Overwrite package signature with our platform signature
+                // if the signature is the vendor's platform signature
+                if (mPlatformPackage != null) {
+                    pkg.mSigningDetails = mPlatformPackage.mSigningDetails;
+                    pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(
+                        pkg,
+                        pkg.isPrivileged(),
+                        pkg.applicationInfo.targetSandboxVersion,
+                        pkg.applicationInfo.targetSdkVersion);
+                }
+            }
         } catch (PackageParserException e) {
             throw PackageManagerException.from(e);
         } finally {
@@ -9399,7 +9483,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             disabledPkgSetting /* pkgSetting */, null /* disabledPkgSetting */,
                             null /* originalPkgSetting */, null, parseFlags, scanFlags,
                             (pkg == mPlatformPackage), user);
-                    applyPolicy(pkg, parseFlags, scanFlags, mPlatformPackage);
+                    applyPolicy(pkg, parseFlags, scanFlags, mPlatformPackage,
+                            mVendorPlatformSignatures);
                     final ScanResult scanResult = scanPackageOnlyLI(request, mFactoryTest, -1L);
                     if (scanResult.existingSettingCopied && scanResult.request.pkgSetting != null) {
                         scanResult.request.pkgSetting.updateFrom(scanResult.pkgSetting);
@@ -10974,7 +11059,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         scanFlags = adjustScanFlags(scanFlags, pkgSetting, disabledPkgSetting, user, pkg);
         synchronized (mPackages) {
-            applyPolicy(pkg, parseFlags, scanFlags, mPlatformPackage);
+            applyPolicy(pkg, parseFlags, scanFlags, mPlatformPackage, mVendorPlatformSignatures);
             assertPackageIsValid(pkg, parseFlags, scanFlags);
 
             SharedUserSetting sharedUserSetting = null;
@@ -11598,7 +11683,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * ideally be static, but, it requires locks to read system state.
      */
     private static void applyPolicy(PackageParser.Package pkg, final @ParseFlags int parseFlags,
-            final @ScanFlags int scanFlags, PackageParser.Package platformPkg) {
+            final @ScanFlags int scanFlags, PackageParser.Package platformPkg,
+            Signature[] vendorPlatformSignatures) {
         if ((scanFlags & SCAN_AS_SYSTEM) != 0) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
             if (pkg.applicationInfo.isDirectBootAware()) {
@@ -11694,8 +11780,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Check if the package is signed with the same key as the platform package.
         if (PLATFORM_PACKAGE_NAME.equals(pkg.packageName) ||
-                (platformPkg != null && compareSignatures(
+                (platformPkg != null && (compareSignatures(
                         platformPkg.mSigningDetails.signatures,
+                        pkg.mSigningDetails.signatures) == PackageManager.SIGNATURE_MATCH) ||
+                 compareSignatures(
+                        vendorPlatformSignatures,
                         pkg.mSigningDetails.signatures) == PackageManager.SIGNATURE_MATCH)) {
             pkg.applicationInfo.privateFlags |=
                 ApplicationInfo.PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY;
@@ -15320,9 +15409,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 final int requiredUid = mRequiredVerifierPackage == null ? -1
                         : getPackageUid(mRequiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
                                 verifierUser.getIdentifier());
+
+                final int optionalUid = mOptionalVerifierPackage == null ? -1
+                        : getPackageUid(mOptionalVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
+                                verifierUser.getIdentifier());
+
                 final int installerUid =
                         verificationInfo == null ? -1 : verificationInfo.installerUid;
-                if (!origin.existing && requiredUid != -1
+                if (!origin.existing && (requiredUid != -1 || optionalUid != -1)
                         && isVerificationEnabled(
                                 verifierUser.getIdentifier(), installFlags, installerUid)) {
                     final Intent verification = new Intent(
@@ -15415,10 +15509,34 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
 
-                    final ComponentName requiredVerifierComponent = matchComponentForVerifier(
-                            mRequiredVerifierPackage, receivers);
+                    if (mOptionalVerifierPackage != null) {
+                        final Intent optionalIntent = new Intent(verification);
+                        optionalIntent.setAction("com.qualcomm.qti.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION");
+                        final List<ResolveInfo> optional_receivers = queryIntentReceiversInternal(optionalIntent,
+                            PACKAGE_MIME_TYPE, 0, verifierUser.getIdentifier(), false /*allowDynamicSplits*/);
+                        final ComponentName optionalVerifierComponent = matchComponentForVerifier(
+                            mOptionalVerifierPackage, optional_receivers);
+                        optionalIntent.setComponent(optionalVerifierComponent);
+                        verificationState.addOptionalVerifier(optionalUid);
+                        if (mRequiredVerifierPackage != null) {
+                            mContext.sendBroadcastAsUser(optionalIntent, verifierUser, android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
+                        } else {
+                            mContext.sendOrderedBroadcastAsUser(optionalIntent, verifierUser, android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
+                            new BroadcastReceiver() {
+                                @Override
+                                public void onReceive(Context context, Intent intent) {
+                                    final Message msg = mHandler.obtainMessage(CHECK_PENDING_VERIFICATION);
+                                    msg.arg1 = verificationId;
+                                    mHandler.sendMessageDelayed(msg, getVerificationTimeout());
+                                }
+                            }, null, 0, null, null);
+                            mArgs = null;
+                        }
+                    }
                     if (ret == PackageManager.INSTALL_SUCCEEDED
                             && mRequiredVerifierPackage != null) {
+                        final ComponentName requiredVerifierComponent = matchComponentForVerifier(
+                                mRequiredVerifierPackage, receivers);
                         Trace.asyncTraceBegin(
                                 TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
                         /*
@@ -22636,7 +22754,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.w(TAG, "Failed to scan " + ps.codePath + ": " + e.getMessage());
                 }
 
-                if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
+                if (!Build.OMNI_FINGERPRINT.equals(ver.fingerprint)) {
                     clearAppDataLIF(ps.pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
                             | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                 }
@@ -22648,7 +22766,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final UserManager um = mContext.getSystemService(UserManager.class);
         UserManagerInternal umInternal = getUserManagerInternal();
         for (UserInfo user : um.getUsers()) {
-            final int flags;
+            int flags = 0;
             if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (umInternal.isUserRunning(user.id)) {
@@ -22656,9 +22774,12 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 continue;
             }
-
+            if ((vol.disk.flags & DiskInfo.FLAG_UFS_CARD) == DiskInfo.FLAG_UFS_CARD) {
+                flags = flags | DiskInfo.FLAG_UFS_CARD;
+            }
+            final int pflags = flags;
             try {
-                sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
+                sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, pflags);
                 synchronized (mInstallLock) {
                     reconcileAppsDataLI(volumeUuid, user.id, flags, true /* migrateAppData */);
                 }

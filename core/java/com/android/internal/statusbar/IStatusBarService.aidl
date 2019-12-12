@@ -85,7 +85,7 @@ interface IStatusBarService
      * These methods are needed for global actions control which the UI is shown in sysui.
      */
     void shutdown();
-    void reboot(boolean safeMode);
+    void reboot(boolean safeMode, String reason);
 
     void addTile(in ComponentName tile);
     void remTile(in ComponentName tile);
@@ -110,4 +110,13 @@ interface IStatusBarService
     void onBiometricError(String error);
     // Used to hide the biometric dialog when the AuthenticationClient is stopped
     void hideBiometricDialog();
+
+    /**
+     * Omni
+     */
+    void toggleCameraFlash();
+    void toggleCameraFlashState(boolean enable);
+    // Used to show or hide in display fingerprint view
+    void showInDisplayFingerprintView();
+    void hideInDisplayFingerprintView();
 }

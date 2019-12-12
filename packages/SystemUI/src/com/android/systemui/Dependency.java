@@ -39,6 +39,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
@@ -296,6 +297,7 @@ public class Dependency {
     @Inject Lazy<ChannelEditorDialogController> mChannelEditorDialogController;
     @Inject Lazy<INotificationManager> mINotificationManager;
     @Inject Lazy<FalsingManager> mFalsingManager;
+    @Inject Lazy<OmniSettingsService> mOmniSettingsService;
 
     @Inject
     public Dependency() {
@@ -490,6 +492,8 @@ public class Dependency {
         //                    a new class maybe named DisplayDependency to solve per-display
         //                    Dependency problem.
         mProviders.put(AutoHideController.class, mAutoHideController::get);
+
+        mProviders.put(OmniSettingsService.class, mOmniSettingsService::get);
 
         sDependency = this;
     }

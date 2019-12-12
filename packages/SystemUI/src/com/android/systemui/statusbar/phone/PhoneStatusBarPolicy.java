@@ -21,10 +21,20 @@ import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
 import android.app.SynchronousUserSwitchObserver;
+import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -36,8 +46,11 @@ import android.telecom.TelecomManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 
+import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
@@ -62,6 +75,7 @@ import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
+import java.util.Collection;
 import java.util.Locale;
 
 /**
@@ -81,7 +95,7 @@ public class PhoneStatusBarPolicy
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final int LOCATION_STATUS_ICON_ID =
-            com.android.internal.R.drawable.perm_group_location;
+            R.drawable.stat_sys_location;
 
     private final String mSlotCast;
     private final String mSlotHotspot;
@@ -94,7 +108,7 @@ public class PhoneStatusBarPolicy
     private final String mSlotRotate;
     private final String mSlotHeadset;
     private final String mSlotDataSaver;
-    private final String mSlotLocation;
+    private final String mSlotLocation = "location";
     private final String mSlotSensorsOff;
 
     private final Context mContext;
@@ -158,7 +172,6 @@ public class PhoneStatusBarPolicy
         mSlotRotate = context.getString(com.android.internal.R.string.status_bar_rotate);
         mSlotHeadset = context.getString(com.android.internal.R.string.status_bar_headset);
         mSlotDataSaver = context.getString(com.android.internal.R.string.status_bar_data_saver);
-        mSlotLocation = context.getString(com.android.internal.R.string.status_bar_location);
         mSlotSensorsOff = context.getString(com.android.internal.R.string.status_bar_sensors_off);
 
         // listen for broadcasts
@@ -166,6 +179,7 @@ public class PhoneStatusBarPolicy
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.ACTION_HEADSET_PLUG);
+        filter.addAction(BluetoothDevice.ACTION_BATTERY_LEVEL_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
@@ -378,15 +392,65 @@ public class PhoneStatusBarPolicy
         String contentDescription =
                 mContext.getString(R.string.accessibility_quick_settings_bluetooth_on);
         boolean bluetoothVisible = false;
+        StatusBarIcon icon = null;
         if (mBluetooth != null) {
             if (mBluetooth.isBluetoothConnected()) {
-                contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
+                final Collection<CachedBluetoothDevice> devices = mBluetooth.getDevices();
+                if (devices != null) {
+                    // get battery level for the first device with battery level support
+                    for (CachedBluetoothDevice device : devices) {
+                        // don't get the level if still pairing
+                        if (mBluetooth.getBondState(device) == BluetoothDevice.BOND_NONE) continue;
+                        int state = device.getMaxConnectionState();
+                        if (state == BluetoothProfile.STATE_CONNECTED) {
+                            int batteryLevel = device.getBatteryLevel();
+                            BluetoothClass type = device.getBtClass();
+                            contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
+
+                            if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN && showBatteryForThis(type)) {
+                                final int padding = mContext.getResources().getDimensionPixelSize(R.dimen.bt_battery_padding);
+                                Drawable d = BluetoothDeviceLayerDrawable.createLayerDrawable(mContext,
+                                        R.drawable.ic_bluetooth_connected, batteryLevel, 1, -padding, padding, 0);
+                                icon = new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
+                                        Icon.createWithBitmap(getBitmapFromDrawable(d)), 0, 0, contentDescription);
+                            } else {
+                                iconId = R.drawable.stat_sys_data_bluetooth_connected;
+                            }
+                            break;
+                        }
+                    }
+                }
                 bluetoothVisible = mBluetooth.isBluetoothEnabled();
             }
         }
 
-        mIconController.setIcon(mSlotBluetooth, iconId, contentDescription);
+        if (icon != null) {
+            mIconController.setIcon(mSlotBluetooth, icon);
+        } else {
+            mIconController.setIcon(mSlotBluetooth, iconId, contentDescription);
+        }
         mIconController.setIconVisibility(mSlotBluetooth, bluetoothVisible);
+    }
+
+    private boolean showBatteryForThis(BluetoothClass type) {
+        boolean show = false;
+        if (type != null) {
+            switch (type.getDeviceClass()) {
+            case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+            case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
+            case BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO:
+            case BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER:
+            case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
+                show = true;
+                break;
+            default:
+                show = false;
+                break;
+            }
+        } else {
+            show = false;
+        }
+        return show;
     }
 
     private final void updateTTY() {
@@ -623,6 +687,9 @@ public class PhoneStatusBarPolicy
                 case AudioManager.ACTION_HEADSET_PLUG:
                     updateHeadsetPlug(intent);
                     break;
+                case BluetoothDevice.ACTION_BATTERY_LEVEL_CHANGED:
+                    updateBluetooth();
+                    break;
             }
         }
     };
@@ -634,4 +701,17 @@ public class PhoneStatusBarPolicy
             mIconController.setIconVisibility(mSlotCast, false);
         }
     };
+
+    private Bitmap getBitmapFromDrawable(Drawable image) {
+        final Canvas canvas = new Canvas();
+        canvas.setDrawFilter(new PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG,
+                Paint.FILTER_BITMAP_FLAG));
+
+        Bitmap bmResult = Bitmap.createBitmap(image.getIntrinsicWidth(), image.getIntrinsicHeight(),
+                Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bmResult);
+        image.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        image.draw(canvas);
+        return bmResult;
+    }
 }

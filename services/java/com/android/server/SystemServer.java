@@ -35,6 +35,7 @@ import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
+import android.database.ContentObserver;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
 import android.hardware.display.DisplayManagerInternal;
@@ -328,6 +329,23 @@ public final class SystemServer {
     private Future<?> mSensorServiceStart;
     private Future<?> mZygotePreload;
 
+    private class AdbPortObserver extends ContentObserver {
+        public AdbPortObserver() {
+            super(null);
+        }
+        @Override
+        public void onChange(boolean selfChange) {
+            try {
+                int adbPort = Settings.Global.getInt(mContentResolver,
+                        Settings.Global.OMNI_ADB_PORT, 0);
+                // setting this will control whether ADB runs on TCP/IP or USB
+                SystemProperties.set("service.adb.tcp.port", Integer.toString(adbPort));
+            } catch (Exception e) {
+                Slog.e(TAG, "", e);
+            }
+        }
+    }
+
     /**
      * Start the sensor service. This is a blocking call and can take time.
      */
@@ -511,6 +529,7 @@ public final class SystemServer {
             startBootstrapServices();
             startCoreServices();
             startOtherServices();
+            startOmniAdditions();
             SystemServerInitThreadPool.shutdown();
         } catch (Throwable ex) {
             Slog.e("System", "******************************************");
@@ -2337,5 +2356,16 @@ public final class SystemServer {
 
     private static void traceEnd() {
         BOOT_TIMINGS_TRACE_LOG.traceEnd();
+    }
+
+    // omni additions start
+    private void startOmniAdditions() {
+        Settings.Global.putInt(mContentResolver, Settings.Global.OMNI_ADB_PORT,
+                Integer.parseInt(SystemProperties.get("service.adb.tcp.port", "0")));
+
+        // register observer to listen for settings changes
+        mContentResolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.OMNI_ADB_PORT),
+                false, new AdbPortObserver());
     }
 }

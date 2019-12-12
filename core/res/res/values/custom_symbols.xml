@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+  <java-symbol type="integer" name="config_deviceHardwareKeys" />
+  <java-symbol type="string" name="config_deviceKeyHandlerLib" />
+  <java-symbol type="string" name="config_deviceKeyHandlerClass" />
+  <java-symbol type="bool" name="config_proxiSensorWakupCheck" />
+
+  <java-symbol type="string" name="reboot_title" />
+  <java-symbol type="string" name="reboot_confirm" />
+
+  <!-- Power menu reboot -->
+  <java-symbol name="reboot_to_bootloader_title" type="string" />
+  <java-symbol name="reboot_to_bootloader_message" type="string" />
+  <java-symbol name="reboot_to_recovery_title" type="string" />
+  <java-symbol name="reboot_to_recovery_message" type="string" />
+  <java-symbol name="reboot_to_fastboot_title" type="string" />
+  <java-symbol name="reboot_to_fastboot_message" type="string" />
+  <java-symbol name="reboot_system_title" type="string" />
+  <java-symbol name="reboot_system_message" type="string" />
+  <java-symbol type="array" name="config_rebootActionsList" />
+
+  <java-symbol type="array" name="config_vendorPlatformSignatures" />
+  
+  <java-symbol type="bool" name="config_usesFOD" />
+
+  <!-- Battery/Notification Led -->
+  <java-symbol type="bool" name="config_intrusiveBatteryLed" />
+  <java-symbol type="bool" name="config_multiColorBatteryLed" />
+  <java-symbol type="bool" name="config_FastChargingLedSupported" />
+  <java-symbol type="integer" name="config_notificationsFastBatteryARGB" />
+
+  <java-symbol type="string" name="config_comboNetworkLocationProvider" />
+
+  <!-- Caf IMS -->
+  <java-symbol type="string" name="config_optionalPackageVerifierName" />
+  <java-symbol type="integer" name="config_sms_authorization_timeout_ms" />
+  <java-symbol type="bool" name="config_sms_authorization_enabled" />
+  <!-- For Pdn throttle feature -->
+  <java-symbol type="bool" name="config_pdp_retry_for_29_33_55_enabled" />
+  <java-symbol type="integer" name="data_retry_delay" />
+  <java-symbol type="integer" name="data_retry_idle_delay" />
+  <java-symbol type="string" name="data_conn_status_title" />
+  <java-symbol type="string" name="user_authentication_failed" />
+  <java-symbol type="string" name="service_not_subscribed" />
+  <java-symbol type="string" name="multi_conn_to_same_pdn_not_allowed" />
+
+  <!-- Full screen aspect ratio -->
+  <java-symbol type="bool" name="config_haveHigherAspectRatioScreen" />
+  <java-symbol type="dimen" name="config_screenAspectRatio" />
+
+  <java-symbol type="integer" name="config_screenBrightnessPulse" />
+
+  <java-symbol type="integer" name="config_defaultMaxCachedProcesses" />
+  <java-symbol type="integer" name="config_defaultTrimCachedProcesses" />
+</resources>

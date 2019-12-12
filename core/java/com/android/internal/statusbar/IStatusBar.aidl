@@ -149,7 +149,7 @@ oneway interface IStatusBar
     void showPinningEnterExitToast(boolean entering);
     void showPinningEscapeToast();
 
-    void showShutdownUi(boolean isReboot, String reason);
+    void showShutdownUi(boolean isReboot, String reason, boolean rebootCustom);
 
     // Used to show the dialog when BiometricService starts authentication
     void showBiometricDialog(in Bundle bundle, IBiometricServiceReceiverInternal receiver, int type,
@@ -162,6 +162,9 @@ oneway interface IStatusBar
     void onBiometricError(String error);
     // Used to hide the biometric dialog when the AuthenticationClient is stopped
     void hideBiometricDialog();
+    // Used to show or hide in display fingerprint view
+    void showInDisplayFingerprintView();
+    void hideInDisplayFingerprintView();
 
     /**
      * Notifies System UI that the display is ready to show system decorations.
@@ -172,4 +175,9 @@ oneway interface IStatusBar
      * Notifies System UI whether the recents animation is running or not.
      */
     void onRecentsAnimationStateChanged(boolean running);
+
+    //Omni
+    void toggleCameraFlash();
+    void toggleCameraFlashState(boolean enable);
+
 }

@@ -63,14 +63,16 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 public class QSFooterImpl extends FrameLayout implements QSFooter,
-        OnClickListener, OnUserInfoChangedListener {
+        OnClickListener, OnUserInfoChangedListener, Tunable {
 
     private static final String TAG = "QSFooterImpl";
+    public static final String QS_SHOW_DRAG_HANDLE = "qs_show_drag_handle";
 
     private final ActivityStarter mActivityStarter;
     private final UserInfoController mUserInfoController;
@@ -81,6 +83,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private boolean mQsDisabled;
     private QSPanel mQsPanel;
+    private QuickQSPanel mQuickQSPanel;
 
     private boolean mExpanded;
 
@@ -100,15 +103,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private View mDragHandle;
 
     private OnClickListener mExpandClickListener;
-
-    private final ContentObserver mDeveloperSettingsObserver = new ContentObserver(
-            new Handler(mContext.getMainLooper())) {
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            super.onChange(selfChange, uri);
-            setBuildText();
-        }
-    };
 
     @Inject
     public QSFooterImpl(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -159,25 +153,17 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                 oldBottom) -> updateAnimator(right - left));
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         updateEverything();
-        setBuildText();
     }
 
     private void setBuildText() {
+        // TODO keeping this here - maybe we find some more useful use for that space
         TextView v = findViewById(R.id.build);
         if (v == null) return;
-        if (DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(mContext)) {
-            v.setText(mContext.getString(
-                    com.android.internal.R.string.bugreport_status,
-                    Build.VERSION.RELEASE,
-                    Build.ID));
-            v.setVisibility(View.VISIBLE);
-        } else {
-            v.setVisibility(View.GONE);
-        }
+        v.setVisibility(View.GONE);
     }
 
     private void updateAnimator(int width) {
-        int numTiles = QuickQSPanel.getNumQuickTiles(mContext);
+        int numTiles = mQuickQSPanel.getNumQuickTiles();
         int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size)
                 - mContext.getResources().getDimensionPixelSize(dimen.qs_quick_tile_padding);
         int remaining = (width - numTiles * size) / (numTiles - 1);
@@ -253,17 +239,23 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED), false,
-                mDeveloperSettingsObserver, UserHandle.USER_ALL);
+        final TunerService tunerService = Dependency.get(TunerService.class);
+        tunerService.addTunable(this, QS_SHOW_DRAG_HANDLE);
     }
 
     @Override
     @VisibleForTesting
     public void onDetachedFromWindow() {
+        Dependency.get(TunerService.class).removeTunable(this);
         setListening(false);
-        mContext.getContentResolver().unregisterContentObserver(mDeveloperSettingsObserver);
         super.onDetachedFromWindow();
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (QS_SHOW_DRAG_HANDLE.equals(key)) {
+            setHideDragHandle(newValue != null && Integer.parseInt(newValue) == 0);
+        }
     }
 
     @Override
@@ -316,8 +308,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private void updateVisibilities() {
         mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
-        mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
-                TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
         mMultiUserSwitch.setVisibility(showUserSwitcher() ? View.VISIBLE : View.INVISIBLE);
         mEditContainer.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
@@ -337,8 +327,9 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     }
 
     @Override
-    public void setQSPanel(final QSPanel qsPanel) {
+    public void setQSPanel(final QSPanel qsPanel, final QuickQSPanel quickQSPanel) {
         mQsPanel = qsPanel;
+        mQuickQSPanel = quickQSPanel;
         if (mQsPanel != null) {
             mMultiUserSwitch.setQsPanel(qsPanel);
             mQsPanel.setFooterPageIndicator(mPageIndicator);
@@ -362,24 +353,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
             MetricsLogger.action(mContext,
                     mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
                             : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
-            if (mSettingsButton.isTunerClick()) {
-                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                    if (TunerService.isTunerEnabled(mContext)) {
-                        TunerService.showResetRequest(mContext, () -> {
-                            // Relaunch settings so that the tuner disappears.
-                            startSettingsActivity();
-                        });
-                    } else {
-                        Toast.makeText(getContext(), R.string.tuner_toast,
-                                Toast.LENGTH_LONG).show();
-                        TunerService.setTunerEnabled(mContext, true);
-                    }
-                    startSettingsActivity();
-
-                });
-            } else {
-                startSettingsActivity();
-            }
+            startSettingsActivity();
         }
     }
 
@@ -399,5 +373,9 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                     Mode.SRC_IN);
         }
         mMultiUserAvatar.setImageDrawable(picture);
+    }
+
+    private void setHideDragHandle(boolean hide) {
+        mDragHandle.setVisibility(hide ? View.GONE : View.VISIBLE);
     }
 }

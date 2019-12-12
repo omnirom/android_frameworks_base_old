@@ -49,6 +49,7 @@
     <protected-broadcast android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_FIRST_LAUNCH" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_NEEDS_VERIFICATION" />
+    <protected-broadcast android:name="com.qualcomm.qti.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_VERIFIED" />
     <protected-broadcast android:name="android.intent.action.PACKAGES_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.PACKAGES_UNSUSPENDED" />
@@ -620,6 +621,13 @@
     <!-- Added in Q -->
     <protected-broadcast android:name="android.content.pm.action.SESSION_UPDATED" />
     <protected-broadcast android:name="android.settings.action.GRAYSCALE_CHANGED" />
+
+    <!-- omni additions start -->
+    <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_TOGGLE_OVERLAY2" />
+    <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_PRELOAD_TASKS" />
+    <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_HIDE_OVERLAY" />
+    <protected-broadcast android:name="com.android.systemui.ACTION_DISMISS_KEYGUARD" />
+    <protected-broadcast android:name="org.omnirom.omnirecord.ACTION_START" />
 
     <!-- For CarIdlenessTracker -->
     <protected-broadcast android:name="com.android.server.jobscheduler.GARAGE_MODE_ON" />
@@ -1435,6 +1443,11 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MODIFY_CELL_BROADCASTS"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to authorize outgoing SMS messages.
+         @hide -->
+    <permission android:name="com.qti.permission.AUTHORIZE_OUTGOING_SMS"
+                android:protectionLevel="signature" />
 
     <!-- =============================================================== -->
     <!-- Permissions for setting the device alarm                        -->
@@ -2630,6 +2643,13 @@
         android:label="@string/permlab_getPackageSize"
         android:description="@string/permdesc_getPackageSize"
         android:protectionLevel="normal" />
+
+    <!-- @hide Allows an application to change the package signature as
+	 seen by applications -->
+    <permission android:name="android.permission.FAKE_PACKAGE_SIGNATURE"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_fakePackageSignature"
+        android:description="@string/permdesc_fakePackageSignature" />
 
     <!-- @deprecated No longer useful, see
          {@link android.content.pm.PackageManager#addPackageToPreferred}

@@ -249,6 +249,13 @@ public class Build {
                 "ro.build.version.security_patch", "");
 
         /**
+         * The user-visible omni security patch level.
+         * @hide
+         */
+        public static final String SECURITY_PATCH_OMNI = SystemProperties.get(
+                "ro.omni.version.security_patch", "");
+
+        /**
          * The user-visible SDK version of the framework in its raw String
          * representation; use {@link #SDK_INT} instead.
          *
@@ -1000,6 +1007,9 @@ public class Build {
 
     /** A string that uniquely identifies this build.  Do not attempt to parse this value. */
     public static final String FINGERPRINT = deriveFingerprint();
+
+    /** @hide */
+    public static final String OMNI_FINGERPRINT = getString("ro.build.date");
 
     /**
      * Some devices split the fingerprint components between multiple

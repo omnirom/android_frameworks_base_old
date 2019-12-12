@@ -590,6 +590,14 @@ interface ISms {
         int subId, String callingPkg, in Bundle params, in IFinancialSmsCallback callback);
 
     /**
+     * Get the capacity count of sms on Icc card.
+     *
+     * @param subId for subId which getSmsCapacityOnIcc is queried.
+     * @return capacity of ICC
+     */
+    int getSmsCapacityOnIccForSubscriber(int subId);
+
+    /**
      * Check if the destination is a possible premium short code.
      *
      * @param destAddress the destination address to test for possible short code

@@ -73,6 +73,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -124,6 +125,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.RegisterStatusBarResult;
+import com.android.internal.util.omni.OmniUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -167,6 +169,7 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.Snoo
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -219,6 +222,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.ExtensionController;
+import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
@@ -229,6 +233,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.volume.VolumeComponent;
 
@@ -393,6 +398,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // settings
     private QSPanel mQSPanel;
+    private QuickQSPanel mQuickQSPanel;
 
     KeyguardIndicationController mKeyguardIndicationController;
 
@@ -552,6 +558,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
 
+    private FlashlightController mFlashlightController;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     protected UserSwitcherController mUserSwitcherController;
     private NetworkController mNetworkController;
@@ -610,6 +617,44 @@ public class StatusBar extends SystemUI implements DemoMode,
             };
     private ActivityIntentHelper mActivityIntentHelper;
     private ShadeController mShadeController;
+
+    // omni additions start
+    private class OmniSettingsObserver extends ContentObserver {
+        OmniSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_DOUBLE_TAP_SLEEP_GESTURE),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_STATUS_BAR_QUICK_QS_PULLDOWN),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_LOCK_QS_DISABLED),
+                    false, this, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            if (mStatusBarWindow != null) {
+                mStatusBarWindow.updateSettings();
+            }
+            if (mNotificationPanel != null) {
+                mNotificationPanel.updateSettings();
+            }
+        }
+    }
+
+    private OmniSettingsObserver mOmniSettingsObserver;
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
@@ -792,6 +837,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         int disabledFlags2 = result.mDisabledFlags2;
         Dependency.get(InitController.class).addPostInitTask(
                 () -> setUpDisableFlags(disabledFlags1, disabledFlags2));
+
+        mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
+        mOmniSettingsObserver.observe();
+        mOmniSettingsObserver.update();
     }
 
     // ================================================================================
@@ -986,6 +1035,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (qs instanceof QSFragment) {
                     mQSPanel = ((QSFragment) qs).getQsPanel();
                     mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
+                    mQuickQSPanel = ((QSFragment) qs).getQuickQsPanel();
                 }
             });
         }
@@ -1038,6 +1088,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
+        filter.addAction(OmniUtils.ACTION_DISMISS_KEYGUARD);
         context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
 
         IntentFilter demoFilter = new IntentFilter();
@@ -1057,6 +1108,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Private API call to make the shadows look better for Recents
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
+
+        mFlashlightController = Dependency.get(FlashlightController.class);
     }
 
     protected QS createDefaultQSFragment() {
@@ -1805,6 +1858,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void handleSystemKey(int key) {
         if (SPEW) Log.d(TAG, "handleNavigationKey: " + key);
+
+        if (KeyEvent.KEYCODE_MEDIA_PREVIOUS == key || KeyEvent.KEYCODE_MEDIA_NEXT == key) {
+            mMediaManager.onSkipTrackEvent(key, mHandler);
+            return;
+        }
+
         if (!mCommandQueue.panelsEnabled() || !mKeyguardMonitor.isDeviceInteractive()
                 || mKeyguardMonitor.isShowing() && !mKeyguardMonitor.isOccluded()) {
             return;
@@ -1832,7 +1891,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN_QS, 1);
             }
         }
-
     }
 
     @Override
@@ -1846,6 +1904,32 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void showPinningEscapeToast() {
         if (getNavigationBarView() != null) {
             getNavigationBarView().showPinningEscapeToast();
+        }
+    }
+
+    @Override
+    public void toggleCameraFlash() {
+        if (DEBUG) {
+            Log.d(TAG, "Toggling camera flashlight");
+        }
+        if (mFlashlightController != null) {
+            mFlashlightController.initFlashLight();
+            if (mFlashlightController.hasFlashlight() && mFlashlightController.isAvailable()) {
+                mFlashlightController.setFlashlight(!mFlashlightController.isEnabled());
+            }
+        }
+    }
+
+    @Override
+    public void toggleCameraFlashState(boolean enable) {
+        if (DEBUG) {
+            Log.d(TAG, "Disabling camera flashlight");
+        }
+        if (mFlashlightController != null) {
+            mFlashlightController.initFlashLight();
+            if (mFlashlightController.hasFlashlight() && mFlashlightController.isAvailable()) {
+                mFlashlightController.setFlashlight(enable);
+            }
         }
     }
 
@@ -2433,6 +2517,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         for (Map.Entry<String, ?> entry : Prefs.getAll(mContext).entrySet()) {
             pw.print("  "); pw.print(entry.getKey()); pw.print("="); pw.println(entry.getValue());
         }
+
+        if (mFlashlightController != null) {
+            mFlashlightController.dump(fd, pw, args);
+        }
     }
 
     static void dumpBarTransitions(PrintWriter pw, String var, BarTransitions transitions) {
@@ -2617,6 +2705,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             else if (DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG.equals(action)) {
                 mQSPanel.showDeviceMonitoringDialog();
             }
+            else if (OmniUtils.ACTION_DISMISS_KEYGUARD.equals(action)) {
+                if (intent.hasExtra(OmniUtils.DISMISS_KEYGUARD_EXTRA_INTENT)) {
+                    Intent launchIntent = (Intent) intent.getParcelableExtra(OmniUtils.DISMISS_KEYGUARD_EXTRA_INTENT);
+                    startActivityDismissingKeyguard(launchIntent, true, true);
+                }
+            }
         }
     };
 
@@ -2719,7 +2813,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mQSPanel != null) {
             mQSPanel.updateResources();
         }
-
+        if (mQuickQSPanel != null) {
+            mQuickQSPanel.updateResources();
+        }
         loadDimens();
 
         if (mStatusBarView != null) {
@@ -3544,6 +3640,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController.showTransientIndication(R.string.phone_hint);
     }
 
+    public void onCustomHintStarted() {
+        mKeyguardIndicationController.showTransientIndication(R.string.custom_hint);
+    }
+
     public void onTrackingStopped(boolean expand) {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             if (!expand && !mUnlockMethodCache.canSkipBouncer()) {
@@ -3803,8 +3903,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
         if (!mNotificationPanel.canCameraGestureBeLaunched(
-                mStatusBarKeyguardViewManager.isShowing()
-                        && (mExpandedVisible || mBouncerShowing))) {
+                mStatusBarKeyguardViewManager.isShowing() && (mExpandedVisible || mBouncerShowing), source)) {
             if (DEBUG_CAMERA_LIFT) Slog.d(TAG, "Can't launch camera right now, mExpandedVisible: " +
                     mExpandedVisible);
             return;
@@ -4013,6 +4112,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     callback.onPulseStarted();
                     updateNotificationPanelTouchState();
                     setPulsing(true);
+                    KeyguardUpdateMonitor.getInstance(mContext).setPulsing(true);
                 }
 
                 @Override
@@ -4025,6 +4125,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mStatusBarWindow.suppressWakeUpGesture(false);
                     }
                     setPulsing(false);
+                    KeyguardUpdateMonitor.getInstance(mContext).setPulsing(false);
                 }
 
                 private void setPulsing(boolean pulsing) {

@@ -111,6 +111,9 @@ public class StatusBarWindowView extends FrameLayout {
     private boolean mExpandAnimationPending;
     private boolean mSuppressingWakeUpGesture;
 
+    // omni additions start
+    private boolean mDoubleTapEnabledNative;
+
     private final GestureDetector.SimpleOnGestureListener mGestureListener =
             new GestureDetector.SimpleOnGestureListener() {
         @Override
@@ -125,7 +128,7 @@ public class StatusBarWindowView extends FrameLayout {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            if (mDoubleTapEnabled || mSingleTapEnabled) {
+            if (mDoubleTapEnabled || mSingleTapEnabled || mDoubleTapEnabledNative) {
                 mService.wakeUpIfDozing(SystemClock.uptimeMillis(), StatusBarWindowView.this,
                         "DOUBLE_TAP");
                 return true;
@@ -141,6 +144,11 @@ public class StatusBarWindowView extends FrameLayout {
                 break;
             case Settings.Secure.DOZE_TAP_SCREEN_GESTURE:
                 mSingleTapEnabled = configuration.tapGestureEnabled(UserHandle.USER_CURRENT);
+                break;
+            case Settings.Secure.DOUBLE_TAP_TO_WAKE:
+                mDoubleTapEnabledNative = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.DOUBLE_TAP_TO_WAKE, 0, UserHandle.USER_CURRENT) == 1;
+                break;
         }
     };
 
@@ -161,7 +169,8 @@ public class StatusBarWindowView extends FrameLayout {
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         Dependency.get(TunerService.class).addTunable(mTunable,
                 Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
-                Settings.Secure.DOZE_TAP_SCREEN_GESTURE);
+                Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
+                Settings.Secure.DOUBLE_TAP_TO_WAKE);
     }
 
     @Override
@@ -890,5 +899,20 @@ public class StatusBarWindowView extends FrameLayout {
         }
     };
 
+    public void updateSettings() {
+        boolean doubleTapToSleepEnabled = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_DOUBLE_TAP_SLEEP_GESTURE, 0,
+                UserHandle.USER_CURRENT) == 1;
+        boolean isDoubleTapEnabled = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN, 0,
+                UserHandle.USER_CURRENT) == 1;
+        if (mNotificationPanel != null) {
+            mNotificationPanel.updateDoubleTapToSleep(doubleTapToSleepEnabled);
+            mNotificationPanel.setLockscreenDoubleTapToSleep(isDoubleTapEnabled);
+        }
+        if (mDragDownHelper != null) {
+            mDragDownHelper.updateDoubleTapToSleep(doubleTapToSleepEnabled);
+        }
+    }
 }
 

@@ -19,20 +19,43 @@
     android:title="@string/system_ui_tuner">
 
     <PreferenceScreen
+        android:key="quick_settings"
+        android:title="@string/quick_settings" >
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_show_brightness"
+            android:title="@string/tuner_show_brightness_new"
+            sysui:defValue="true" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_brightness_position_bottom"
+            android:title="@string/tuner_brightness_position_bottom"
+            sysui:defValue="false" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_show_secure"
+            android:title="@string/tuner_show_secure_title"
+            sysui:defValue="true" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_show_drag_handle"
+            android:title="@string/tuner_show_drag_handle"
+            sysui:defValue="true" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_battery_location_bar"
+            android:title="@string/tuner_battery_location_bar"
+            sysui:defValue="false" />
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
         android:key="status_bar"
         android:title="@string/status_bar" >
 
         <com.android.systemui.tuner.StatusBarSwitch
-            android:key="rotate"
-            android:title="@string/status_bar_settings_auto_rotation" />
-
-        <com.android.systemui.tuner.StatusBarSwitch
             android:key="headset"
             android:title="@string/headset" />
-
-        <com.android.systemui.tuner.StatusBarSwitch
-            android:key="managed_profile"
-            android:title="@string/status_bar_work" />
 
         <!-- ime -->
         <!-- sync_failing -->
@@ -77,31 +100,43 @@
             android:title="@string/quick_settings_cellular_detail_title" />
 
         <com.android.systemui.tuner.StatusBarSwitch
+            android:key="roaming"
+            android:title="@string/quick_settings_roaming_title" />
+
+        <com.android.systemui.tuner.StatusBarSwitch
             android:key="airplane"
             android:title="@string/status_bar_airplane" />
-
-        <!-- other weird signal stuff -->
-
-        <com.android.systemui.tuner.BatteryPreference
-            android:title="@string/battery"
-            android:summary="%s"
-            android:entries="@array/battery_options" />
 
         <com.android.systemui.tuner.StatusBarSwitch
             android:key="alarm_clock"
             android:title="@string/status_bar_alarm" />
 
-        <!-- secure -->
+        <com.android.systemui.tuner.StatusBarSwitch
+            android:key="vpn"
+            android:title="@string/status_bar_vpn" />
+
+        <com.android.systemui.tuner.StatusBarSwitch
+            android:key="location"
+            android:title="@string/status_bar_location" />
+
+        <com.android.systemui.tuner.StatusBarSwitch
+            android:key="battery"
+            android:title="@string/battery" />
+
+        <com.android.systemui.tuner.BatteryPreference
+            android:title="@string/tuner_battery_percent_title"
+            android:summary="%s"
+            android:entries="@array/battery_options_new" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="status_bar_show_battery_image"
+            android:title="@string/tuner_status_bar_show_battery_image"
+            sysui:defValue="true" />
 
         <com.android.systemui.tuner.ClockPreference
             android:title="@string/tuner_time"
             android:summary="%s"
             android:entries="@array/clock_options" />
-
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="low_priority"
-            android:title="@string/tuner_low_priority"
-            sysui:defValue="false" />
 
     </PreferenceScreen>
 
@@ -116,17 +151,6 @@
             android:title="@string/volume_dnd_silent"
             sysui:defValue="true"
             sysui:metricsAction="315" />
-
-    </PreferenceScreen>
-
-    <PreferenceScreen
-      android:key="doze"
-      android:title="@string/tuner_doze">
-
-        <com.android.systemui.tuner.TunerSwitch
-          android:key="doze_always_on"
-          android:title="@string/tuner_doze_always_on"
-          sysui:defValue="true" />
 
     </PreferenceScreen>
 

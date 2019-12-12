@@ -2660,6 +2660,7 @@ public final class Settings {
         @UnsupportedAppUsage
         public static String getStringForUser(ContentResolver resolver, String name,
                 int userHandle) {
+            android.util.SeempLog.record(android.util.SeempLog.getSeempGetApiIdFromValue(name));
             if (MOVED_TO_SECURE.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
                         + " to android.provider.Settings.Secure, returning read-only value.");
@@ -2688,6 +2689,7 @@ public final class Settings {
         @UnsupportedAppUsage
         public static boolean putStringForUser(ContentResolver resolver, String name, String value,
                 int userHandle) {
+            android.util.SeempLog.record(android.util.SeempLog.getSeempPutApiIdFromValue(name));
             if (MOVED_TO_SECURE.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
                         + " to android.provider.Settings.Secure, value is unchanged.");
@@ -3849,6 +3851,16 @@ public final class Settings {
          */
         public static final String RINGTONE = "ringtone";
 
+        /**
+         * Persistent store for the system-wide default ringtone for Slot2 URI.
+         *
+         * @see #RINGTONE
+         * @see #DEFAULT_RINGTONE2_URI
+         *
+         */
+        /** {@hide} */
+        public static final String RINGTONE2 = "ringtone2";
+
         private static final Validator RINGTONE_VALIDATOR = URI_VALIDATOR;
 
         /**
@@ -3861,10 +3873,25 @@ public final class Settings {
          */
         public static final Uri DEFAULT_RINGTONE_URI = getUriFor(RINGTONE);
 
+        /**
+         * A {@link Uri} that will point to the current default ringtone for Slot2
+         * at any given time.
+         *
+         * @see #DEFAULT_RINGTONE_URI
+         *
+         */
+        /** {@hide} */
+        public static final Uri DEFAULT_RINGTONE2_URI = getUriFor(RINGTONE2);
+
         /** {@hide} */
         public static final String RINGTONE_CACHE = "ringtone_cache";
         /** {@hide} */
         public static final Uri RINGTONE_CACHE_URI = getUriFor(RINGTONE_CACHE);
+
+        /** {@hide} */
+        public static final String RINGTONE2_CACHE = "ringtone2_cache";
+        /** {@hide} */
+        public static final Uri RINGTONE2_CACHE_URI = getUriFor(RINGTONE2_CACHE);
 
         /**
          * Persistent store for the system-wide default notification sound.
@@ -4462,12 +4489,567 @@ public final class Settings {
          * Setting to determine whether or not to show the battery percentage in the status bar.
          *    0 - Don't show percentage
          *    1 - Show percentage
+         *    2 - Show percentage on charging
          * @hide
          */
         public static final String SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
 
         /** @hide */
-        private static final Validator SHOW_BATTERY_PERCENT_VALIDATOR = BOOLEAN_VALIDATOR;
+        private static final Validator SHOW_BATTERY_PERCENT_VALIDATOR = ANY_INTEGER_VALIDATOR;
+
+        // omni adding start
+        /**
+         * @hide
+         */
+        public static final String OMNI_NAVIGATION_BAR_RECENTS = "navigation_bar_recents";
+
+        /** @hide */
+        private static final Validator OMNI_NAVIGATION_BAR_RECENTS_VALIDATOR = BOOLEAN_VALIDATOR;
+        /**
+         * @hide
+         */
+        public static final String OMNI_SYSTEM_PROXI_CHECK_ENABLED = "system_proxi_check_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_SYSTEM_PROXI_CHECK_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * some devices have a extra hw button e.g. n3 on the back on the
+         * fingerprint sensor. allow mapping button to key
+         *
+         * @hide
+         */
+        public static final String OMNI_BUTTON_EXTRA_KEY_MAPPING = "button_extra_mapping";
+
+        /** @hide */
+        private static final Validator OMNI_BUTTON_EXTRA_KEY_MAPPING_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_CUSTOM_FP_ICON = "custom_fingerprint_icon";
+
+        /** @hide */
+        private static final Validator OMNI_CUSTOM_FP_ICON_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * Disable hw buttons - actions, brightness, haptic feedback, overflow menu
+         * @hide
+         */
+        public static final String OMNI_HARDWARE_KEYS_DISABLE = "hardware_keys_disable";
+
+        /** @hide */
+        private static final Validator OMNI_HARDWARE_KEYS_DISABLE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Enable proxi check for wake keys - must be implemented in a device
+         * KeyHandler
+         * @hide
+         */
+        public static final String OMNI_DEVICE_PROXI_CHECK_ENABLED = "device_proxi_check_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_DEVICE_PROXI_CHECK_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Enable Gesture Haptic feedback
+         * KeyHandler
+         * @hide
+         */
+        public static final String OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED =
+                "device_gesture_feedback_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_DEVICE_FEATURE_SETTINGS = "device_feature_settings";
+
+        /** @hide */
+        private static final Validator OMNI_DEVICE_FEATURE_SETTINGS_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_NAVIGATION_BAR_SHOW = "navigation_bar_show";
+
+        /** @hide */
+        private static final Validator OMNI_NAVIGATION_BAR_SHOW_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_HIDE_NOTCH = "hide_notch";
+
+        /** @hide */
+        private static final Validator OMNI_HIDE_NOTCH_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_ADVANCED_REBOOT = "advanced_reboot";
+
+        /** @hide */
+        private static final Validator OMNI_ADVANCED_REBOOT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_USE_BOTTOM_GESTURE_NAVIGATION =
+                "use_bottom_gesture_navigation";
+
+        /** @hide */
+        private static final Validator OMNI_USE_BOTTOM_GESTURE_NAVIGATION_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Number of qs columns on landscape orientation
+         * @hide
+         */
+        public static final String OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE = "qs_layout_columns_landscape";
+         /** @hide */
+        private static final Validator OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+         /**
+         * @hide
+         */
+        public static final String OMNI_QS_LAYOUT_COLUMNS = "qs_layout_columns";
+         /** @hide */
+        private static final Validator OMNI_QS_LAYOUT_COLUMNS_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * Whether to display qs tile titles in the qs panel
+         * @hide
+         */
+        public static final String OMNI_QS_TILE_TITLE_VISIBILITY = "qs_tile_title_visibility";
+
+        /** @hide */
+        private static final Validator OMNI_QS_TILE_TITLE_VISIBILITY_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_QS_LAYOUT_ROWS = "qs_layout_rows";
+
+        /** @hide */
+        private static final Validator OMNI_QS_LAYOUT_ROWS_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_QS_QUICKBAR_COLUMNS = "qs_quickbar_columns";
+
+        /** @hide */
+        private static final Validator OMNI_QS_QUICKBAR_COLUMNS_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * Whether to change the transparency of the qs panel
+         * @hide
+         */
+        public static final String OMNI_QS_PANEL_BG_ALPHA = "qs_panel_bg_alpha";
+
+        /** @hide */
+        private static final Validator OMNI_QS_PANEL_BG_ALPHA_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_SCREENSHOT_SHUTTER_SOUND = "screenshot_shutter_sound";
+
+        /** @hide */
+        private static final Validator OMNI_SCREENSHOT_SHUTTER_SOUND_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Whether the battery light should be enabled (if hardware supports it)
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String OMNI_BATTERY_LIGHT_ENABLED = "battery_light_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_BATTERY_LIGHT_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Whether to show battery light when DND mode is active
+         * @hide
+         */
+        public static final String OMNI_BATTERY_LIGHT_ALLOW_ON_DND = "battery_light_allow_on_dnd";
+
+        /** @hide */
+        private static final Validator OMNI_BATTERY_LIGHT_ALLOW_ON_DND_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Whether to show blinking light when battery is low
+         * @hide
+         */
+        public static final String OMNI_BATTERY_LIGHT_LOW_BLINKING = "battery_light_low_blinking";
+
+        /** @hide */
+        private static final Validator OMNI_BATTERY_LIGHT_LOW_BLINKING_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Low battery charging color
+         * @hide
+         */
+        public static final String OMNI_BATTERY_LIGHT_LOW_COLOR = "battery_light_low_color";
+
+        /** @hide */
+        private static final Validator OMNI_BATTERY_LIGHT_LOW_COLOR_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * Medium battery charging color
+         * @hide
+         */
+        public static final String OMNI_BATTERY_LIGHT_MEDIUM_COLOR = "battery_light_medium_color";
+
+        /** @hide */
+        private static final Validator OMNI_BATTERY_LIGHT_MEDIUM_COLOR_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+        * Full battery charging color
+        * @hide
+        */
+        public static final String OMNI_BATTERY_LIGHT_FULL_COLOR = "battery_light_full_color";
+
+        /** @hide */
+        private static final Validator OMNI_BATTERY_LIGHT_FULL_COLOR_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * Really full 100 battery charging color
+         * @hide
+         */
+        public static final String OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR =
+                "battery_light_really_full_color";
+
+        /** @hide */
+        private static final Validator OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * Whether the battery light should only be enabled on fully charged battery.
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED =
+                "battery_light_only_fully_charged";
+
+        /** @hide */
+        private static final Validator OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * What color to use for the battery LED while charging - low
+         * @hide
+         */
+        public static final String OMNI_FAST_BATTERY_LIGHT_COLOR = "fast_battery_light_color";
+
+        /** @hide */
+        private static final Validator OMNI_FAST_BATTERY_LIGHT_COLOR_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * Whether the fast charging battery light is enabled
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String OMNI_FAST_CHARGING_LED_ENABLED = "fast_charging_led_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_FAST_CHARGING_LED_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNIJAWS_WEATHER_ICON_PACK = "omnijaws_weather_icon_pack";
+
+        /** @hide */
+        private static final Validator OMNIJAWS_WEATHER_ICON_PACK_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_LOCKSCREEN_WEATHER_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_ASPECT_RATIO_APPS_LIST = "aspect_ratio_apps_list";
+
+        /** @hide */
+        private static final Validator OMNI_ASPECT_RATIO_APPS_LIST_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_ASPECT_RATIO_APPS_ENABLED = "aspect_ratio_apps_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_ASPECT_RATIO_APPS_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /** @hide */
+        public static final String OMNI_LOCK_POWER_MENU_DISABLED = "lockscreen_power_menu_disabled";
+
+        /** @hide */
+        private static final Validator OMNI_LOCK_POWER_MENU_DISABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /** @hide */
+        public static final String OMNI_BACK_GESTURE_HEIGHT = "back_gesture_height";
+
+        /** @hide */
+        private static final Validator OMNI_BACK_GESTURE_HEIGHT_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         *  Enable statusbar double tap gesture on to put device to sleep
+         * @hide
+         */
+        public static final String OMNI_DOUBLE_TAP_SLEEP_GESTURE = "double_tap_sleep_gesture";
+
+        /** @hide */
+        private static final Validator OMNI_DOUBLE_TAP_SLEEP_GESTURE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Double tap on lockscreen to sleep
+         * @hide
+         */
+        public static final String OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN =
+                "double_tap_sleep_lockscreen";
+
+        /** @hide */
+        private static final Validator OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_SHOW_CPU_OVERLAY = "show_cpu_overlay";
+
+        /** @hide */
+        private static final Validator OMNI_SHOW_CPU_OVERLAY_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Control music seeking with volume up/down buttons
+         *
+         * @hide
+         */
+        public static final String OMNI_VOLUME_BUTTON_MUSIC_CONTROL = "volume_button_music_control";
+
+        private static final Validator OMNI_VOLUME_BUTTON_MUSIC_CONTROL_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /** Whether to allow one finger quick settings expansion on the right side of the statusbar.
+         *
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_QUICK_QS_PULLDOWN = "status_bar_quick_qs_pulldown";
+
+        private static final Validator OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * User definable value of pulse notification screen brightness
+         *
+         * @hide
+         */
+        public static final String OMNI_PULSE_BRIGHTNESS = "pulse_brightness";
+
+        /** @hide */
+        private static final Validator OMNI_PULSE_BRIGHTNESS_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * User definable value of aod screen brightness
+         *
+         * @hide
+         */
+        public static final String OMNI_DOZE_BRIGHTNESS = "doze_brightness";
+
+        /** @hide */
+        private static final Validator OMNI_DOZE_BRIGHTNESS_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * whether to enable or disable vibration on succesful fingerprint auth
+         *
+         * @hide
+         */
+        public static final String OMNI_FINGERPRINT_SUCCESS_VIB = "fingerprint_success_vib";
+
+        /** @hide */
+        private static final Validator OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Disable expanding quick settings on secure lock screens
+         *
+         * @hide
+         */
+        public static final String OMNI_LOCK_QS_DISABLED = "lockscreen_qs_disabled";
+
+        private static final Validator OMNI_LOCK_QS_DISABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_LONG_PRESS_POWER_TORCH =
+                "long_press_power_torch";
+
+        private static final Validator OMNI_LONG_PRESS_POWER_TORCH_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Whether to use the custom status bar header or not
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_CUSTOM_HEADER = "status_bar_custom_header";
+
+        private static final Validator OMNI_STATUS_BAR_CUSTOM_HEADER_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Whether to apply a shadow on top of the header image
+         * value is the alpha value of the shadow image is 0 -> no shadow -> 255 black
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_CUSTOM_HEADER_SHADOW =
+                "status_bar_custom_header_shadow";
+
+        private static final Validator OMNI_STATUS_BAR_CUSTOM_HEADER_SHADOW_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * header image package to use for daylight header - package name - null if default
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_DAYLIGHT_HEADER_PACK =
+                "status_bar_daylight_header_pack";
+
+        private static final Validator OMNI_STATUS_BAR_DAYLIGHT_HEADER_PACK_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * Current active provider - available currently "static" "daylight"
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_CUSTOM_HEADER_PROVIDER =
+                "status_bar_custom_header_provider";
+
+        private static final Validator OMNI_STATUS_BAR_CUSTOM_HEADER_PROVIDER_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * Manual override picture to use
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_CUSTOM_HEADER_IMAGE =
+                "status_bar_custom_header_image";
+
+        private static final Validator OMNI_STATUS_BAR_CUSTOM_HEADER_IMAGE_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_FILE_HEADER_IMAGE =
+                "status_bar_file_header_image";
+
+        private static final Validator OMNI_STATUS_BAR_FILE_HEADER_IMAGE_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * Whether the phone vibrates on call connect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CONNECT = "vibrate_on_connect";
+
+        private static final Validator OMNI_VIBRATE_ON_CONNECT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+         /**
+         * Whether the phone vibrates on call waiting
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CALLWAITING = "vibrate_on_callwaiting";
+
+        private static final Validator OMNI_VIBRATE_ON_CALLWAITING_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+         /**
+         * Whether the phone vibrates on disconnect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_DISCONNECT = "vibrate_on_disconnect";
+
+        private static final Validator OMNI_VIBRATE_ON_DISCONNECT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+         /**
+         * Whether to enable DOZE only when charging
+         * @hide
+         */
+        public static final String OMNI_DOZE_ON_CHARGE = "doze_on_charge";
+
+        private static final Validator OMNI_DOZE_ON_CHARGE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * hidden stting of the current atate of DOZE only when charging
+         * @hide
+         */
+        public static final String OMNI_DOZE_ON_CHARGE_NOW = "doze_on_charge_now";
+
+        /**
+         * media artwork wallpaper blur level on lockscreen
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_MEDIA_BLUR = "lockscreen_media_blur";
+
+        private static final Validator OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_USE_OLD_MOBILETYPE = "use_old_mobiletype";
+
+        private static final Validator OMNI_USE_OLD_MOBILETYPE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
@@ -4531,6 +5113,7 @@ public final class Settings {
             POINTER_SPEED,
             VIBRATE_WHEN_RINGING,
             RINGTONE,
+            RINGTONE2,
             LOCK_TO_APP_ENABLED,
             NOTIFICATION_SOUND,
             ACCELEROMETER_ROTATION,
@@ -4541,6 +5124,61 @@ public final class Settings {
             DISPLAY_COLOR_MODE,
             ALARM_ALERT,
             NOTIFICATION_LIGHT_PULSE,
+            OMNI_NAVIGATION_BAR_RECENTS,
+            OMNI_SYSTEM_PROXI_CHECK_ENABLED,
+            OMNI_BUTTON_EXTRA_KEY_MAPPING,
+            OMNI_CUSTOM_FP_ICON,
+            OMNI_HARDWARE_KEYS_DISABLE,
+            OMNI_DEVICE_PROXI_CHECK_ENABLED,
+            OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED,
+            OMNI_DEVICE_FEATURE_SETTINGS,
+            OMNI_NAVIGATION_BAR_SHOW,
+            OMNI_HIDE_NOTCH,
+            OMNI_ADVANCED_REBOOT,
+            OMNI_USE_BOTTOM_GESTURE_NAVIGATION,
+            OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE,
+            OMNI_QS_LAYOUT_COLUMNS,
+            OMNI_QS_TILE_TITLE_VISIBILITY,
+            OMNI_QS_LAYOUT_ROWS,
+            OMNI_SCREENSHOT_SHUTTER_SOUND,
+            OMNI_QS_QUICKBAR_COLUMNS,
+            OMNI_QS_PANEL_BG_ALPHA,
+            OMNI_BATTERY_LIGHT_ENABLED,
+            OMNI_BATTERY_LIGHT_ALLOW_ON_DND,
+            OMNI_BATTERY_LIGHT_LOW_BLINKING,
+            OMNI_BATTERY_LIGHT_LOW_COLOR,
+            OMNI_BATTERY_LIGHT_MEDIUM_COLOR,
+            OMNI_BATTERY_LIGHT_FULL_COLOR,
+            OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR,
+            OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED,
+            OMNIJAWS_WEATHER_ICON_PACK,
+            OMNI_LOCKSCREEN_WEATHER_ENABLED,
+            OMNI_ASPECT_RATIO_APPS_ENABLED,
+            OMNI_ASPECT_RATIO_APPS_LIST,
+            OMNI_LOCK_POWER_MENU_DISABLED,
+            OMNI_BACK_GESTURE_HEIGHT,
+            OMNI_DOUBLE_TAP_SLEEP_GESTURE,
+            OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN,
+            OMNI_SHOW_CPU_OVERLAY,
+            OMNI_VOLUME_BUTTON_MUSIC_CONTROL,
+            OMNI_PULSE_BRIGHTNESS,
+            OMNI_DOZE_BRIGHTNESS,
+            OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
+            OMNI_FINGERPRINT_SUCCESS_VIB,
+            OMNI_LOCK_QS_DISABLED,
+            OMNI_LONG_PRESS_POWER_TORCH,
+            OMNI_STATUS_BAR_CUSTOM_HEADER,
+            OMNI_STATUS_BAR_CUSTOM_HEADER_SHADOW,
+            OMNI_STATUS_BAR_DAYLIGHT_HEADER_PACK,
+            OMNI_STATUS_BAR_CUSTOM_HEADER_PROVIDER,
+            OMNI_STATUS_BAR_CUSTOM_HEADER_IMAGE,
+            OMNI_STATUS_BAR_FILE_HEADER_IMAGE,
+            OMNI_VIBRATE_ON_CONNECT,
+            OMNI_VIBRATE_ON_CALLWAITING,
+            OMNI_VIBRATE_ON_DISCONNECT,
+            OMNI_DOZE_ON_CHARGE,
+            OMNI_LOCKSCREEN_MEDIA_BLUR,
+            OMNI_USE_OLD_MOBILETYPE,
         };
 
         /**
@@ -4592,6 +5230,7 @@ public final class Settings {
             PUBLIC_SETTINGS.add(VOLUME_NOTIFICATION);
             PUBLIC_SETTINGS.add(VOLUME_BLUETOOTH_SCO);
             PUBLIC_SETTINGS.add(RINGTONE);
+            PUBLIC_SETTINGS.add(RINGTONE2);
             PUBLIC_SETTINGS.add(NOTIFICATION_SOUND);
             PUBLIC_SETTINGS.add(ALARM_ALERT);
             PUBLIC_SETTINGS.add(TEXT_AUTO_REPLACE);
@@ -4660,6 +5299,63 @@ public final class Settings {
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
+            PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_RECENTS);
+            PRIVATE_SETTINGS.add(OMNI_SYSTEM_PROXI_CHECK_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_BUTTON_EXTRA_KEY_MAPPING);
+            PRIVATE_SETTINGS.add(OMNI_CUSTOM_FP_ICON);
+            PRIVATE_SETTINGS.add(OMNI_HARDWARE_KEYS_DISABLE);
+            PRIVATE_SETTINGS.add(OMNI_DEVICE_PROXI_CHECK_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_DEVICE_FEATURE_SETTINGS);
+            PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_SHOW);
+            PRIVATE_SETTINGS.add(OMNI_HIDE_NOTCH);
+            PRIVATE_SETTINGS.add(OMNI_ADVANCED_REBOOT);
+            PRIVATE_SETTINGS.add(OMNI_USE_BOTTOM_GESTURE_NAVIGATION);
+            PRIVATE_SETTINGS.add(OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE);
+            PRIVATE_SETTINGS.add(OMNI_QS_LAYOUT_COLUMNS);
+            PRIVATE_SETTINGS.add(OMNI_QS_TILE_TITLE_VISIBILITY);
+            PRIVATE_SETTINGS.add(OMNI_QS_LAYOUT_ROWS);
+            PRIVATE_SETTINGS.add(OMNI_SCREENSHOT_SHUTTER_SOUND);
+            PRIVATE_SETTINGS.add(OMNI_QS_QUICKBAR_COLUMNS);
+            PRIVATE_SETTINGS.add(OMNI_QS_PANEL_BG_ALPHA);
+            PRIVATE_SETTINGS.add(OMNI_BATTERY_LIGHT_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_BATTERY_LIGHT_ALLOW_ON_DND);
+            PRIVATE_SETTINGS.add(OMNI_BATTERY_LIGHT_LOW_BLINKING);
+            PRIVATE_SETTINGS.add(OMNI_BATTERY_LIGHT_LOW_COLOR);
+            PRIVATE_SETTINGS.add(OMNI_BATTERY_LIGHT_MEDIUM_COLOR);
+            PRIVATE_SETTINGS.add(OMNI_BATTERY_LIGHT_FULL_COLOR);
+            PRIVATE_SETTINGS.add(OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR);
+            PRIVATE_SETTINGS.add(OMNI_FAST_BATTERY_LIGHT_COLOR);
+            PRIVATE_SETTINGS.add(OMNI_FAST_CHARGING_LED_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED);
+            PRIVATE_SETTINGS.add(OMNIJAWS_WEATHER_ICON_PACK);
+            PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_WEATHER_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_ASPECT_RATIO_APPS_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_ASPECT_RATIO_APPS_LIST);
+            PRIVATE_SETTINGS.add(OMNI_LOCK_POWER_MENU_DISABLED);
+            PRIVATE_SETTINGS.add(OMNI_BACK_GESTURE_HEIGHT);
+            PRIVATE_SETTINGS.add(OMNI_DOUBLE_TAP_SLEEP_GESTURE);
+            PRIVATE_SETTINGS.add(OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN);
+            PRIVATE_SETTINGS.add(OMNI_SHOW_CPU_OVERLAY);
+            PRIVATE_SETTINGS.add(OMNI_VOLUME_BUTTON_MUSIC_CONTROL);
+            PRIVATE_SETTINGS.add(OMNI_PULSE_BRIGHTNESS);
+            PRIVATE_SETTINGS.add(OMNI_DOZE_BRIGHTNESS);
+            PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN);
+            PRIVATE_SETTINGS.add(OMNI_FINGERPRINT_SUCCESS_VIB);
+            PRIVATE_SETTINGS.add(OMNI_LOCK_QS_DISABLED);
+            PRIVATE_SETTINGS.add(OMNI_LONG_PRESS_POWER_TORCH);
+            PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_CUSTOM_HEADER);
+            PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_CUSTOM_HEADER_SHADOW);
+            PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_DAYLIGHT_HEADER_PACK);
+            PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_CUSTOM_HEADER_PROVIDER);
+            PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_CUSTOM_HEADER_IMAGE);
+            PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_FILE_HEADER_IMAGE);
+            PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_CONNECT);
+            PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_CALLWAITING);
+            PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_DISCONNECT);
+            PRIVATE_SETTINGS.add(OMNI_DOZE_ON_CHARGE);
+            PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_MEDIA_BLUR);
+            PRIVATE_SETTINGS.add(OMNI_USE_OLD_MOBILETYPE);
         }
 
         /**
@@ -4694,6 +5390,7 @@ public final class Settings {
             VALIDATORS.put(RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
             VALIDATORS.put(HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
             VALIDATORS.put(RINGTONE, RINGTONE_VALIDATOR);
+            VALIDATORS.put(RINGTONE2, RINGTONE_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_SOUND, NOTIFICATION_SOUND_VALIDATOR);
             VALIDATORS.put(ALARM_ALERT, ALARM_ALERT_VALIDATOR);
             VALIDATORS.put(TEXT_AUTO_REPLACE, TEXT_AUTO_REPLACE_VALIDATOR);
@@ -4753,6 +5450,100 @@ public final class Settings {
             VALIDATORS.put(WIFI_STATIC_DNS2, WIFI_STATIC_DNS2_VALIDATOR);
             VALIDATORS.put(SHOW_BATTERY_PERCENT, SHOW_BATTERY_PERCENT_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_LIGHT_PULSE, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(OMNI_NAVIGATION_BAR_RECENTS, OMNI_NAVIGATION_BAR_RECENTS_VALIDATOR);
+            VALIDATORS.put(OMNI_SYSTEM_PROXI_CHECK_ENABLED,
+                    OMNI_SYSTEM_PROXI_CHECK_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_BUTTON_EXTRA_KEY_MAPPING,
+                    OMNI_BUTTON_EXTRA_KEY_MAPPING_VALIDATOR);
+            VALIDATORS.put(OMNI_CUSTOM_FP_ICON,
+                    OMNI_CUSTOM_FP_ICON_VALIDATOR);
+            VALIDATORS.put(OMNI_HARDWARE_KEYS_DISABLE, OMNI_HARDWARE_KEYS_DISABLE_VALIDATOR);
+            VALIDATORS.put(OMNI_DEVICE_PROXI_CHECK_ENABLED,
+                    OMNI_DEVICE_PROXI_CHECK_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED,
+                    OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS,
+                    OMNI_DEVICE_FEATURE_SETTINGS_VALIDATOR);
+            VALIDATORS.put(OMNI_NAVIGATION_BAR_SHOW, OMNI_NAVIGATION_BAR_SHOW_VALIDATOR);
+            VALIDATORS.put(OMNI_HIDE_NOTCH, OMNI_HIDE_NOTCH_VALIDATOR);
+            VALIDATORS.put(OMNI_ADVANCED_REBOOT, OMNI_ADVANCED_REBOOT_VALIDATOR);
+            VALIDATORS.put(OMNI_USE_BOTTOM_GESTURE_NAVIGATION,
+                    OMNI_USE_BOTTOM_GESTURE_NAVIGATION_VALIDATOR);
+            VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE,
+                    OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE_VALIDATOR);
+            VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS, OMNI_QS_LAYOUT_COLUMNS_VALIDATOR);
+            VALIDATORS.put(OMNI_QS_TILE_TITLE_VISIBILITY, OMNI_QS_TILE_TITLE_VISIBILITY_VALIDATOR);
+            VALIDATORS.put(OMNI_QS_LAYOUT_ROWS, OMNI_QS_LAYOUT_ROWS_VALIDATOR);
+            VALIDATORS.put(OMNI_SCREENSHOT_SHUTTER_SOUND,
+                    OMNI_SCREENSHOT_SHUTTER_SOUND_VALIDATOR);
+            VALIDATORS.put(OMNI_QS_QUICKBAR_COLUMNS, OMNI_QS_QUICKBAR_COLUMNS_VALIDATOR);
+            VALIDATORS.put(OMNI_QS_PANEL_BG_ALPHA, OMNI_QS_PANEL_BG_ALPHA_VALIDATOR);
+            VALIDATORS.put(OMNI_BATTERY_LIGHT_ENABLED, OMNI_BATTERY_LIGHT_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_BATTERY_LIGHT_ALLOW_ON_DND,
+                    OMNI_BATTERY_LIGHT_ALLOW_ON_DND_VALIDATOR);
+            VALIDATORS.put(OMNI_BATTERY_LIGHT_LOW_BLINKING,
+                    OMNI_BATTERY_LIGHT_LOW_BLINKING_VALIDATOR);
+            VALIDATORS.put(OMNI_BATTERY_LIGHT_LOW_COLOR,
+                    OMNI_BATTERY_LIGHT_LOW_COLOR_VALIDATOR);
+            VALIDATORS.put(OMNI_BATTERY_LIGHT_MEDIUM_COLOR,
+                    OMNI_BATTERY_LIGHT_MEDIUM_COLOR_VALIDATOR);
+            VALIDATORS.put(OMNI_BATTERY_LIGHT_FULL_COLOR,
+                    OMNI_BATTERY_LIGHT_FULL_COLOR_VALIDATOR);
+            VALIDATORS.put(OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR,
+                    OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR_VALIDATOR);
+            VALIDATORS.put(OMNI_FAST_BATTERY_LIGHT_COLOR, OMNI_FAST_BATTERY_LIGHT_COLOR_VALIDATOR);
+            VALIDATORS.put(OMNI_FAST_CHARGING_LED_ENABLED,
+                    OMNI_FAST_CHARGING_LED_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED,
+                    OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED_VALIDATOR);
+            VALIDATORS.put(OMNIJAWS_WEATHER_ICON_PACK, OMNIJAWS_WEATHER_ICON_PACK_VALIDATOR);
+            VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED,
+                    OMNI_LOCKSCREEN_WEATHER_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_ASPECT_RATIO_APPS_ENABLED,
+                    OMNI_ASPECT_RATIO_APPS_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_ASPECT_RATIO_APPS_LIST,
+                    OMNI_ASPECT_RATIO_APPS_LIST_VALIDATOR);
+            VALIDATORS.put(OMNI_LOCK_POWER_MENU_DISABLED,
+                    OMNI_LOCK_POWER_MENU_DISABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_BACK_GESTURE_HEIGHT, OMNI_BACK_GESTURE_HEIGHT_VALIDATOR);
+            VALIDATORS.put(OMNI_DOUBLE_TAP_SLEEP_GESTURE,
+                    OMNI_DOUBLE_TAP_SLEEP_GESTURE_VALIDATOR);
+            VALIDATORS.put(OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN,
+                    OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN_VALIDATOR);
+            VALIDATORS.put(OMNI_SHOW_CPU_OVERLAY,
+                    OMNI_SHOW_CPU_OVERLAY_VALIDATOR);
+            VALIDATORS.put(OMNI_VOLUME_BUTTON_MUSIC_CONTROL,
+                    OMNI_VOLUME_BUTTON_MUSIC_CONTROL_VALIDATOR);
+            VALIDATORS.put(OMNI_PULSE_BRIGHTNESS, OMNI_PULSE_BRIGHTNESS_VALIDATOR);
+            VALIDATORS.put(OMNI_DOZE_BRIGHTNESS, OMNI_DOZE_BRIGHTNESS_VALIDATOR);
+            VALIDATORS.put(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
+                    OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR);
+            VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB,
+                    OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR);
+            VALIDATORS.put(OMNI_LOCK_QS_DISABLED, OMNI_LOCK_QS_DISABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_LONG_PRESS_POWER_TORCH, OMNI_LONG_PRESS_POWER_TORCH_VALIDATOR);
+            VALIDATORS.put(OMNI_STATUS_BAR_CUSTOM_HEADER,
+                    OMNI_STATUS_BAR_CUSTOM_HEADER_VALIDATOR);
+            VALIDATORS.put(OMNI_STATUS_BAR_CUSTOM_HEADER_SHADOW,
+                    OMNI_STATUS_BAR_CUSTOM_HEADER_SHADOW_VALIDATOR);
+            VALIDATORS.put(OMNI_STATUS_BAR_DAYLIGHT_HEADER_PACK,
+                    OMNI_STATUS_BAR_DAYLIGHT_HEADER_PACK_VALIDATOR);
+            VALIDATORS.put(OMNI_STATUS_BAR_CUSTOM_HEADER_PROVIDER,
+                    OMNI_STATUS_BAR_CUSTOM_HEADER_PROVIDER_VALIDATOR);
+            VALIDATORS.put(OMNI_STATUS_BAR_CUSTOM_HEADER_IMAGE,
+                    OMNI_STATUS_BAR_CUSTOM_HEADER_IMAGE_VALIDATOR);
+            VALIDATORS.put(OMNI_STATUS_BAR_FILE_HEADER_IMAGE,
+                    OMNI_STATUS_BAR_FILE_HEADER_IMAGE_VALIDATOR);
+            VALIDATORS.put(OMNI_VIBRATE_ON_CONNECT,
+                    OMNI_VIBRATE_ON_CONNECT_VALIDATOR);
+            VALIDATORS.put(OMNI_VIBRATE_ON_CALLWAITING,
+                    OMNI_VIBRATE_ON_CALLWAITING_VALIDATOR);
+            VALIDATORS.put(OMNI_VIBRATE_ON_DISCONNECT,
+                    OMNI_VIBRATE_ON_DISCONNECT_VALIDATOR);
+            VALIDATORS.put(OMNI_DOZE_ON_CHARGE,
+                    OMNI_DOZE_ON_CHARGE_VALIDATOR);
+            VALIDATORS.put(OMNI_LOCKSCREEN_MEDIA_BLUR, OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR);
+            VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, OMNI_USE_OLD_MOBILETYPE_VALIDATOR);
         }
 
         /**
@@ -4785,6 +5576,7 @@ public final class Settings {
         public static final Map<String, String> CLONE_FROM_PARENT_ON_VALUE = new ArrayMap<>();
         static {
             CLONE_FROM_PARENT_ON_VALUE.put(RINGTONE, Secure.SYNC_PARENT_SOUNDS);
+            CLONE_FROM_PARENT_ON_VALUE.put(RINGTONE2, Secure.SYNC_PARENT_SOUNDS);
             CLONE_FROM_PARENT_ON_VALUE.put(NOTIFICATION_SOUND, Secure.SYNC_PARENT_SOUNDS);
             CLONE_FROM_PARENT_ON_VALUE.put(ALARM_ALERT, Secure.SYNC_PARENT_SOUNDS);
         }
@@ -13830,6 +14622,18 @@ public final class Settings {
                 "power_button_very_long_press";
         private static final Validator POWER_BUTTON_VERY_LONG_PRESS_VALIDATOR =
                 new SettingsValidators.InclusiveIntegerRangeValidator(0, 1);
+
+        /**
+         * The TCP/IP port to run ADB on, or 0 for USB
+         * @hide
+         */
+        public static final String OMNI_ADB_PORT = "omni_adb_port";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_RECENT_TASKS_VISIBLE_DISABLE =
+                "recents_tasks_visible_disable";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

@@ -45,10 +45,16 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
+import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.os.SystemClock;
+import android.util.Log;
+import android.view.KeyEvent;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -638,6 +644,39 @@ public class NotificationMediaManager implements Dumpable {
         }
     }
 
+    private void triggerKeyEvents(int key, MediaController controller, final Handler h) {
+        long when = SystemClock.uptimeMillis();
+        final KeyEvent evDown = new KeyEvent(when, when, KeyEvent.ACTION_DOWN, key, 0);
+        final KeyEvent evUp = KeyEvent.changeAction(evDown, KeyEvent.ACTION_UP);
+        h.post(new Runnable() {
+            @Override
+            public void run() {
+                controller.dispatchMediaButtonEvent(evDown);
+            }
+        });
+        h.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                controller.dispatchMediaButtonEvent(evUp);
+            }
+        }, 20);
+    }
+
+    public void onSkipTrackEvent(int key, final Handler h) {
+        if (mMediaSessionManager != null) {
+            final List<MediaController> sessions
+                    = mMediaSessionManager.getActiveSessionsForUser(
+                    null, UserHandle.USER_ALL);
+            for (MediaController aController : sessions) {
+                if (PlaybackState.STATE_PLAYING ==
+                        getMediaControllerPlaybackState(aController)) {
+                    triggerKeyEvents(key, aController, h);
+                    break;
+                }
+            }
+        }
+    }
+
     public void setup(BackDropView backdrop, ImageView backdropFront, ImageView backdropBack,
             ScrimController scrimController, LockscreenWallpaper lockscreenWallpaper) {
         mBackdrop = backdrop;
@@ -667,7 +706,7 @@ public class NotificationMediaManager implements Dumpable {
     };
 
     private Bitmap processArtwork(Bitmap artwork) {
-        return mMediaArtworkProcessor.processArtwork(mContext, artwork);
+        return mMediaArtworkProcessor.processArtwork(mContext, artwork, getLockScreenMediaBlurLevel());
     }
 
     @MainThread
@@ -729,5 +768,12 @@ public class NotificationMediaManager implements Dumpable {
          * @see PlaybackState.State
          */
         void onMetadataOrStateChanged(MediaMetadata metadata, @PlaybackState.State int state);
+    }
+
+    private float getLockScreenMediaBlurLevel() {
+        float level = (float) Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_LOCKSCREEN_MEDIA_BLUR, 25,
+                UserHandle.USER_CURRENT) / 100;
+        return level;
     }
 }

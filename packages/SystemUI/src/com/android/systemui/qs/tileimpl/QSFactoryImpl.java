@@ -26,9 +26,12 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.tiles.AdbOverNetworkTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
+import com.android.systemui.qs.tiles.AODTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
+import com.android.systemui.qs.tiles.CaffeineTile;
 import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
@@ -36,13 +39,16 @@ import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HotspotTile;
+import com.android.systemui.qs.tiles.HeadsUpTile;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
+import com.android.systemui.qs.tiles.ScreenrecordTile;
 import com.android.systemui.qs.tiles.UiModeNightTile;
 import com.android.systemui.qs.tiles.UserTile;
+import com.android.systemui.qs.tiles.WeatherTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.qs.tiles.WorkModeTile;
 import com.android.systemui.util.leak.GarbageMonitor;
@@ -75,6 +81,13 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<NfcTile> mNfcTileProvider;
     private final Provider<GarbageMonitor.MemoryTile> mMemoryTileProvider;
     private final Provider<UiModeNightTile> mUiModeNightTileProvider;
+    //Omni
+    private final Provider<AODTile> mAODTileProvider;
+    private final Provider<CaffeineTile> mCaffeineTileProvider;
+    private final Provider<AdbOverNetworkTile> mAdbOverNetworkProvider;
+    private final Provider<ScreenrecordTile> mScrTileProvider;
+    private final Provider<WeatherTile> mWeatherTileProvider;
+    private final Provider<HeadsUpTile> mHeadsUpTileProvider;
 
     private QSTileHost mHost;
 
@@ -97,7 +110,13 @@ public class QSFactoryImpl implements QSFactory {
             Provider<NightDisplayTile> nightDisplayTileProvider,
             Provider<NfcTile> nfcTileProvider,
             Provider<GarbageMonitor.MemoryTile> memoryTileProvider,
-            Provider<UiModeNightTile> uiModeNightTileProvider) {
+            Provider<UiModeNightTile> uiModeNightTileProvider,
+            Provider<AODTile> aodTileProvider,
+            Provider<CaffeineTile> caffeineTileProvider,
+            Provider<AdbOverNetworkTile> adbOverNetworkProvider,
+            Provider<ScreenrecordTile> scrTileProvider,
+            Provider<WeatherTile> weatherTileProvider,
+            Provider<HeadsUpTile> headsupTileProvider) {
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
         mCellularTileProvider = cellularTileProvider;
@@ -117,6 +136,13 @@ public class QSFactoryImpl implements QSFactory {
         mNfcTileProvider = nfcTileProvider;
         mMemoryTileProvider = memoryTileProvider;
         mUiModeNightTileProvider = uiModeNightTileProvider;
+	//Omni
+        mAODTileProvider = aodTileProvider;
+        mCaffeineTileProvider = caffeineTileProvider;
+        mAdbOverNetworkProvider = adbOverNetworkProvider;
+        mScrTileProvider = scrTileProvider;
+        mWeatherTileProvider = weatherTileProvider;
+        mHeadsUpTileProvider = headsupTileProvider;
     }
 
     public void setHost(QSTileHost host) {
@@ -170,6 +196,19 @@ public class QSFactoryImpl implements QSFactory {
                 return mNfcTileProvider.get();
             case "dark":
                 return mUiModeNightTileProvider.get();
+            // Omni tiles
+            case "aod":
+                return mAODTileProvider.get();
+            case "caffeine":
+                return mCaffeineTileProvider.get();
+            case "adb_network":
+                return mAdbOverNetworkProvider.get();
+            case "scr":
+                return mScrTileProvider.get();
+            case "weather":
+                return mWeatherTileProvider.get();
+            case "heads_up":
+                return mHeadsUpTileProvider.get();
         }
 
         // Intent tiles.

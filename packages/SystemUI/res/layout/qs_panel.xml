@@ -29,25 +29,29 @@
         android:elevation="4dp"
         android:background="@drawable/qs_background_primary" />
 
-    <!-- Black part behind the status bar -->
-    <View
-        android:id="@+id/quick_settings_status_bar_background"
-        android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/quick_qs_offset_height"
-        android:clipToPadding="false"
-        android:clipChildren="false"
-        android:background="#ff000000" />
-
     <!-- Gradient view behind QS -->
     <View
         android:id="@+id/quick_settings_gradient_view"
         android:layout_width="match_parent"
-        android:layout_height="126dp"
-        android:layout_marginTop="@*android:dimen/quick_qs_offset_height"
+        android:layout_height="166dp"
         android:clipToPadding="false"
         android:clipChildren="false"
         android:background="@drawable/qs_bg_gradient" />
 
+    <!-- Black part behind the status bar -->
+    <LinearLayout
+        android:id="@+id/quick_settings_status_bar_background"
+        android:layout_width="match_parent"
+        android:layout_height="@*android:dimen/quick_qs_offset_height"
+        android:background="#ff000000" >
+
+        <ImageView android:id="@+id/qs_header_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:background="@drawable/qs_header_image_view_outline" />
+    </LinearLayout>
 
     <com.android.systemui.qs.QSPanel
         android:id="@+id/quick_settings_panel"
@@ -59,6 +63,8 @@
         android:background="@android:color/transparent"
         android:focusable="true"
         android:accessibilityTraversalBefore="@android:id/edit"
+        android:layout_marginStart="@dimen/qs_tile_layout_margin_side"
+        android:layout_marginEnd="@dimen/qs_tile_layout_margin_side"
     />
 
     <include layout="@layout/quick_status_bar_expanded_header" />

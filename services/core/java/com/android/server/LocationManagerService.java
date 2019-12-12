@@ -191,6 +191,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private AppOpsManager mAppOps;
     private PackageManager mPackageManager;
+    private String mComboNlpPackageName;
+    private String mComboNlpReadyMarker;
+    private String mComboNlpScreenMarker;
     private PowerManager mPowerManager;
     private ActivityManager mActivityManager;
     private UserManager mUserManager;
@@ -867,6 +870,13 @@ public class LocationManagerService extends ILocationManager.Stub {
                 null);
         if (provider == null) {
             Slog.d(TAG, "Unable to bind FLP Geofence proxy.");
+        }
+
+        mComboNlpPackageName = resources.getString(
+            com.android.internal.R.string.config_comboNetworkLocationProvider);
+        if (mComboNlpPackageName != null) {
+            mComboNlpReadyMarker = mComboNlpPackageName + ".nlp:ready";
+            mComboNlpScreenMarker = mComboNlpPackageName + ".nlp:screen";
         }
 
         // bind to hardware activity recognition

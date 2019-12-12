@@ -72,6 +72,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     protected QuickStatusBarHeader mHeader;
     private QSCustomizer mQSCustomizer;
     protected QSPanel mQSPanel;
+    protected QuickQSPanel mQuickQSPanel;
     private QSDetail mQSDetail;
     private boolean mListening;
     private QSContainerImpl mContainer;
@@ -106,6 +107,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mStatusBarStateController = statusBarStateController;
     }
 
+    // omni additions
+    private boolean mSecureExpandDisabled;
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
@@ -120,12 +124,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSPanel = view.findViewById(R.id.quick_settings_panel);
         mQSDetail = view.findViewById(R.id.qs_detail);
         mHeader = view.findViewById(R.id.header);
+        mQuickQSPanel  = mHeader.findViewById(R.id.quick_qs_panel);
         mFooter = view.findViewById(R.id.qs_footer);
         mContainer = view.findViewById(id.quick_settings_container);
 
         mQSDetail.setQsPanel(mQSPanel, mHeader, (View) mFooter);
-        mQSAnimator = new QSAnimator(this,
-                mHeader.findViewById(R.id.quick_qs_panel), mQSPanel);
+        mQSAnimator = new QSAnimator(this, mQuickQSPanel, mQSPanel);
 
         mQSCustomizer = view.findViewById(R.id.qs_customize);
         mQSCustomizer.setQs(this);
@@ -197,6 +201,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 mQSAnimator.onRtlChanged();
             }
         }
+        if (mQSAnimator != null) {
+            mQSAnimator.updateSettings();
+        }
     }
 
     private void setEditLocation(View view) {
@@ -222,7 +229,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void setHost(QSTileHost qsh) {
         mQSPanel.setHost(qsh, mQSCustomizer);
         mHeader.setQSPanel(mQSPanel);
-        mFooter.setQSPanel(mQSPanel);
+        mFooter.setQSPanel(mQSPanel, mQuickQSPanel);
         mQSDetail.setHost(qsh);
 
         if (mQSAnimator != null) {
@@ -361,7 +368,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         boolean onKeyguardAndExpanded = isKeyguardShowing() && !mShowCollapsedOnKeyguard;
         if (!mHeaderAnimating && !headerWillBeAnimating()) {
             getView().setTranslationY(
-                    onKeyguardAndExpanded
+                    (onKeyguardAndExpanded || mSecureExpandDisabled)
                             ? translationScaleY * mHeader.getHeight()
                             : headerTranslation);
         }
@@ -408,6 +415,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     @Override
     public void animateHeaderSlidingIn(long delay) {
+        if (mSecureExpandDisabled) {
+            return;
+        }
         if (DEBUG) Log.d(TAG, "animateHeaderSlidingIn");
         // If the QS is already expanded we don't need to slide in the header as it's already
         // visible.
@@ -462,6 +472,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.
         mPanelView.onQsHeightChanged();
+
+        // when we come back from customize update
+        if (!mQSCustomizer.isCustomizing()) {
+            mQSPanel.updateSettings();
+            mQuickQSPanel.updateSettings();
+            mQSAnimator.updateSettings();
+        }
     }
 
     /**
@@ -490,7 +507,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     @Override
     public int getQsMinExpansionHeight() {
-        return mHeader.getHeight();
+        return mSecureExpandDisabled ? 0 : mHeader.getHeight();
+    }
+
+    @Override
+    public void setSecureExpandDisabled(boolean value) {
+        mSecureExpandDisabled = value;
     }
 
     @Override
@@ -523,6 +545,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             updateQsState();
         }
     };
+
+    public QuickQSPanel getQuickQsPanel() {
+        return mQuickQSPanel;
+    }
 
     @Override
     public void onStateChanged(int newState) {

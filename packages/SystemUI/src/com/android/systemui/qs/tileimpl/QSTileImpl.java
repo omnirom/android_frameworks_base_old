@@ -113,6 +113,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     abstract protected void handleUpdateState(TState state, Object arg);
 
+    @Override
+    public boolean isDualTarget() {
+        return false;
+    }
+
     /**
      * Declare the category of this tile.
      *
@@ -288,8 +293,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     }
 
     protected void handleLongClick() {
-        Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
-                getLongClickIntent(), 0);
+        if (getLongClickIntent() != null) {
+            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
+                    getLongClickIntent(), 0);
+        }
     }
 
     public abstract Intent getLongClickIntent();
@@ -416,7 +423,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
             case Tile.STATE_INACTIVE:
                 return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary);
             case Tile.STATE_ACTIVE:
-                return Utils.getColorAttrDefaultColor(context, android.R.attr.colorPrimary);
+                return context.getResources().getColor(android.R.color.background_light);
             default:
                 Log.e("QSTile", "Invalid state " + state);
                 return 0;

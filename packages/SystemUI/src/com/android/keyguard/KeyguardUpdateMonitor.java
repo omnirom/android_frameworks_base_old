@@ -26,8 +26,10 @@ import static android.os.BatteryManager.EXTRA_HEALTH;
 import static android.os.BatteryManager.EXTRA_LEVEL;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
+import static android.os.BatteryManager.EXTRA_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
+import static android.os.BatteryManager.EXTRA_TEMPERATURE;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
@@ -225,6 +227,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mSecureCameraLaunched;
     @VisibleForTesting
     protected boolean mTelephonyCapable;
+    protected boolean mPulsing;
 
     // Device provisioning state
     private boolean mDeviceProvisioned;
@@ -1036,12 +1039,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 final int level = intent.getIntExtra(EXTRA_LEVEL, 0);
                 final int health = intent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
 
+                double currBatteryTemp = intent.getIntExtra(EXTRA_TEMPERATURE, -1);
                 final int maxChargingMicroAmp = intent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT, -1);
                 int maxChargingMicroVolt = intent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
+                double currChargingVoltage = intent.getIntExtra(EXTRA_VOLTAGE, -1);
                 final int maxChargingMicroWatt;
 
-                if (maxChargingMicroVolt <= 0) {
+                if ((maxChargingMicroVolt <= 0) || (currChargingVoltage <= 0)) {
                     maxChargingMicroVolt = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
+                    currChargingVoltage = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
                 }
                 if (maxChargingMicroAmp > 0) {
                     // Calculating muW = muA * muV / (10^6 mu^2 / mu); splitting up the divisor
@@ -1051,9 +1057,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 } else {
                     maxChargingMicroWatt = -1;
                 }
+                if (DEBUG) Log.d(TAG, "maxChargingMicroAmp = " + maxChargingMicroAmp +
+                        " maxChargingMicroVolt = " + maxChargingMicroVolt + " maxChargingMicroWatt = " +
+                        maxChargingMicroWatt + " currBatteryTemp = " + currBatteryTemp);
                 final Message msg = mHandler.obtainMessage(
                         MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health,
-                                maxChargingMicroWatt));
+                                maxChargingMicroWatt, currChargingVoltage, currBatteryTemp));
                 mHandler.sendMessage(msg);
             } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
                 SimData args = SimData.fromIntent(intent);
@@ -1297,13 +1306,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         public final int plugged;
         public final int health;
         public final int maxChargingWattage;
+        public final double currChargingVolt;
+        public final double currBatteryTemp;
         public BatteryStatus(int status, int level, int plugged, int health,
-                int maxChargingWattage) {
+                int maxChargingWattage, double currChargingVolt, double currBatteryTemp) {
             this.status = status;
             this.level = level;
             this.plugged = plugged;
             this.health = health;
             this.maxChargingWattage = maxChargingWattage;
+            this.currChargingVolt = currChargingVolt;
+            this.currBatteryTemp = currBatteryTemp;
         }
 
         /**
@@ -1496,7 +1509,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         // Take a guess at initial SIM state, battery status and PLMN until we get an update
-        mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, 100, 0, 0, 0);
+        mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, 100, 0, 0, 0, 0, 0);
 
         // Watch for interesting updates
         final IntentFilter filter = new IntentFilter();
@@ -2329,6 +2342,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         callback.onClockVisibilityChanged();
         callback.onKeyguardVisibilityChangedRaw(mKeyguardIsVisible);
         callback.onTelephonyCapable(mTelephonyCapable);
+        callback.onPulsing(mPulsing);
         for (Entry<Integer, SimData> data : mSimDatas.entrySet()) {
             final SimData state = data.getValue();
             callback.onSimStateChanged(state.subId, state.slotId, state.simState);
@@ -2671,5 +2685,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             pw.println("    enabledByUser=" + mFaceSettingEnabledForUser.get(userId));
             pw.println("    mSecureCameraLaunched=" + mSecureCameraLaunched);
         }
+    }
+
+    public boolean setPulsing(boolean pulsing) {
+        mPulsing = pulsing;
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onPulsing(mPulsing);
+            }
+        }
+        return mPulsing;
     }
 }

@@ -187,6 +187,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     // Order of holding lock: mSeparateChallengeLock -> mSpManager -> this
     // Do not call into ActivityManager while holding mSpManager lock.
     private final Object mSeparateChallengeLock = new Object();
+    private static final String DEFAULT_PASSWORD = "default_password";
 
     private final DeviceProvisionedObserver mDeviceProvisionedObserver =
             new DeviceProvisionedObserver();
@@ -208,6 +209,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final SyntheticPasswordManager mSpManager;
 
     private final KeyStore mKeyStore;
+    private static String mSavePassword = DEFAULT_PASSWORD;
 
     private final RecoverableKeyStoreManager mRecoverableKeyStoreManager;
 
@@ -1142,6 +1144,45 @@ public class LockSettingsService extends ILockSettings.Stub {
         return mStorage.hasCredential(userId);
     }
 
+    public void retainPassword(String password) {
+        if (LockPatternUtils.isDeviceEncryptionEnabled()) {
+            if (password != null)
+                mSavePassword = password;
+            else
+                mSavePassword = DEFAULT_PASSWORD;
+        }
+    }
+
+    public void sanitizePassword() {
+        if (LockPatternUtils.isDeviceEncryptionEnabled()) {
+            mSavePassword = DEFAULT_PASSWORD;
+        }
+    }
+
+    private boolean checkCryptKeeperPermissions() {
+        boolean permission_err = false;
+        try {
+            mContext.enforceCallingOrSelfPermission(
+                       android.Manifest.permission.CRYPT_KEEPER,
+                       "no permission to get the password");
+        } catch (SecurityException e) {
+            permission_err = true;
+        }
+        return permission_err;
+    }
+
+    public String getPassword() {
+       /** if calling process does't have crypt keeper or admin permissions,
+         * throw the exception.
+         */
+       if (checkCryptKeeperPermissions())
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.MANAGE_DEVICE_ADMINS,
+                    "no crypt_keeper or admin permission to get the password");
+
+       return mSavePassword;
+    }
+
     private void setKeystorePassword(byte[] password, int userHandle) {
         final KeyStore ks = KeyStore.getInstance();
         // TODO(b/120484642): Update keystore to accept byte[] passwords
@@ -1691,6 +1732,18 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void clearUserKeyProtection(int userId) throws RemoteException {
         if (DEBUG) Slog.d(TAG, "clearUserKeyProtection user=" + userId);
         addUserKeyAuth(userId, null, null);
+    }
+
+    private void clearUserKeyAuth(int userId, byte[] token, byte[] secret) throws RemoteException {
+        if (DEBUG) Slog.d(TAG, "clearUserKeyProtection user=" + userId);
+        final UserInfo userInfo = mUserManager.getUserInfo(userId);
+        final IStorageManager storageManager = mInjector.getStorageManager();
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            storageManager.clearUserKeyAuth(userId, userInfo.serialNumber, token, secret);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
     }
 
     private static byte[] secretFromCredential(byte[] credential) throws RemoteException {
@@ -2698,7 +2751,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // during boot. Vold storage needs to be unlocked before manipulation of the keys can
             // succeed.
             unlockUserKey(userId, null, auth.deriveDiskEncryptionKey());
-            clearUserKeyProtection(userId);
+            clearUserKeyAuth(userId, null, auth.deriveDiskEncryptionKey());
             fixateNewestUserKeyAuth(userId);
             unlockKeystore(auth.deriveKeyStorePassword(), userId);
             setKeystorePassword(null, userId);

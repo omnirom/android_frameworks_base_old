@@ -73,12 +73,14 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     private static final String VISIBLE_BY_USER = "visible_by_user";
     private static final String SHOW_SECONDS = "show_seconds";
     private static final String VISIBILITY = "visibility";
+    private static final String SLOT_CLOCK = "clock";
 
     private final CurrentUserTracker mCurrentUserTracker;
     private int mCurrentUserId;
 
     private boolean mClockVisibleByPolicy = true;
     private boolean mClockVisibleByUser = true;
+    private boolean mClockHideableByUser = true;
 
     private boolean mAttached;
     private Calendar mCalendar;
@@ -259,8 +261,10 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     }
 
     public void setClockVisibleByUser(boolean visible) {
-        mClockVisibleByUser = visible;
-        updateClockVisibility();
+        if (mClockHideableByUser) {
+            mClockVisibleByUser = visible;
+            updateClockVisibility();
+        }
     }
 
     public void setClockVisibilityByPolicy(boolean visible) {
@@ -278,6 +282,14 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         super.setVisibility(visibility);
     }
 
+    public boolean isClockVisible() {
+        return mClockVisibleByPolicy && mClockVisibleByUser;
+    }
+
+    public void setClockHideableByUser(boolean value) {
+        mClockHideableByUser = value;
+    }
+
     final void updateClock() {
         if (mDemoMode) return;
         mCalendar.setTimeInMillis(System.currentTimeMillis());
@@ -292,7 +304,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             updateShowSeconds();
         } else {
             setClockVisibleByUser(!StatusBarIconController.getIconBlacklist(newValue)
-                    .contains("clock"));
+                    .contains(SLOT_CLOCK));
             updateClockVisibility();
         }
     }

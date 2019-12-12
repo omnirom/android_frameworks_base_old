@@ -62,6 +62,18 @@ struct fields_t {
     jmethodID   rect_constructor;
     jmethodID   face_constructor;
     jmethodID   point_constructor;
+    jfieldID    face_sm_degree;
+    jfieldID    face_sm_score;
+    jfieldID    face_blink_detected;
+    jfieldID    face_gaze_angle;
+    jfieldID    face_updown_dir;
+    jfieldID    face_leftright_dir;
+    jfieldID    face_roll_dir;
+    jfieldID    face_leye_blink;
+    jfieldID    face_reye_blink;
+    jfieldID    face_left_right_gaze;
+    jfieldID    face_top_bottom_gaze;
+    jfieldID    face_recognised;
 };
 
 static fields_t fields;
@@ -100,6 +112,7 @@ private:
     jclass      mFaceClass;  // strong reference to Face class
     jclass      mRectClass;  // strong reference to Rect class
     jclass      mPointClass;  // strong reference to Point class
+    bool        mIsExtendedFace;
     Mutex       mLock;
 
     /*
@@ -151,8 +164,16 @@ JNICameraContext::JNICameraContext(JNIEnv* env, jobject weak_this, jclass clazz,
     mCameraJClass = (jclass)env->NewGlobalRef(clazz);
     mCamera = camera;
 
-    jclass faceClazz = env->FindClass("android/hardware/Camera$Face");
-    mFaceClass = (jclass) env->NewGlobalRef(faceClazz);
+    jclass extendedfaceClazz = env->FindClass("com/qualcomm/qti/camera/ExtendedFace");
+    if (NULL != extendedfaceClazz) {
+        mFaceClass = (jclass) env->NewGlobalRef(extendedfaceClazz);
+        mIsExtendedFace = true;
+    } else {
+        env->ExceptionClear();
+        jclass faceClazz = env->FindClass("android/hardware/Camera$Face");
+        mFaceClass = (jclass) env->NewGlobalRef(faceClazz);
+        mIsExtendedFace = false;
+    }
 
     jclass rectClazz = env->FindClass("android/graphics/Rect");
     mRectClass = (jclass) env->NewGlobalRef(rectClazz);
@@ -404,7 +425,6 @@ void JNICameraContext::postMetadata(JNIEnv *env, int32_t msgType, camera_frame_m
         env->SetIntField(rect, fields.rect_top, metadata->faces[i].rect[1]);
         env->SetIntField(rect, fields.rect_right, metadata->faces[i].rect[2]);
         env->SetIntField(rect, fields.rect_bottom, metadata->faces[i].rect[3]);
-
         env->SetObjectField(face, fields.face_rect, rect);
         env->SetIntField(face, fields.face_score, metadata->faces[i].score);
 
@@ -433,6 +453,21 @@ void JNICameraContext::postMetadata(JNIEnv *env, int32_t msgType, camera_frame_m
             env->SetIntField(mouth, fields.point_y, metadata->faces[i].mouth[1]);
             env->SetObjectField(face, fields.face_mouth, mouth);
             env->DeleteLocalRef(mouth);
+
+            if (mIsExtendedFace) {
+                env->SetIntField(face, fields.face_sm_degree, metadata->faces[i].smile_degree);
+                env->SetIntField(face, fields.face_sm_score, metadata->faces[i].smile_score);
+                env->SetIntField(face, fields.face_blink_detected, metadata->faces[i].blink_detected);
+                env->SetIntField(face, fields.face_recognised, metadata->faces[i].face_recognised);
+                env->SetIntField(face, fields.face_gaze_angle, metadata->faces[i].gaze_angle);
+                env->SetIntField(face, fields.face_updown_dir, metadata->faces[i].updown_dir);
+                env->SetIntField(face, fields.face_leftright_dir, metadata->faces[i].leftright_dir);
+                env->SetIntField(face, fields.face_roll_dir, metadata->faces[i].roll_dir);
+                env->SetIntField(face, fields.face_leye_blink, metadata->faces[i].leye_blink);
+                env->SetIntField(face, fields.face_reye_blink, metadata->faces[i].reye_blink);
+                env->SetIntField(face, fields.face_left_right_gaze, metadata->faces[i].left_right_gaze);
+                env->SetIntField(face, fields.face_top_bottom_gaze, metadata->faces[i].top_bottom_gaze);
+            }
         }
 
         env->DeleteLocalRef(face);
@@ -470,6 +505,56 @@ void JNICameraContext::setCallbackMode(JNIEnv *env, bool installed, bool manualM
     }
 }
 
+static void android_hardware_Camera_setLongshot(JNIEnv *env, jobject thiz, jboolean enable)
+{
+    ALOGV("setLongshot");
+    JNICameraContext* context;
+    status_t rc;
+    sp<Camera> camera = get_native_camera(env, thiz, &context);
+    if (camera == 0) return;
+
+    if ( enable ) {
+        rc = camera->sendCommand(CAMERA_CMD_LONGSHOT_ON, 0, 0);
+    } else {
+        rc = camera->sendCommand(CAMERA_CMD_LONGSHOT_OFF, 0, 0);
+    }
+
+    if (rc != NO_ERROR) {
+       jniThrowException(env, "java/lang/RuntimeException", "enabling longshot mode failed");
+    }
+}
+
+static void android_hardware_Camera_sendHistogramData(JNIEnv *env, jobject thiz)
+ {
+   ALOGV("sendHistogramData" );
+   JNICameraContext* context;
+   status_t rc;
+   sp<Camera> camera = get_native_camera(env, thiz, &context);
+   if (camera == 0) return;
+
+   rc = camera->sendCommand(CAMERA_CMD_HISTOGRAM_SEND_DATA, 0, 0);
+
+   if (rc != NO_ERROR) {
+      jniThrowException(env, "java/lang/RuntimeException", "send histogram data failed");
+    }
+ }
+ static void android_hardware_Camera_setHistogramMode(JNIEnv *env, jobject thiz, jboolean mode)
+ {
+   ALOGV("setHistogramMode: mode:%d", (int)mode);
+   JNICameraContext* context;
+   status_t rc;
+   sp<Camera> camera = get_native_camera(env, thiz, &context);
+   if (camera == 0) return;
+
+   if(mode == true)
+      rc = camera->sendCommand(CAMERA_CMD_HISTOGRAM_ON, 0, 0);
+   else
+      rc = camera->sendCommand(CAMERA_CMD_HISTOGRAM_OFF, 0, 0);
+
+   if (rc != NO_ERROR) {
+      jniThrowException(env, "java/lang/RuntimeException", "set histogram mode failed");
+     }
+ }
 void JNICameraContext::addCallbackBuffer(
         JNIEnv *env, jbyteArray cbb, int msgType)
 {
@@ -793,7 +878,25 @@ static void android_hardware_Camera_setHasPreviewCallback(JNIEnv *env, jobject t
     context->setCallbackMode(env, installed, manualBuffer);
 }
 
-static void android_hardware_Camera_addCallbackBuffer(JNIEnv *env, jobject thiz, jbyteArray bytes, jint msgType) {
+static void android_hardware_Camera_setMetadataCb(JNIEnv *env, jobject thiz, jboolean mode)
+{
+    ALOGV("setMetadataCb: mode:%d", (int)mode);
+    JNICameraContext* context;
+    status_t rc;
+    sp<Camera> camera = get_native_camera(env, thiz, &context);
+    if (camera == 0) return;
+
+    if(mode == true)
+        rc = camera->sendCommand(CAMERA_CMD_METADATA_ON, 0, 0);
+    else
+        rc = camera->sendCommand(CAMERA_CMD_METADATA_OFF, 0, 0);
+
+    if (rc != NO_ERROR) {
+        jniThrowException(env, "java/lang/RuntimeException", "set metadata mode failed");
+    }
+}
+
+static void android_hardware_Camera_addCallbackBuffer(JNIEnv *env, jobject thiz, jbyteArray bytes, int msgType) {
     ALOGV("addCallbackBuffer: 0x%x", msgType);
 
     JNICameraContext* context = reinterpret_cast<JNICameraContext*>(env->GetLongField(thiz, fields.context));
@@ -1026,7 +1129,7 @@ static void android_hardware_Camera_enableFocusMoveCallback(JNIEnv *env, jobject
 //-------------------------------------------------
 
 static const JNINativeMethod camMethods[] = {
-  { "getNumberOfCameras",
+  { "_getNumberOfCameras",
     "()I",
     (void *)android_hardware_Camera_getNumberOfCameras },
   { "_getCameraInfo",
@@ -1071,6 +1174,18 @@ static const JNINativeMethod camMethods[] = {
   { "native_takePicture",
     "(I)V",
     (void *)android_hardware_Camera_takePicture },
+  { "native_setHistogramMode",
+    "(Z)V",
+     (void *)android_hardware_Camera_setHistogramMode },
+  { "native_setMetadataCb",
+    "(Z)V",
+    (void *)android_hardware_Camera_setMetadataCb },
+  { "native_sendHistogramData",
+    "()V",
+     (void *)android_hardware_Camera_sendHistogramData },
+ { "native_setLongshot",
+     "(Z)V",
+      (void *)android_hardware_Camera_setLongshot },
   { "native_setParameters",
     "(Ljava/lang/String;)V",
     (void *)android_hardware_Camera_setParameters },
@@ -1149,6 +1264,27 @@ int register_android_hardware_Camera(JNIEnv *env)
         { "android/graphics/Point", "y", "I", &fields.point_y},
     };
 
+    field extendedfacefields_to_find[] = {
+        { "com/qualcomm/qti/camera/ExtendedFace", "rect", "Landroid/graphics/Rect;", &fields.face_rect },
+        { "com/qualcomm/qti/camera/ExtendedFace", "score", "I", &fields.face_score },
+        { "com/qualcomm/qti/camera/ExtendedFace", "id", "I", &fields.face_id },
+        { "com/qualcomm/qti/camera/ExtendedFace", "leftEye", "Landroid/graphics/Point;", &fields.face_left_eye },
+        { "com/qualcomm/qti/camera/ExtendedFace", "rightEye", "Landroid/graphics/Point;", &fields.face_right_eye },
+        { "com/qualcomm/qti/camera/ExtendedFace", "mouth", "Landroid/graphics/Point;", &fields.face_mouth },
+        { "com/qualcomm/qti/camera/ExtendedFace", "smileDegree", "I", &fields.face_sm_degree },
+        { "com/qualcomm/qti/camera/ExtendedFace", "smileScore", "I", &fields.face_sm_score },
+        { "com/qualcomm/qti/camera/ExtendedFace", "blinkDetected", "I", &fields.face_blink_detected },
+        { "com/qualcomm/qti/camera/ExtendedFace", "faceRecognized", "I", &fields.face_recognised },
+        { "com/qualcomm/qti/camera/ExtendedFace", "gazeAngle", "I", &fields.face_gaze_angle },
+        { "com/qualcomm/qti/camera/ExtendedFace", "updownDir", "I", &fields.face_updown_dir },
+        { "com/qualcomm/qti/camera/ExtendedFace", "leftrightDir", "I", &fields.face_leftright_dir },
+        { "com/qualcomm/qti/camera/ExtendedFace", "rollDir", "I", &fields.face_roll_dir },
+        { "com/qualcomm/qti/camera/ExtendedFace", "leyeBlink", "I", &fields.face_leye_blink },
+        { "com/qualcomm/qti/camera/ExtendedFace", "reyeBlink", "I", &fields.face_reye_blink },
+        { "com/qualcomm/qti/camera/ExtendedFace", "leftrightGaze", "I", &fields.face_left_right_gaze },
+        { "com/qualcomm/qti/camera/ExtendedFace", "topbottomGaze", "I", &fields.face_top_bottom_gaze },
+    };
+
     find_fields(env, fields_to_find, NELEM(fields_to_find));
 
     jclass clazz = FindClassOrDie(env, "android/hardware/Camera");
@@ -1166,6 +1302,14 @@ int register_android_hardware_Camera(JNIEnv *env)
     if (fields.point_constructor == NULL) {
         ALOGE("Can't find android/graphics/Point()");
         return -1;
+    }
+
+    clazz = env->FindClass("com/qualcomm/qti/camera/ExtendedFace");
+    if (NULL != clazz) {
+        fields.face_constructor = env->GetMethodID(clazz, "<init>", "()V");
+        find_fields(env, extendedfacefields_to_find, NELEM(extendedfacefields_to_find));
+    }else {
+        env->ExceptionClear();
     }
 
     // Register native functions
