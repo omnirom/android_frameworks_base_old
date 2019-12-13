@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff291c46_a1443867",
+        "filename": "services/core/java/com/android/server/StorageManagerService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1286,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-12-13T14:44:53Z",
+      "side": 1,
+      "message": "please why not simply use || :)\nif (vol.disk.isAdoptable() || vol.disk.isSd())\nit hurts my eyes seeing something like this",
+      "revId": "f67b1a22d0b28bed38e5d7828035421f85fd5861",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
