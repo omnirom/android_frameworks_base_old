@@ -1765,6 +1765,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         updateButtonLocation(
                 region, touchRegionCache, mView.getAccessibilityButton(), inScreenSpace,
                 useNearestRegion);
+        updateButtonLocation(region, mView.getKeyButtonViewById(R.id.dpad_left), inScreenSpace);
+        updateButtonLocation(region, mView.getKeyButtonViewById(R.id.dpad_right), inScreenSpace);
         if (includeFloatingButtons && mView.getFloatingRotationButton().isVisible()) {
             // Note: this button is floating so the nearest region doesn't apply
             updateButtonLocation(
