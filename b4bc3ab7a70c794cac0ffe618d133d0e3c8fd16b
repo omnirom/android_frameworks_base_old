@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f5589c9d_72a60a7d",
+        "filename": "packages/SystemUI/src/com/android/systemui/tuner/TunerFragment.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-12-13T14:02:45Z",
+      "side": 1,
+      "message": "you only need to comment out this single line - else remove completely",
+      "revId": "b4bc3ab7a70c794cac0ffe618d133d0e3c8fd16b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
