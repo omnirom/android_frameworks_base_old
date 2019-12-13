@@ -25,7 +25,7 @@
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <string name="global_action_reboot_fastboot">Fastboot</string>
-    
+
     <!-- AOD QS tile -->
     <string name="quick_settings_aod_label">AOD</string>
 
@@ -56,4 +56,7 @@
     <!-- Content description indicating that tapping the element will allow deleting the screenshot [CHAR LIMIT=NONE] -->
     <string name="screenshot_delete_description">Delete screenshot</string>
 
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Cursor left</string>
+    <string name="accessibility_dpad_right">Cursor right</string>
 </resources>
