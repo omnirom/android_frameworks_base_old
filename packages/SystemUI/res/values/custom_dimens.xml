@@ -27,4 +27,6 @@
 
     <dimen name="volume_seekbar_progress_width">8dp</dimen>
     <dimen name="volume_seekbar_progress_corner_radius">4dp</dimen>
+
+    <dimen name="navigation_extra_key_width">36dp</dimen>
 </resources>
