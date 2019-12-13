@@ -5669,6 +5669,12 @@ public final class Settings {
         public static final String OMNI_BACK_GESTURE_HEIGHT = "back_gesture_height";
 
         /**
+         * Whether to show arrow keys in navigation bar
+         * @hide
+         */
+        public static final String OMNI_NAVIGATION_BAR_ARROW_KEYS = "navigation_bar_menu_arrow_keys";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5685,6 +5691,7 @@ public final class Settings {
             OMNI_DOZE_ON_CHARGE,
             OMNI_SHOW_BATTERY_IMAGE,
             OMNI_BACK_GESTURE_HEIGHT,
+            OMNI_NAVIGATION_BAR_ARROW_KEYS,
         };
 
         /**
@@ -5709,6 +5716,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DOZE_ON_CHARGE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BACK_GESTURE_HEIGHT, 1);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_ARROW_KEYS, 0);
         }
     }
 

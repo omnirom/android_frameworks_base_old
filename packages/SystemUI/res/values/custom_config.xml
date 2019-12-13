@@ -41,4 +41,6 @@
 
     <bool name="always_show_screenshot_dismiss_botton">false</bool>
 
+    <!-- Navigation bar dpad -->
+    <string name="config_navBarLayoutHandleArrows" translatable="false">back[1.7WC];home_handle;ime_switcher[1.7WC]</string>
 </resources>
