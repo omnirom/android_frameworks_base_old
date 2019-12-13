@@ -16,6 +16,24 @@
       "revId": "b4bc3ab7a70c794cac0ffe618d133d0e3c8fd16b",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5619609_4f7dc3aa",
+        "filename": "packages/SystemUI/src/com/android/systemui/tuner/TunerFragment.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-12-13T14:43:16Z",
+      "side": 1,
+      "message": "so we can remove all what we commented out so far completely - no need in keeping it",
+      "parentUuid": "f5589c9d_72a60a7d",
+      "revId": "b4bc3ab7a70c794cac0ffe618d133d0e3c8fd16b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
