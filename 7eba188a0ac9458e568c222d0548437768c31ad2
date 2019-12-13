@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54a47a32_73656b86",
+        "filename": "services/core/java/com/android/server/StorageManagerService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1290,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2019-12-13T08:07:22Z",
+      "side": 1,
+      "message": "that makes no sense",
+      "revId": "7eba188a0ac9458e568c222d0548437768c31ad2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
