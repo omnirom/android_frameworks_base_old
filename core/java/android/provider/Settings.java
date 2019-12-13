@@ -5052,6 +5052,15 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether to show arrow keys in navigation bar
+         * @hide
+         */
+        public static final String OMNI_NAVIGATION_BAR_ARROW_KEYS = "navigation_bar_menu_arrow_keys";
+
+        private static final Validator OMNI_NAVIGATION_BAR_ARROW_KEYS_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5179,6 +5188,7 @@ public final class Settings {
             OMNI_DOZE_ON_CHARGE,
             OMNI_LOCKSCREEN_MEDIA_BLUR,
             OMNI_USE_OLD_MOBILETYPE,
+            OMNI_NAVIGATION_BAR_ARROW_KEYS,
         };
 
         /**
@@ -5356,6 +5366,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_DOZE_ON_CHARGE);
             PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_MEDIA_BLUR);
             PRIVATE_SETTINGS.add(OMNI_USE_OLD_MOBILETYPE);
+            PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_ARROW_KEYS);
         }
 
         /**
@@ -5544,6 +5555,8 @@ public final class Settings {
                     OMNI_DOZE_ON_CHARGE_VALIDATOR);
             VALIDATORS.put(OMNI_LOCKSCREEN_MEDIA_BLUR, OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR);
             VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, OMNI_USE_OLD_MOBILETYPE_VALIDATOR);
+            VALIDATORS.put(OMNI_NAVIGATION_BAR_ARROW_KEYS,
+                    OMNI_NAVIGATION_BAR_ARROW_KEYS_VALIDATOR);
         }
 
         /**

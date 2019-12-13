@@ -49,4 +49,6 @@
 
     <color name="dashboard_icon_color">@*android:color/accent_device_default_light</color>
 
+    <string name="config_navBarLayoutHandleArrows" translatable="false">back[1.7WC];home_handle;ime_switcher[1.7WC]</string>
+
 </resources>
