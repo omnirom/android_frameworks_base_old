@@ -59,6 +59,7 @@
     <string name="tuner_show_secure_title">Show security footer</string>
     <string name="tuner_show_drag_handle">Show drag handle</string>
     <string name="tuner_battery_location_bar">Show battery in status bar</string>
+    <string name="tuner_status_bar_bg_transparency">Transparent status bar background</string>
 
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Enabled</string>

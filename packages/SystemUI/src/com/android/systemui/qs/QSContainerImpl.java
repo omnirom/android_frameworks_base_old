@@ -36,15 +36,19 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.omni.StatusBarHeaderMachine;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 
 /**
  * Wrapper view with background which contains {@link QSPanel} and {@link BaseStatusBarHeader}
  */
 public class QSContainerImpl extends FrameLayout implements
-        StatusBarHeaderMachine.IStatusBarHeaderMachineObserver {
+        StatusBarHeaderMachine.IStatusBarHeaderMachineObserver,
+        Tunable {
 
     private final Point mSizePoint = new Point();
 
@@ -71,6 +75,8 @@ public class QSContainerImpl extends FrameLayout implements
     private boolean mLandscape;
     private boolean mQsBackgroundAlpha;
     private boolean mForceHideQsStatusBar;
+    private boolean mStatusBarBgTransparent;
+    private static final String QS_STATUS_BAR_BG_TRANSPARENCY =  "qs_status_bar_bg_transparency";
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -107,12 +113,16 @@ public class QSContainerImpl extends FrameLayout implements
         super.onAttachedToWindow();
         mStatusBarHeaderMachine.addObserver(this);
         mStatusBarHeaderMachine.updateEnablement();
+        final TunerService tunerService = Dependency.get(TunerService.class);
+        tunerService.addTunable(this, QS_STATUS_BAR_BG_TRANSPARENCY);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mStatusBarHeaderMachine.removeObserver(this);
+        final TunerService tunerService = Dependency.get(TunerService.class);
+        tunerService.removeTunable(this);
     }
 
     @Override
@@ -253,7 +263,7 @@ public class QSContainerImpl extends FrameLayout implements
         lp.setMargins(statusBarSideMargin, 0, statusBarSideMargin, 0);
         mStatusBarBackground.setLayoutParams(lp);
 
-        if (mHeaderImageEnabled) {
+        if (mHeaderImageEnabled || mStatusBarBgTransparent) {
             mStatusBarBackground.setBackgroundColor(Color.TRANSPARENT);
         } else {
             mStatusBarBackground.setBackgroundColor(Color.BLACK);
@@ -406,5 +416,13 @@ public class QSContainerImpl extends FrameLayout implements
     private void updateStatusbarVisibility() {
         boolean shouldHideStatusbar = (mLandscape || mForceHideQsStatusBar) && !mHeaderImageEnabled;
         mStatusBarBackground.setVisibility(shouldHideStatusbar ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (QS_STATUS_BAR_BG_TRANSPARENCY.equals(key)) {
+            mStatusBarBgTransparent = newValue != null && Integer.parseInt(newValue) == 1;
+            updateResources();
+        }
     }
 }
