@@ -47,6 +47,11 @@
             android:title="@string/tuner_battery_location_bar"
             sysui:defValue="false" />
 
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_status_bar_bg_transparency"
+            android:title="@string/tuner_status_bar_bg_transparency"
+            sysui:defValue="false" />
+
     </PreferenceScreen>
 
     <PreferenceScreen
