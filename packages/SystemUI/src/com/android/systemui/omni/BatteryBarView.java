@@ -18,6 +18,7 @@
 package com.android.systemui.omni;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
@@ -74,6 +75,11 @@ public class BatteryBarView extends LinearLayout {
             mInitDone = true;
             post(mBarUpdate);
         }
+    }
+
+    public void setBarColor(ColorStateList color) {
+        int c = color.getDefaultColor();
+        setBarColor(c);
     }
 
     public void setBarColor(int color) {
