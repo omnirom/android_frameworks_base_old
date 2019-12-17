@@ -450,7 +450,7 @@ public class KeyguardIndicationController implements StateListener,
                 if (showBatteryBar && showBatteryBarAlways) {
                     mBatteryBar.setVisibility(View.VISIBLE);
                     mBatteryBar.setBatteryPercent(mBatteryLevel);
-                    mBatteryBar.setBarColor(mTextView.getCurrentTextColor());
+                    mBatteryBar.setBarColor(mInitialTextColorState);
                 }
             } else if (!TextUtils.isEmpty(trustManagedIndication)
                     && mKeyguardUpdateMonitor.getUserTrustIsManaged(userId)
