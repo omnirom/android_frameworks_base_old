@@ -143,6 +143,7 @@ public class NotificationMediaManager implements Dumpable {
     private BackDropView mBackdrop;
     private ImageView mBackdropFront;
     private ImageView mBackdropBack;
+    private boolean mHideLockscreenArtwork;
 
     private boolean mShowCompactMediaSeekbar;
     private final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener =
@@ -455,7 +456,7 @@ public class NotificationMediaManager implements Dumpable {
      */
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
         Trace.beginSection("StatusBar#updateMediaMetaData");
-        if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) {
+        if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK || mHideLockscreenArtwork) {
             Trace.endSection();
             return;
         }
@@ -712,6 +713,13 @@ public class NotificationMediaManager implements Dumpable {
     @MainThread
     private void removeTask(AsyncTask<?, ?, ?> task) {
         mProcessArtworkTasks.remove(task);
+    }
+
+    @Overridw
+    public void updateSettings() {
+        mHideLockscreenArtwork = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_LOCKSCREEN_HIDE_MEDIA, 0,
+                UserHandle.USER_CURRENT) != 0;
     }
 
     /**

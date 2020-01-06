@@ -5061,6 +5061,15 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * hide the media metadata as wallpaper on lockscreen
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_HIDE_MEDIA = "lockscreen_hide_media";
+
+        private static final Validator OMNI_LOCKSCREEN_HIDE_MEDIA_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5189,6 +5198,7 @@ public final class Settings {
             OMNI_LOCKSCREEN_MEDIA_BLUR,
             OMNI_USE_OLD_MOBILETYPE,
             OMNI_NAVIGATION_BAR_ARROW_KEYS,
+            OMNI_LOCKSCREEN_HIDE_MEDIA,
         };
 
         /**
@@ -5367,6 +5377,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_MEDIA_BLUR);
             PRIVATE_SETTINGS.add(OMNI_USE_OLD_MOBILETYPE);
             PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_ARROW_KEYS);
+            PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_HIDE_MEDIA);
         }
 
         /**
@@ -5557,6 +5568,7 @@ public final class Settings {
             VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, OMNI_USE_OLD_MOBILETYPE_VALIDATOR);
             VALIDATORS.put(OMNI_NAVIGATION_BAR_ARROW_KEYS,
                     OMNI_NAVIGATION_BAR_ARROW_KEYS_VALIDATOR);
+            VALIDATORS.put(OMNI_LOCKSCREEN_HIDE_MEDIA,OMNI_LOCKSCREEN_HIDE_MEDIA_VALIDATOR);
         }
 
         /**
