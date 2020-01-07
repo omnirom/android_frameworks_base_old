@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.graphics.Paint.Style;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextClock;
 
 import com.android.internal.colorextraction.ColorExtractor;
@@ -139,7 +140,14 @@ public class AnalogClockController implements ClockPlugin {
         setColorPalette(colors.supportsDarkText(), colors.getColorPalette());
         onTimeTick();
 
-        return mRenderer.createPreview(view, width, height);
+        // make it bigger for a nice preview
+        FrameLayout.LayoutParams p = (FrameLayout.LayoutParams) mAnalogClock.getLayoutParams();
+        p.width = mResources.getDimensionPixelSize(R.dimen.custom_clock_preview_width);
+        p.height = mResources.getDimensionPixelSize(R.dimen.custom_clock_preview_height);
+        mAnalogClock.setLayoutParams(p);
+        Bitmap b = mRenderer.createPreview(view, width, height);
+        mBigClockView = null;
+        return b;
     }
 
     @Override
@@ -160,11 +168,12 @@ public class AnalogClockController implements ClockPlugin {
 
     @Override
     public int getPreferredY(int totalHeight) {
-        return mClockPosition.getPreferredY();
+        if (shouldShowInBigContainer()) {
+            return mClockPosition.getPreferredY();
+        } else {
+            return totalHeight / 2;
+        }
     }
-
-    @Override
-    public void setStyle(Style style) {}
 
     @Override
     public void setTextColor(int color) {
@@ -180,7 +189,6 @@ public class AnalogClockController implements ClockPlugin {
     private void updateColor() {
         final int primary = mPalette.getPrimaryColor();
         final int secondary = mPalette.getSecondaryColor();
-        mLockClock.setTextColor(secondary);
         mAnalogClock.setClockColors(primary, secondary);
     }
 

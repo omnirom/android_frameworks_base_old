@@ -20,8 +20,9 @@
     android:layout_height="match_parent" >
 
     <com.android.keyguard.clock.BinaryClock
-        android:id="@+id/analog_clock"
+        android:id="@+id/binary_clock"
         android:layout_width="@dimen/binary_clock_width"
-        android:layout_height="@dimen/binary_clock_height" />
+        android:layout_height="@dimen/binary_clock_height"
+        android:layout_gravity="center" />
 
 </com.android.keyguard.clock.ClockLayout>

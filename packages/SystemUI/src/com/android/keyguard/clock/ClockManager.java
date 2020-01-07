@@ -27,6 +27,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 
 import androidx.annotation.VisibleForTesting;
@@ -148,9 +149,11 @@ public final class ClockManager {
         LayoutInflater layoutInflater = injectionInflater.injectable(LayoutInflater.from(context));
 
         addBuiltinClock(() -> new DefaultClockController(res, layoutInflater, colorExtractor));
-        addBuiltinClock(() -> new BubbleClockController(res, layoutInflater, colorExtractor));
+        //addBuiltinClock(() -> new BubbleClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new AnalogClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new BinaryClockController(res, layoutInflater, colorExtractor));
+        addBuiltinClock(() -> new OneLineDigitalClockController(res, layoutInflater, colorExtractor));
+        addBuiltinClock(() -> new TwoLineDigitalClockController(res, layoutInflater, colorExtractor));
 
         // Store the size of the display for generation of clock preview.
         DisplayMetrics dm = res.getDisplayMetrics();
@@ -245,6 +248,7 @@ public final class ClockManager {
         mListeners.forEach((listener, clocks) -> {
             clocks.reloadCurrentClock();
             ClockPlugin clock = clocks.getCurrentClock();
+            Log.d("ThemePicker", "reload " + clock.getClass().getName());
             if (clock instanceof DefaultClockController) {
                 listener.onClockChanged(null);
             } else {
