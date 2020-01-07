@@ -24,6 +24,7 @@ import android.graphics.Paint.Style;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextClock;
 
 import com.android.internal.colorextraction.ColorExtractor;
@@ -34,24 +35,24 @@ import com.android.systemui.plugins.ClockPlugin;
 import java.util.TimeZone;
 
 /**
- * Controller for binary clock that can appear on lock screen and AOD.
+ * Controller for general digital clock that can appear on lock screen and AOD.
  */
-public class BinaryClockController implements ClockPlugin {
+public abstract class DigitalClockController implements ClockPlugin {
 
     /**
      * Resources used to get title and thumbnail.
      */
-    private final Resources mResources;
+    protected final Resources mResources;
 
     /**
      * LayoutInflater used to inflate custom clock views.
      */
-    private final LayoutInflater mLayoutInflater;
+    protected final LayoutInflater mLayoutInflater;
 
     /**
      * Extracts accent color from wallpaper.
      */
-    private final SysuiColorExtractor mColorExtractor;
+    protected final SysuiColorExtractor mColorExtractor;
 
     /**
      * Computes preferred position of clock.
@@ -59,40 +60,40 @@ public class BinaryClockController implements ClockPlugin {
     private final SmallClockPosition mClockPosition;
 
     /**
-     * Renders preview from clock view.
-     */
-    private final ViewPreviewer mRenderer = new ViewPreviewer();
-
-    /**
      * Custom clock shown on AOD screen and behind stack scroller on lock.
      */
-    private BinaryClock mBinaryClock;
-    private ClockLayout mBigClockView;
+    protected DigitalClock mDigitalClock;
+    protected ClockLayout mBigClockView;
 
     /**
      * Small clock shown on lock screen above stack scroller.
      */
     private View mView;
     private TextClock mLockClock;
+    private boolean mTwoLine;
+    private boolean mBoldHours;
 
     /**
-     * Create a BinaryClockController instance.
+     * Create a DigitalClockController instance.
      *
      * @param res Resources contains title and thumbnail.
      * @param inflater Inflater used to inflate custom clock views.
      * @param colorExtractor Extracts accent color from wallpaper.
      */
-    public BinaryClockController(Resources res, LayoutInflater inflater,
-            SysuiColorExtractor colorExtractor) {
+    public DigitalClockController(Resources res, LayoutInflater inflater,
+            SysuiColorExtractor colorExtractor, boolean twoLine, boolean boldHours) {
         mResources = res;
         mLayoutInflater = inflater;
         mColorExtractor = colorExtractor;
         mClockPosition = new SmallClockPosition(res);
+        mTwoLine = twoLine;
+        mBoldHours = boldHours;
     }
 
     private void createViews() {
-        mBigClockView = (ClockLayout) mLayoutInflater.inflate(R.layout.binary_clock, null);
-        mBinaryClock = mBigClockView.findViewById(R.id.binary_clock);
+        mBigClockView = (ClockLayout) mLayoutInflater.inflate(R.layout.custom_digital_clock, null);
+        mDigitalClock = mBigClockView.findViewById(R.id.digital_clock);
+        mDigitalClock.setMode(mTwoLine, mBoldHours);
 
         mView = mLayoutInflater.inflate(R.layout.digital_clock, null);
         mLockClock = mView.findViewById(R.id.lock_screen_clock);
@@ -101,41 +102,26 @@ public class BinaryClockController implements ClockPlugin {
     @Override
     public void onDestroyView() {
         mBigClockView = null;
-        mBinaryClock = null;
+        mDigitalClock = null;
         mView = null;
         mLockClock = null;
     }
 
-    @Override
-    public String getName() {
-        return "binary";
-    }
-
-    @Override
-    public String getTitle() {
-        return mResources.getString(R.string.clock_title_binary);
-    }
-
-    @Override
-    public Bitmap getThumbnail() {
-        return BitmapFactory.decodeResource(mResources, R.drawable.binary_thumbnail);
-    }
-
-    @Override
+    /*@Override
     public Bitmap getPreview(int width, int height) {
         // Use the big clock view for the preview
         View view = getBigClockView();
-
+        mDigitalClock.mClockView.setTextSize(30);
         // Initialize state of plugin before generating preview.
-        setDarkAmount(1f);
-        setTextColor(Color.WHITE);
+        setDarkAmount(0f);
+        setTextColor(Color.GREEN);
         ColorExtractor.GradientColors colors = mColorExtractor.getColors(
                 WallpaperManager.FLAG_LOCK);
         setColorPalette(colors.supportsDarkText(), colors.getColorPalette());
         onTimeTick();
-
+        
         return mRenderer.createPreview(view, width, height);
-    }
+    }*/
 
     @Override
     public View getView() {
@@ -164,7 +150,13 @@ public class BinaryClockController implements ClockPlugin {
 
     @Override
     public void setTextColor(int color) {
-        mBinaryClock.setTintColor(color);
+        mDigitalClock.setTextColor(color);
+        mLockClock.setTextColor(color);
+    }
+
+    @Override
+    public void setShowCurrentUserTime(boolean showCurrentUserTime) {
+        mDigitalClock.setShowCurrentUserTime(showCurrentUserTime);
     }
 
     @Override
@@ -172,7 +164,7 @@ public class BinaryClockController implements ClockPlugin {
 
     @Override
     public void onTimeTick() {
-        mBinaryClock.onTimeChanged();
+        mDigitalClock.onTimeChanged();
         mBigClockView.onTimeChanged();
         mLockClock.refresh();
     }
@@ -181,13 +173,12 @@ public class BinaryClockController implements ClockPlugin {
     public void setDarkAmount(float darkAmount) {
         mClockPosition.setDarkAmount(darkAmount);
         mBigClockView.setDarkAmount(darkAmount);
-        boolean dark = darkAmount == 1;
-        mBinaryClock.setDark(dark);
+        mDigitalClock.setDarkAmount(darkAmount);
     }
 
     @Override
     public void onTimeZoneChanged(TimeZone timeZone) {
-        mBinaryClock.onTimeZoneChanged(timeZone);
+        mDigitalClock.onTimeZoneChanged(timeZone);
     }
 
     @Override

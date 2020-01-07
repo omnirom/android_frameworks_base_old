@@ -160,11 +160,12 @@ public class BubbleClockController implements ClockPlugin {
 
     @Override
     public int getPreferredY(int totalHeight) {
-        return mClockPosition.getPreferredY();
+        if (shouldShowInBigContainer()) {
+            return mClockPosition.getPreferredY();
+        } else {
+            return totalHeight / 2;
+        }
     }
-
-    @Override
-    public void setStyle(Style style) {}
 
     @Override
     public void setTextColor(int color) {
@@ -180,7 +181,6 @@ public class BubbleClockController implements ClockPlugin {
     private void updateColor() {
         final int primary = mPalette.getPrimaryColor();
         final int secondary = mPalette.getSecondaryColor();
-        mLockClock.setTextColor(secondary);
         mAnalogClock.setClockColors(primary, secondary);
     }
 
@@ -205,6 +205,11 @@ public class BubbleClockController implements ClockPlugin {
 
     @Override
     public boolean shouldShowStatusArea() {
+        return true;
+    }
+
+    @Override
+    public boolean shouldShowInBigContainer() {
         return true;
     }
 }
