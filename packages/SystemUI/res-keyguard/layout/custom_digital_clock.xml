@@ -19,15 +19,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <FrameLayout
-        android:layout_width="@dimen/binary_clock_width"
-        android:layout_height="@dimen/custom_clock_height"
+    <com.android.keyguard.clock.DigitalClock
+        android:id="@+id/digital_clock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center" >
 
-        <com.android.keyguard.clock.BinaryClock
-            android:id="@+id/binary_clock"
-            android:layout_width="@dimen/binary_clock_width"
-            android:layout_height="@dimen/binary_clock_height"
-            android:layout_gravity="top" />
-    </FrameLayout>
+        <TextClock
+            android:id="@+id/time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:textColor="?attr/wallpaperTextColor"
+            android:singleLine="true"
+            style="@style/widget_big_thin"
+            android:textSize="@dimen/widget_big_font_size"
+            android:format12Hour="@string/keyguard_widget_12_hours_format"
+            android:format24Hour="@string/keyguard_widget_24_hours_format"
+            android:elegantTextHeight="false"
+        />
+    </com.android.keyguard.clock.DigitalClock>
 </com.android.keyguard.clock.ClockLayout>
+
