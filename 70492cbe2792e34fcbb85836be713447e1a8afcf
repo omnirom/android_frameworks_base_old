@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e3f9ec4_91aecea4",
+        "filename": "packages/SystemUI/src/com/android/keyguard/clock/ClockManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000270
+      },
+      "writtenOn": "2020-01-08T13:59:52Z",
+      "side": 1,
+      "message": "Can\u0027t see BubbleClock as preview in ThemePicker. Does this reason for missing ?",
+      "range": {
+        "startLine": 152,
+        "startChar": 7,
+        "endLine": 152,
+        "endChar": 11
+      },
+      "revId": "70492cbe2792e34fcbb85836be713447e1a8afcf",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
