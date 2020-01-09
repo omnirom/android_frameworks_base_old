@@ -24,10 +24,6 @@ LOCAL_REQUIRED_MODULES := \
 	AccentColorSpaceOverlay \
 	AccentColorGreenOverlay \
 	AccentColorPurpleOverlay \
-	AccentColorSluttyPinkOverlay \
-	AccentColorBlueMondayOverlay \
-	AccentColorOmniOverlay \
-	AccentColorGoldenShowerOverlay \
 	DisplayCutoutEmulationCornerOverlay \
 	DisplayCutoutEmulationDoubleOverlay \
 	DisplayCutoutEmulationTallOverlay \
@@ -51,8 +47,6 @@ LOCAL_REQUIRED_MODULES := \
 	IconShapeSquircleOverlay \
 	IconShapeTeardropOverlay \
 	IconShapeCircleOverlay \
-	PrimaryColorOmniBlackOverlay \
-	PrimaryColorDarkBlueOverlay \
 	NavigationBarMode3ButtonOverlay \
 	NavigationBarMode2ButtonOverlay \
 	NavigationBarModeGesturalOverlay \
