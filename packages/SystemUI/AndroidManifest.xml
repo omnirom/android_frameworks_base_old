@@ -263,6 +263,7 @@
         android:theme="@style/Theme.SystemUI"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true"
+        android:requestLegacyExternalStorage="true"
         tools:replace="android:appComponentFactory"
         android:appComponentFactory=".SystemUIAppComponentFactory">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
