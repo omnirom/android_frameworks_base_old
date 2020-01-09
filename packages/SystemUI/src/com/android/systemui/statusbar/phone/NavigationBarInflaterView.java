@@ -57,6 +57,7 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String NAV_BAR_LEFT = "sysui_nav_bar_left";
     public static final String NAV_BAR_RIGHT = "sysui_nav_bar_right";
     public static final String NAV_BAR_SHOW_HANDLE = "sysui_nav_bar_show_handle";
+    public static final String NAV_BAR_INVERSE = "sysui_nav_bar_inverse";
 
     public static final String MENU_IME_ROTATE = "menu_ime";
     public static final String BACK = "back";
@@ -106,6 +107,8 @@ public class NavigationBarInflaterView extends FrameLayout
     private OverviewProxyService mOverviewProxyService;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private boolean mHideHandle;
+
+    private boolean mInverseLayout;
 
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -171,12 +174,14 @@ public class NavigationBarInflaterView extends FrameLayout
         Dependency.get(TunerService.class).removeTunable(this);
         Dependency.get(NavigationModeController.class).removeListener(this);
         Dependency.get(OmniSettingsService.class).removeObserver(this);
+        Dependency.get(TunerService.class).removeTunable(this);
         super.onDetachedFromWindow();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        Dependency.get(TunerService.class).addTunable(this, NAV_BAR_INVERSE);
         Dependency.get(TunerService.class).addTunable(this, NAV_BAR_VIEWS);
         Dependency.get(TunerService.class).addTunable(this, NAV_BAR_SHOW_HANDLE);
         Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_NAVIGATION_BAR_ARROW_KEYS);
@@ -195,6 +200,16 @@ public class NavigationBarInflaterView extends FrameLayout
                 onLikelyDefaultLayoutChange();
             }
         }
+        if (NAV_BAR_INVERSE.equals(key)) {
+            mInverseLayout = TunerService.parseIntegerSwitch(newValue, false);
+            updateLayoutInversion();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateLayoutInversion();
     }
 
     private void setNavigationBarLayout(String layoutValue) {
@@ -315,6 +330,19 @@ public class NavigationBarInflaterView extends FrameLayout
                 true /* landscape */, false /* start */);
 
         updateButtonDispatchersCurrentView();
+    }
+
+    private void updateLayoutInversion() {
+        if (mInverseLayout) {
+            Configuration config = mContext.getResources().getConfiguration();
+            if (config.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+                setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+            } else {
+                setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+            }
+        } else {
+            setLayoutDirection(View.LAYOUT_DIRECTION_INHERIT);
+        }
     }
 
     private void addGravitySpacer(LinearLayout layout) {
