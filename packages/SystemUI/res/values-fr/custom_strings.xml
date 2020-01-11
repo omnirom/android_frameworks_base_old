@@ -47,9 +47,13 @@
     <string name="qs_menu_item_reset">Réinitialiser</string>
     <string name="qs_menu_item_titles">Afficher le libellé</string>
     <string name="qs_menu_item_qs_columns">Colonnes de la barre de raccourci</string>
+    <string name="qs_menu_item_columns_auto">Automatique</string>
     <string name="tuner_quick_settings">Réglages Rapides</string>
     <string name="tuner_show_brightness_new">Afficher le curseur de luminosité</string>
     <string name="tuner_brightness_position_bottom">Curseur de luminosité en bas</string>
+    <string name="tuner_show_secure_title">Afficher le pied de page de sécurité</string>
+    <string name="tuner_show_drag_handle">Afficher la \"poignée\" de glissement</string>
+    <string name="tuner_battery_location_bar">Afficher le statut de la batterie dans la barre d’état</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Activé</string>
     <string name="quick_settings_network_adb_disabled_label">Désactivé</string>
@@ -62,6 +66,18 @@
     <string name="accessibility_quick_settings_heads_up_changed_off">Notifications flottantes éteintes.</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Notifications flottantes allumées.</string>
     <string name="quick_settings_screenrecord_label">Capture vidéo</string>
+    <string name="tuner_keyguard_show_battery_bar_title">Afficher la batterie</string>
+    <string name="tuner_keyguard_show_battery_bar_summary">Afficher la batterie lors de la charge en mode always-on display</string>
+    <string name="tuner_keyguard_show_battery_bar_always_title">Toujours afficher la batterie</string>
+    <string name="tuner_keyguard_show_battery_bar_always_summary">Toujours afficher la batterie lors de la charge</string>
+    <string name="tuner_keyguard_battery_percent_title">Afficher le pourcentage de batterie</string>
+    <string name="tuner_keyguard_battery_percent_summary">Forcer l\'affichage du pourcentage de la batterie dans la barre d\'état lors de la charge</string>
+    <string name="tuner_keyguard_show_watt_title">Afficher les watts de charge</string>
+    <string name="tuner_keyguard_show_watt_summary">Afficher la valeur du watt de charge en mW</string>
+    <string name="tuner_keyguard_show_current_title">Afficher les watts de charge actuels</string>
+    <string name="tuner_keyguard_show_current_summary">Afficher les valeur de watts de charge actuels</string>
+    <string name="tuner_keyguard_show_battery_temp_title">Monter la température de la batterie</string>
+    <string name="tuner_keyguard_show_battery_temp_summary">Monter la valeur de température de la batterie</string>
     <string name="omnijaws_service_error">Erreur</string>
     <string name="omnijaws_service_unkown">Donnée météo indisponible</string>
     <string name="omnijaws_service_error_long">Erreur lors du chargement des données météo</string>
@@ -76,6 +92,8 @@
     <string name="keycode">Keycode</string>
     <string name="no_home_title">Pas de bouton d\'accueil trouvé</string>
     <string name="no_home_message">Un bouton d\'accueil est requis pour naviguer sur l\'appareil. Ajoutez, s\'il vous plaît, un bouton d\'accueil avant de sauvegarder.</string>
+    <string name="clipboard_description">Le presse-papiers permet aux éléments d\'être glisser directement dans le presse-papiers. Les éléments peuvent également être déplacés directement à partir du presse-papiers lorsqu’ils sont présents.</string>
+    <string name="keycode_description">Les boutons keycode permet aux touches du clavier d\'être ajouté à la barre de navigation. Quand on appuie dessus elles émulent la touche de clavier sélectionnée. La première touche doit être sélectionnée pour le bouton, suivie par une image qui sera affichée sur le bouton.</string>
     <string name="start">Commencer</string>
     <string name="center">Centrer</string>
     <string name="end">Fin</string>
@@ -89,4 +107,5 @@
     <string name="left">Gauche</string>
     <string name="right">Droite</string>
     <string name="navbar_editor_title">Editeur</string>
+    <string name="navbar_editor_summary">Configurer la barre de navigation</string>
 </resources>

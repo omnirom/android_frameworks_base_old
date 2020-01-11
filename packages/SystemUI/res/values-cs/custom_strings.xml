@@ -44,11 +44,11 @@
     <string name="qs_menu_item_columns_seven">7</string>
     <string name="qs_menu_item_columns_eight">8</string>
     <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Obnovit výchozí</string>
+    <string name="qs_menu_item_reset">Resetovat</string>
     <string name="qs_menu_item_titles">Zobrazit popisky</string>
-    <string name="qs_menu_item_qs_columns">Sloupce panelu rychlého nastavení</string>
+    <string name="qs_menu_item_qs_columns">Sloupce panelu QS</string>
     <string name="qs_menu_item_columns_auto">Automaticky</string>
-    <string name="tuner_quick_settings">Rychlé nastavení</string>
+    <string name="tuner_quick_settings">Rychlá nastavení</string>
     <string name="tuner_show_brightness_new">Zobrazit posuvník jasu</string>
     <string name="tuner_brightness_position_bottom">Posuvník jasu ve spodní části</string>
     <string name="tuner_show_secure_title">Zobrazit bezpečnostní zápatí</string>

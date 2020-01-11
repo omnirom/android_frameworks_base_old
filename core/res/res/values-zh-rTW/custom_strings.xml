@@ -21,6 +21,8 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+    <string name="reboot_confirm">你想要重新開機嗎?</string>
+    <string name="reboot_title">重新開機</string>
     <!-- advanced reboot to bootloader. -->
     <string name="reboot_to_bootloader_title">重開機至 bootloader</string>
     <string name="reboot_to_bootloader_message">重新開機到 bootloader\u2026</string>

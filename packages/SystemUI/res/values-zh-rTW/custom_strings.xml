@@ -47,6 +47,7 @@
     <string name="qs_menu_item_reset">重置</string>
     <string name="qs_menu_item_titles">顯示標籤</string>
     <string name="qs_menu_item_qs_columns">快捷開關列</string>
+    <string name="qs_menu_item_columns_auto">自動</string>
     <string name="tuner_quick_settings">快速設定</string>
     <string name="tuner_show_brightness_new">顯示亮度滑桿</string>
     <string name="tuner_brightness_position_bottom">底部的亮度滑桿</string>
