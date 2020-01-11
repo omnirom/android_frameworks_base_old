@@ -71,4 +71,7 @@
 
   <java-symbol type="integer" name="config_defaultMaxCachedProcesses" />
   <java-symbol type="integer" name="config_defaultTrimCachedProcesses" />
+
+  <java-symbol type="bool" name="config_hasOnePlusHapticMotor" />
+
 </resources>
