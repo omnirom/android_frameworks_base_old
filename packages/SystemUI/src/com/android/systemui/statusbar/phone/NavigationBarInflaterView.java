@@ -56,6 +56,7 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String NAV_BAR_VIEWS = "sysui_nav_bar";
     public static final String NAV_BAR_LEFT = "sysui_nav_bar_left";
     public static final String NAV_BAR_RIGHT = "sysui_nav_bar_right";
+    public static final String NAV_BAR_SHOW_HANDLE = "sysui_nav_bar_show_handle";
 
     public static final String MENU_IME_ROTATE = "menu_ime";
     public static final String BACK = "back";
@@ -104,6 +105,7 @@ public class NavigationBarInflaterView extends FrameLayout
 
     private OverviewProxyService mOverviewProxyService;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
+    private boolean mHideHandle;
 
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -141,13 +143,21 @@ public class NavigationBarInflaterView extends FrameLayout
     }
 
     protected String getDefaultLayout() {
-        final int defaultResource = QuickStepContract.isGesturalMode(mNavBarMode)
-                ? (showDpadArrowKeys() ? R.string.config_navBarLayoutHandleArrows
-                : R.string.config_navBarLayoutHandle)
-                : mOverviewProxyService.shouldShowSwipeUpUI()
-                        ? R.string.config_navBarLayoutQuickstep
-                        : R.string.config_navBarLayout;
-        return getContext().getString(defaultResource);
+        if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+            String navbarLayout = getContext().getString(showDpadArrowKeys()
+                    ? R.string.config_navBarLayoutHandleArrows
+                    : R.string.config_navBarLayoutHandle);
+            if (mHideHandle) {
+                return navbarLayout.replace(HOME_HANDLE, NAVSPACE);
+            } else {
+                return navbarLayout;
+            }
+        } else {
+            final int defaultResource = mOverviewProxyService.shouldShowSwipeUpUI()
+                            ? R.string.config_navBarLayoutQuickstep
+                            : R.string.config_navBarLayout;
+            return getContext().getString(defaultResource);
+        }
     }
 
     @Override
@@ -168,17 +178,26 @@ public class NavigationBarInflaterView extends FrameLayout
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         Dependency.get(TunerService.class).addTunable(this, NAV_BAR_VIEWS);
+        Dependency.get(TunerService.class).addTunable(this, NAV_BAR_SHOW_HANDLE);
         Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_NAVIGATION_BAR_ARROW_KEYS);
     }
 
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (NAV_BAR_VIEWS.equals(key)) {
-            setNavigationBarLayout(newValue);
+            if (QuickStepContract.isLegacyMode(mNavBarMode)) {
+                setNavigationBarLayout(newValue);
+            }
+        }
+        if (NAV_BAR_SHOW_HANDLE.equals(key)) {
+            mHideHandle = newValue != null && newValue.equals("0");
+            if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+                onLikelyDefaultLayoutChange();
+            }
         }
     }
 
-    public void setNavigationBarLayout(String layoutValue) {
+    private void setNavigationBarLayout(String layoutValue) {
         if (!Objects.equals(mCurrentLayout, layoutValue)) {
             mUsingCustomLayout = layoutValue != null;
             clearViews();
