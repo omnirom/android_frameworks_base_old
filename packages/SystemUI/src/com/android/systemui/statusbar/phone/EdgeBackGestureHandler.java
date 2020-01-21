@@ -81,7 +81,11 @@ public class EdgeBackGestureHandler implements DisplayListener {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             // No need to thread jump, assignments are atomic
-            mImeHeight = imeVisible ? imeHeight : 0;
+            if (mBlockImeSpace) {
+                mImeHeight = imeVisible ? imeHeight : 0;
+            } else {
+                mImeHeight = 0;
+            }
             // TODO: Probably cancel any existing gesture
         }
 
@@ -171,6 +175,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
 
     // omni additions start
     private int mEdgeHeight;
+    private boolean mBlockImeSpace = false;
 
     public EdgeBackGestureHandler(Context context, OverviewProxyService overviewProxyService) {
         final Resources res = context.getResources();
