@@ -81,7 +81,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             // No need to thread jump, assignments are atomic
-            mImeHeight = imeVisible ? imeHeight : 0;
+            //mImeHeight = imeVisible ? imeHeight : 0;
             // TODO: Probably cancel any existing gesture
         }
 
