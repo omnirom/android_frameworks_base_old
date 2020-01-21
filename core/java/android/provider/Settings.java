@@ -4832,6 +4832,13 @@ public final class Settings {
         private static final Validator OMNI_BACK_GESTURE_HEIGHT_VALIDATOR =
                 ANY_INTEGER_VALIDATOR;
 
+        /** @hide */
+        public static final String OMNI_BACK_GESTURE_BLOCK_IME = "back_gesture_block_ime";
+
+        /** @hide */
+        private static final Validator OMNI_BACK_GESTURE_BLOCK_IME_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
         /**
          *  Enable statusbar double tap gesture on to put device to sleep
          * @hide
@@ -5175,6 +5182,7 @@ public final class Settings {
             OMNI_ASPECT_RATIO_APPS_LIST,
             OMNI_LOCK_POWER_MENU_DISABLED,
             OMNI_BACK_GESTURE_HEIGHT,
+            OMNI_BACK_GESTURE_BLOCK_IME,
             OMNI_DOUBLE_TAP_SLEEP_GESTURE,
             OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN,
             OMNI_SHOW_CPU_OVERLAY,
@@ -5354,6 +5362,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_ASPECT_RATIO_APPS_LIST);
             PRIVATE_SETTINGS.add(OMNI_LOCK_POWER_MENU_DISABLED);
             PRIVATE_SETTINGS.add(OMNI_BACK_GESTURE_HEIGHT);
+            PRIVATE_SETTINGS.add(OMNI_BACK_GESTURE_BLOCK_IME);
             PRIVATE_SETTINGS.add(OMNI_DOUBLE_TAP_SLEEP_GESTURE);
             PRIVATE_SETTINGS.add(OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN);
             PRIVATE_SETTINGS.add(OMNI_SHOW_CPU_OVERLAY);
@@ -5528,6 +5537,7 @@ public final class Settings {
             VALIDATORS.put(OMNI_LOCK_POWER_MENU_DISABLED,
                     OMNI_LOCK_POWER_MENU_DISABLED_VALIDATOR);
             VALIDATORS.put(OMNI_BACK_GESTURE_HEIGHT, OMNI_BACK_GESTURE_HEIGHT_VALIDATOR);
+            VALIDATORS.put(OMNI_BACK_GESTURE_BLOCK_IME,OMNI_BACK_GESTURE_BLOCK_IME_VALIDATOR);
             VALIDATORS.put(OMNI_DOUBLE_TAP_SLEEP_GESTURE,
                     OMNI_DOUBLE_TAP_SLEEP_GESTURE_VALIDATOR);
             VALIDATORS.put(OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN,
