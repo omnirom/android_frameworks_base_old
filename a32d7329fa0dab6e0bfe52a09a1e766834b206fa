@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa31a9ce_cbf9be89",
+        "filename": "core/java/android/hardware/display/AmbientDisplayConfiguration.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-01-22T15:41:28Z",
+      "side": 1,
+      "message": "missing @hide",
+      "revId": "a32d7329fa0dab6e0bfe52a09a1e766834b206fa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8b9ca21_4a03c0bc",
+        "filename": "core/java/android/hardware/display/AmbientDisplayConfiguration.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-01-22T15:41:28Z",
+      "side": 1,
+      "message": "messed intendation",
+      "revId": "a32d7329fa0dab6e0bfe52a09a1e766834b206fa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae58133f_7e6b0da6",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 5055,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-01-22T15:41:28Z",
+      "side": 1,
+      "message": "missing hide",
+      "revId": "a32d7329fa0dab6e0bfe52a09a1e766834b206fa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95e22a19_5d2170cb",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 5059,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-01-22T15:41:28Z",
+      "side": 1,
+      "message": "missing hide",
+      "revId": "a32d7329fa0dab6e0bfe52a09a1e766834b206fa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7cddd13_3cc7744c",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 5064,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-01-22T15:41:28Z",
+      "side": 1,
+      "message": "missing hide",
+      "revId": "a32d7329fa0dab6e0bfe52a09a1e766834b206fa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9f941dd_e6530e90",
+        "filename": "packages/SystemUI/res/layout/lights_view.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-01-22T15:41:28Z",
+      "side": 1,
+      "message": "nitpick - 2017-2020 or just 2020",
+      "revId": "a32d7329fa0dab6e0bfe52a09a1e766834b206fa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba8f07ba_5f819954",
+        "filename": "packages/SystemUI/src/com/android/systemui/omni/NotificationLightsView.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-01-22T15:41:28Z",
+      "side": 1,
+      "message": "add\nprivate static final boolean DEBUG \u003d false;\nprivate static final String TAG \u003d \"NotificationLightsView\";",
+      "revId": "a32d7329fa0dab6e0bfe52a09a1e766834b206fa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac3fc166_e7587313",
+        "filename": "packages/SystemUI/src/com/android/systemui/omni/NotificationLightsView.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-01-22T15:41:28Z",
+      "side": 1,
+      "message": "put logs inside a if (DEBUG)",
+      "revId": "a32d7329fa0dab6e0bfe52a09a1e766834b206fa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8525f7f_26d59e75",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/NotificationPanelView.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 2878,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-01-22T15:41:28Z",
+      "side": 1,
+      "message": "remove if not needed",
+      "revId": "a32d7329fa0dab6e0bfe52a09a1e766834b206fa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d544f9f_8af69757",
+        "filename": "services/core/java/com/android/server/power/PowerManagerService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1050,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-01-22T15:41:28Z",
+      "side": 1,
+      "message": "intendation screwup",
+      "revId": "a32d7329fa0dab6e0bfe52a09a1e766834b206fa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
