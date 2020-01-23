@@ -51,4 +51,7 @@
 
     <string name="config_navBarLayoutHandleArrows" translatable="false">back[1.7WC];home_handle;ime_switcher[1.7WC]</string>
 
+    <!-- Whether to use custom fod view icon -->
+    <bool name="config_useCustomFodViewResource">false</bool>
+
 </resources>

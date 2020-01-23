@@ -89,6 +89,8 @@ public class FODCircleView extends ImageView implements OnTouchListener {
 
     private Timer mBurnInProtectionTimer;
 
+    private final boolean mUseCustomFodViewResource;
+
     private IFingerprintInscreenCallback mFingerprintInscreenCallback =
             new IFingerprintInscreenCallback.Stub() {
         @Override
@@ -97,7 +99,11 @@ public class FODCircleView extends ImageView implements OnTouchListener {
 
             mHandler.post(() -> {
                 setDim(true);
-                setImageResource(R.drawable.fod_icon_pressed);
+                if (mUseCustomFodViewResource) {
+                    setImageResource(R.drawable.fod_icon_pressed);
+                } else {
+                    setImageDrawable(null);
+                }
 
                 invalidate();
             });
@@ -260,6 +266,8 @@ public class FODCircleView extends ImageView implements OnTouchListener {
         mUpdateMonitor.registerCallback(mMonitorCallback);
 
         mDisplayManager = context.getSystemService(DisplayManager.class);
+
+        mUseCustomFodViewResource = res.getBoolean(R.bool.config_useCustomFodViewResource);
     }
 
     @Override
@@ -338,7 +346,11 @@ public class FODCircleView extends ImageView implements OnTouchListener {
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             setDim(true);
-            setImageResource(R.drawable.fod_icon_pressed);
+            if (mUseCustomFodViewResource) {
+                setImageResource(R.drawable.fod_icon_pressed);
+            } else {
+                setImageDrawable(null);
+            }
         }
 
         return true;
