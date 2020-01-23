@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "64de4e18_30069722",
+        "filename": "services/core/java/com/android/server/lights/LightsService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-01-23T00:30:26Z",
+      "side": 1,
+      "message": "nitpick alarm! :) following aosp code style - its ) { and } else {\nso curly braces are always with space - hint hint - use an editor that does that for you if you are lazy :)",
+      "revId": "48974d6408acda02ab7ce4a39ff93ccc3377035f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
