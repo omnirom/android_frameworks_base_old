@@ -20,11 +20,13 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="global_action_reboot">Yenidən başlat</string>
+    <string name="global_action_reboot_more">Yenidən başlat\u2026</string>
     <string name="global_action_reboot_sub">Sistem</string>
     <string name="global_action_reboot_recovery">Bərpa</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <!-- Caffeine tile -->
     <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
     <string name="lockscreen_default">Standart</string>
     <string name="lockscreen_hidden">Yoxdur</string>
     <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
@@ -40,6 +42,7 @@
     <string name="qs_menu_item_columns_nine">9</string>
     <string name="qs_menu_item_reset">Sıfırla</string>
     <string name="qs_menu_item_titles">Yarlığı Göstər</string>
+    <string name="qs_menu_item_columns_auto">Avtomatik</string>
     <string name="tuner_quick_settings">Sürətli Parametrlər</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Aktivdir</string>
@@ -47,8 +50,20 @@
     <string name="quick_settings_network_adb_label">Şəbəkədən ADB</string>
     <string name="quick_settings_network_adb_toast">USB xəta ayırıcı aktivləşdirilməyib</string>
     <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">Üst bildirişlər</string>
+    <string name="accessibility_quick_settings_heads_up_off">Üst bildirişlər qapadıldı.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Üst bildirişlərə icazə verildi.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Üst bildirişlər qapadıldı.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Üst bildirişlərə icazə verildi.</string>
     <string name="omnijaws_service_error">Xəta</string>
+    <string name="omnijaws_detail_header">Hava</string>
+    <string name="omnijaws_label_default">Hava</string>
+    <string name="omnijaws_current_text">İndi</string>
+    <string name="omnijaws_package_not_available">Omnijaws mövcüd deyil</string>
+    <string name="omnijaws_service_last_update">Son yeniləmə:</string>
     <!-- navbar editor -->
+    <string name="preview">Önbaxış</string>
+    <string name="start">Başla</string>
     <string name="save">Saxla</string>
     <string name="reset">Sıfırla</string>
     <string name="left">Sol</string>

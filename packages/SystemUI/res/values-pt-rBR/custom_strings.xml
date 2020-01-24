@@ -47,9 +47,13 @@
     <string name="qs_menu_item_reset">Repor</string>
     <string name="qs_menu_item_titles">Mostrar títulos</string>
     <string name="qs_menu_item_qs_columns">Colunas da barra de acesso rápido</string>
+    <string name="qs_menu_item_columns_auto">Automático</string>
     <string name="tuner_quick_settings">Configurações rápidas</string>
     <string name="tuner_show_brightness_new">Mostrar o controle deslizante de brilho</string>
     <string name="tuner_brightness_position_bottom">Controle deslizante de brilho na parte inferior</string>
+    <string name="tuner_show_secure_title">Mostrar rodapé de segurança</string>
+    <string name="tuner_show_drag_handle">Mostrar alça de arrastar</string>
+    <string name="tuner_battery_location_bar">Mostrar a bateria na barra de status</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Ligado</string>
     <string name="quick_settings_network_adb_disabled_label">Desligado</string>
@@ -62,6 +66,13 @@
     <string name="accessibility_quick_settings_heads_up_changed_off">Notificações flutuantes desligadas.</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Notificações flutuantes ligadas.</string>
     <string name="quick_settings_screenrecord_label">Gravação de tela</string>
+    <string name="tuner_keyguard_show_battery_bar_title">Mostrar barra da bateria</string>
+    <string name="tuner_keyguard_show_battery_bar_always_title">Sempre mostrar barra de bateria</string>
+    <string name="tuner_keyguard_show_battery_bar_always_summary">Sempre mostrar a barra de bateria ao carregar</string>
+    <string name="tuner_keyguard_battery_percent_title">Mostrar a porcentagem da bateria</string>
+    <string name="tuner_keyguard_battery_percent_summary">Forçar mostrar a porcentagem da bateria na barra de status no carregamento</string>
+    <string name="tuner_keyguard_show_battery_temp_title">Mostrar temperatura da bateria</string>
+    <string name="tuner_keyguard_show_battery_temp_summary">Mostrar temperatura da bateria</string>
     <string name="omnijaws_service_error">Erro</string>
     <string name="omnijaws_service_unkown">Sem dados meteorológicos</string>
     <string name="omnijaws_service_error_long">Erro ao carregar dados meteorológicos</string>
@@ -76,6 +87,8 @@
     <string name="keycode">Código de tecla</string>
     <string name="no_home_title">Nenhum botão Início encontrado</string>
     <string name="no_home_message">É necessário ter um botão Página Inicial para conseguir navegar neste dispositivo. Por favor, adicione um botão Página Inicial antes de salvar.</string>
+    <string name="clipboard_description">O Clipboard permite arrastar itens diretamente para a área de transferência. Os itens poderão igualmente ser arrastados diretamente a partir da área de transferência, quando presentes.</string>
+    <string name="keycode_description">Os botões com código de tecla permitem adicionar teclas do teclado à barra de navegação. Quando tocados, estes realizarão a mesma ação da tecla do teclado selecionada. Primeiro, associe a tecla ao botão e depois selecione uma imagem a ser mostrada como botão.</string>
     <string name="start">Início</string>
     <string name="center">Centro</string>
     <string name="end">Fim</string>
@@ -89,4 +102,5 @@
     <string name="left">Esquerda</string>
     <string name="right">Direita</string>
     <string name="navbar_editor_title">Editor</string>
+    <string name="navbar_editor_summary">Configurar a barra de navegação</string>
 </resources>

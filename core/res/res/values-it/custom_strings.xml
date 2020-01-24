@@ -21,6 +21,8 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+    <string name="reboot_confirm">Desideri riavviare?</string>
+    <string name="reboot_title">Riavvio</string>
     <!-- advanced reboot to bootloader. -->
     <string name="reboot_to_bootloader_title">Riavvia in bootloader</string>
     <string name="reboot_to_bootloader_message">Riavvio in bootloader\u2026</string>

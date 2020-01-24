@@ -47,9 +47,13 @@
     <string name="qs_menu_item_reset">Azzera</string>
     <string name="qs_menu_item_titles">Mostra etichette</string>
     <string name="qs_menu_item_qs_columns">Colonne barra di scelta rapida</string>
+    <string name="qs_menu_item_columns_auto">Automatico</string>
     <string name="tuner_quick_settings">Impostazioni rapide</string>
     <string name="tuner_show_brightness_new">Mostra il cursore di luminosità</string>
     <string name="tuner_brightness_position_bottom">Cursore luminosità in basso</string>
+    <string name="tuner_show_secure_title">Mostra piè di pagina di sicurezza</string>
+    <string name="tuner_show_drag_handle">Mostra maniglia di trascinamento</string>
+    <string name="tuner_battery_location_bar">Mostra batteria nella barra di stato</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Abilitato</string>
     <string name="quick_settings_network_adb_disabled_label">Disabilitato</string>
@@ -62,6 +66,18 @@
     <string name="accessibility_quick_settings_heads_up_changed_off">Notifiche peek disattivate.</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Notifiche peek attivate.</string>
     <string name="quick_settings_screenrecord_label">Registra schermo</string>
+    <string name="tuner_keyguard_show_battery_bar_title">Mostra barra della batteria</string>
+    <string name="tuner_keyguard_show_battery_bar_summary">Mostra barra della batteria durante la ricarica e il display always on</string>
+    <string name="tuner_keyguard_show_battery_bar_always_title">Mostra sempre barra della batteria</string>
+    <string name="tuner_keyguard_show_battery_bar_always_summary">Mostra sempre barra della batteria durante la ricarica</string>
+    <string name="tuner_keyguard_battery_percent_title">Mostra percentuale batteria</string>
+    <string name="tuner_keyguard_battery_percent_summary">Forza la visualizzazione della percentuale nella barra di stato durante la ricarica</string>
+    <string name="tuner_keyguard_show_watt_title">Mostra i Watt di ricarica</string>
+    <string name="tuner_keyguard_show_watt_summary">Mostra i Watt di ricarica in mW</string>
+    <string name="tuner_keyguard_show_current_title">Mostra corrente di ricarica</string>
+    <string name="tuner_keyguard_show_current_summary">Mostra i valori correnti di ricarica</string>
+    <string name="tuner_keyguard_show_battery_temp_title">Mostra temperatura della batteria</string>
+    <string name="tuner_keyguard_show_battery_temp_summary">Mostra i valori della temperatura della batteria</string>
     <string name="omnijaws_service_error">Errore</string>
     <string name="omnijaws_service_unkown">Dati meteo non disponibili</string>
     <string name="omnijaws_service_error_long">Errore durante il caricamento dei dati meteo</string>
@@ -76,6 +92,8 @@
     <string name="keycode">Keycode</string>
     <string name="no_home_title">Nessun tasto home trovato</string>
     <string name="no_home_message">Un tasto home è necessario per utilizzare questo dispositivo. Aggiungi un tasto home prima di salvare.</string>
+    <string name="clipboard_description">Gli appunti permettono di trascinare gli elementi direttamente negli appunti. Gli elementi possono anche essere trascinati fuori dagli appunti quando presenti.</string>
+    <string name="keycode_description">I pulsanti keycode permettono di aggiungere i tasti della tastiera alla barra di navigazione. Quando premuti, emulano il tasto selezionato. Va prima selezionato il tasto desiderato, seguito dall\'immagine da mostrare sul pulsante.</string>
     <string name="start">Avvia</string>
     <string name="center">Centro</string>
     <string name="end">Fine</string>
@@ -89,4 +107,5 @@
     <string name="left">Sinistra</string>
     <string name="right">Destra</string>
     <string name="navbar_editor_title">Editor</string>
+    <string name="navbar_editor_summary">Configura la barra di navigazione</string>
 </resources>
