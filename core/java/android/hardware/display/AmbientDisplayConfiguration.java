@@ -154,7 +154,6 @@ public class AmbientDisplayConfiguration {
      */
     @TestApi
     public boolean alwaysOnEnabled(int user) {
-        //return alwaysOnEnabledSetting(user) || alwaysOnChargingEnabled(user);
         return alwaysOnEnabledSetting(user) || alwaysOnChargingEnabled(user) || alwaysOnAmbientLightEnabled(user);
     }
 
@@ -235,12 +234,13 @@ public class AmbientDisplayConfiguration {
         return false;
     }
 
+    /** {@hide} */
     public boolean alwaysOnAmbientLightEnabled(int user) {
-        final boolean AmbientLightsEnabled = boolSettingSystem(Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED, user, 0);
-          if (AmbientLightsEnabled) {
-              boolean AmbientLightsActivated = boolSettingSystem(Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED, user, 0);
-              return AmbientLightsActivated && !accessibilityInversionEnabled(user) && alwaysOnAvailable();
-          }
+        final boolean ambientLightsEnabled = boolSettingSystem(Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED, user, 0);
+        if (ambientLightsEnabled) {
+            boolean ambientLightsActivated = boolSettingSystem(Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED, user, 0);
+            return ambientLightsActivated && !accessibilityInversionEnabled(user) && alwaysOnAvailable();
+        }
         return false;
     }
 }

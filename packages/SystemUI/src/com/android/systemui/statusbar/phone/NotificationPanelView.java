@@ -429,7 +429,6 @@ public class NotificationPanelView extends PanelView implements
     private GestureDetector mDoubleTapGesture;
     private GestureDetector mLockscreenDoubleTapToSleep;
     private boolean mIsLockscreenDoubleTapEnabled;
-    private boolean mShouldPulse = false;
 
     /**
      * Cache the resource id of the theme to avoid unnecessary work in onThemeChanged.
@@ -2887,18 +2886,6 @@ public class NotificationPanelView extends PanelView implements
         if (!mDozing && animate) {
             animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
         }
-        /*boolean mActiveNotif = mNotificationStackScroller.hasActiveClearableNotifications(ROWS_ALL);
-        if (!mDozing && animate && mActiveNotif) {
-            mPulseLightsView.animateNotification(mActiveNotif);
-            mPulseLightsView.setVisibility(View.VISIBLE);
-        }
-        if (mActiveNotif && mDozing) {
-        mPulseLightsView.animateNotification(mActiveNotif);
-        mPulseLightsView.setVisibility(mActiveNotif ? View.VISIBLE : View.GONE);
-        } else {
-            //mPulseLightsView.animateNotification(mActiveNotif);
-            mPulseLightsView.setVisibility(View.GONE);
-        }*/
     }
 
     @Override
@@ -3392,33 +3379,35 @@ public class NotificationPanelView extends PanelView implements
             updateDozingVisibilities(animate);
         }
 
+        if (mPulseLightsView != null) {
+            updatePulseLightState(dozing);
+        }
+        final float dozeAmount = dozing ? 1 : 0;
+        mStatusBarStateController.setDozeAmount(dozeAmount, animate);
+    }
+
+    private void updatePulseLightState(boolean dozing) {
         boolean mAmbientLights = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED,
                 0, UserHandle.USER_CURRENT) != 0;
-
-        if (mAmbientLights && mNotificationStackScroller.hasActiveClearableNotifications(ROWS_ALL)) {
-            if (dozing && mShouldPulse) {
-                mPulseLightsView.animateNotification(mShouldPulse);
-                mPulseLightsView.setVisibility(View.VISIBLE);
-                Settings.System.putIntForUser(mContext.getContentResolver(),
-                         Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 1,
-                         UserHandle.USER_CURRENT);
+        if (DEBUG) {
+            Log.d(TAG, "updatePulseLightState dozing = " + dozing + " mAmbientLights = "  + mAmbientLights);
+        }
+        if (mAmbientLights) {
+            if (dozing) {
+                // TODO on screen off should we restart pulse?
+                // if that should work we need to decide at this point
+                // if the current notifications "would" turn the screen on
+                // just checking hasActiveClearableNotifications is obviusly not
+                // enough here - so for now dont even try to do it
             } else {
+                // screen on!
                 mPulseLightsView.setVisibility(View.GONE);
                 Settings.System.putIntForUser(mContext.getContentResolver(),
                          Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0,
                          UserHandle.USER_CURRENT);
             }
-        } else if (mAmbientLights && !mNotificationStackScroller.hasActiveClearableNotifications(ROWS_ALL) && mShouldPulse) {
-            mShouldPulse = false;
-            mPulseLightsView.setVisibility(View.GONE);
-            Settings.System.putIntForUser(mContext.getContentResolver(),
-                     Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0,
-                     UserHandle.USER_CURRENT);
         }
-
-        final float dozeAmount = dozing ? 1 : 0;
-        mStatusBarStateController.setDozeAmount(dozeAmount, animate);
     }
 
     @Override
@@ -3451,48 +3440,36 @@ public class NotificationPanelView extends PanelView implements
         if (!mPulsing && !mDozing) {
             mAnimateNextPositionUpdate = false;
         }
-        if ((mPulseLightsView != null) && mPulsing) {
-            if (pulseLights && mAmbientLights) {
-                mPulseLightsView.animateNotification(mPulsing);
-                mPulseLightsView.setVisibility(mPulsing ? View.VISIBLE : View.GONE);
-                Settings.System.putIntForUser(mContext.getContentResolver(),
-                         Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 1 ,
-                         UserHandle.USER_CURRENT);
-                mShouldPulse = true;
-            } else if (pulseLights && !mAmbientLights) {
-                //Infinite animation should only be true on Always On, not on pulse
-                mPulseLightsView.animateNotification(!mPulsing);
-                mPulseLightsView.setVisibility(mPulsing ? View.VISIBLE : View.GONE);
-                Settings.System.putIntForUser(mContext.getContentResolver(),
-                         Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0 ,
-                         UserHandle.USER_CURRENT);
-                mShouldPulse = false;
-            } else if (!pulseLights && mAmbientLights) {
-                mShouldPulse = true;
-                //Infinite animation should only be true on Always On, not on pulse
-                Settings.System.putIntForUser(mContext.getContentResolver(),
-                         Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 1 ,
-                         UserHandle.USER_CURRENT);
-                mPulseLightsView.setPulsing(!mPulsing);
-            } else if(!pulseLights && !mAmbientLights) {
-                mShouldPulse = false;
-                mPulseLightsView.setVisibility(View.GONE);
-                Settings.System.putIntForUser(mContext.getContentResolver(),
-                         Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0 ,
-                         UserHandle.USER_CURRENT);
+        if (mPulseLightsView != null) {
+            if (DEBUG) {
+                Log.d(TAG, "setPulsing pulsing = " + pulsing + " pulseLights = " + pulseLights
+                        + " mAmbientLights = " + mAmbientLights + " mActiveNotif = " + mActiveNotif);
             }
-        } else if (mShouldPulse && !mPulsing) {
-            mPulseLightsView.animateNotification(mActiveNotif);
-            mPulseLightsView.setVisibility(View.VISIBLE);
-        } else {
-            mShouldPulse = false;
-            mPulseLightsView.setVisibility(View.GONE);
-            Settings.System.putIntForUser(mContext.getContentResolver(),
-                     Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0 ,
-                     UserHandle.USER_CURRENT);
+            if (mPulsing) {
+                if (mActiveNotif && (pulseLights || mAmbientLights)) {
+                    mPulseLightsView.animateNotification(true);
+                    mPulseLightsView.setVisibility(View.VISIBLE);
+                    Settings.System.putIntForUser(mContext.getContentResolver(),
+                            Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 1 ,
+                            UserHandle.USER_CURRENT);
+                }
+            } else {
+                // continue to pulse
+                if (mActiveNotif && mAmbientLights) {
+                    // not really needed to do again
+                    // TODO maybe when using different pulse modes
+                    mPulseLightsView.animateNotification(true);
+                    mPulseLightsView.setVisibility(View.VISIBLE);
+                } else {
+                    // no active notifications or just pulse without aod - so no reason to continue
+                    mPulseLightsView.setVisibility(View.GONE);
+                    Settings.System.putIntForUser(mContext.getContentResolver(),
+                            Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0 ,
+                            UserHandle.USER_CURRENT);
+                }
+            }
         }
-        
-    
+
         mNotificationStackScroller.setPulsing(pulsing, animatePulse);
         mKeyguardStatusView.setPulsing(pulsing);
     }
