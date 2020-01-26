@@ -550,8 +550,6 @@ public final class PowerManagerService extends SystemService
     // doze on charge
     private boolean mDozeOnChargeEnabled;
 
-    private boolean mDozeOnNotification;
-
     private final class ForegroundProfileObserver extends SynchronousUserSwitchObserver {
         @Override
         public void onUserSwitching(int newUserId) throws RemoteException {}
@@ -939,7 +937,7 @@ public final class PowerManagerService extends SystemService
                 Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT),
                 false, mSettingsObserver, UserHandle.USER_ALL);
         resolver.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED),
+                Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED),
                 false, mSettingsObserver, UserHandle.USER_ALL);
 
         IVrManager vrManager = IVrManager.Stub.asInterface(getBinderService(Context.VR_SERVICE));
@@ -1039,19 +1037,26 @@ public final class PowerManagerService extends SystemService
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
         mTheaterModeEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.THEATER_MODE_ON, 0) == 1;
-        mAlwaysOnEnabled = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
         mDozeOnChargeEnabled = Settings.System.getIntForUser(resolver,
                 Settings.System.OMNI_DOZE_ON_CHARGE, 0, UserHandle.USER_CURRENT) != 0;
         boolean mAmbientLights = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED,
                 0, UserHandle.USER_CURRENT) != 0;
         if (mAmbientLights) {
-            mDozeOnNotification = Settings.System.getIntForUser(resolver,
-                                           Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0, UserHandle.USER_CURRENT) != 0;
+            boolean dozeOnNotification = Settings.System.getIntForUser(resolver,
+                    Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0, UserHandle.USER_CURRENT) != 0;
             Settings.System.putIntForUser(mContext.getContentResolver(),
-                     Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED, mDozeOnNotification ? 1 : 0,
+                     Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED, dozeOnNotification ? 1 : 0,
+                     UserHandle.USER_CURRENT);
+        } else {
+             Settings.System.putIntForUser(mContext.getContentResolver(),
+                     Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED, 0,
                      UserHandle.USER_CURRENT);
         }
+        // depends on OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED - so MUST be afterwards
+        // no need to call us again
+        mAlwaysOnEnabled = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+
         if (mSupportsDoubleTapWakeConfig) {
             boolean doubleTapWakeEnabled = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.DOUBLE_TAP_TO_WAKE, DEFAULT_DOUBLE_TAP_TO_WAKE,
