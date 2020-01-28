@@ -5090,6 +5090,13 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * helper setting to contain the current pulse reason so we can check
+         * if it has been triggered from a notification or a gesture
+         * @hide
+         */
+        public static final String OMNI_PULSE_TRIGGER_REASON = "pulse_trigger_reason";
+
+        /**
          * @hide
          */
         public static final String OMNI_USE_OLD_MOBILETYPE = "use_old_mobiletype";
