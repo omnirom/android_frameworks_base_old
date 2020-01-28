@@ -1,6 +1,6 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:drawable="@drawable/ic_screenshot_selector_bg"
+        android:drawable="@drawable/ic_screenshot_selector_capture_bg"
         android:height="48dp"
         android:width="48dp" />
     <item
