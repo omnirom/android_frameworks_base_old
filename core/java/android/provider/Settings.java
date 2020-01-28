@@ -5351,6 +5351,12 @@ public final class Settings {
          */
         public static final String OMNI_PULSE_TRIGGER_REASON = "pulse_trigger_reason";
 
+         /**
+         * Whether to use accent color for pulse
+         * @hide
+         */
+        public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT = "ambient_notification_light_accent";
+
         /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
@@ -5376,6 +5382,7 @@ public final class Settings {
             OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED,
             OMNI_AMBIENT_NOTIFICATION_LIGHT,
             OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED,
+            OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT,
         };
 
         /**
@@ -5409,6 +5416,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT, 0);
         }
     }
 
