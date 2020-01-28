@@ -3436,6 +3436,10 @@ public class NotificationPanelView extends PanelView implements
         int pulseReason = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.OMNI_PULSE_TRIGGER_REASON, DozeLog.PULSE_REASON_NONE, UserHandle.USER_CURRENT);
         boolean pulseReasonNotification = pulseReason == DozeLog.PULSE_REASON_NOTIFICATION;
+        boolean mAmbientLightsHideAod = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_HIDE_AOD,
+                0, UserHandle.USER_CURRENT) != 0;
+
         if (animatePulse) {
             mAnimateNextPositionUpdate = true;
         }
@@ -3444,6 +3448,7 @@ public class NotificationPanelView extends PanelView implements
         if (!mPulsing && !mDozing) {
             mAnimateNextPositionUpdate = false;
         }
+
         if (mPulseLightsView != null) {
             if (DEBUG_PULSE_LIGHT) {
                 Log.d(TAG, "setPulsing pulsing = " + pulsing + " pulseLights = " + pulseLights
@@ -3452,7 +3457,10 @@ public class NotificationPanelView extends PanelView implements
                         + " pulseReason = " + pulseReason);
             }
             if (mPulsing) {
-                if (activeNotif) {
+                if (mAmbientLightsHideAod) {
+                    showAodContent(true);
+                }
+                if (mActiveNotif) {
                     // show the bars if we have to
                     if (pulseLights && pulseReasonNotification) {
                         mPulseLightsView.animateNotification(true);
@@ -3468,9 +3476,13 @@ public class NotificationPanelView extends PanelView implements
                     }
                 }
             } else {
+                boolean wasHidden = false;
                 // continue to pulse - if not screen was turned on in the meantime
                 if (activeNotif && ambientLights && mDozing && !mPulseLightHandled && pulseReasonNotification) {
                     // no-op if pulseLights is also enabled
+                    if (mAmbientLightsHideAod) {
+                        showAodContent(false);
+                    }
                     mPulseLightsView.animateNotification(true);
                     mPulseLightsView.setVisibility(View.VISIBLE);
                 } else {
@@ -3479,12 +3491,21 @@ public class NotificationPanelView extends PanelView implements
                     Settings.System.putIntForUser(mContext.getContentResolver(),
                             Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0,
                             UserHandle.USER_CURRENT);
+                    if (mAmbientLightsHideAod) {
+                        showAodContent(true);
+                    }
                 }
             }
         }
 
         mNotificationStackScroller.setPulsing(pulsing, animatePulse);
         mKeyguardStatusView.setPulsing(pulsing);
+    }
+
+    private void showAodContent(boolean show) {
+        mKeyguardStatusView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+        mKeyguardStatusBar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+        mKeyguardBottomArea.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
 
     public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
