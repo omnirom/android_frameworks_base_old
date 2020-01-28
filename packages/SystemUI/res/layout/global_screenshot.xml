@@ -41,10 +41,13 @@
         android:pointerIcon="crosshair">
         <LinearLayout
             android:id="@+id/global_screenshot_buttons"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
-            android:layout_marginBottom="24dp"
+            android:gravity="center"
+            android:paddingBottom="24dp"
+            android:paddingTop="24dp"
+            android:background="@color/screenshot_partial_layout_background"
             android:animateLayoutChanges="true">
             <ImageView
                 android:id="@+id/global_screenshot_selector_capture"
@@ -62,7 +65,7 @@
                 android:contentDescription="@string/global_screenshot_selector_cancel_description"
                 android:src="@drawable/ic_screenshot_selector_cancel"
                 android:layout_height="48dp"
-                android:layout_width="48dp" />
+                android:layout_width="48dp"/>
         </LinearLayout>
     </com.android.systemui.screenshot.ScreenshotSelectorView>
 </FrameLayout>
