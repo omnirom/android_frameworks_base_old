@@ -33,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 public class NotificationLightsView extends RelativeLayout {
@@ -87,11 +88,11 @@ public class NotificationLightsView extends RelativeLayout {
 
     public void animateNotification(boolean mNotification) {
         int defaultColor = Color.parseColor("#3980FF");
-        /*int color = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.OMNI_PULSE_AMBIANT_LIGHT_COLOR, 0x3980FF,
-                UserHandle.USER_CURRENT);*/
-        //int color = Color.parseColor("#3980FF");
-        int color = defaultColor;
+        boolean useAccent = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT,
+                0, UserHandle.USER_CURRENT) != 0;
+        int color = useAccent ?
+                Utils.getColorAccentDefaultColor(getContext()) : defaultColor;
         StringBuilder sb = new StringBuilder();
         sb.append("animateNotification color ");
         sb.append(Integer.toHexString(color));
