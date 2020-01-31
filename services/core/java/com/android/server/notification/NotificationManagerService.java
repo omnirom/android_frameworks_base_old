@@ -5962,7 +5962,7 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
         // suppressed due to DND
-        if ((record.getSuppressedVisualEffects() & SUPPRESSED_EFFECT_LIGHTS) != 0) {
+        if ((record.getSuppressedVisualEffects() & SUPPRESSED_EFFECT_LIGHTS) != 0 && !record.shouldLightOnZen()) {
             return false;
         }
         // Suppressed because it's a silent update
@@ -5976,10 +5976,6 @@ public class NotificationManagerService extends SystemService {
         }
         // not if in call or the screen's on
         if (isInCall() || mScreenOn) {
-            return false;
-        }
-	// Omni Lights
-        if (!record.isIntercepted() || record.isIntercepted() && record.shouldLightOnZen()) {
             return false;
         }
         return true;
