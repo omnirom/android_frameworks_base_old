@@ -1035,21 +1035,23 @@ public final class PowerManagerService extends SystemService
                 UserHandle.USER_CURRENT);
         mStayOnWhilePluggedInSetting = Settings.Global.getInt(resolver,
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
-        mTheaterModeEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+        mTheaterModeEnabled = Settings.Global.getInt(resolver,
                 Settings.Global.THEATER_MODE_ON, 0) == 1;
         mDozeOnChargeEnabled = Settings.System.getIntForUser(resolver,
                 Settings.System.OMNI_DOZE_ON_CHARGE, 0, UserHandle.USER_CURRENT) != 0;
-        boolean mAmbientLights = Settings.System.getIntForUser(
-                mContext.getContentResolver(), Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED,
-                0, UserHandle.USER_CURRENT) != 0;
+        Settings.System.putIntForUser(resolver, Settings.System.OMNI_DOZE_ON_CHARGE_NOW,
+                mDozeOnChargeEnabled && mIsPowered ? 1 : 0, UserHandle.USER_CURRENT);
+
+        boolean mAmbientLights = Settings.System.getIntForUser(resolver,
+                Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED, 0, UserHandle.USER_CURRENT) != 0;
         if (mAmbientLights) {
             boolean dozeOnNotification = Settings.System.getIntForUser(resolver,
                     Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0, UserHandle.USER_CURRENT) != 0;
-            Settings.System.putIntForUser(mContext.getContentResolver(),
+            Settings.System.putIntForUser(resolver,
                      Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED, dozeOnNotification ? 1 : 0,
                      UserHandle.USER_CURRENT);
         } else {
-             Settings.System.putIntForUser(mContext.getContentResolver(),
+             Settings.System.putIntForUser(resolver,
                      Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED, 0,
                      UserHandle.USER_CURRENT);
         }
