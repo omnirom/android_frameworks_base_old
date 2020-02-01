@@ -3404,9 +3404,13 @@ public class NotificationPanelView extends PanelView implements
                 // if the current notifications "would" turn the screen on
                 // just checking hasActiveClearableNotifications is obviusly not
                 // enough here - so for now dont even try to do it
+                showAodContent(true);
             } else {
                 // screen on!
-                showAodContent(true);
+                if (mBarState == StatusBarState.KEYGUARD
+                        || mBarState == StatusBarState.SHADE_LOCKED) {
+                    showAodContent(true);
+                }
                 mPulseLightsView.setVisibility(View.GONE);
                 Settings.System.putIntForUser(mContext.getContentResolver(),
                          Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0,
@@ -3493,7 +3497,10 @@ public class NotificationPanelView extends PanelView implements
                     Settings.System.putIntForUser(mContext.getContentResolver(),
                             Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0,
                             UserHandle.USER_CURRENT);
-                    showAodContent(true);
+                    if (mBarState == StatusBarState.KEYGUARD
+                            || mBarState == StatusBarState.SHADE_LOCKED) {
+                        showAodContent(true);
+                    }
                 }
             }
         }
@@ -3503,6 +3510,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void showAodContent(boolean show) {
+        if (DEBUG_PULSE_LIGHT) {
+            Log.d(TAG, "showAodContent show = " + show);
+        }
         mKeyguardStatusView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
         mKeyguardStatusBar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
         mKeyguardBottomArea.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
