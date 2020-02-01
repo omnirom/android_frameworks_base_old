@@ -229,9 +229,9 @@ static jobjectArray NativeCreateIdmapsForStaticOverlaysTargetingAndroid(JNIEnv* 
   // --input-directory can be given multiple times, but idmap2 expects the directory to exist
   std::vector<std::string> input_dirs;
   struct stat st;
-  if (stat(AssetManager::VENDOR_OVERLAY_DIR, &st) == 0) {
+  /*if (stat(AssetManager::VENDOR_OVERLAY_DIR, &st) == 0) {
     input_dirs.push_back(AssetManager::VENDOR_OVERLAY_DIR);
-  }
+  }*/
 
   if (stat(AssetManager::PRODUCT_OVERLAY_DIR, &st) == 0) {
     input_dirs.push_back(AssetManager::PRODUCT_OVERLAY_DIR);
@@ -266,6 +266,8 @@ static jobjectArray NativeCreateIdmapsForStaticOverlaysTargetingAndroid(JNIEnv* 
     "--target-apk-path", "/system/framework/framework-res.apk",
     "--output-directory", "/data/resource-cache"};
 
+    // idmap2 scan --recursive --output-directory /data/resource-cache --input-directory /vendor/overlay --target-package-name android --target-apk-path /system/framework/framework-res.apk
+    
   for (const auto& dir : input_dirs) {
     argv.push_back("--input-directory");
     argv.push_back(dir);
