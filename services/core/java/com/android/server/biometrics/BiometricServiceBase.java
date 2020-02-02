@@ -905,6 +905,7 @@ public abstract class BiometricServiceBase extends SystemService
                             + " since tokens don't match. fromClient: " + fromClient);
                 }
             } else if (client != null) {
+                client.stop(client.getToken() == token);
                 if (DEBUG) Slog.v(getTag(), "Can't cancel non-authenticating client "
                         + client.getOwnerString());
             }
