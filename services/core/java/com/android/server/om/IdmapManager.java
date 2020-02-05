@@ -62,12 +62,6 @@ class IdmapManager {
     private final PackageManagerHelper mPackageManager;
     private final IdmapDaemon mIdmapDaemon;
 
-    // omni addition
-    private static final boolean VENDOR_STATIC_OVERLAY_ENABLE;
-    static  {
-        VENDOR_STATIC_OVERLAY_ENABLE = SystemProperties.getBoolean("ro.boot.vendor.overlay.static", true);
-    }
-
     IdmapManager(final Installer installer, final PackageManagerHelper packageManager) {
         mInstaller = installer;
         mPackageManager = packageManager;
@@ -83,17 +77,6 @@ class IdmapManager {
         final int sharedGid = UserHandle.getSharedAppGid(targetPackage.applicationInfo.uid);
         final String targetPath = targetPackage.applicationInfo.getBaseCodePath();
         final String overlayPath = overlayPackage.applicationInfo.getBaseCodePath();
-
-        if (!VENDOR_STATIC_OVERLAY_ENABLE) {
-            final ApplicationInfo ai = overlayPackage.applicationInfo;
-            if (ai.isVendor() && overlayPackage.isStaticOverlayPackage()) {
-                if (DEBUG) {
-                    Slog.d(TAG, "skip create idmap for static vendor overlay package " + overlayPackage.packageName);
-                }
-                return false;
-            }
-        }
-
         try {
             if (FEATURE_FLAG_IDMAP2) {
                 int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
