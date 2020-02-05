@@ -59,7 +59,7 @@
     <integer name="config_notificationsFastBatteryARGB">0x0000FF</integer>
 
     <!-- Default value for Ambiant Pulse light color -->
-    <integer name="config_AmbiantPulseLightColor" >0x3980FF</integer>
+    <integer name="pulse_ambient_light_color">0x3980FF</integer>
 
     <!-- Component name of the combo network location provider. -->
     <string name="config_comboNetworkLocationProvider" translatable="false">@null</string>
@@ -100,4 +100,7 @@
 
     <!-- Whether to use scaled brightness (set -1 to disable) -->
     <integer name="config_useScaleBrightness">-1</integer>
+
+    <!-- Ambient notification light color -->
+    <integer name="config_ambientNotificationDefaultColor">0x3980FF</integer>
 </resources>

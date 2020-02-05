@@ -49,7 +49,7 @@
   <java-symbol type="integer" name="config_notificationsFastBatteryARGB" />
 
   <!-- Ambiant Pulse Light -->
-  <java-symbol type="integer" name="config_AmbiantPulseLightColor" />
+  <java-symbol type="integer" name="pulse_ambient_light_color" />
 
   <java-symbol type="string" name="config_comboNetworkLocationProvider" />
 
@@ -78,6 +78,9 @@
   <!-- Whether to send camera status intent -->
   <java-symbol type="bool" name="config_sendCameraStatusIntent" />
 
-    <!-- Whether to use scaled brightness (set -1 to disable) -->
-    <java-symbol type="integer" name="config_useScaleBrightness" />
+  <!-- Whether to use scaled brightness (set -1 to disable) -->
+  <java-symbol type="integer" name="config_useScaleBrightness" />
+
+  <!-- Ambient notification light color -->
+  <java-symbol type="integer" name="config_ambientNotificationDefaultColor" />
 </resources>
