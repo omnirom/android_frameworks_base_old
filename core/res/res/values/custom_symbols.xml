@@ -49,7 +49,7 @@
   <java-symbol type="integer" name="config_notificationsFastBatteryARGB" />
 
   <!-- Ambiant Pulse Light -->
-  <java-symbol type="integer" name="config_AmbiantPulseLightColor" />
+  <java-symbol type="integer" name="pulse_ambient_light_color" />
 
   <java-symbol type="string" name="config_comboNetworkLocationProvider" />
 

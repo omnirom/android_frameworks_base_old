@@ -43,6 +43,7 @@ public class NotificationLightsView extends RelativeLayout {
     private ValueAnimator mLightAnimator;
     private boolean mPulsing;
     private boolean mNotification;
+    private int color;
 
     public NotificationLightsView(Context context) {
         this(context, null);
@@ -88,8 +89,14 @@ public class NotificationLightsView extends RelativeLayout {
         boolean useAccent = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT,
                 0, UserHandle.USER_CURRENT) != 0;
-        int color = useAccent ?
-                Utils.getColorAccentDefaultColor(getContext()) : defaultColor;
+        if (useAccent) {
+            color = useAccent ?
+                    Utils.getColorAccentDefaultColor(getContext()) : defaultColor;
+        } else {
+            color = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.OMNI_PULSE_AMBIENT_LIGHT_COLOR, defaultColor,
+                    UserHandle.USER_CURRENT);
+        }
         StringBuilder sb = new StringBuilder();
         sb.append("animateNotification color ");
         sb.append(Integer.toHexString(color));
