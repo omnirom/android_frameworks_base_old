@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5c1d16b2_b590d9e1",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 5068,
+      "author": {
+        "id": 1001070
+      },
+      "writtenOn": "2020-02-06T21:58:31Z",
+      "side": 1,
+      "message": "as its part of the same thing as above try keep the same name of the feature",
+      "revId": "1338a8394c0f853b50a80c82add754f9bdbfd4ae",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
