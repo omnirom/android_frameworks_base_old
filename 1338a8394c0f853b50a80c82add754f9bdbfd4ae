@@ -16,6 +16,23 @@
       "revId": "1338a8394c0f853b50a80c82add754f9bdbfd4ae",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c38f6a3_4dbfc113",
+        "filename": "packages/SystemUI/src/com/android/systemui/omni/NotificationLightsView.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1001070
+      },
+      "writtenOn": "2020-02-06T22:03:59Z",
+      "side": 1,
+      "message": "mColor\nand not sure why but breaks accent color afaik",
+      "revId": "1338a8394c0f853b50a80c82add754f9bdbfd4ae",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
     }
   ]
 }
