@@ -162,8 +162,9 @@ public class BluetoothUtils {
 
         // get color index based on mac address
         final int index = Math.abs(hashCode % iconBgColors.length);
-        drawable.setTint(iconFgColors[index]);
-        final Drawable adaptiveIcon = new AdaptiveIcon(context, drawable);
+        Drawable d = drawable.mutate();
+        d.setTint(iconFgColors[index]);
+        final Drawable adaptiveIcon = new AdaptiveIcon(context, d);
         ((AdaptiveIcon) adaptiveIcon).setBackgroundColor(iconBgColors[index]);
 
         return adaptiveIcon;
