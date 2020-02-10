@@ -5075,7 +5075,6 @@ public final class Settings {
          * Whether to enable Ambient Edge lights
          * @hide
          */
-
         public static final String OMNI_AOD_NOTIFICATION_PULSE = "ambient_notification_light_enabled";
 
         private static final Validator OMNI_AOD_NOTIFICATION_PULSE_VALIDATOR = BOOLEAN_VALIDATOR;
@@ -5109,6 +5108,15 @@ public final class Settings {
 
         private static final Validator OMNI_NOTIFICATION_PULSE_ACCENT_VALIDATOR =
                 BOOLEAN_VALIDATOR;
+
+        /**
+         * Timeout for ambient pulse in seconds - 0 is no timeout
+         * @hide
+         */
+        public static final String OMNI_AOD_NOTIFICATION_PULSE_TIMEOUT = "ambient_notification_light_timeout";
+
+        private static final Validator OMNI_AOD_NOTIFICATION_PULSE_TIMEOUT_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
 
         /**
          * helper setting to contain the current pulse reason so we can check
@@ -5307,6 +5315,7 @@ public final class Settings {
             OMNI_NOTIFICATION_PULSE,
             OMNI_AOD_NOTIFICATION_PULSE,
             OMNI_AOD_NOTIFICATION_PULSE_CLEAR,
+            OMNI_AOD_NOTIFICATION_PULSE_TIMEOUT,
             OMNI_NOTIFICATION_PULSE_ACCENT,
             OMNI_NOTIFICATION_PULSE_COLOR,
         };
@@ -5492,6 +5501,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_NOTIFICATION_PULSE);
             PRIVATE_SETTINGS.add(OMNI_AOD_NOTIFICATION_PULSE);
             PRIVATE_SETTINGS.add(OMNI_AOD_NOTIFICATION_PULSE_CLEAR);
+            PRIVATE_SETTINGS.add(OMNI_AOD_NOTIFICATION_PULSE_TIMEOUT);
             PRIVATE_SETTINGS.add(OMNI_NOTIFICATION_PULSE_ACCENT);
             PRIVATE_SETTINGS.add(OMNI_NOTIFICATION_PULSE_COLOR);
         }
@@ -5689,6 +5699,7 @@ public final class Settings {
             VALIDATORS.put(OMNI_NOTIFICATION_PULSE, OMNI_NOTIFICATION_PULSE_VALIDATOR);
             VALIDATORS.put(OMNI_AOD_NOTIFICATION_PULSE, OMNI_AOD_NOTIFICATION_PULSE_VALIDATOR);
             VALIDATORS.put(OMNI_AOD_NOTIFICATION_PULSE_CLEAR, OMNI_AOD_NOTIFICATION_PULSE_CLEAR_VALIDATOR);
+            VALIDATORS.put(OMNI_AOD_NOTIFICATION_PULSE_TIMEOUT, OMNI_AOD_NOTIFICATION_PULSE_TIMEOUT_VALIDATOR);
             VALIDATORS.put(OMNI_NOTIFICATION_PULSE_ACCENT, OMNI_NOTIFICATION_PULSE_ACCENT_VALIDATOR);
             VALIDATORS.put(OMNI_NOTIFICATION_PULSE_COLOR, OMNI_NOTIFICATION_PULSE_COLOR_VALIDATOR);
         }
