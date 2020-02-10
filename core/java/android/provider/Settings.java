@@ -5064,7 +5064,6 @@ public final class Settings {
          * Whether to enable Ambient Edge lights
          * @hide
          */
-
         public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED = "ambient_notification_light_enabled";
 
         private static final Validator OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
@@ -5073,7 +5072,6 @@ public final class Settings {
          * Whether to enable Ambient Edge lights
          * @hide
          */
-
         public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT = "ambient_notification_light";
 
         private static final Validator OMNI_AMBIENT_NOTIFICATION_LIGHT_VALIDATOR =
@@ -5083,7 +5081,6 @@ public final class Settings {
          * Whether Ambient Edge lights are activated
          * @hide
          */
-
         public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED = "ambient_notification_light_activated";
 
         private static final Validator OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED_VALIDATOR =
@@ -5093,7 +5090,6 @@ public final class Settings {
          * Whether hide everything on aod when  ambient lights are enabled
          * @hide
          */
-
         public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_HIDE_AOD = "ambient_notification_light_hide_aod";
 
         private static final Validator OMNI_AMBIENT_NOTIFICATION_LIGHT_HIDE_AOD_VALIDATOR =
@@ -5103,11 +5099,19 @@ public final class Settings {
          * Whether to use accent color for pulse
          * @hide
          */
-
         public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT = "ambient_notification_light_accent";
 
         private static final Validator OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT_VALIDATOR =
                 BOOLEAN_VALIDATOR;
+
+        /**
+         * Timeout for ambient pulse in seconds - 0 is no timeout
+         * @hide
+         */
+        public static final String OMNI_AMBIENT_NOTIFICATION_TIMEOUT = "ambient_notification_light_timeout";
+
+        private static final Validator OMNI_AMBIENT_NOTIFICATION_TIMEOUT_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
 
         /**
          * helper setting to contain the current pulse reason so we can check
@@ -5309,6 +5313,7 @@ public final class Settings {
             OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED,
             OMNI_AMBIENT_NOTIFICATION_LIGHT_HIDE_AOD,
             OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT,
+            OMNI_AMBIENT_NOTIFICATION_TIMEOUT,
         };
 
         /**
@@ -5491,6 +5496,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_HIDE_MEDIA);
             PRIVATE_SETTINGS.add(OMNI_PULSE_AMBIENT_LIGHT);
             PRIVATE_SETTINGS.add(OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_AMBIENT_NOTIFICATION_TIMEOUT);
         }
 
         /**
@@ -5689,6 +5695,7 @@ public final class Settings {
             VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED, OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED_VALIDATOR);
             VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_HIDE_AOD, OMNI_AMBIENT_NOTIFICATION_LIGHT_HIDE_AOD_VALIDATOR);
             VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT, OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT_VALIDATOR);
+            VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_TIMEOUT, OMNI_AMBIENT_NOTIFICATION_TIMEOUT_VALIDATOR);
         }
 
         /**

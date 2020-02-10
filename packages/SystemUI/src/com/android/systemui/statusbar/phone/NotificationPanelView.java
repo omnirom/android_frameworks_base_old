@@ -26,7 +26,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.Fragment;
+import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -115,6 +117,7 @@ import com.android.systemui.omni.NotificationLightsView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -340,12 +343,6 @@ public class NotificationPanelView extends PanelView implements
     private FalsingManager mFalsingManager;
     private String mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
 
-    // Omni additions
-    private boolean mQsSecureExpandDisabled;
-    private LockPatternUtils mLockPatternUtils;
-    private NotificationLightsView mPulseLightsView;
-    private boolean mPulseLightHandled;
-
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
         public void run() {
@@ -428,12 +425,6 @@ public class NotificationPanelView extends PanelView implements
             Dependency.get(ShadeController.class);
     private int mDisplayId;
 
-    // omni additions start
-    private int mStatusBarHeaderHeight;
-    private GestureDetector mDoubleTapGesture;
-    private GestureDetector mLockscreenDoubleTapToSleep;
-    private boolean mIsLockscreenDoubleTapEnabled;
-
     /**
      * Cache the resource id of the theme to avoid unnecessary work in onThemeChanged.
      *
@@ -463,6 +454,18 @@ public class NotificationPanelView extends PanelView implements
      * the keyguard is dismissed to show the status bar.
      */
     private boolean mDelayShowingKeyguardStatusBar;
+
+    // Omni additions
+    private boolean mQsSecureExpandDisabled;
+    private LockPatternUtils mLockPatternUtils;
+    private NotificationLightsView mPulseLightsView;
+    private boolean mPulseLightHandled;
+    public static final String CANCEL_NOTIFICATION_PULSE_ACTION = "cancel_notification_pulse";
+    private int mStatusBarHeaderHeight;
+    private GestureDetector mDoubleTapGesture;
+    private GestureDetector mLockscreenDoubleTapToSleep;
+    private boolean mIsLockscreenDoubleTapEnabled;
+    private boolean mAmbientPulseLightRunning;
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -3394,10 +3397,11 @@ public class NotificationPanelView extends PanelView implements
         boolean mAmbientLights = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED,
                 0, UserHandle.USER_CURRENT) != 0;
-        if (DEBUG_PULSE_LIGHT) {
-            Log.d(TAG, "updatePulseLightState dozing = " + dozing + " mAmbientLights = "  + mAmbientLights);
-        }
+
         if (mAmbientLights) {
+            if (DEBUG_PULSE_LIGHT) {
+                Log.d(TAG, "updatePulseLightState dozing = " + dozing + " mAmbientLights = "  + mAmbientLights);
+            }
             if (dozing) {
                 // TODO on screen off should we restart pulse?
                 // if that should work we need to decide at this point
@@ -3407,14 +3411,7 @@ public class NotificationPanelView extends PanelView implements
                 showAodContent(true);
             } else {
                 // screen on!
-                if (mBarState == StatusBarState.KEYGUARD
-                        || mBarState == StatusBarState.SHADE_LOCKED) {
-                    showAodContent(true);
-                }
-                mPulseLightsView.setVisibility(View.GONE);
-                Settings.System.putIntForUser(mContext.getContentResolver(),
-                         Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0,
-                         UserHandle.USER_CURRENT);
+                stopNotificationPulse();
                 mPulseLightHandled = true;
             }
         }
@@ -3445,7 +3442,8 @@ public class NotificationPanelView extends PanelView implements
         boolean ambientLightsHideAod = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_HIDE_AOD,
                 0, UserHandle.USER_CURRENT) != 0;
-
+        int ambientLightsTimeout = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_AMBIENT_NOTIFICATION_TIMEOUT, 0, UserHandle.USER_CURRENT);
         if (animatePulse) {
             mAnimateNextPositionUpdate = true;
         }
@@ -3454,12 +3452,12 @@ public class NotificationPanelView extends PanelView implements
         if (!mPulsing && !mDozing) {
             mAnimateNextPositionUpdate = false;
         }
-        if (mPulseLightsView != null) {
+        if (mPulseLightsView != null && (pulseLights || ambientLights)) {
             if (DEBUG_PULSE_LIGHT) {
                 Log.d(TAG, "setPulsing pulsing = " + pulsing + " pulseLights = " + pulseLights
                         + " ambientLights = " + ambientLights + " activeNotif = " + activeNotif
                         + " mPulseLightHandled = " + mPulseLightHandled + " mDozing = " + mDozing
-                        + " pulseReason = " + pulseReason);
+                        + " pulseReason = " + pulseReason + " ambientLightsTimeout = " + ambientLightsTimeout);
             }
             if (mPulsing) {
                 showAodContent(true);
@@ -3491,16 +3489,14 @@ public class NotificationPanelView extends PanelView implements
                     }
                     mPulseLightsView.animateNotification(true);
                     mPulseLightsView.setVisibility(View.VISIBLE);
+                    mAmbientPulseLightRunning = true;
+                    if (ambientLightsTimeout != 0) {
+                        // start the end timer
+                        startNotificationPulseTimer(ambientLightsTimeout);
+                    }
                 } else {
                     // no active notifications or just pulse without aod - so no reason to continue
-                    mPulseLightsView.setVisibility(View.GONE);
-                    Settings.System.putIntForUser(mContext.getContentResolver(),
-                            Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0,
-                            UserHandle.USER_CURRENT);
-                    if (mBarState == StatusBarState.KEYGUARD
-                            || mBarState == StatusBarState.SHADE_LOCKED) {
-                        showAodContent(true);
-                    }
+                    stopNotificationPulse();
                 }
             }
         }
@@ -3722,5 +3718,68 @@ public class NotificationPanelView extends PanelView implements
                 || mBarState == StatusBarState.SHADE_LOCKED;
         return mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser()) && mQsSecureExpandDisabled &&
                 keyguardOrShadeShowing;
+    }
+
+    public void stopNotificationPulse() {
+        if (DEBUG_PULSE_LIGHT) {
+            Log.d(TAG, "stopNotificationPulse");
+        }
+        mPulseLightsView.setVisibility(View.GONE);
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0,
+                UserHandle.USER_CURRENT);
+        boolean doShowAodContent = true;
+        // if needed first turn screen off to prevent flicker showing aod for a short time
+        // BUT getAlwaysOn depends on OMNI_AMBIENT_NOTIFICATION_LIGHT so it must be afterwards
+        if (mAmbientPulseLightRunning) {
+            mAmbientPulseLightRunning = false;
+            stopNotificationPulseTimer();
+            DozeParameters dozeParameters = DozeParameters.getInstance(mContext);
+            if (!dozeParameters.getAlwaysOn()) {
+                if (DEBUG_PULSE_LIGHT) {
+                    Log.d(TAG, "stopNotificationPulse disable aod");
+                }
+                doShowAodContent = false;
+                // we want that in one step to prevent flicker - usage of GO_TO_SLEEP_FLAG_FORCE
+                // since this will end doze we will enter setDozing(false) which
+                // will basically call this again
+                mPowerManager.goToSleep(SystemClock.uptimeMillis(), PowerManager.GO_TO_SLEEP_REASON_APPLICATION,
+                        PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE|PowerManager.GO_TO_SLEEP_FLAG_FORCE);
+            }
+        }
+        if (doShowAodContent) {
+            if (mBarState == StatusBarState.KEYGUARD
+                    || mBarState == StatusBarState.SHADE_LOCKED) {
+                showAodContent(true);
+            }
+        }
+    }
+
+    private void startNotificationPulseTimer(long timeoutInSecs) {
+        // just to be sure
+        stopNotificationPulseTimer();
+
+        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        long when = System.currentTimeMillis() + timeoutInSecs * 1000;
+        if (DEBUG_PULSE_LIGHT) {
+            SimpleDateFormat formatTime = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+            Log.d(TAG, "startNotificationPulseTimer until = " + formatTime.format(when));
+        }
+        Intent intent = new Intent(CANCEL_NOTIFICATION_PULSE_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        PendingIntent sender = PendingIntent.getBroadcast(mContext,
+                0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, sender);
+    }
+
+    private void stopNotificationPulseTimer() {
+        if (DEBUG_PULSE_LIGHT) {
+            Log.d(TAG, "stopNotificationPulseTimer");
+        }
+        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(CANCEL_NOTIFICATION_PULSE_ACTION);
+        PendingIntent sender = PendingIntent.getBroadcast(mContext,
+                0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        alarmManager.cancel(sender);
     }
 }
