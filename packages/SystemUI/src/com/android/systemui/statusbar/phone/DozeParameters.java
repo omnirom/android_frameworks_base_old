@@ -167,6 +167,17 @@ public class DozeParameters implements TunerService.Tunable,
     }
 
     /**
+     * Checks if always on is available and enabled for the current user
+     * without notification pulse - used to check what to do if aod notification pulse stops
+     * @return {@code true} if enabled and available.
+     * @hide
+     */
+    public boolean getAlwaysOnAfterAmbientLight() {
+        return mAmbientDisplayConfiguration.alwaysOnEnabledSetting(UserHandle.USER_CURRENT) ||
+                mAmbientDisplayConfiguration.alwaysOnChargingEnabled(UserHandle.USER_CURRENT);
+    }
+
+    /**
      * Some screens need to be completely black before changing the display power mode,
      * unexpected behavior might happen if this parameter isn't respected.
      *
