@@ -16,6 +16,23 @@
       "revId": "9d37542f79e0910d1caec72d20576df3fb0f1ff8",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac797d74_7299f14d",
+        "filename": "packages/SystemUI/src/com/android/systemui/omni/NotificationLightsView.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-02-11T15:11:55Z",
+      "side": 1,
+      "message": "you use int - but defines as ANY_STRING_VALIDATOR in Settings",
+      "revId": "9d37542f79e0910d1caec72d20576df3fb0f1ff8",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
     }
   ]
 }
