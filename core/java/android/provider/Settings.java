@@ -5324,25 +5324,38 @@ public final class Settings {
          * Whether to enable PULSE Edge lights
          * @hide
          */
-        public static final String OMNI_PULSE_AMBIENT_LIGHT = "pulse_ambient_light";
+        public static final String OMNI_NOTIFICATION_PULSE = "pulse_ambient_light";
 
          /**
          * Whether to enable Ambient Edge lights
          * @hide
          */
-        public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED = "ambient_notification_light_enabled";
+        public static final String OMNI_AOD_NOTIFICATION_PULSE = "ambient_notification_light_enabled";
+
 
          /**
-         * Whether to enable Ambient Edge lights
+         * Whether hide everything on aod when  ambient lights are enabled
          * @hide
          */
-        public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT = "ambient_notification_light";
+        public static final String OMNI_AOD_NOTIFICATION_PULSE_CLEAR = "ambient_notification_light_hide_aod";
+
+         /**
+         * Whether to change aod pulse state
+         * @hide
+         */
+        public static final String OMNI_AOD_NOTIFICATION_PULSE_TRIGGER = "ambient_notification_light";
 
          /**
          * Whether Ambient Edge lights are activated
          * @hide
          */
-        public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED = "ambient_notification_light_activated";
+        public static final String OMNI_AOD_NOTIFICATION_PULSE_ACTIVATED = "ambient_notification_light_activated";
+
+         /**
+         * Whether to use accent color for pulse
+         * @hide
+         */
+        public static final String OMNI_NOTIFICATION_PULSE_ACCENT = "ambient_notification_light_accent";
 
         /**
          * helper setting to contain the current pulse reason so we can check
@@ -5350,12 +5363,6 @@ public final class Settings {
          * @hide
          */
         public static final String OMNI_PULSE_TRIGGER_REASON = "pulse_trigger_reason";
-
-         /**
-         * Whether to use accent color for pulse
-         * @hide
-         */
-        public static final String OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT = "ambient_notification_light_accent";
 
         /**
          * SettingsBackupAgent will combine its list with this so we dont need
@@ -5378,11 +5385,10 @@ public final class Settings {
             OMNI_DEVICE_FEATURE_SETTINGS,
             OMNI_CUSTOM_FP_ICON,
             OMNI_DOZE_ON_CHARGE,
-            OMNI_PULSE_AMBIENT_LIGHT,
-            OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED,
-            OMNI_AMBIENT_NOTIFICATION_LIGHT,
-            OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED,
-            OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT,
+            OMNI_NOTIFICATION_PULSE,
+            OMNI_AOD_NOTIFICATION_PULSE,
+            OMNI_AOD_NOTIFICATION_PULSE_CLEAR,
+            OMNI_NOTIFICATION_PULSE_ACCENT,
         };
 
         /**
@@ -5412,11 +5418,10 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_CUSTOM_FP_ICON, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DOZE_ON_CHARGE, 0);
-            OMNI_SETTINGS_VALIDATORS.put(OMNI_PULSE_AMBIENT_LIGHT, 0);
-            OMNI_SETTINGS_VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED, 0);
-            OMNI_SETTINGS_VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT, 0);
-            OMNI_SETTINGS_VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ACTIVATED, 0);
-            OMNI_SETTINGS_VALIDATORS.put(OMNI_AMBIENT_NOTIFICATION_LIGHT_ACCENT, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_NOTIFICATION_PULSE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_AOD_NOTIFICATION_PULSE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_AOD_NOTIFICATION_PULSE_CLEAR, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_NOTIFICATION_PULSE_ACCENT, 0);
         }
     }
 
