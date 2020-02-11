@@ -892,7 +892,7 @@ public class NotificationPanelView extends PanelView implements
                     getUnlockedStackScrollerPadding());
             if (!hasVisibleNotifications) {
                 Settings.System.putIntForUser(mContext.getContentResolver(),
-                         Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0,
+                         Settings.System.OMNI_AOD_NOTIFICATION_PULSE_TRIGGER, 0,
                          UserHandle.USER_CURRENT);
             }
             mClockPositionAlgorithm.run(mClockPositionResult);
@@ -3392,7 +3392,7 @@ public class NotificationPanelView extends PanelView implements
 
     private void updatePulseLightState(boolean dozing) {
         boolean mAmbientLights = Settings.System.getIntForUser(
-                mContext.getContentResolver(), Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED,
+                mContext.getContentResolver(), Settings.System.OMNI_AOD_NOTIFICATION_PULSE,
                 0, UserHandle.USER_CURRENT) != 0;
         if (DEBUG_PULSE_LIGHT) {
             Log.d(TAG, "updatePulseLightState dozing = " + dozing + " mAmbientLights = "  + mAmbientLights);
@@ -3413,7 +3413,7 @@ public class NotificationPanelView extends PanelView implements
                 }
                 mPulseLightsView.setVisibility(View.GONE);
                 Settings.System.putIntForUser(mContext.getContentResolver(),
-                         Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0,
+                         Settings.System.OMNI_AOD_NOTIFICATION_PULSE_TRIGGER, 0,
                          UserHandle.USER_CURRENT);
                 mPulseLightHandled = true;
             }
@@ -3435,15 +3435,15 @@ public class NotificationPanelView extends PanelView implements
         final boolean animatePulse = !dozeParameters.getDisplayNeedsBlanking()
                 && dozeParameters.getAlwaysOn();
         boolean pulseLights = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.OMNI_PULSE_AMBIENT_LIGHT, 0, UserHandle.USER_CURRENT) != 0;
+                Settings.System.OMNI_NOTIFICATION_PULSE, 0, UserHandle.USER_CURRENT) != 0;
         boolean ambientLights = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_ENABLED, 0, UserHandle.USER_CURRENT) != 0;
+                Settings.System.OMNI_AOD_NOTIFICATION_PULSE, 0, UserHandle.USER_CURRENT) != 0;
         boolean activeNotif = mNotificationStackScroller.hasActiveClearableNotifications(ROWS_HIGH_PRIORITY);
         int pulseReason = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.OMNI_PULSE_TRIGGER_REASON, DozeLog.PULSE_REASON_NONE, UserHandle.USER_CURRENT);
         boolean pulseReasonNotification = pulseReason == DozeLog.PULSE_REASON_NOTIFICATION;
         boolean ambientLightsHideAod = Settings.System.getIntForUser(
-                mContext.getContentResolver(), Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT_HIDE_AOD,
+                mContext.getContentResolver(), Settings.System.OMNI_AOD_NOTIFICATION_PULSE_CLEAR,
                 0, UserHandle.USER_CURRENT) != 0;
 
         if (animatePulse) {
@@ -3478,7 +3478,7 @@ public class NotificationPanelView extends PanelView implements
                         // tell power manager that we want to enable aod
                         // must do that here already not on pulsing = false
                         Settings.System.putIntForUser(mContext.getContentResolver(),
-                                Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 1,
+                                Settings.System.OMNI_AOD_NOTIFICATION_PULSE_TRIGGER, 1,
                                 UserHandle.USER_CURRENT);
                     }
                 }
@@ -3495,7 +3495,7 @@ public class NotificationPanelView extends PanelView implements
                     // no active notifications or just pulse without aod - so no reason to continue
                     mPulseLightsView.setVisibility(View.GONE);
                     Settings.System.putIntForUser(mContext.getContentResolver(),
-                            Settings.System.OMNI_AMBIENT_NOTIFICATION_LIGHT, 0,
+                            Settings.System.OMNI_AOD_NOTIFICATION_PULSE_TRIGGER, 0,
                             UserHandle.USER_CURRENT);
                     if (mBarState == StatusBarState.KEYGUARD
                             || mBarState == StatusBarState.SHADE_LOCKED) {
