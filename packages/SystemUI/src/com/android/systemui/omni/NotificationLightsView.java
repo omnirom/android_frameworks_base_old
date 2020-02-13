@@ -37,13 +37,9 @@ import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 public class NotificationLightsView extends RelativeLayout {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String TAG = "NotificationLightsView";
-    private View mNotificationAnimView;
     private ValueAnimator mLightAnimator;
-    private boolean mPulsing;
-    private boolean mNotification;
-    private int color;
 
     public NotificationLightsView(Context context) {
         this(context, null);
@@ -59,37 +55,19 @@ public class NotificationLightsView extends RelativeLayout {
 
     public NotificationLightsView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        if (DEBUG) Log.d(TAG, "new");
-    }
-
-    private Runnable mLightUpdate = new Runnable() {
-        @Override
-        public void run() {
-            if (DEBUG) Log.d(TAG, "run");
-            animateNotification(mNotification);
-        }
-    };
-
-    @Override
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
-        if (DEBUG) Log.d(TAG, "draw");
-        //post(mLightUpdate);
-    }
-
-    public void setPulsing(boolean pulsing) {
-        if (mPulsing == pulsing) {
-            return;
-        }
-        mPulsing = pulsing;
     }
 
     public void animateNotification(boolean mNotification) {
+        animateNotificationWithColor(mNotification, getNotificationLightsColor());
+    }
+
+    public int getNotificationLightsColor() {
         int defaultColor = getResources().getInteger(
                 com.android.internal.R.integer.config_ambientNotificationDefaultColor);
         boolean useAccent = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.OMNI_NOTIFICATION_PULSE_ACCENT,
                 0, UserHandle.USER_CURRENT) != 0;
+        int color = defaultColor;
         if (useAccent) {
             color = useAccent ?
                     Utils.getColorAccentDefaultColor(getContext()) : defaultColor;
@@ -98,6 +76,10 @@ public class NotificationLightsView extends RelativeLayout {
                     Settings.System.OMNI_NOTIFICATION_PULSE_COLOR, defaultColor,
                     UserHandle.USER_CURRENT);
         }
+        return color;
+    }
+
+    public void animateNotificationWithColor(boolean mNotification, int color) {
         StringBuilder sb = new StringBuilder();
         sb.append("animateNotification color ");
         sb.append(Integer.toHexString(color));
