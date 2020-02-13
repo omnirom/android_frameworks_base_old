@@ -37,7 +37,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 public class NotificationLightsView extends RelativeLayout {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String TAG = "NotificationLightsView";
     private ValueAnimator mLightAnimator;
 
@@ -65,6 +65,10 @@ public class NotificationLightsView extends RelativeLayout {
     }
 
     public void animateNotification() {
+        animateNotificationWithColor(getNotificationLightsColor());
+    }
+
+    public int getNotificationLightsColor() {
         int defaultColor = getResources().getInteger(
                 com.android.internal.R.integer.config_ambientNotificationDefaultColor);
         int color = defaultColor;
@@ -80,6 +84,10 @@ public class NotificationLightsView extends RelativeLayout {
                     UserHandle.USER_CURRENT);
         }
         if (DEBUG) Log.d(TAG, "color = " + Integer.toHexString(color));
+        return color;
+    }
+
+    public void animateNotificationWithColor(int color) {
         ImageView leftView = (ImageView) findViewById(R.id.notification_animation_left);
         ImageView rightView = (ImageView) findViewById(R.id.notification_animation_right);
         leftView.setColorFilter(color);
