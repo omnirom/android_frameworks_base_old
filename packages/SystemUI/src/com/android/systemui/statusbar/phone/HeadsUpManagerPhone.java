@@ -88,6 +88,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private boolean mHeadsUpGoingAway;
     private int mStatusBarState;
     private Region mTouchableRegion = new Region();
+    private boolean mDozing;
+    private int mPulseDurationDecay;
 
     private AnimationStateHandler mAnimationStateHandler;
 
@@ -121,6 +123,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
         mAutoHeadsUpNotificationDecay = resources.getInteger(
                 R.integer.auto_heads_up_notification_decay);
+        mPulseDurationDecay = resources.getInteger(
+                R.integer.doze_pulse_duration_visible);
         mStatusBarStateController = statusBarStateController;
         mStatusBarStateController.addCallback(this);
         mBypassController = bypassController;
@@ -245,6 +249,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
     @Override
     public void onDozingChanged(boolean isDozing) {
+        mDozing = isDozing;
         if (!isDozing) {
             // Let's make sure all huns we got while dozing time out within the normal timeout
             // duration. Otherwise they could get stuck for a very long time
@@ -611,7 +616,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         }
 
         private int getDecayDuration() {
-            if (isAutoHeadsUp()) {
+            if (mDozing) {
+                return getRecommendedHeadsUpTimeoutMs(mPulseDurationDecay);
+            } else if (isAutoHeadsUp()) {
                 return getRecommendedHeadsUpTimeoutMs(mAutoHeadsUpNotificationDecay);
             } else {
                 return getRecommendedHeadsUpTimeoutMs(mAutoDismissNotificationDecay);
