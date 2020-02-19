@@ -5187,6 +5187,14 @@ public final class Settings {
         public static final String MEDIAPROJECTION_SYSUI_OK = "mediaprojection_sysui_ok";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_AUTO_BRIGHTNESS_MIN_VALUE = "auto_brightness_min_value";
+
+        private static final Validator OMNI_AUTO_BRIGHTNESS_MIN_VALUE_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5324,6 +5332,7 @@ public final class Settings {
             OMNI_NOTIFICATION_PULSE_ACCENT,
             OMNI_NOTIFICATION_PULSE_COLOR,
             OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC,
+            OMNI_AUTO_BRIGHTNESS_MIN_VALUE,
         };
 
         /**
@@ -5511,6 +5520,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_NOTIFICATION_PULSE_ACCENT);
             PRIVATE_SETTINGS.add(OMNI_NOTIFICATION_PULSE_COLOR);
             PRIVATE_SETTINGS.add(OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC);
+            PRIVATE_SETTINGS.add(OMNI_AUTO_BRIGHTNESS_MIN_VALUE);
         }
 
         /**
@@ -5711,6 +5721,7 @@ public final class Settings {
             VALIDATORS.put(OMNI_NOTIFICATION_PULSE_COLOR, OMNI_NOTIFICATION_PULSE_COLOR_VALIDATOR);
             VALIDATORS.put(OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC,
                     OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC_VALIDATOR);
+            VALIDATORS.put(OMNI_AUTO_BRIGHTNESS_MIN_VALUE, OMNI_AUTO_BRIGHTNESS_MIN_VALUE_VALIDATOR);
         }
 
         /**
