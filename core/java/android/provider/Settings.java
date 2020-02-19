@@ -4669,7 +4669,6 @@ public final class Settings {
                 ANY_INTEGER_VALIDATOR;
 
         /**
-<<<<<<< HEAD
          * @hide
          */
         public static final String OMNI_SCREENSHOT_SHUTTER_SOUND = "screenshot_shutter_sound";
