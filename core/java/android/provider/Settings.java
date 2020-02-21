@@ -5195,13 +5195,62 @@ public final class Settings {
                 ANY_INTEGER_VALIDATOR;
 
         /**
+         * Custom button brightness value for manual mode
+         *
+         * @hide
+         */
+        public static final String OMNI_CUSTOM_BUTTON_BRIGHTNESS = "custom_button_brightness";
+
+        private static final Validator OMNI_CUSTOM_BUTTON_BRIGHTNESS_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * use same value for buttons as for screen (manual and auto mode)
+         *
+         * @hide
+         */
+        public static final String OMNI_CUSTOM_BUTTON_USE_SCREEN_BRIGHTNESS =
+                "custom_button_use_screen_brightness";
+
+        private static final Validator OMNI_CUSTOM_BUTTON_USE_SCREEN_BRIGHTNESS_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * disable all button brightness (manual and auto mode)
+         *
+         * @hide
+         */
+        public static final String OMNI_BUTTON_BACKLIGHT_ENABLE = "button_backlight_enable";
+
+        private static final Validator OMNI_BUTTON_BACKLIGHT_ENABLE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Timeout value for button lights. 0 = disabled
+         * @hide
+         */
+        public static final String OMNI_BUTTON_BACKLIGHT_TIMEOUT = "button_backlight_timeout";
+
+        private static final Validator OMNI_BUTTON_BACKLIGHT_TIMEOUT_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY =
+                "button_backlight_on_touch_only";
+
+        private static final Validator OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
          * the setting value. See an example above.
          */
 
-        /**
+         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -5333,6 +5382,11 @@ public final class Settings {
             OMNI_NOTIFICATION_PULSE_COLOR,
             OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC,
             OMNI_AUTO_BRIGHTNESS_MIN_VALUE,
+            OMNI_CUSTOM_BUTTON_BRIGHTNESS,
+            OMNI_CUSTOM_BUTTON_USE_SCREEN_BRIGHTNESS,
+            OMNI_BUTTON_BACKLIGHT_ENABLE,
+            OMNI_BUTTON_BACKLIGHT_TIMEOUT,
+            OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY,
         };
 
         /**
@@ -5521,6 +5575,11 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_NOTIFICATION_PULSE_COLOR);
             PRIVATE_SETTINGS.add(OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC);
             PRIVATE_SETTINGS.add(OMNI_AUTO_BRIGHTNESS_MIN_VALUE);
+            PRIVATE_SETTINGS.add(OMNI_CUSTOM_BUTTON_BRIGHTNESS);
+            PRIVATE_SETTINGS.add(OMNI_CUSTOM_BUTTON_USE_SCREEN_BRIGHTNESS);
+            PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_ENABLE);
+            PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_TIMEOUT);
+            PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY);
         }
 
         /**
@@ -5722,6 +5781,16 @@ public final class Settings {
             VALIDATORS.put(OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC,
                     OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC_VALIDATOR);
             VALIDATORS.put(OMNI_AUTO_BRIGHTNESS_MIN_VALUE, OMNI_AUTO_BRIGHTNESS_MIN_VALUE_VALIDATOR);
+            VALIDATORS.put(OMNI_CUSTOM_BUTTON_BRIGHTNESS,
+                    OMNI_CUSTOM_BUTTON_BRIGHTNESS_VALIDATOR);
+            VALIDATORS.put(OMNI_CUSTOM_BUTTON_USE_SCREEN_BRIGHTNESS,
+                    OMNI_CUSTOM_BUTTON_USE_SCREEN_BRIGHTNESS_VALIDATOR);
+            VALIDATORS.put(OMNI_BUTTON_BACKLIGHT_ENABLE,
+                    OMNI_BUTTON_BACKLIGHT_ENABLE_VALIDATOR);
+            VALIDATORS.put(OMNI_BUTTON_BACKLIGHT_TIMEOUT,
+                    OMNI_BUTTON_BACKLIGHT_TIMEOUT_VALIDATOR);
+            VALIDATORS.put(OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY,
+                    OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY_VALIDATOR);
         }
 
         /**
