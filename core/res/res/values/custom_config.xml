@@ -104,4 +104,8 @@
     <!-- Whether to cleanup fingerprints upon connection to the daemon and when user switches -->
     <bool name="config_cleanupUnusedFingerprints">true</bool>
 
+    <!-- Button brightness -->
+    <bool name="config_button_brightness_support">false</bool>
+    <integer name="config_button_brightness_default">128</integer>
+
 </resources>
