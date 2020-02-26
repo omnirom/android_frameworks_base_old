@@ -32,6 +32,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -730,8 +731,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 continue;
             }
             final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            if (row.canViewBeDismissed() && matchesSelection(row, selection)) {
-                return row;
+            if (matchesSelection(row, selection)) {
+                int visibility = row.getStatusBarNotification().getNotification().visibility;
+                // TODO
+                if (visibility != Notification.VISIBILITY_PUBLIC) {
+                    if (row.getStatusBarNotification().isClearable()) {
+                        return row;
+                    }
+                }
+                if (row.canViewBeDismissed()) {
+                    return row;
+                }
             }
         }
         return null;
