@@ -26,6 +26,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
@@ -50,7 +51,9 @@ import android.widget.ImageView;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.omni.OmniSettingsService;
 
 import vendor.omni.biometrics.fingerprint.inscreen.V1_0.IFingerprintInscreen;
 import vendor.omni.biometrics.fingerprint.inscreen.V1_0.IFingerprintInscreenCallback;
@@ -60,7 +63,8 @@ import java.util.NoSuchElementException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class FODCircleView extends ImageView implements OnTouchListener {
+public class FODCircleView extends ImageView implements OnTouchListener,
+        OmniSettingsService.OmniSettingsObserver {
     private static final String TAG = "FODCircleView";
     private final int mPositionX;
     private final int mPositionY;
@@ -93,6 +97,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     private Timer mBurnInProtectionTimer;
 
     private final boolean mFodPressedImage;
+    private BitmapDrawable mCustomImage;
 
     private IFingerprintInscreenCallback mFingerprintInscreenCallback =
             new IFingerprintInscreenCallback.Stub() {
@@ -379,6 +384,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        Dependency.get(OmniSettingsService.class).removeObserver(this);
 
         IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
         if (daemon != null) {
@@ -393,6 +399,7 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        Dependency.get(OmniSettingsService.class).addStringObserver(this, Settings.System.OMNI_CUSTOM_FP_ICON);
 
         IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
         if (daemon != null) {
@@ -538,24 +545,36 @@ public class FODCircleView extends ImageView implements OnTouchListener {
     }
 
     private void setCustomIcon(){
-        final String customIconURI = Settings.System.getStringForUser(getContext().getContentResolver(),
-                Settings.System.OMNI_CUSTOM_FP_ICON,
-                UserHandle.USER_CURRENT);
+        if (mCustomImage != null) {
+            setImageDrawable(mCustomImage);
+        } else {
+            setImageResource(mIsDreaming ? R.drawable.fod_icon_aod : R.drawable.fod_icon_default);
+        }
+    }
 
+    @Override
+    public void onStringSettingChanged(String key, String customIconURI) {
         if (!TextUtils.isEmpty(customIconURI)) {
-            try {
-                ParcelFileDescriptor parcelFileDescriptor =
-                    getContext().getContentResolver().openFileDescriptor(Uri.parse(customIconURI), "r");
-                FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-                Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
-                parcelFileDescriptor.close();
-                setImageBitmap(image);
-            }
-            catch (Exception e) {
+            loadCustomImage(customIconURI);
+            if (mCustomImage == null) {
                 setImageResource(mIsDreaming ? R.drawable.fod_icon_aod : R.drawable.fod_icon_default);
             }
         } else {
             setImageResource(mIsDreaming ? R.drawable.fod_icon_aod : R.drawable.fod_icon_default);
+        }
+    }
+
+    private void loadCustomImage(String customIconURI) {
+        try {
+            ParcelFileDescriptor parcelFileDescriptor =
+                    getContext().getContentResolver().openFileDescriptor(Uri.parse(customIconURI), "r");
+            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+            Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+            parcelFileDescriptor.close();
+            mCustomImage = new BitmapDrawable(getResources(), image);
+        }
+        catch (Exception e) {
+            mCustomImage = null;
         }
     }
 
