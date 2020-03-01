@@ -40,18 +40,22 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.R;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import javax.inject.Inject;
 
-public class AODTile extends QSTileImpl<BooleanState> {
+public class AODTile extends QSTileImpl<BooleanState> implements
+        BatteryController.BatteryStateChangeCallback {
+
     public static final String TILE_SPEC = "aod";
 
     private boolean mAodDisabled;
     private boolean mListening;
     private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_aod);
+    private final BatteryController mBatteryController;
 
     @Inject
     public AODTile(
@@ -63,10 +67,19 @@ public class AODTile extends QSTileImpl<BooleanState> {
             MetricsLogger metricsLogger,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
+            BatteryController batteryController,
             QSLogger qsLogger
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
+
+        mBatteryController = batteryController;
+        batteryController.observe(getLifecycle(), this);
+    }
+
+    @Override
+    public void onPowerSaveChanged(boolean isPowerSave) {
+        refreshState();
     }
 
     @Override
@@ -112,10 +125,18 @@ public class AODTile extends QSTileImpl<BooleanState> {
         state.value = mAodDisabled;
         state.slash.isSlashed = state.value;
         state.label = mContext.getString(R.string.quick_settings_aod_label);
-        if (mAodDisabled) {
+        if (mBatteryController.isAodPowerSave()) {
+            state.state = Tile.STATE_UNAVAILABLE;
+            state.secondaryLabel = mContext.getString(
+                           R.string.quick_settings_aod_off_powersave_label);
+        } else if (mAodDisabled) {
             state.state = Tile.STATE_INACTIVE;
+            state.secondaryLabel = mContext.getString(
+                           R.string.aod_off);
         } else {
             state.state = Tile.STATE_ACTIVE;
+            state.secondaryLabel = mContext.getString(
+                           R.string.aod_on);
         }
     }
 
