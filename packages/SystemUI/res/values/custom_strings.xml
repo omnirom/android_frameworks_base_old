@@ -28,6 +28,7 @@
 
     <!-- AOD QS tile -->
     <string name="quick_settings_aod_label">AOD</string>
+    <string name="quick_settings_aod_off_powersave_label">AOD off\nBattery saver</string>
 
      <!-- Screenshot Tile -->
     <string name="screenshot_long_press">Long press for an selected region</string>
