@@ -1186,6 +1186,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     .getDefaultDataSubscriptionId();
             PersistableBundle b = configMgr.getConfigForSubId(defaultDataSubId);
             if (b != null) {
+                Log.d(TAG, "show4gForLte= " + config.show4gForLte + "  hideLtePlus= " + config.hideLtePlus);
                 config.alwaysShowDataRatIcon = b.getBoolean(
                         CarrierConfigManager.KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL);
                 config.show4gForLte = b.getBoolean(
