@@ -33,6 +33,7 @@
     <string name="accessibility_quick_settings_caffeine_on">Caffeine on</string>
     <!-- AOD QS tile -->
     <string name="quick_settings_aod_label">AOD</string>
+    <string name="quick_settings_aod_off_powersave_label">AOD off\nBattery saver</string>
 
     <string name="lockscreen_default">Default</string>
     <string name="lockscreen_hidden">None</string>
