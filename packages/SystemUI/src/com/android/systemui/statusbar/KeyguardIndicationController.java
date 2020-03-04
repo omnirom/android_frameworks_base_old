@@ -203,9 +203,6 @@ public class KeyguardIndicationController implements StateListener,
         mDevicePolicyManager = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         setIndicationArea(indicationArea);
-
-        mBatteryBar = indicationArea.findViewById(R.id.battery_bar_view);
-
         updateDisclosure();
 
         mKeyguardUpdateMonitor.registerCallback(getKeyguardCallback());
@@ -217,6 +214,7 @@ public class KeyguardIndicationController implements StateListener,
     public void setIndicationArea(ViewGroup indicationArea) {
         mIndicationArea = indicationArea;
         mTextView = indicationArea.findViewById(R.id.keyguard_indication_text);
+        mBatteryBar = indicationArea.findViewById(R.id.battery_bar_view);
         mInitialTextColorState = mTextView != null ?
                 mTextView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
         mDisclosure = indicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure);
@@ -419,7 +417,7 @@ public class KeyguardIndicationController implements StateListener,
 
             // Walk down a precedence-ordered list of what indication
             // should be shown based on user or device state
-            // mBatteryBar.setVisibility(View.GONE);
+            mBatteryBar.setVisibility(View.GONE);
             if (mDozing) {
                 // When dozing we ignore any text color and use white instead, because
                 // colors can be hard to read in low brightness.
