@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-
 package com.android.systemui.screenshot;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -27,7 +25,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
-
 /**
  * Draws a selection rectangle while taking screenshot
  */
@@ -35,11 +32,9 @@ public class ScreenshotSelectorView extends View {
     private Point mStartPoint;
     private Rect mSelectionRect;
     private final Paint mPaintSelection, mPaintBackground;
-
     public ScreenshotSelectorView(Context context) {
         this(context, null);
     }
-
     public ScreenshotSelectorView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mPaintBackground = new Paint(Color.BLACK);
@@ -47,12 +42,10 @@ public class ScreenshotSelectorView extends View {
         mPaintSelection = new Paint(Color.TRANSPARENT);
         mPaintSelection.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
     }
-
     public void startSelection(int x, int y) {
         mStartPoint = new Point(x, y);
         mSelectionRect = new Rect(x, y, x, y);
     }
-
     public void updateSelection(int x, int y) {
         if (mSelectionRect != null) {
             mSelectionRect.left = Math.min(mStartPoint.x, x);
@@ -62,16 +55,13 @@ public class ScreenshotSelectorView extends View {
             invalidate();
         }
     }
-
     public Rect getSelectionRect() {
         return mSelectionRect;
     }
-
     public void stopSelection() {
         mStartPoint = null;
         mSelectionRect = null;
     }
-
     @Override
     public void draw(Canvas canvas) {
         canvas.drawRect(mLeft, mTop, mRight, mBottom, mPaintBackground);
