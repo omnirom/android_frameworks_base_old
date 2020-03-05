@@ -205,11 +205,7 @@ final class UiModeManagerService extends SystemService {
         public void onTwilightStateChanged(@Nullable TwilightState state) {
             synchronized (mLock) {
                 if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                    if (mCar) {
-                        updateLocked(0, 0);
-                    } else {
-                        registerScreenOffEvent();
-                    }
+                    updateLocked(0, 0);
                 }
             }
         }
@@ -509,12 +505,7 @@ final class UiModeManagerService extends SystemService {
                         if (!mCarModeEnabled) {
                             persistNightMode(user);
                         }
-                        // on screen off will update configuration instead
-                        if (mNightMode != UiModeManager.MODE_NIGHT_AUTO || mCar) {
-                            updateLocked(0, 0);
-                        } else {
-                            registerScreenOffEvent();
-                        }
+                        updateLocked(0, 0);
                     }
                 }
             } finally {
