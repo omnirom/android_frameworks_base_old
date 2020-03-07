@@ -909,7 +909,7 @@ class RecentTasks {
 
             if (isVisibleRecentTask(tr)) {
                 numVisibleTasks++;
-                if (isInVisibleRange(tr, i, numVisibleTasks, withExcluded)) {
+                if (mDisableVisibleLimits || isInVisibleRange(tr, i, numVisibleTasks, withExcluded)) {
                     // Fall through
                 } else {
                     // Not in visible range
@@ -1236,7 +1236,7 @@ class RecentTasks {
                 } else {
                     numVisibleTasks++;
                     if (isInVisibleRange(task, i, numVisibleTasks, false /* skipExcludedCheck */)
-                            || !isTrimmable(task)) {
+                            || !isTrimmable(task) || mDisableVisibleLimits) {
                         // Keep visible tasks in range
                         i++;
                         continue;
