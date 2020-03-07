@@ -54,6 +54,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.omni.OmniSettingsService;
+import com.android.systemui.tuner.TunerService;
 
 import vendor.omni.biometrics.fingerprint.inscreen.V1_0.IFingerprintInscreen;
 import vendor.omni.biometrics.fingerprint.inscreen.V1_0.IFingerprintInscreenCallback;
@@ -64,8 +65,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class FODCircleView extends ImageView implements OnTouchListener,
-        OmniSettingsService.OmniSettingsObserver {
+        TunerService.Tunable, OmniSettingsService.OmniSettingsObserver {
     private static final String TAG = "FODCircleView";
+    private final String SCREEN_BRIGHTNESS = "system:" + Settings.System.SCREEN_BRIGHTNESS;
     private final int mPositionX;
     private final int mPositionY;
     private final int mWidth;
@@ -82,6 +84,7 @@ public class FODCircleView extends ImageView implements OnTouchListener,
 
     private int mDreamingOffsetY;
     private int mNavigationBarSize;
+    private int mCurrentBrightness;
 
     private boolean mIsBouncer;
     private boolean mIsDreaming;
@@ -285,6 +288,13 @@ public class FODCircleView extends ImageView implements OnTouchListener,
         mDisplayManager = context.getSystemService(DisplayManager.class);
 
         mFodPressedImage = res.getBoolean(R.bool.config_fodPressedImage);
+        Dependency.get(TunerService.class).addTunable(this, SCREEN_BRIGHTNESS);
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        mCurrentBrightness = newValue != null ?  Integer.parseInt(newValue) : 0;
+        setDim(false);
     }
 
     @Override
@@ -514,14 +524,12 @@ public class FODCircleView extends ImageView implements OnTouchListener,
 
     private void setDim(boolean dim) {
         if (dim) {
-            int curBrightness = Settings.System.getInt(getContext().getContentResolver(),
-                    Settings.System.SCREEN_BRIGHTNESS, 100);
             int dimAmount = 0;
 
             IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
             if (daemon != null) {
                 try {
-                    dimAmount = daemon.getDimAmount(curBrightness);
+                    dimAmount = daemon.getDimAmount(mCurrentBrightness);
                 } catch (RemoteException e) {
                     // do nothing
                 }
