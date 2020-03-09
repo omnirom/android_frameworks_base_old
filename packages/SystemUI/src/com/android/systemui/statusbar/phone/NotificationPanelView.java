@@ -3462,6 +3462,9 @@ public class NotificationPanelView extends PanelView implements
             }
             int pulseColor = mPulseLightsView.getDefaultNotificationLightsColor();
             if (row != null) {
+                if (DEBUG_PULSE_LIGHT) {
+                    Log.d(TAG, "setPulsing notification = " + row.getStatusBarNotification());
+                }
                 if (pulseColorAutomatic) {
                     int notificationColor = row.getStatusBarNotification().getNotification().color;
                     if (notificationColor != Notification.COLOR_DEFAULT) {
@@ -3472,25 +3475,28 @@ public class NotificationPanelView extends PanelView implements
                 }
             }
             if (mPulsing) {
-                showAodContent(true);
-                if (activeNotif && pulseReasonNotification) {
-                    // show the bars if we have to
-                    if (pulseLights) {
-                        mPulseLightsView.animateNotificationWithColor(pulseColor);
-                        mPulseLightsView.setVisibility(View.VISIBLE);
-                    } else {
-                        // bars can still be visible as leftover
-                        // but we dont want them here
-                        mPulseLightsView.setVisibility(View.GONE);
+                if (pulseReasonNotification) {
+                    if (activeNotif) {
+                        // show the bars if we have to
+                        if (pulseLights) {
+                            mPulseLightsView.animateNotificationWithColor(pulseColor);
+                            mPulseLightsView.setVisibility(View.VISIBLE);
+                        } else if (!mAmbientPulseLightRunning) {
+                            // bars can still be visible as leftover
+                            // but we dont want them here
+                            mPulseLightsView.setVisibility(View.GONE);
+                        }
+                        if (ambientLights) {
+                            mPulseLightHandled = false;
+                            // tell power manager that we want to enable aod
+                            // must do that here already not on pulsing = false
+                            Settings.System.putIntForUser(mContext.getContentResolver(),
+                                    Settings.System.OMNI_AOD_NOTIFICATION_PULSE_TRIGGER, 1,
+                                    UserHandle.USER_CURRENT);
+                        }
                     }
-                    if (ambientLights) {
-                        mPulseLightHandled = false;
-                        // tell power manager that we want to enable aod
-                        // must do that here already not on pulsing = false
-                        Settings.System.putIntForUser(mContext.getContentResolver(),
-                                Settings.System.OMNI_AOD_NOTIFICATION_PULSE_TRIGGER, 1,
-                                UserHandle.USER_CURRENT);
-                    }
+                } else {
+                    showAodContent(true);
                 }
             } else {
                 // continue to pulse - if not screen was turned on in the meantime
