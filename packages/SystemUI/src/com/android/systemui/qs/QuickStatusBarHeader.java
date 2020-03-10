@@ -144,6 +144,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private boolean mForceHideQsStatusBar;
     private BatteryMeterView mBatteryMeterView;
     public static final String QS_BATTERY_LOCATION_BAR = "qs_battery_location_bar";
+    private boolean mDeviceHasLeftSidePunchHole;
 
     private class OmniSettingsObserver extends ContentObserver {
         OmniSettingsObserver(Handler handler) {
@@ -162,7 +163,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             updateSettings();
         }
     }
-    private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler); 
+    private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
 
     private final BroadcastReceiver mRingerReceiver = new BroadcastReceiver() {
         @Override
@@ -211,6 +212,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mRingerContainer = findViewById(R.id.ringer_container);
         mCarrierGroup = findViewById(R.id.carrier_group);
         mForceHideQsStatusBar = mContext.getResources().getBoolean(R.bool.qs_status_bar_hidden);
+        mDeviceHasLeftSidePunchHole = mContext.getResources().getBoolean(
+          R.bool.device_has_left_side_punch_hole);
 
         updateResources();
 
@@ -237,6 +240,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mClockView = findViewById(R.id.clock);
         mClockView.setOnClickListener(this);
         mClockView.setClockHideableByUser(false);
+        if (mDeviceHasLeftSidePunchHole) {
+            updateLeftClockPadding(false);
+        }
         mDateView = findViewById(R.id.date);
         mDateView.setOnClickListener(this);
 
@@ -318,6 +324,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
         updateResources();
         updateStatusbarProperties();
+        if (mDeviceHasLeftSidePunchHole) {
+            updateLeftClockPadding(mLandscape);
+        }
     }
 
     @Override
@@ -624,5 +633,21 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         boolean shouldUseWallpaperTextColor = (mLandscape || mForceHideQsStatusBar) && !mHeaderImageEnabled;
         mBatteryMeterView.useWallpaperTextColor(shouldUseWallpaperTextColor);
         mClockView.useWallpaperTextColor(shouldUseWallpaperTextColor);
+    }
+
+    private void updateLeftClockPadding(boolean isLandscape) {
+        int defaultLeftClockPadding = mContext.getResources().getDimensionPixelSize(
+                R.dimen.status_bar_left_clock_starting_padding);
+        int customLeftClockPadding = mContext.getResources().getDimensionPixelSize(
+                R.dimen.quick_status_bar_left_clock_starting_padding);
+        if (mLandscape) {
+            mClockView.setPadding(defaultLeftClockPadding,
+                    mClockView.getPaddingTop(), mClockView.getPaddingRight(),
+                    mClockView.getPaddingBottom());
+        } else {
+            mClockView.setPadding(customLeftClockPadding,
+                    mClockView.getPaddingTop(), mClockView.getPaddingRight(),
+                    mClockView.getPaddingBottom());
+        }
     }
 }
