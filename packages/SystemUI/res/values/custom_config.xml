@@ -54,4 +54,5 @@
     <!-- Whether to use fingerprint pressed image -->
     <bool name="config_fodPressedImage">false</bool>
 
+    <bool name="device_has_left_side_punch_hole">false</bool>
 </resources>
