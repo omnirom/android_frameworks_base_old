@@ -281,7 +281,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mLayoutState = LAYOUT_CUTOUT;
 
         if (mCutoutSpace == null) {
-            updateLayoutParamsNoCutout();
+            return updateLayoutParamsNoCutout();
         }
 
         Rect bounds = new Rect();
