@@ -211,6 +211,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mRingerContainer = findViewById(R.id.ringer_container);
         mCarrierGroup = findViewById(R.id.carrier_group);
         mForceHideQsStatusBar = mContext.getResources().getBoolean(R.bool.qs_status_bar_hidden);
+        mClockView = findViewById(R.id.clock);
+        mClockView.setOnClickListener(this);
+        mClockView.setClockHideableByUser(false);
 
         updateResources();
 
@@ -234,9 +237,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mBatteryMeterView.setOnClickListener(this);
         mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
 
-        mClockView = findViewById(R.id.clock);
-        mClockView.setOnClickListener(this);
-        mClockView.setClockHideableByUser(false);
         mDateView = findViewById(R.id.date);
         mDateView.setOnClickListener(this);
 
@@ -360,6 +360,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         mSystemIconsView.getLayoutParams().height = topMargin;
         mSystemIconsView.setLayoutParams(mSystemIconsView.getLayoutParams());
+        mClockView.setPadding(resources.getDimensionPixelSize(R.dimen.qs_status_bar_left_clock_starting_padding), 0, 0, 0);
 
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
         if (mQsDisabled) {
