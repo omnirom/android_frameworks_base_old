@@ -119,14 +119,8 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
             Log.d(TAG, "Call state=" + mTelephonyManager.getCallState());
         } else if (mSimCount == 0) {
             Log.d(TAG, "handleClick:no sim card");
-            SysUIToast.makeText(mContext,
-                    mContext.getString(R.string.qs_data_switch_toast_0),
-                    Toast.LENGTH_LONG).show();
         } else if (mSimCount == 1) {
             Log.d(TAG, "handleClick:only one sim card");
-            SysUIToast.makeText(mContext,
-                    mContext.getString(R.string.qs_data_switch_toast_1),
-                    Toast.LENGTH_LONG).show();
         } else {
             mHost.collapsePanels();
             AsyncTask.execute(new Runnable() {
