@@ -139,12 +139,8 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
             if (DEBUG) Log.d(TAG, "Call state=" + mTelephonyManager.getCallState());
         } else if (mSimCount == 0) {
             if (DEBUG) Log.d(TAG, "handleClick:no sim card");
-            Toast.makeText(mContext, R.string.qs_data_switch_toast_0,
-                    Toast.LENGTH_LONG).show();
         } else if (mSimCount == 1) {
             if (DEBUG) Log.d(TAG, "handleClick:only one sim card");
-            Toast.makeText(mContext, R.string.qs_data_switch_toast_1,
-                    Toast.LENGTH_LONG).show();
         } else {
             Executors.newSingleThreadExecutor().execute(() -> {
                 toggleMobileDataEnabled();
@@ -183,8 +179,13 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
                     ? R.string.qs_data_sim_1
                     : R.string.qs_data_sim_2);
         } else {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_data_switch_1);
-            state.secondaryLabel = mContext.getString(R.string.qs_data_sim_1);
+            if (mSimCount == 0) {
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_data_switch_0);
+                state.secondaryLabel = mContext.getString(R.string.qs_data_no_sim);
+            } else {
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_data_switch_1);
+                state.secondaryLabel = mContext.getString(R.string.qs_data_sim_1);
+            }
         }
         if (mSimCount < 2 || !mCanSwitch) {
             state.state = 0;
