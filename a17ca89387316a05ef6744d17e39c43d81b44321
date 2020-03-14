@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0662e133_9ba19526",
+        "filename": "packages/SystemUI/src/com/android/systemui/qs/tiles/DataSwitchTile.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-03-14T16:01:27Z",
+      "side": 1,
+      "message": "and why not also here :)",
+      "revId": "a17ca89387316a05ef6744d17e39c43d81b44321",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
