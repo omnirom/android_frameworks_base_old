@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c9576584_605baa7f",
+        "filename": "packages/SystemUI/src/com/android/systemui/qs/tiles/DataSwitchTile.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-03-14T13:39:14Z",
+      "side": 1,
+      "message": "so simply remove secondary label",
+      "revId": "55754972d67b3d3d8c50b9bdfe04c99254912572",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
