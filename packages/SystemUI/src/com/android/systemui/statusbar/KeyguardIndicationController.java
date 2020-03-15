@@ -427,25 +427,36 @@ public class KeyguardIndicationController implements StateListener,
                 } else if (!TextUtils.isEmpty(mAlignmentIndication)) {
                     mTextView.switchIndication(mAlignmentIndication);
                     mTextView.setTextColor(Utils.getColorError(mContext));
-                } else if (mPowerPluggedIn) {
+                } else if (mPowerPluggedIn && !showPowerDetails) {
                     String indication = computePowerIndication();
-                    if (showPowerDetails) {
-                        indication += computePowerDetailIndication();
-                    }
                     if (animate) {
                         animateText(mTextView, indication);
                     } else {
                         mTextView.switchIndication(indication);
                     }
+                } else {
+                    String percentage = NumberFormat.getPercentInstance()
+                            .format(mBatteryLevel / 100f);
+                    mTextView.switchIndication(percentage);
+                }
+                // we may want to overwrite things set above
+                if (mPowerPluggedIn) {
                     if (showBatteryBar) {
                         mBatteryBar.setVisibility(View.VISIBLE);
                         mBatteryBar.setBatteryPercent(mBatteryLevel);
                         mBatteryBar.setBarColor(Color.WHITE);
                     }
-                } else {
-                    String percentage = NumberFormat.getPercentInstance()
-                            .format(mBatteryLevel / 100f);
-                    mTextView.switchIndication(percentage);
+                    // if we opted to show anything of that we dont care about any message
+                    // from e.g. smart lock - so overrule that
+                    if (showPowerDetails) {
+                        String indication = computePowerIndication();
+                        indication += computePowerDetailIndication();
+                        if (animate) {
+                            animateText(mTextView, indication);
+                        } else {
+                            mTextView.switchIndication(indication);
+                        }
+                    }
                 }
                 return;
             }
@@ -466,21 +477,13 @@ public class KeyguardIndicationController implements StateListener,
             } else if (!TextUtils.isEmpty(mAlignmentIndication)) {
                 mTextView.switchIndication(mAlignmentIndication);
                 mTextView.setTextColor(Utils.getColorError(mContext));
-            } else if (mPowerPluggedIn) {
+            } else if (mPowerPluggedIn && !showPowerDetails) {
                 String indication = computePowerIndication();
-                if (showPowerDetails) {
-                    indication += computePowerDetailIndication();
-                }
                 mTextView.setTextColor(mInitialTextColorState);
                 if (animate) {
                     animateText(mTextView, indication);
                 } else {
                     mTextView.switchIndication(indication);
-                }
-                if (showBatteryBar && showBatteryBarAlways) {
-                    mBatteryBar.setVisibility(View.VISIBLE);
-                    mBatteryBar.setBatteryPercent(mBatteryLevel);
-                    mBatteryBar.setBarColor(mInitialTextColorState);
                 }
             } else if (!TextUtils.isEmpty(trustManagedIndication)
                     && mKeyguardUpdateMonitor.getUserTrustIsManaged(userId)
@@ -490,6 +493,26 @@ public class KeyguardIndicationController implements StateListener,
             } else {
                 mTextView.switchIndication(mRestingIndication);
                 mTextView.setTextColor(mInitialTextColorState);
+            }
+            // we may want to overwrite things set above
+            if (mPowerPluggedIn) {
+                if (showBatteryBar && showBatteryBarAlways) {
+                    mBatteryBar.setVisibility(View.VISIBLE);
+                    mBatteryBar.setBatteryPercent(mBatteryLevel);
+                    mBatteryBar.setBarColor(Color.WHITE);
+                }
+                // if we opted to show anything of that we dont care about any message
+                // from e.g. smart lock - so overrule that
+                if (showPowerDetails) {
+                    String indication = computePowerIndication();
+                    indication += computePowerDetailIndication();
+                    mTextView.setTextColor(mInitialTextColorState);
+                    if (animate) {
+                        animateText(mTextView, indication);
+                    } else {
+                        mTextView.switchIndication(indication);
+                    }
+                }
             }
         }
     }
