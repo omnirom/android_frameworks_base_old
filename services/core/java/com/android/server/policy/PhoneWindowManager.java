@@ -218,6 +218,8 @@ import com.android.internal.util.omni.DeviceKeyHandler;
 import com.android.internal.util.omni.OmniSwitchConstants;
 import com.android.internal.util.omni.OmniUtils;
 import com.android.internal.util.omni.OmniSwitchConstants;
+import com.android.internal.util.omni.TaskUtils;
+import com.android.internal.util.omni.SystemKeyEventHandler;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
 import com.android.server.SystemServiceManager;
@@ -256,7 +258,7 @@ import java.util.List;
 public class PhoneWindowManager implements WindowManagerPolicy {
     static final String TAG = "WindowManager";
     static final boolean localLOGV = false;
-    static final boolean DEBUG_INPUT = false;
+    static final boolean DEBUG_INPUT = true;
     static final boolean DEBUG_KEYGUARD = false;
     static final boolean DEBUG_SPLASH_SCREEN = false;
     static final boolean DEBUG_WAKEUP = false;
@@ -676,7 +678,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mVolumeMusicControlActive;
     private boolean mVolumeMusicControl;
     private boolean mLongPressPowerTorch;
-
+    private SystemKeyEventHandler mAppSwitchKeyHandler = new SystemKeyEventHandler(mHandler,
+            () -> toggleRecentApps(),
+            () -> TaskUtils.toggleLastApp(mContext, UserHandle.myUserId()),
+            null);
     private static final int KEY_ACTION_TOGGLE_TORCH = 9;
 
     private class PolicyHandler extends Handler {
@@ -2922,10 +2927,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 0;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
             if (!keyguardOn) {
-                if (down && repeatCount == 0) {
-                    preloadRecentApps();
-                } else if (!down) {
-                    toggleRecentApps();
+                if (mOmniSwitchRecents) {
+                    return mAppSwitchKeyHandler.handleKeyEvent(event, keyguardOn);
+                } else {
+                    if (down && repeatCount == 0) {
+                        preloadRecentApps();
+                    } else if (!down) {
+                        toggleRecentApps();
+                    }
                 }
             }
             return -1;
