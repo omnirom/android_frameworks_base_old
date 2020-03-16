@@ -654,10 +654,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mNavigationBarView.reorient();
 
         ButtonDispatcher recentsButton = mNavigationBarView.getRecentsButton();
-        recentsButton.setOnClickListener(this::onRecentsClick);
-        recentsButton.setOnTouchListener(this::onRecentsTouch);
-        recentsButton.setLongClickable(true);
+        //recentsButton.setOnClickListener(this::onRecentsClick);
+        //recentsButton.setOnTouchListener(this::onRecentsTouch);
         recentsButton.setOnLongClickListener(this::onLongPressBackRecents);
+        recentsButton.setLongClickable(false);
 
         ButtonDispatcher backButton = mNavigationBarView.getBackButton();
         backButton.setLongClickable(true);
