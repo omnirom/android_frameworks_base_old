@@ -21,6 +21,7 @@ package com.android.internal.util.omni;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.ActivityTaskManager;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -39,6 +40,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManager;
+
+import com.android.internal.R;
 
 import java.util.List;
 
@@ -90,26 +93,23 @@ public class TaskUtils {
         // lets get enough tasks to find something to switch to
         // Note, we'll only get as many as the system currently has - up to 5
         int lastAppId = 0;
-        Intent lastAppIntent = null;
-        for (int i = 1; i < tasks.size() && lastAppIntent == null; i++) {
+        for (int i = 1; i < tasks.size(); i++) {
             final String packageName = tasks.get(i).baseIntent.getComponent()
                     .getPackageName();
             if (!packageName.equals(defaultHomePackage)
                     && !packageName.equals(SYSTEMUI_PACKAGE)) {
                 final ActivityManager.RecentTaskInfo info = tasks.get(i);
-                lastAppId = info.id;
-                lastAppIntent = info.baseIntent;
+                lastAppId = info.persistentId;
+                break;
             }
         }
         if (lastAppId > 0) {
-            am.moveTaskToFront(lastAppId,
-                    ActivityManager.MOVE_TASK_NO_USER_ACTION);
-        } else if (lastAppIntent != null) {
-            // last task is dead, restart it.
-            lastAppIntent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+            ActivityOptions options = ActivityOptions.makeCustomAnimation(context,
+                    R.anim.last_app_in, R.anim.last_app_out);
             try {
-                context.startActivityAsUser(lastAppIntent, UserHandle.CURRENT);
-            } catch (ActivityNotFoundException e) {
+                ActivityManagerNative.getDefault().startActivityFromRecents(
+                        lastAppId,  options.toBundle());
+            } catch (RemoteException e) {
             }
         }
     }
