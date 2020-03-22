@@ -512,7 +512,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
             });
         }
 
-        TransitionManager.beginDelayedTransition((ViewGroup) mClockView.getParent(), mTransition);
+        //TransitionManager.beginDelayedTransition((ViewGroup) mClockView.getParent(), mTransition);
         mClockView.setVisibility(hasHeader ? View.INVISIBLE : View.VISIBLE);
         mClockViewBold.setVisibility(hasHeader ? View.VISIBLE : View.INVISIBLE);
         int paddingBottom = mContext.getResources().getDimensionPixelSize(hasHeader
