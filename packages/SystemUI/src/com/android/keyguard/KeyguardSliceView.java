@@ -85,6 +85,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
     private static final String TAG = "KeyguardSliceView";
     public static final int DEFAULT_ANIM_DURATION = 550;
+    private static final boolean SKIP_TRANSITION_ANIMATION = true;
 
     private final HashMap<View, PendingIntent> mClickActions;
     private final ActivityStarter mActivityStarter;
@@ -178,7 +179,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     @Override
     public void onVisibilityAggregated(boolean isVisible) {
         super.onVisibilityAggregated(isVisible);
-        setLayoutTransition(isVisible ? mLayoutTransition : null);
+        setLayoutTransition((isVisible && !SKIP_TRANSITION_ANIMATION) ? mLayoutTransition : null);
     }
 
     /**
@@ -482,7 +483,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         @Override
         public void onVisibilityAggregated(boolean isVisible) {
             super.onVisibilityAggregated(isVisible);
-            setLayoutTransition(isVisible ? mLayoutTransition : null);
+            setLayoutTransition((isVisible && !SKIP_TRANSITION_ANIMATION) ? mLayoutTransition : null);
         }
 
         @Override

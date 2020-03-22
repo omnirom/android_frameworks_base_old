@@ -52,6 +52,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private static final String TAG = "KeyguardClockSwitch";
     private static final boolean CUSTOM_CLOCKS_ENABLED = true;
+    private static final boolean SKIP_TRANSITION_ANIMATION = true;
 
     /**
      * Animation fraction when text is transitioned to/from bold.
@@ -478,7 +479,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
             return;
         }
         mShowingHeader = hasHeader;
-        if (hasCustomClock()) {
+        if (hasCustomClock() || SKIP_TRANSITION_ANIMATION) {
             return;
         }
 
