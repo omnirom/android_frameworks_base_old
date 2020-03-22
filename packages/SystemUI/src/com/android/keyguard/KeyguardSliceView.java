@@ -85,6 +85,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
     private static final String TAG = "KeyguardSliceView";
     public static final int DEFAULT_ANIM_DURATION = 550;
+    private static final String KEYGUARD_TRANSISITION_ANIMATIONS = "sysui_keyguard_transition_animations";
 
     private final HashMap<View, PendingIntent> mClickActions;
     private final ActivityStarter mActivityStarter;
@@ -114,6 +115,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private float mRowWithHeaderTextSize;
     private float mHeaderTextSize;
 
+    private static boolean mKeyguardTransitionAnimations = true;
+
     @Inject
     public KeyguardSliceView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             ActivityStarter activityStarter, ConfigurationController configurationController) {
@@ -121,6 +124,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
         TunerService tunerService = Dependency.get(TunerService.class);
         tunerService.addTunable(this, Settings.Secure.KEYGUARD_SLICE_URI);
+        tunerService.addTunable(this, KEYGUARD_TRANSISITION_ANIMATIONS);
 
         mClickActions = new HashMap<>();
         mRowPadding = context.getResources().getDimensionPixelSize(R.dimen.subtitle_clock_padding);
@@ -183,7 +187,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     @Override
     public void onVisibilityAggregated(boolean isVisible) {
         super.onVisibilityAggregated(isVisible);
-        setLayoutTransition(isVisible ? mLayoutTransition : null);
+        setLayoutTransition((isVisible && mKeyguardTransitionAnimations) ? mLayoutTransition : null);
     }
 
     /**
@@ -356,7 +360,11 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        setupUri(newValue);
+        if (key.equals(KEYGUARD_TRANSISITION_ANIMATIONS)) {
+            mKeyguardTransitionAnimations = newValue == null || newValue.equals("1");
+        } else {
+            setupUri(newValue);
+        }
     }
 
     /**
@@ -497,7 +505,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         @Override
         public void onVisibilityAggregated(boolean isVisible) {
             super.onVisibilityAggregated(isVisible);
-            setLayoutTransition(isVisible ? mLayoutTransition : null);
+            setLayoutTransition((isVisible && mKeyguardTransitionAnimations) ? mLayoutTransition : null);
         }
 
         @Override
