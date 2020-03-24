@@ -24,6 +24,7 @@
     <string name="global_action_reboot_recovery">Рекавери</string>
     <string name="global_action_reboot_bootloader">Загрузчик</string>
     <string name="global_action_reboot_fastboot">Fastboot</string>
+    <string name="global_action_screenrecord">Запись</string>
     <!-- Caffeine tile -->
     <string name="quick_settings_caffeine_label">Запрет сна</string>
     <string name="accessibility_quick_settings_caffeine_off">Запрет сна выкл.</string>
@@ -126,6 +127,14 @@
     <!-- Navigation bar dpad -->
     <string name="accessibility_dpad_left">Курсор влево</string>
     <string name="accessibility_dpad_right">Курсор вправо</string>
+    <string name="screenrecord_stopdot_label">Показать точку остановки</string>
+    <string name="screenrecord_low_quality_label">Низкое качество</string>
     <!-- Partial screenshot -->
+    <string name="global_screenshot_selector_capture_description">Сделать частичный скриншот</string>
+    <string name="global_screenshot_selector_cancel_description">Отменить частичный скриншот</string>
     <!-- Immersive tile -->
+    <string name="quick_settings_immersive_tile">Режим погружения</string>
+    <string name="quick_settings_immersive_tile_statusbar">Иммерсивная строка состояния</string>
+    <string name="quick_settings_immersive_tile_navbar">Иммерсивная панель навигации</string>
+    <string name="quick_settings_immersive_tile_full">Полное погружение</string>
 </resources>

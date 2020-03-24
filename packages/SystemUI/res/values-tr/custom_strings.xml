@@ -24,6 +24,7 @@
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <string name="global_action_reboot_fastboot">Fastboot</string>
+    <string name="global_action_screenrecord">Kayıt</string>
     <!-- Caffeine tile -->
     <string name="quick_settings_caffeine_label">Caffeine</string>
     <string name="accessibility_quick_settings_caffeine_off">Caffeine kapalı</string>
@@ -86,7 +87,7 @@
     <string name="tuner_battery_percent_title">Pil yüzdesi</string>
     <string name="tuner_status_bar_show_battery_image">Pil görüntüsü</string>
     <string name="tuner_keyguard_show_lock_icon_title">Kilit durumunu göster</string>
-    <string name="tuner_keyguard_show_lock_icon_summary">Mevcut kilit durumunu üstte göster</string>
+    <string name="tuner_keyguard_show_lock_icon_summary">Mevcut kilit durumu simgesini üstte gösterir</string>
     <string name="tuner_nav_bar_show_handle_title">Kol göster</string>
     <string name="tuner_nav_bar_legacy_category">3 düğmeli gezinti</string>
     <string name="tuner_nav_bar_gesture_category">El hareketiyle gezinti</string>
@@ -97,14 +98,14 @@
     <string name="omnijaws_detail_header">Hava durumu</string>
     <string name="omnijaws_label_default">Hava durumu</string>
     <string name="omnijaws_current_text">Şu ânda</string>
-    <string name="omnijaws_package_not_available">OmniJaws mevcûd değil</string>
+    <string name="omnijaws_package_not_available">OmniJaws kullanılabilir değil</string>
     <string name="omnijaws_service_last_update">Son güncelleme:</string>
     <!-- navbar editor -->
     <string name="preview">Göz atma</string>
     <string name="keycode">Tuş kodu</string>
     <string name="no_home_title">Ana ekran düğmesi bulunmadı</string>
     <string name="no_home_message">Bu cihazda gezinmeniz için bir ana ekran düğmesine ihtiyâcınız var. Kaydetmeden evvel lütfen bir ana ekran düğmesi ilâve edin.</string>
-    <string name="clipboard_description">Pano, unsurların doğrudan panoya sürüklenmesine imkân sağlar. Unsurlar panoda mevcûdsa doğrudan pano dışına da sürüklenebilir.</string>
+    <string name="clipboard_description">Pano, unsurların doğrudan panoya sürüklenmesine imkân sağlar. Unsurlar panoda mevcutsa doğrudan pano dışına da sürüklenebilir.</string>
     <string name="keycode_description">Tuş kodu düğmeleri klavye tuşlarının gezinti çubuğuna ilâve edilmesine imkân sağlar. Dokunulduğu vakit seçilen klavye tuşunu taklit ederler. Evvelâ düğme için bir tuş ve ardından düğme üzerinde gösterilecek bir resim seçilmelidir.</string>
     <string name="start">Başlangıç</string>
     <string name="center">Merkez</string>
@@ -126,6 +127,14 @@
     <!-- Navigation bar dpad -->
     <string name="accessibility_dpad_left">İşâretçi solda</string>
     <string name="accessibility_dpad_right">İşâretçi sağda</string>
+    <string name="screenrecord_stopdot_label">Durma noktasını göster</string>
+    <string name="screenrecord_low_quality_label">Düşük kalite</string>
     <!-- Partial screenshot -->
+    <string name="global_screenshot_selector_capture_description">Kısmî ekran görüntüsü al</string>
+    <string name="global_screenshot_selector_cancel_description">Kısmî ekran görüntüsünü iptal et</string>
     <!-- Immersive tile -->
+    <string name="quick_settings_immersive_tile">Tam ekran modu</string>
+    <string name="quick_settings_immersive_tile_statusbar">Tam ekran modu: Durum çubuğu</string>
+    <string name="quick_settings_immersive_tile_navbar">Tam ekran modu: Gezinti çubuğu</string>
+    <string name="quick_settings_immersive_tile_full">Tam ekran modu: Tam</string>
 </resources>

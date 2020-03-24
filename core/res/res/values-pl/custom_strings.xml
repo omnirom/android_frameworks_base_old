@@ -40,6 +40,10 @@
          they want to allow the application to do this. -->
     <string name="permdesc_fakePackageSignature">Zezwala aplikacji na udawanie innej aplikacji. Złośliwe aplikacje mogą to wykorzystać do uzyskania dostępu do danych prywatnych aplikacji. Uzasadnione zastosowania obejmują emulator udający, że jest tym, co emuluje. Udzielaj tego uprawnienia z ostrożnością!</string>
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_fake_package_signature">Fałszywy podpis pakietu</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_fake_package_signature">pozwól na fałszywy podpis pakietu</string>
     <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
+    <string name="permgrouprequest_fake_package_signature">Zezwolić
+        &lt;b&gt;<xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b&gt; na fałszywy podpis pakietu?</string>
 </resources>

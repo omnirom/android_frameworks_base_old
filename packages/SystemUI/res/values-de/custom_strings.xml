@@ -24,6 +24,7 @@
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <string name="global_action_reboot_fastboot">Fastboot</string>
+    <string name="global_action_screenrecord">Aufnehmen</string>
     <!-- Caffeine tile -->
     <string name="quick_settings_caffeine_label">Koffein</string>
     <string name="accessibility_quick_settings_caffeine_off">Koffein aus</string>
@@ -126,6 +127,14 @@
     <!-- Navigation bar dpad -->
     <string name="accessibility_dpad_left">Zeiger links</string>
     <string name="accessibility_dpad_right">Zeiger rechts</string>
+    <string name="screenrecord_stopdot_label">Stop-Punkt anzeigen</string>
+    <string name="screenrecord_low_quality_label">Niedrige Qualität</string>
     <!-- Partial screenshot -->
+    <string name="global_screenshot_selector_capture_description">Teil-Screenshot erfassen</string>
+    <string name="global_screenshot_selector_cancel_description">Teil-Screenshot abbrechen</string>
     <!-- Immersive tile -->
+    <string name="quick_settings_immersive_tile">Vollbildmodus</string>
+    <string name="quick_settings_immersive_tile_statusbar">Statusbar verstecken</string>
+    <string name="quick_settings_immersive_tile_navbar">Navigationsleiste verstecken</string>
+    <string name="quick_settings_immersive_tile_full">Vollständig</string>
 </resources>
