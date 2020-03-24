@@ -24,6 +24,7 @@
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <string name="global_action_reboot_fastboot">Fastboot</string>
+    <string name="global_action_screenrecord">Záznam</string>
     <!-- Caffeine tile -->
     <string name="quick_settings_caffeine_label">Caffeine</string>
     <string name="accessibility_quick_settings_caffeine_off">Caffeine vypnuto</string>
@@ -126,6 +127,14 @@
     <!-- Navigation bar dpad -->
     <string name="accessibility_dpad_left">Kurzor vlevo</string>
     <string name="accessibility_dpad_right">Kurzor vpravo</string>
+    <string name="screenrecord_stopdot_label">Zobrazit tečku ukončení</string>
+    <string name="screenrecord_low_quality_label">Nízká kvalita</string>
     <!-- Partial screenshot -->
+    <string name="global_screenshot_selector_capture_description">Pořídit částečný snímek obrazovky</string>
+    <string name="global_screenshot_selector_cancel_description">Zrušit částečný snímek obrazovky</string>
     <!-- Immersive tile -->
+    <string name="quick_settings_immersive_tile">Režim pohlcení</string>
+    <string name="quick_settings_immersive_tile_statusbar">Pohlcující stavový řádek</string>
+    <string name="quick_settings_immersive_tile_navbar">Pohlcující navigační panel</string>
+    <string name="quick_settings_immersive_tile_full">Úplný režim pohlcení</string>
 </resources>

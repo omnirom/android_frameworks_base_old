@@ -38,8 +38,11 @@
     <string name="permlab_fakePackageSignature">Paket imzasını taklîd et</string>
     <!-- Description of an application permission, listed so the user can choose whether
          they want to allow the application to do this. -->
-    <string name="permdesc_fakePackageSignature">Uygulamaya farklı bir uygulama gibi davranma izni verir. Zararlı uygulamalar bunu özel uygulama verilerine erişmek için kullanabilir. Meşru kullanımlar taklit ettiği şeymiş gibi davranan bir emülatör içerir. Bu izni çok dikkatli bir şekilde verin!</string>
+    <string name="permdesc_fakePackageSignature">Uygulamaya farklı bir uygulama gibi davranma izni verir. Kötü niyetli uygulamalar, mahrem uygulama verilerine erişmek için bundan faydalanabilir. Meşrû kullanımlar, taklit ettiği şeymiş gibi davranan bir emülatör içerir. Bu izni çok dikkatli bir şekilde verin!</string>
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_fake_package_signature">Paket imzasını taklîd etme</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_fake_package_signature">paket imzasını taklîd etmeye izin verir</string>
     <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
+    <string name="permgrouprequest_fake_package_signature">&lt;b&gt;<xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b&gt; uygulamasının paket imzasını taklîd etmesine izin verilsin mi?</string>
 </resources>

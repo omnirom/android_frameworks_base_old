@@ -24,6 +24,7 @@
     <string name="global_action_reboot_recovery">Tryb Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <string name="global_action_reboot_fastboot">Fastboot</string>
+    <string name="global_action_screenrecord">Nagraj</string>
     <!-- Caffeine tile -->
     <string name="quick_settings_caffeine_label">Kofeina</string>
     <string name="accessibility_quick_settings_caffeine_off">Kofeina wyłączona</string>
@@ -126,6 +127,14 @@
     <!-- Navigation bar dpad -->
     <string name="accessibility_dpad_left">Kursor w lewo</string>
     <string name="accessibility_dpad_right">Kursor w prawo</string>
+    <string name="screenrecord_stopdot_label">Pokaż kropkę zatrzymania</string>
+    <string name="screenrecord_low_quality_label">Niska jakość</string>
     <!-- Partial screenshot -->
+    <string name="global_screenshot_selector_capture_description">Przechwyć częściowy zrzut ekranu</string>
+    <string name="global_screenshot_selector_cancel_description">Anuluj częściowy zrzut ekranu</string>
     <!-- Immersive tile -->
+    <string name="quick_settings_immersive_tile">Tryb pełnoekranowy</string>
+    <string name="quick_settings_immersive_tile_statusbar">Pełnoekranowy pasek stanu</string>
+    <string name="quick_settings_immersive_tile_navbar">Pełnoekranowy pasek nawigacyjny</string>
+    <string name="quick_settings_immersive_tile_full">W pełni pełnoekranowy</string>
 </resources>
