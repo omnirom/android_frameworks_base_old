@@ -19,8 +19,10 @@ package com.android.keyguard;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.hardware.biometrics.BiometricSourceType;
 import android.graphics.Canvas;
 import android.media.AudioManager;
 import android.os.SystemClock;
@@ -57,6 +59,8 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     protected LockPatternUtils mLockPatternUtils;
     private OnDismissAction mDismissAction;
     private Runnable mCancelAction;
+    private boolean mHasFod;
+    private boolean mFodRunning;
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -90,6 +94,24 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
                 }
             }
         }
+
+        @Override
+        public void onBiometricRunningStateChanged(boolean running,
+            BiometricSourceType biometricSourceType) {
+            if (mHasFod && biometricSourceType == BiometricSourceType.FINGERPRINT) {
+                if (DEBUG) Log.d(TAG, "onBiometricRunningStateChanged() running = " + running);
+                mFodRunning = running;
+
+                // move up to clear fod area if needed
+                FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mSecurityContainer.getLayoutParams();
+                int bottmMargin = 0;
+                if (mHasFod && mFodRunning) {
+                    bottmMargin = getContext().getResources().getDimensionPixelSize(R.dimen.keyguard_security_container_bottom_margin);
+                }
+                lp.setMargins(0, 0, 0, bottmMargin);
+                mSecurityContainer.setLayoutParams(lp);
+            }
+        }
     };
 
     // Whether the volume keys should be handled by keyguard. If true, then
@@ -108,6 +130,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     public KeyguardHostView(Context context, AttributeSet attrs) {
         super(context, attrs);
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateCallback);
+        mHasFod = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FOD);
     }
 
     @Override
@@ -142,6 +165,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
 
     @Override
     protected void onFinishInflate() {
+        if (DEBUG) Log.d(TAG, "onFinishInflate()");
         mSecurityContainer =
                 findViewById(R.id.keyguard_security_container);
         mLockPatternUtils = new LockPatternUtils(mContext);
