@@ -19,6 +19,7 @@ package com.android.keyguard;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -57,6 +58,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     protected LockPatternUtils mLockPatternUtils;
     private OnDismissAction mDismissAction;
     private Runnable mCancelAction;
+    private boolean mHasFod;
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -108,6 +110,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     public KeyguardHostView(Context context, AttributeSet attrs) {
         super(context, attrs);
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateCallback);
+        mHasFod = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FOD);
     }
 
     @Override
@@ -142,12 +145,21 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
 
     @Override
     protected void onFinishInflate() {
+        if (DEBUG) Log.d(TAG, "onFinishInflate()");
         mSecurityContainer =
                 findViewById(R.id.keyguard_security_container);
         mLockPatternUtils = new LockPatternUtils(mContext);
         mSecurityContainer.setLockPatternUtils(mLockPatternUtils);
         mSecurityContainer.setSecurityCallback(this);
         mSecurityContainer.showPrimarySecurityScreen(false);
+
+        // TODO maybe only if fingerprint is enabled - but how to check here?
+        if (mHasFod) {
+            int bottmMargin = getContext().getResources().getDimensionPixelSize(R.dimen.keyguard_security_container_bottom_margin);
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mSecurityContainer.getLayoutParams();
+            lp.setMargins(0, 0, 0, bottmMargin);
+            mSecurityContainer.setLayoutParams(lp);
+        }
     }
 
     /**
