@@ -27,4 +27,9 @@
     <dimen name="digital_clock_two_line_spacing">-20dp</dimen>
     <dimen name="clock_bottom_margin">8dp</dimen>
     <dimen name="header_font_size">20dp</dimen>
+    <!-- The margin between the pattern view and the Emergency Carrier area -->
+    <dimen name="pattern_view_bottom_margin">4dp</dimen>
+
+    <!-- The margin between the pin view and the Emergency Carrier area -->
+    <dimen name="pin_view_bottom_margin">0dp</dimen>
 </resources>
