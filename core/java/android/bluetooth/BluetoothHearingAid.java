@@ -125,6 +125,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
     public static final long HI_SYNC_ID_INVALID = IBluetoothHearingAid.HI_SYNC_ID_INVALID;
 
     private BluetoothAdapter mAdapter;
+
     private final BluetoothProfileConnector<IBluetoothHearingAid> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.HEARING_AID,
                     "BluetoothHearingAid", IBluetoothHearingAid.class.getName()) {

@@ -33,8 +33,11 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Public API for controlling the Bluetooth Headset Service. This includes both
@@ -282,6 +285,41 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
 
     /**
+     * Intent used to broadcast the Battery status of TWS+ devices
+     *
+     * <p>This intent will have 2 extras:
+     * <ul>
+     * <li> {@link #EXTRA_HF_TWSP_BATTERY_STATE} - Current Battey state of TWS+
+     *      device. 0 for Discharging, 1 for Charging
+     * <\li>
+     * <li> {@link #EXTRA_HF_TWSP_BATTERY_LEVEL} - Current Battey charging level
+     *      in percentage of TWS+ device.
+     * <\li>
+     *
+     * @hide
+     */
+    public static final String ACTION_HF_TWSP_BATTERY_STATE_CHANGED =
+            "android.bluetooth.headset.action.HF_TWSP_BATTERY_STATE_CHANGED";
+
+    /**
+     * A int extra field in {@link #EXTRA_HF_TWSP_BATTERY_STATE}
+     * intents that contains the battery state of TWS+ device
+     *
+     * @hide
+     */
+    public static final String EXTRA_HF_TWSP_BATTERY_STATE =
+            "android.bluetooth.headset.extra.HF_TWSP_BATTERY_STATE";
+
+    /**
+     * A int extra field in {@link #EXTRA_HF_TWSP_BATTERY_LEVEL}
+     * intents that contains the value of battery level in percentage for TWS+ device
+     * @hide
+     */
+    public static final String EXTRA_HF_TWSP_BATTERY_LEVEL =
+            "android.bluetooth.headset.extra.HF_TWSP_BATTERY_LEVEL";
+
+
+    /**
      * Intent used to broadcast the headset's indicator status
      *
      * <p>This intent will have 3 extras:
@@ -329,7 +367,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
 
     private Context mContext;
     private ServiceListener mServiceListener;
-    private volatile IBluetoothHeadset mService;
+    private final ReentrantReadWriteLock mServiceLock = new ReentrantReadWriteLock();
+    @GuardedBy("mServiceLock") private IBluetoothHeadset mService;
     private BluetoothAdapter mAdapter;
 
     private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
@@ -367,7 +406,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
     private boolean doBind() {
         synchronized (mConnection) {
             if (mService == null) {
-                if (VDBG) Log.d(TAG, "Binding service...");
+                if (DBG) Log.d(TAG, "Binding service...");
                 try {
                     return mAdapter.getBluetoothManager().bindBluetoothProfileService(
                             BluetoothProfile.HEADSET, mConnection);
@@ -381,15 +420,17 @@ public final class BluetoothHeadset implements BluetoothProfile {
 
     private void doUnbind() {
         synchronized (mConnection) {
+            if (DBG) Log.d(TAG, "Unbinding service...");
             if (mService != null) {
-                if (VDBG) Log.d(TAG, "Unbinding service...");
                 try {
                     mAdapter.getBluetoothManager().unbindBluetoothProfileService(
                             BluetoothProfile.HEADSET, mConnection);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to unbind HeadsetService", e);
                 } finally {
+                    mServiceLock.writeLock().lock();
                     mService = null;
+                    mServiceLock.writeLock().unlock();
                 }
             }
         }
@@ -415,6 +456,10 @@ public final class BluetoothHeadset implements BluetoothProfile {
         }
         mServiceListener = null;
         doUnbind();
+    }
+
+    protected void finalize() throws Throwable {
+        close();
     }
 
     /**
@@ -503,17 +548,22 @@ public final class BluetoothHeadset implements BluetoothProfile {
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
-        final IBluetoothHeadset service = mService;
-        if (service != null && isEnabled()) {
-            try {
-                return service.getConnectedDevices();
-            } catch (RemoteException e) {
-                Log.e(TAG, Log.getStackTraceString(new Throwable()));
-                return new ArrayList<BluetoothDevice>();
+        try {
+            mServiceLock.readLock().lock();
+            final IBluetoothHeadset service = mService;
+            if (service != null && isEnabled()) {
+                try {
+                    return service.getConnectedDevices();
+                } catch (RemoteException e) {
+                    Log.e(TAG, Log.getStackTraceString(new Throwable()));
+                    return new ArrayList<BluetoothDevice>();
+                }
             }
+            if (service == null) Log.w(TAG, "Proxy not attached to service");
+            return new ArrayList<BluetoothDevice>();
+        } finally {
+            mServiceLock.readLock().unlock();
         }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return new ArrayList<BluetoothDevice>();
     }
 
     /**
@@ -693,14 +743,19 @@ public final class BluetoothHeadset implements BluetoothProfile {
     public boolean isAudioConnected(BluetoothDevice device) {
         if (VDBG) log("isAudioConnected()");
         final IBluetoothHeadset service = mService;
-        if (service != null && isEnabled() && isValidDevice(device)) {
-            try {
-                return service.isAudioConnected(device);
-            } catch (RemoteException e) {
-                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+        try {
+            mServiceLock.readLock().lock();
+            if (service != null && isEnabled() && isValidDevice(device)) {
+                try {
+                    return service.isAudioConnected(device);
+                } catch (RemoteException e) {
+                    Log.e(TAG, Log.getStackTraceString(new Throwable()));
+                }
             }
+            if (service == null) Log.w(TAG, "Proxy not attached to service");
+        } finally {
+            mServiceLock.readLock().unlock();
         }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
@@ -1159,17 +1214,26 @@ public final class BluetoothHeadset implements BluetoothProfile {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
-            mService = IBluetoothHeadset.Stub.asInterface(Binder.allowBlocking(service));
-            mHandler.sendMessage(mHandler.obtainMessage(
-                    MESSAGE_HEADSET_SERVICE_CONNECTED));
+            try {
+                mServiceLock.writeLock().lock();
+                mService = IBluetoothHeadset.Stub.asInterface(Binder.allowBlocking(service));
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        MESSAGE_HEADSET_SERVICE_CONNECTED));
+            } finally {
+                mServiceLock.writeLock().unlock();
+            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName className) {
             if (DBG) Log.d(TAG, "Proxy object disconnected");
-            doUnbind();
-            mHandler.sendMessage(mHandler.obtainMessage(
-                    MESSAGE_HEADSET_SERVICE_DISCONNECTED));
+            try {
+                mServiceLock.writeLock().lock();
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        MESSAGE_HEADSET_SERVICE_DISCONNECTED));
+            } finally {
+                mServiceLock.writeLock().unlock();
+            }
         }
     };
 
