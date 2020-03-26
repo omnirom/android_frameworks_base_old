@@ -206,6 +206,9 @@ import com.android.internal.annotations.GuardedBy;
             }
 
             mForcedUseForCommExt = mForcedUseForComm;
+            if (AudioService.DEBUG_SCO) {
+                Log.i(TAG, "In setSpeakerphoneOn(), mForcedUseForCommExt: " + mForcedUseForCommExt);
+            }
             setForceUse_Async(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, eventSource);
             return (wasOn != isSpeakerphoneOn());
         }
@@ -213,6 +216,9 @@ import com.android.internal.annotations.GuardedBy;
 
     /*package*/ boolean isSpeakerphoneOn() {
         synchronized (mDeviceStateLock) {
+            if (AudioService.DEBUG_SCO) {
+                Log.i(TAG, "In isSpeakerphoneOn(), mForcedUseForCommExt: " +mForcedUseForCommExt);
+            }
             return (mForcedUseForCommExt == AudioSystem.FORCE_SPEAKER);
         }
     }
@@ -280,6 +286,15 @@ import com.android.internal.annotations.GuardedBy;
                 device);
     }
 
+    /*package*/ void postBluetoothA2dpDeviceConfigChangeExt(
+            @NonNull BluetoothDevice device,
+            @AudioService.BtProfileConnectionState int state, int profile,
+            boolean suppressNoisyIntent, int a2dpVolume) {
+         final BtDeviceConnectionInfo info = new BtDeviceConnectionInfo(device, state, profile,
+                 suppressNoisyIntent, a2dpVolume);
+         sendLMsgNoDelay(MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT, SENDMSG_QUEUE, info);
+    }
+
     private static final class HearingAidDeviceConnectionInfo {
         final @NonNull BluetoothDevice mDevice;
         final @AudioService.BtProfileConnectionState int mState;
@@ -309,30 +324,51 @@ import com.android.internal.annotations.GuardedBy;
     // never called by system components
     /*package*/ void setBluetoothScoOnByApp(boolean on) {
         synchronized (mDeviceStateLock) {
-            mForcedUseForCommExt = on ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE;
+            if (on)
+                mForcedUseForCommExt = AudioSystem.FORCE_BT_SCO;
+            else if (mForcedUseForCommExt == AudioSystem.FORCE_BT_SCO)
+                mForcedUseForCommExt = AudioSystem.FORCE_NONE;
+            if (AudioService.DEBUG_SCO) {
+                Log.i(TAG, "In setBluetoothScoOnByApp(), mForcedUseForCommExt: " +
+                      mForcedUseForCommExt);
+            }
         }
     }
 
     /*package*/ boolean isBluetoothScoOnForApp() {
         synchronized (mDeviceStateLock) {
+            if (AudioService.DEBUG_SCO) {
+                Log.i(TAG, "In isBluetoothScoOnForApp(), mForcedUseForCommExt: " +
+                      mForcedUseForCommExt);
+            }
             return mForcedUseForCommExt == AudioSystem.FORCE_BT_SCO;
         }
     }
 
     /*package*/ void setBluetoothScoOn(boolean on, String eventSource) {
-        //Log.i(TAG, "setBluetoothScoOnInt: " + on + " " + eventSource);
+        if (AudioService.DEBUG_SCO) {
+            Log.i(TAG, "setBluetoothScoOn: " + on + " " + eventSource);
+        }
         synchronized (mDeviceStateLock) {
             if (on) {
                 // do not accept SCO ON if SCO audio is not connected
                 if (!mBtHelper.isBluetoothScoOn()) {
-                    mForcedUseForCommExt = AudioSystem.FORCE_BT_SCO;
-                    return;
+                    if (mBtHelper.isBluetoothAudioNotConnectedToEarbud()) {
+                        Log.w(TAG, "setBluetoothScoOn(true) failed because device "+
+                                   "is not in audio connected mode");
+                        mForcedUseForCommExt = AudioSystem.FORCE_BT_SCO;
+                        return;
+                    }
                 }
                 mForcedUseForComm = AudioSystem.FORCE_BT_SCO;
             } else if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
                 mForcedUseForComm = AudioSystem.FORCE_NONE;
             }
             mForcedUseForCommExt = mForcedUseForComm;
+            if (AudioService.DEBUG_SCO) {
+                Log.i(TAG, "In setbluetoothScoOn(), mForcedUseForCommExt: " +
+                      mForcedUseForCommExt);
+            }
             AudioSystem.setParameters("BT_SCO=" + (on ? "on" : "off"));
             sendIILMsgNoDelay(MSG_IIL_SET_FORCE_USE, SENDMSG_QUEUE,
                     AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, eventSource);
@@ -879,6 +915,22 @@ import com.android.internal.annotations.GuardedBy;
                                 info.mDevice, info.mState, info.mSupprNoisy, info.mMusicDevice);
                     }
                 } break;
+                case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT: {
+                    final BtDeviceConnectionInfo info = (BtDeviceConnectionInfo) msg.obj;
+                    AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+                    "handleBluetoothA2dpActiveDeviceChangeExt "
+                           + " state=" + info.mState
+                           // only querying address as this is the only readily available
+                           // field on the device
+                           + " addr=" + info.mDevice.getAddress()
+                           + " prof=" + info.mProfile + " supprNoisy=" + info.mSupprNoisy
+                           + " vol=" + info.mVolume)).printLog(TAG));
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.handleBluetoothA2dpActiveDeviceChangeExt(
+                                info.mDevice, info.mState, info.mProfile,
+                                info.mSupprNoisy, info.mVolume);
+                    }
+                } break;
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
             }
@@ -928,8 +980,10 @@ import com.android.internal.annotations.GuardedBy;
     private static final int MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION = 30;
     // process external command to (dis)connect a hearing aid device
     private static final int MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT = 31;
+    // process external command to (dis)connect or change active A2DP device
+    private static final int MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT = 32;
     // a ScoClient died in BtHelper
-    private static final int MSG_L_SCOCLIENT_DIED = 32;
+    private static final int MSG_L_SCOCLIENT_DIED = 33;
 
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
@@ -946,6 +1000,7 @@ import com.android.internal.annotations.GuardedBy;
             case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION:
             case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION:
             case MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT:
+            case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT:
                 return true;
             default:
                 return false;

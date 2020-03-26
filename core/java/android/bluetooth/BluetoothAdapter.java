@@ -1201,10 +1201,10 @@ public final class BluetoothAdapter {
     public boolean factoryReset() {
         try {
             mServiceLock.readLock().lock();
-            if (mService != null) {
-                return mService.factoryReset();
+            if (mManagerService != null) {
+                SystemProperties.set("persist.bluetooth.factoryreset", "true");
+                return mManagerService.factoryReset();
             }
-            SystemProperties.set("persist.bluetooth.factoryreset", "true");
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         } finally {
@@ -2536,6 +2536,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.PAN) {
             BluetoothPan pan = new BluetoothPan(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.DUN) {
+            BluetoothDun dun = new BluetoothDun(context, listener);
+            return true;
         } else if (profile == BluetoothProfile.HEALTH) {
             Log.e(TAG, "getProfileProxy(): BluetoothHealth is deprecated");
             return false;
@@ -2608,6 +2611,10 @@ public final class BluetoothAdapter {
                 BluetoothPan pan = (BluetoothPan) proxy;
                 pan.close();
                 break;
+            case BluetoothProfile.DUN:
+                BluetoothDun dun = (BluetoothDun)proxy;
+                dun.close();
+                break;
             case BluetoothProfile.GATT:
                 BluetoothGatt gatt = (BluetoothGatt) proxy;
                 gatt.close();
@@ -2643,6 +2650,7 @@ public final class BluetoothAdapter {
             case BluetoothProfile.HEARING_AID:
                 BluetoothHearingAid hearingAid = (BluetoothHearingAid) proxy;
                 hearingAid.close();
+                break;
         }
     }
 
@@ -2704,6 +2712,8 @@ public final class BluetoothAdapter {
                     }
 
                     synchronized (mProxyServiceStateCallbacks) {
+                        Log.d(TAG, "onBluetoothServiceDown: Sending callbacks to " +
+                                    mProxyServiceStateCallbacks.size() + " clients");
                         for (IBluetoothManagerCallback cb : mProxyServiceStateCallbacks) {
                             try {
                                 if (cb != null) {
@@ -2716,6 +2726,7 @@ public final class BluetoothAdapter {
                             }
                         }
                     }
+                    Log.d(TAG, "onBluetoothServiceDown: Finished sending callbacks to registered clients");
                 }
 
                 public void onBrEdrDown() {
@@ -2805,6 +2816,22 @@ public final class BluetoothAdapter {
         @Override
         public void onBluetoothStateChange(boolean on) {
             mCallback.onBluetoothStateChange(on);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void unregisterAdapter() {
+        try {
+            //mServiceLock.writeLock().lock();
+            if (mManagerService != null){
+                mManagerService.unregisterAdapter(mManagerCallback);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            //mServiceLock.writeLock().unlock();
         }
     }
 
