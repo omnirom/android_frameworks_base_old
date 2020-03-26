@@ -908,7 +908,6 @@ public class AudioManager {
 
     /** @hide */
     @UnsupportedAppUsage
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void setMasterMute(boolean mute, int flags) {
         final IAudioService service = getService();
         try {
@@ -1463,6 +1462,8 @@ public class AudioManager {
      */
     public void setSpeakerphoneOn(boolean on){
         final IAudioService service = getService();
+        Log.i(TAG, "In setSpeakerphoneOn(), on: " + on + ", calling application: "
+                    + mApplicationContext.getOpPackageName());
         try {
             service.setSpeakerphoneOn(on);
         } catch (RemoteException e) {
@@ -1476,6 +1477,8 @@ public class AudioManager {
      * @return true if speakerphone is on, false if it's off
      */
     public boolean isSpeakerphoneOn() {
+        Log.i(TAG, "In isSpeakerphoneOn(), calling application: "
+                    + mApplicationContext.getOpPackageName());
         final IAudioService service = getService();
         try {
             return service.isSpeakerphoneOn();
@@ -1646,8 +1649,12 @@ public class AudioManager {
      * @see #startBluetoothSco()
     */
     public boolean isBluetoothScoAvailableOffCall() {
-        return getContext().getResources().getBoolean(
-               com.android.internal.R.bool.config_bluetooth_sco_off_call);
+        boolean retval;
+        retval = getContext().getResources().getBoolean(
+                  com.android.internal.R.bool.config_bluetooth_sco_off_call);
+        Log.i(TAG, "In isBluetoothScoAvailableOffCall(), calling appilication: " +
+              mApplicationContext.getOpPackageName()+", return value: " + retval);
+        return retval;
     }
 
     /**
@@ -1697,6 +1704,8 @@ public class AudioManager {
      */
     public void startBluetoothSco(){
         final IAudioService service = getService();
+        Log.i(TAG, "In startbluetoothSco(), calling application: "
+                     + mApplicationContext.getOpPackageName());
         try {
             service.startBluetoothSco(mICallBack,
                     getContext().getApplicationInfo().targetSdkVersion);
@@ -1722,6 +1731,8 @@ public class AudioManager {
      */
     @UnsupportedAppUsage
     public void startBluetoothScoVirtualCall() {
+        Log.i(TAG, "In startBluetoothScoVirtualCall(), calling application: "
+                    + mApplicationContext.getOpPackageName());
         final IAudioService service = getService();
         try {
             service.startBluetoothScoVirtualCall(mICallBack);
@@ -1742,6 +1753,8 @@ public class AudioManager {
     // Also used for connections started with {@link #startBluetoothScoVirtualCall()}
     public void stopBluetoothSco(){
         final IAudioService service = getService();
+        Log.i(TAG, "In stopBluetoothSco(), calling application: "
+                    + mApplicationContext.getOpPackageName());
         try {
             service.stopBluetoothSco(mICallBack);
         } catch (RemoteException e) {
@@ -1760,6 +1773,8 @@ public class AudioManager {
      */
     public void setBluetoothScoOn(boolean on){
         final IAudioService service = getService();
+        Log.i(TAG, "In setBluetoothScoOn(), on: " + on + ", calling application: "
+                    + mApplicationContext.getOpPackageName());
         try {
             service.setBluetoothScoOn(on);
         } catch (RemoteException e) {
@@ -1775,6 +1790,8 @@ public class AudioManager {
      */
     public boolean isBluetoothScoOn() {
         final IAudioService service = getService();
+        Log.i(TAG, "In isBluetoothScoOn(), calling application: "
+                    + mApplicationContext.getOpPackageName());
         try {
             return service.isBluetoothScoOn();
         } catch (RemoteException e) {
@@ -4278,6 +4295,38 @@ public class AudioManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+     /**
+     * Indicate A2DP source or sink active device change and eventually suppress
+     * the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent.
+     * This operation is asynchronous but its execution will still be sequentially scheduled
+     * relative to calls to {@link #setBluetoothHearingAidDeviceConnectionState(BluetoothDevice,
+     * int, boolean, int)} and
+     * {@link #handleBluetoothA2dpDeviceConfigChange(BluetoothDevice)}.
+     * @param device Bluetooth device connected/disconnected
+     * @param state  new connection state (BluetoothProfile.STATE_xxx)
+     * @param profile profile for the A2DP device
+     * (either {@link android.bluetooth.BluetoothProfile.A2DP} or
+     * {@link android.bluetooth.BluetoothProfile.A2DP_SINK})
+     * @param a2dpVolume New volume for the connecting device. Does nothing if
+     * disconnecting. Pass value -1 in case you want this field to be ignored
+     * @param suppressNoisyIntent if true the
+     * {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent will not be sent.
+     * @return a delay in ms that the caller should wait before broadcasting
+     * BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED intent.
+     * {@hide}
+     */
+    public void handleBluetoothA2dpActiveDeviceChange(
+                BluetoothDevice device, int state, int profile,
+                boolean suppressNoisyIntent, int a2dpVolume) {
+         final IAudioService service = getService();
+         try {
+             service.handleBluetoothA2dpActiveDeviceChange(device,
+                   state, profile, suppressNoisyIntent, a2dpVolume);
+         } catch (RemoteException e) {
+             throw e.rethrowFromSystemServer();
+         }
     }
 
     /** {@hide} */
