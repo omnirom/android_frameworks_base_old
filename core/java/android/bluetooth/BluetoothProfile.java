@@ -202,12 +202,18 @@ public interface BluetoothProfile {
     int HEARING_AID = 21;
 
     /**
+     * DUN
+     * @hide
+     */
+    public static final int DUN = 22;
+
+    /**
      * Max profile ID. This value should be updated whenever a new profile is added to match
      * the largest value assigned to a profile.
      *
      * @hide
      */
-    int MAX_PROFILE_ID = 21;
+    int MAX_PROFILE_ID = 22;
 
     /**
      * Default priority for devices that we try to auto-connect to and

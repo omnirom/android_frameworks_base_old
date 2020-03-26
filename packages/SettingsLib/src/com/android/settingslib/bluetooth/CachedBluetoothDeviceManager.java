@@ -192,6 +192,13 @@ public class CachedBluetoothDeviceManager {
         }
     }
 
+    public synchronized void clearAllDevices() {
+        for (int i = mCachedDevices.size() - 1; i >= 0; i--) {
+            CachedBluetoothDevice cachedDevice = mCachedDevices.get(i);
+                mCachedDevices.remove(i);
+        }
+    }
+
     public synchronized void onScanningStateChanged(boolean started) {
         if (!started) return;
         // If starting a new scan, clear old visibility
@@ -222,6 +229,9 @@ public class CachedBluetoothDeviceManager {
                     cachedDevice.setJustDiscovered(false);
                     mCachedDevices.remove(i);
                 }
+                //Clear if there any Tws battery info on BT turning OFF
+                cachedDevice.mTwspBatteryState = -1;
+                cachedDevice.mTwspBatteryLevel = -1;
             }
         }
     }

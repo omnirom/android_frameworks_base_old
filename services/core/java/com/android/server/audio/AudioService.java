@@ -195,6 +195,9 @@ public class AudioService extends IAudioService.Stub
     /** debug calls to devices APIs */
     protected static final boolean DEBUG_DEVICES = false;
 
+    /** debug SCO modes */
+    protected static final boolean DEBUG_SCO = true;
+
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
 
@@ -1662,6 +1665,10 @@ public class AudioService extends IAudioService.Stub
         }
         final int streamType;
         synchronized (mForceControlStreamLock) {
+            if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream=" + suggestedStreamType
+                    + ", flags=" + flags + ", caller=" + caller
+                    + ", volControlStream=" + mVolumeControlStream
+                    + ", userSelect=" + mUserSelectedVolumeControlStream);
             // Request lock in case mVolumeControlStream is changed by other thread.
             if (mUserSelectedVolumeControlStream) { // implies mVolumeControlStream != -1
                 streamType = mVolumeControlStream;
@@ -1723,11 +1730,19 @@ public class AudioService extends IAudioService.Stub
 
     protected void adjustStreamVolume(int streamType, int direction, int flags,
             String callingPackage, String caller, int uid) {
+        if (DEBUG_VOL) Log.d(TAG, "adjustStreamVolume() stream=" + streamType + ", dir=" + direction
+                + ", flags=" + flags + ", caller=" + caller);
+
+        /* If MirrorLink audio is playing, then disable volume changes */
+        String value = SystemProperties.get("vendor.mls.audio.session.status", "default");
+        if (true == value.equals("started")){
+            Log.e(TAG, "adjustStreamVolume() Ignore volume change during MirrorLink session");
+            return;
+        }
+
         if (mUseFixedVolume) {
             return;
         }
-        if (DEBUG_VOL) Log.d(TAG, "adjustStreamVolume() stream=" + streamType + ", dir=" + direction
-                + ", flags=" + flags + ", caller=" + caller);
 
         ensureValidDirection(direction);
         ensureValidStreamType(streamType);
@@ -2299,6 +2314,14 @@ public class AudioService extends IAudioService.Stub
             Log.d(TAG, "setStreamVolume(stream=" + streamType+", index=" + index
                     + ", calling=" + callingPackage + ")");
         }
+
+        /* If MirrorLink audio is playing, then disable volume changes */
+        String value = SystemProperties.get("vendor.mls.audio.session.status", "default");
+        if (true == value.equals("started")){
+            Log.e(TAG, "setStreamVolume() Ignore volume change during MirrorLink session");
+            return;
+        }
+
         if (mUseFixedVolume) {
             return;
         }
@@ -2807,7 +2830,6 @@ public class AudioService extends IAudioService.Stub
     }
 
     public void setMasterMute(boolean mute, int flags, String callingPackage, int userId) {
-        enforceModifyAudioRoutingPermission();
         setMasterMuteInternal(mute, flags, callingPackage, Binder.getCallingUid(),
                 userId);
     }
@@ -3227,6 +3249,7 @@ public class AudioService extends IAudioService.Stub
             // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
             // SCO connections not started by the application changing the mode when pid changes
             if ((newModeOwnerPid != oldModeOwnerPid) && (newModeOwnerPid != 0)) {
+                Log.i(TAG, "In binderDied(), calling disconnectBluetoothSco()");
                 mDeviceBroker.postDisconnectBluetoothSco(newModeOwnerPid);
             }
         }
@@ -3250,6 +3273,8 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#setMode(int) */
     public void setMode(int mode, IBinder cb, String callingPackage) {
+        Log.i(TAG, "setMode(mode = " + mode + ", callingPackage = " +
+                  callingPackage + ", Process ID: " + Binder.getCallingPid());
         if (DEBUG_MODE) { Log.v(TAG, "setMode(mode=" + mode + ", callingPackage=" + callingPackage + ")"); }
         if (!checkAudioSettingsPermission("setMode()")) {
             return;
@@ -3282,6 +3307,7 @@ public class AudioService extends IAudioService.Stub
         // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
         // SCO connections not started by the application changing the mode when pid changes
         if ((newModeOwnerPid != oldModeOwnerPid) && (newModeOwnerPid != 0)) {
+            Log.i(TAG, "In setMode(), calling disconnectBluetoothSco()");
             mDeviceBroker.postDisconnectBluetoothSco(newModeOwnerPid);
         }
     }
@@ -3683,6 +3709,8 @@ public class AudioService extends IAudioService.Stub
         final String eventSource = new StringBuilder("setSpeakerphoneOn(").append(on)
                 .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
                 .append(Binder.getCallingPid()).toString();
+        Log.i(TAG, "In setSpeakerphoneOn(), on: " + on + ", eventSource: " + eventSource);
+
         final boolean stateChanged = mDeviceBroker.setSpeakerphoneOn(on, eventSource);
         if (stateChanged) {
             final long ident = Binder.clearCallingIdentity();
@@ -3706,9 +3734,11 @@ public class AudioService extends IAudioService.Stub
         if (!checkAudioSettingsPermission("setBluetoothScoOn()")) {
             return;
         }
-
         // Only enable calls from system components
         if (UserHandle.getCallingAppId() >= FIRST_APPLICATION_UID) {
+            Log.i(TAG, "In setBluetoothScoOn(), on: "+on+". The calling application Uid: "
+                  + Binder.getCallingUid() + ", is greater than FIRST_APPLICATION_UID"
+                  + " exiting from setBluetoothScoOn()");
             mDeviceBroker.setBluetoothScoOnByApp(on);
             return;
         }
@@ -3717,7 +3747,7 @@ public class AudioService extends IAudioService.Stub
         final String eventSource = new StringBuilder("setBluetoothScoOn(").append(on)
                 .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
                 .append(Binder.getCallingPid()).toString();
-
+        Log.i(TAG, "In setBluetoothScoOn(), eventSource: " + eventSource);
         mDeviceBroker.setBluetoothScoOn(on, eventSource);
     }
 
@@ -3745,6 +3775,12 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#startBluetoothSco() */
     public void startBluetoothSco(IBinder cb, int targetSdkVersion) {
+        Log.i(TAG, "In startBluetoothSco()");
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if ((adapter == null) || (adapter.getState() != BluetoothAdapter.STATE_ON)) {
+             Log.i(TAG, "startBluetoothSco(), BT is not turned ON or adapter is null");
+             return;
+        }
         final int scoAudioMode =
                 (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR2) ?
                         BtHelper.SCO_MODE_VIRTUAL_CALL : BtHelper.SCO_MODE_UNDEFINED;
@@ -3756,6 +3792,7 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#startBluetoothScoVirtualCall() */
     public void startBluetoothScoVirtualCall(IBinder cb) {
+        Log.i(TAG, "In startBluetoothScoVirtualCall()");
         final String eventSource = new StringBuilder("startBluetoothScoVirtualCall()")
                 .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
                 .append(Binder.getCallingPid()).toString();
@@ -3763,6 +3800,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     void startBluetoothScoInt(IBinder cb, int scoAudioMode, @NonNull String eventSource) {
+        Log.i(TAG, "In startBluetoothScoInt(), scoAudioMode: " + scoAudioMode);
         if (!checkAudioSettingsPermission("startBluetoothSco()") ||
                 !mSystemReady) {
             return;
@@ -3774,6 +3812,12 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#stopBluetoothSco() */
     public void stopBluetoothSco(IBinder cb){
+        Log.i(TAG, "In stopBluetoothSco()");
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if ((adapter == null) || (adapter.getState() != BluetoothAdapter.STATE_ON)) {
+             Log.i(TAG, "stopBluetoothSco(), BT is not turned ON or adapter is null");
+             return;
+        }
         if (!checkAudioSettingsPermission("stopBluetoothSco()") ||
                 !mSystemReady) {
             return;
@@ -3811,8 +3855,7 @@ public class AudioService extends IAudioService.Stub
                         mMusicActiveMs += MUSIC_ACTIVE_POLL_PERIOD_MS;
                         if (mMusicActiveMs > UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX) {
                             setSafeMediaVolumeEnabled(true, caller);
-                            mMusicActiveMs = 0;
-                        }
+                            mMusicActiveMs = 0;                        }
                         saveMusicActiveMs();
                     }
                 }
@@ -3864,7 +3907,6 @@ public class AudioService extends IAudioService.Stub
                         SystemProperties.getBoolean("audio.safemedia.force", false)
                         || mContext.getResources().getBoolean(
                                 com.android.internal.R.bool.config_safe_media_volume_enabled);
-
                 boolean safeMediaVolumeBypass =
                         SystemProperties.getBoolean("audio.safemedia.bypass", false);
 
@@ -4034,7 +4076,8 @@ public class AudioService extends IAudioService.Stub
         final boolean muteSystem = (zenPolicy.priorityCategories
                 & NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM) == 0;
         final boolean muteNotificationAndRing = ZenModeConfig
-                .areAllPriorityOnlyNotificationZenSoundsMuted(zenPolicy);
+                .areAllPriorityOnlyNotificationZenSoundsMuted(
+                        mNm.getConsolidatedNotificationPolicy());
         return muteAlarms && isAlarm(streamType)
                 || muteMedia && isMedia(streamType)
                 || muteSystem && isSystem(streamType)
@@ -4046,13 +4089,11 @@ public class AudioService extends IAudioService.Stub
     }
 
     /**
-     * Notifications, ringer and system sounds are controlled by the ringer:
-     * {@link ZenModeHelper.RingerModeDelegate#getRingerModeAffectedStreams(int)} but can
-     * also be muted by DND based on the DND mode:
-     * DND total silence: media and alarms streams can be muted by DND
-     * DND alarms only: no streams additionally controlled by DND
-     * DND priority only: alarms, media, system, ringer and notification streams can be muted by
-     * DND.  The current applied zenPolicy determines which streams will be muted by DND.
+     * DND total silence: media and alarms streams are tied to the muted ringer
+     * {@link ZenModeHelper.RingerModeDelegate#getRingerModeAffectedStreams(int)}
+     * DND alarms only: notification, ringer + system muted (by default tied to muted ringer mode)
+     * DND priority only: alarms, media, system streams can be muted separate from ringer based on
+     * zenPolicy (this method determines which streams)
      * @return true if changed, else false
      */
     private boolean updateZenModeAffectedStreams() {
@@ -4072,11 +4113,6 @@ public class AudioService extends IAudioService.Stub
             if ((zenPolicy.priorityCategories
                     & NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM) == 0) {
                 zenModeAffectedStreams |= 1 << AudioManager.STREAM_SYSTEM;
-            }
-
-            if (ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(zenPolicy)) {
-                zenModeAffectedStreams |= 1 << AudioManager.STREAM_NOTIFICATION;
-                zenModeAffectedStreams |= 1 << AudioManager.STREAM_RING;
             }
         }
 
@@ -4477,6 +4513,27 @@ public class AudioService extends IAudioService.Stub
             throw new IllegalArgumentException("Illegal null device");
         }
         mDeviceBroker.postBluetoothA2dpDeviceConfigChange(device);
+    }
+
+    /**
+     * @see AudioManager#handleBluetoothA2dpActiveDeviceChange(BluetoothDevice, int, int,
+     *                                                        boolean, int)
+     */
+    public void handleBluetoothA2dpActiveDeviceChange(
+            BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent,
+            int a2dpVolume) {
+        if (device == null) {
+                throw new IllegalArgumentException("Illegal null device");
+        }
+        if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK) {
+            throw new IllegalArgumentException("invalid profile " + profile);
+        }
+        if (state != BluetoothProfile.STATE_CONNECTED
+                && state != BluetoothProfile.STATE_DISCONNECTED) {
+            throw new IllegalArgumentException("Invalid state " + state);
+        }
+        mDeviceBroker.postBluetoothA2dpDeviceConfigChangeExt(device, state, profile,
+                suppressNoisyIntent, a2dpVolume);
     }
 
     private static final int DEVICE_MEDIA_UNMUTED_ON_PLUG =
@@ -5744,8 +5801,7 @@ public class AudioService extends IAudioService.Stub
                         UserManager.DISALLOW_RECORD_AUDIO, false, userId);
             } else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-                if (state == BluetoothAdapter.STATE_OFF ||
-                        state == BluetoothAdapter.STATE_TURNING_OFF) {
+                if (state == BluetoothAdapter.STATE_OFF) {
                     mDeviceBroker.disconnectAllBluetoothProfiles();
                 }
             } else if (action.equals(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION) ||
