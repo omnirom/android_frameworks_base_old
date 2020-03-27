@@ -31,6 +31,7 @@ import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.Log;
 import android.widget.Button;
 
 import com.android.systemui.Dependency;
@@ -46,6 +47,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class TileQueryHelper {
     private static final String TAG = "TileQueryHelper";
@@ -84,21 +87,14 @@ public class TileQueryHelper {
         String current = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.QS_TILES);
         String possible = mContext.getString(R.string.quick_settings_tiles_stock)
-                + "," + mContext.getString(R.string.quick_settings_tiles_extra)
-		+ "," + current;
-        final ArrayList<String> possibleTiles = new ArrayList<>();
+                + "," + mContext.getString(R.string.quick_settings_tiles_extra);
+
+        final Set<String> possibleTiles = new HashSet<>();
         if (current != null) {
-            // The setting QS_TILES is not populated immediately upon Factory Reset
             possibleTiles.addAll(Arrays.asList(current.split(",")));
-        } else {
-            current = "";
         }
-        String[] stockSplit =  possible.split(",");
-        for (String spec : stockSplit) {
-            if (!current.contains(spec)) {
-                possibleTiles.add(spec);
-            }
-        }
+        possibleTiles.addAll(Arrays.asList(possible.split(",")));
+
         if (Build.IS_DEBUGGABLE && !current.contains(GarbageMonitor.MemoryTile.TILE_SPEC)) {
             possibleTiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
         }
