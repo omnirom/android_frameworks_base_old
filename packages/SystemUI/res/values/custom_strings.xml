@@ -104,6 +104,7 @@
     <string name="tuner_nav_bar_gesture_category">Gesture navigation</string>
     <string name="tuner_keyguard_transition_animations_title">Show transition animations</string>
     <string name="tuner_keyguard_transition_animations_summary">Show useless animations</string>
+    <string name="tuner_long_press_secondary">Show details on long press</string>
 
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>
