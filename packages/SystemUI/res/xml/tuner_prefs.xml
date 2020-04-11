@@ -53,8 +53,8 @@
             sysui:defValue="false" />
 
         <com.android.systemui.tuner.TunerSwitch
-            android:key="qs_long_press_secondary"
-            android:title="@string/tuner_long_press_secondary"
+            android:key="qs_long_press_action"
+            android:title="@string/tuner_qs_long_press_action"
             sysui:defValue="false" />
     </PreferenceScreen>
 
