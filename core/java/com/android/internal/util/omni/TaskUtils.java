@@ -88,20 +88,20 @@ public class TaskUtils {
         String defaultHomePackage = resolveCurrentLauncherPackageForUser(context, userId);
         final ActivityManager am = (ActivityManager) context
                 .getSystemService(Activity.ACTIVITY_SERVICE);
-        final List<ActivityManager.RecentTaskInfo> tasks = am.getRecentTasks(5,
-                ActivityManager.RECENT_IGNORE_UNAVAILABLE);
-        // lets get enough tasks to find something to switch to
-        // Note, we'll only get as many as the system currently has - up to 5
+        final List<ActivityManager.RecentTaskInfo> tasks = am.getRecentTasks(8,
+                ActivityManager.RECENT_IGNORE_UNAVAILABLE |
+                ActivityManager.RECENT_WITH_EXCLUDED);
+
         int lastAppId = 0;
         for (int i = 1; i < tasks.size(); i++) {
-            final String packageName = tasks.get(i).baseIntent.getComponent()
-                    .getPackageName();
-            if (!packageName.equals(defaultHomePackage)
-                    && !packageName.equals(SYSTEMUI_PACKAGE)) {
-                final ActivityManager.RecentTaskInfo info = tasks.get(i);
-                lastAppId = info.persistentId;
-                break;
+            final ActivityManager.RecentTaskInfo info = tasks.get(i);
+            boolean isExcluded = (info.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                    == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+            if (isExcluded) {
+                continue;
             }
+            lastAppId = info.persistentId;
+            break;
         }
         if (lastAppId > 0) {
             ActivityOptions options = ActivityOptions.makeCustomAnimation(context,
