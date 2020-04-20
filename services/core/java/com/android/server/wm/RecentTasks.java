@@ -909,7 +909,7 @@ class RecentTasks {
 
             if (isVisibleRecentTask(tr)) {
                 numVisibleTasks++;
-                if (mDisableVisibleLimits || isInVisibleRange(tr, i, numVisibleTasks, withExcluded)) {
+                if (isInVisibleRange(tr, i, numVisibleTasks, withExcluded)) {
                     // Fall through
                 } else {
                     // Not in visible range
@@ -1236,7 +1236,7 @@ class RecentTasks {
                 } else {
                     numVisibleTasks++;
                     if (isInVisibleRange(task, i, numVisibleTasks, false /* skipExcludedCheck */)
-                            || !isTrimmable(task) || mDisableVisibleLimits) {
+                            || !isTrimmable(task)) {
                         // Keep visible tasks in range
                         i++;
                         continue;
@@ -1361,6 +1361,10 @@ class RecentTasks {
                 if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\texcludeFromRecents=true");
                 return taskIndex == 0;
             }
+        }
+
+        if (mDisableVisibleLimits) {
+            return true;
         }
 
         if (mMinNumVisibleTasks >= 0 && numVisibleTasks <= mMinNumVisibleTasks) {
