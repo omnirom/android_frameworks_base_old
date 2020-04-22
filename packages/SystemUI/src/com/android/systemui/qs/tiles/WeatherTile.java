@@ -41,6 +41,7 @@ import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.omni.PackageUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
@@ -61,6 +62,8 @@ import java.util.Arrays;
 public class WeatherTile extends QSTileImpl<BooleanState> implements OmniJawsClient.OmniJawsObserver {
     private static final String TAG = "WeatherTile";
     private static final boolean DEBUG = false;
+    private static final String WEATHER_SERVICE_PACKAGE = "org.omnirom.omnijaws";
+
     private OmniJawsClient mWeatherClient;
     private Drawable mWeatherImage;
     private String mWeatherLabel;
@@ -98,6 +101,11 @@ public class WeatherTile extends QSTileImpl<BooleanState> implements OmniJawsCli
     @Override
     public BooleanState newTileState() {
         return new BooleanState();
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return PackageUtils.isAvailableApp(WEATHER_SERVICE_PACKAGE, mContext);
     }
 
     @Override
