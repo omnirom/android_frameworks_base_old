@@ -22,5 +22,5 @@
     <string name="clock_title_binary" translatable="false">Binary</string>
     <string name="clock_title_two_line_digital" translatable="false">Vertical</string>
     <string name="clock_title_one_line_digital" translatable="false">Digital</string>
-
+    <string name="keyguard_security_container_fod_button">Hide</string>
 </resources>
