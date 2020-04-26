@@ -324,4 +324,5 @@ public class KeyguardUpdateMonitorCallback {
      */
     public void onPulsing(boolean pulsing) { }
 
+    public void onFodVisibilityChanged(boolean visible) { }
 }

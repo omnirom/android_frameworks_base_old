@@ -27,4 +27,7 @@
     <dimen name="digital_clock_two_line_spacing">-20dp</dimen>
     <dimen name="clock_bottom_margin">8dp</dimen>
     <dimen name="header_font_size">20dp</dimen>
+    <dimen name="keyguard_fod_switch_bottom_margin">20dp</dimen>
+    <!-- op7xxx need about 70dp to be above fod -->
+    <dimen name="keyguard_security_container_bottom_margin">70dp</dimen>
 </resources>
