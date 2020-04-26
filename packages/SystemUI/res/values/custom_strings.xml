@@ -26,6 +26,10 @@
     <string name="customize_quickbar_label">Quickbar</string>
     <string name="customize_columns_land_label">Landscape</string>
     <string name="customize_columns_port_label">Portrait</string>
+
+    <string name="tuner_keyguard_fod_unlock_enabled_title">Allow secondary FOD unlock</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_summary">For devices with FOD allow using on secondary unlock screens</string>
+
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>
     <string name="omnijaws_service_error_long">Error loading weather data</string>

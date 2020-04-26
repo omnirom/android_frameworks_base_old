@@ -1843,7 +1843,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             return;
         }
         mHandler.removeCallbacks(mRetryFingerprintAuthentication);
-        boolean shouldListenForFingerprint = shouldListenForFingerprint();
+        boolean shouldListenForFingerprint = shouldListenForFingerprint() && !mFingerprintLockedOut;
         boolean runningOrRestarting = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING
                 || mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING;
         if (runningOrRestarting && !shouldListenForFingerprint) {
@@ -2054,6 +2054,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mFpm.authenticate(null, mFingerprintCancelSignal, 0, mFingerprintAuthenticationCallback,
                     null, userId);
             setFingerprintRunningState(BIOMETRIC_STATE_RUNNING);
+            mFingerprintLockedOut = false;
         }
     }
 
@@ -3071,6 +3072,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
         if (mIsAutomotive) {
             pw.println("  Running on Automotive build");
+        }
+    }
+
+    public void setFodVisbility(boolean visible) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onFodVisibilityChanged(visible);
+            }
         }
     }
 }
