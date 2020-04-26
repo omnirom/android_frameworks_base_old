@@ -100,6 +100,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private int mActivePointerId = -1;
     private boolean mIsDragging;
     private float mStartTouchY = -1;
+    private boolean mFodShowing;
 
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
@@ -203,6 +204,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mFodShowing) {
+            return true;
+        }
         final int action = event.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_MOVE:
@@ -734,6 +738,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (mCurrentSecuritySelection != SecurityMode.None) {
             if (reason != PROMPT_REASON_NONE) {
                 Log.i(TAG, "Strong auth required, reason: " + reason);
+                hideFod();
             }
             getSecurityView(mCurrentSecuritySelection).showPromptReason(reason);
         }
@@ -750,5 +755,20 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mSecurityViewFlipper.showUsabilityHint();
     }
 
+    public void hideFod() {
+        if (DEBUG) Log.d(TAG, "hideFod");
+        if (mSecurityViewFlipper.canShowFod()) {
+            mFodShowing = false;
+            mSecurityViewFlipper.hideFod();
+        }
+    }
+
+    public void showFod() {
+        if (DEBUG) Log.d(TAG, "showFod");
+        if (mSecurityViewFlipper.canShowFod()) {
+            mFodShowing = true;;
+            mSecurityViewFlipper.showFod();
+        }
+    }
 }
 
