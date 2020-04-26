@@ -21,6 +21,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
@@ -44,6 +45,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     private int mDisappearYTranslation;
     private View[][] mViews;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private ImageView mSwitchFodButton;
+    private ViewGroup mSwitchFodButtonContainer;
 
     public KeyguardPINView(Context context) {
         this(context, null);
@@ -120,6 +123,15 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 mCallback.onCancelClicked();
             });
         }
+        mSwitchFodButtonContainer = findViewById(R.id.keyguard_security_container_fod_container);
+        mSwitchFodButton = findViewById(R.id.keyguard_security_container_fod_button);
+        mSwitchFodButton.setImageResource(R.drawable.keyguard_pin_fod_button);
+        if (mSwitchFodButton != null) {
+            mSwitchFodButton.setOnClickListener(v -> {
+                hideFod();
+                mKeyguardUpdateMonitor.setFodVisbility(false);
+            });
+        }
     }
 
     @Override
@@ -149,6 +161,11 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     @Override
     public boolean startDisappearAnimation(final Runnable finishRunnable) {
+        if (mSwitchFodButtonContainer.getVisibility() == View.VISIBLE) {
+            mSwitchFodButtonContainer.setVisibility(View.INVISIBLE);
+            mEcaView.setVisibility(View.INVISIBLE);
+        }
+
         enableClipping(false);
         setTranslationY(0);
         AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 280 /* duration */,
@@ -182,5 +199,23 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    @Override
+    public void showFod() {
+        mSwitchFodButtonContainer.setVisibility(View.VISIBLE);
+        mContainer.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void hideFod() {
+        mContainer.setVisibility(View.VISIBLE);
+        mSwitchFodButtonContainer.setVisibility(View.GONE);
+        startAppearAnimation();
+    }
+
+    @Override
+    public boolean canShowFod() {
+        return true;
     }
 }
