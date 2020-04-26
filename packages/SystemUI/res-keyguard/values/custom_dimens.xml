@@ -28,5 +28,6 @@
     <dimen name="clock_bottom_margin">8dp</dimen>
     <dimen name="header_font_size">20dp</dimen>
     <!-- op7xxx need about 64dp -->
-    <dimen name="keyguard_security_container_bottom_margin">64dp</dimen>
+    <dimen name="keyguard_security_container_bottom_margin">0dp</dimen>
+    <dimen name="keyguard_fod_switch_bottom_margin">80dp</dimen>
 </resources>

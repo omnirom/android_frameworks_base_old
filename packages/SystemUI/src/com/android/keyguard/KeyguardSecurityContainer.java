@@ -734,6 +734,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (mCurrentSecuritySelection != SecurityMode.None) {
             if (reason != PROMPT_REASON_NONE) {
                 Log.i(TAG, "Strong auth required, reason: " + reason);
+                hideFod();
             }
             getSecurityView(mCurrentSecuritySelection).showPromptReason(reason);
         }
@@ -750,5 +751,16 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mSecurityViewFlipper.showUsabilityHint();
     }
 
+    public void hideFod() {
+        if (mSecurityViewFlipper.canShowFod()) {
+            mSecurityViewFlipper.hideFod();
+        }
+    }
+
+    public void showFod() {
+        if (mSecurityViewFlipper.canShowFod()) {
+            mSecurityViewFlipper.showFod();
+        }
+    }
 }
 
