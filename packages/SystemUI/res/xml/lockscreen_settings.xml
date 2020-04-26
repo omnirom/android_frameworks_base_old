@@ -87,4 +87,10 @@
         android:title="@string/tuner_keyguard_transition_animations_title"
         android:summary="@string/tuner_keyguard_transition_animations_summary"
         sysui:defValue="true" />
+
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="sysui_keyguard_fod_unlock_enabled"
+        android:title="@string/tuner_keyguard_fod_unlock_enabled_title"
+        android:summary="@string/tuner_keyguard_fod_unlock_enabled_summary"
+        sysui:defValue="true" />
 </PreferenceScreen>
