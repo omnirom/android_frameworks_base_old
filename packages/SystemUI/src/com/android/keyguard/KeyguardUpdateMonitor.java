@@ -2697,4 +2697,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
         return mPulsing;
     }
+
+    public void setFodVisbility(boolean visible) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onFodVisibilityChanged(visible);
+            }
+        }
+    }
 }
