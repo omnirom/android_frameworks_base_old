@@ -19,8 +19,10 @@ package com.android.keyguard;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.hardware.biometrics.BiometricSourceType;
 import android.graphics.Canvas;
 import android.media.AudioManager;
 import android.os.SystemClock;
@@ -29,6 +31,7 @@ import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -57,6 +60,10 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     protected LockPatternUtils mLockPatternUtils;
     private OnDismissAction mDismissAction;
     private Runnable mCancelAction;
+    private boolean mHasFod;
+    private boolean mFpcAuth;
+    private KeyguardUpdateMonitor mUpdateMonitor;
+    private boolean mForceFodBottomMargin;
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -90,6 +97,70 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
                 }
             }
         }
+
+        @Override
+        public void onBiometricRunningStateChanged(boolean running,
+            BiometricSourceType biometricSourceType) {
+            if (mHasFod && biometricSourceType == BiometricSourceType.FINGERPRINT) {
+                if (DEBUG) Log.d(TAG, "onBiometricRunningStateChanged running = " + running + " mFpcAuth = " + mFpcAuth);
+                if (!running) {
+                    if (!mFpcAuth) {
+                        mSecurityContainer.hideFod();
+                    }
+                } else {
+                    if (!mFpcAuth && isFodUnlockEnabled()) {
+                        mSecurityContainer.showFod();
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onBiometricAuthFailed(BiometricSourceType biometricSourceType) {
+            if (mHasFod && biometricSourceType == BiometricSourceType.FINGERPRINT) {
+                if (DEBUG) Log.d(TAG, "onBiometricAuthFailed");
+                mFpcAuth = false;
+            }
+        }
+
+        @Override
+        public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) {
+            if (mHasFod && biometricSourceType == BiometricSourceType.FINGERPRINT) {
+                if (DEBUG) Log.d(TAG, "onBiometricAuthenticated");
+                mFpcAuth = true;
+            }
+        }
+
+        @Override
+        public void onFodVisibilityChanged(boolean visible) {
+            if (DEBUG) Log.d(TAG, "onFodVisibilityChanged " + mSecurityContainer.canShowFod() + " " + isFodUnlockEnabled() + " " + visible + " " + mForceFodBottomMargin);
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mSecurityContainer.getLayoutParams();
+            int bottomMargin = 0;
+            if (mSecurityContainer.canShowFod() && isFodUnlockEnabled() && (visible || mForceFodBottomMargin)) {
+                bottomMargin = getContext().getResources().getDimensionPixelSize(R.dimen.keyguard_security_container_bottom_margin);
+            }
+            lp.setMargins(0, 0, 0, bottomMargin);
+            mSecurityContainer.setLayoutParams(lp);
+            mSecurityContainer.setFodShowing(visible);
+        }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean visible) {
+            if (DEBUG) Log.d(TAG, "onKeyguardVisibilityChanged " + visible);
+        }
+
+        @Override
+        public void onKeyguardBouncerChanged(boolean isBouncer) {
+            if (DEBUG) Log.d(TAG, "onKeyguardBouncerChanged");
+            if (mHasFod && isFodRunning()) {
+                if (!isFodUnlockEnabled() && isBouncer) {
+                    mSecurityContainer.hideFod();
+                }
+                if (!isBouncer) {
+                    mSecurityContainer.showFod();
+                }
+            }
+        }
     };
 
     // Whether the volume keys should be handled by keyguard. If true, then
@@ -107,7 +178,21 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
 
     public KeyguardHostView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateCallback);
+        mUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
+        mHasFod = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FOD);
+        mForceFodBottomMargin = context.getResources().getBoolean(R.bool.keyguard_security_container_force_bottom_margin);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mUpdateMonitor.registerCallback(mUpdateCallback);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mUpdateMonitor.removeCallback(mUpdateCallback);
     }
 
     @Override
@@ -155,6 +240,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
      */
     public void showPrimarySecurityScreen() {
         if (DEBUG) Log.d(TAG, "show()");
+        mFpcAuth = false;
         mSecurityContainer.showPrimarySecurityScreen(false);
     }
 
@@ -205,6 +291,11 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
 
     @Override
     public boolean dismiss(boolean authenticated, int targetUserId) {
+        if (mHasFod) {
+            if (isFodRunning() && !authenticated) {
+                mSecurityContainer.showFod();
+            }
+        }
         return mSecurityContainer.showNextSecurityScreenOrFinish(authenticated, targetUserId);
     }
 
@@ -449,5 +540,13 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
 
     public SecurityMode getCurrentSecurityMode() {
         return mSecurityContainer.getCurrentSecurityMode();
+    }
+
+    private boolean isFodRunning() {
+        return mUpdateMonitor.isFingerprintDetectionRunning();
+    }
+
+    private boolean isFodUnlockEnabled() {
+        return mSecurityContainer.isFodUnlockEnabled();
     }
 }
