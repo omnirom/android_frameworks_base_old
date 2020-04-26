@@ -39,6 +39,9 @@
     <string name="tuner_status_bar_bg_transparency">Transparent status bar background</string>
     <string name="tuner_qs_media_player">Inline media player - reboot required</string>
 
+    <string name="tuner_keyguard_fod_unlock_enabled_title">Allow secondary FOD unlock</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_summary">For devices with FOD allow using on secondary unlock screens</string>
+
     <!-- omnijaws -->
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>

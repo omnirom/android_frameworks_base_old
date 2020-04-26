@@ -267,6 +267,31 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
         return MeasureSpec.makeMeasureSpec(size, mode);
     }
 
+    @Override
+    public void showFod() {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            ksv.showFod();
+        }
+    }
+
+    @Override
+    public void hideFod() {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            ksv.hideFod();
+        }
+    }
+
+    @Override
+    public boolean canShowFod() {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            return ksv.canShowFod();
+        }
+        return false;
+    }
+
     public static class LayoutParams extends FrameLayout.LayoutParams {
         @ViewDebug.ExportedProperty(category = "layout")
         public int maxWidth;

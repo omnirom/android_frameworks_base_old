@@ -325,4 +325,5 @@ public class KeyguardUpdateMonitorCallback {
      */
     public void onSecondaryLockscreenRequirementChanged(int userId) { }
 
+    public void onFodVisibilityChanged(boolean visible) { }
 }
