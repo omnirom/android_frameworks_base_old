@@ -28,18 +28,9 @@
     <string name="customize_columns_land_label">Landscape</string>
     <string name="customize_columns_port_label">Portrait</string>
 
-    <string name="tuner_show_brightness_mode">Show brightness mode switch</string>
-    <string name="tuner_show_brightness_side_buttons">Show brightness slider side buttons</string>
-    <string name="tuner_quick_settings">Quick settings</string>
-    <string name="tuner_show_brightness_new">Show brightness slider</string>
-    <string name="tuner_brightness_position_bottom">Brightness slider on bottom</string>
-    <string name="tuner_show_secure_title">Show security footer</string>
-    <string name="tuner_show_drag_handle">Show drag handle</string>
-    <string name="tuner_battery_location_bar">Show battery in status bar</string>
-    <string name="tuner_status_bar_bg_transparency">Transparent status bar background</string>
-    <string name="tuner_qs_media_player">Inline media player - reboot required</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_title">Allow secondary FOD unlock</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_summary">For devices with FOD allow using on secondary unlock screens</string>
 
-    <!-- omnijaws -->
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>
     <string name="omnijaws_service_error_long">Error loading weather data</string>

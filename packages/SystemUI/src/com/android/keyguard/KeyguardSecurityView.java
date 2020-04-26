@@ -164,4 +164,14 @@ public interface KeyguardSecurityView {
      * When bouncer was visible but is being dragged down or dismissed.
      */
     default void onStartingToHide() {};
+
+    default void showFod() {
+    }
+
+    default void hideFod() {
+    }
+
+    default boolean canShowFod() {
+        return false;
+    }
 }
