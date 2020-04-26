@@ -209,10 +209,16 @@ public class FODCircleView extends ImageView implements OnTouchListener,
         @Override
         public void onKeyguardBouncerChanged(boolean isBouncer) {
             mIsBouncer = isBouncer;
-            if (isBouncer) {
-                hide();
-            } else if (mUpdateMonitor.isFingerprintDetectionRunning()) {
+        }
+
+        @Override
+        public void onFodVisibilityChanged(boolean visible) {
+            Log.d(TAG, "onFodVisibilityChanged " + visible);
+            if (visible && mUpdateMonitor.isFingerprintDetectionRunning()) {
                 show();
+                setCustomIcon();
+            } else {
+                hide();
             }
         }
 
@@ -225,18 +231,6 @@ public class FODCircleView extends ImageView implements OnTouchListener,
         public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) {
             super.onBiometricAuthenticated(userId, biometricSourceType);
             mIsInsideCircle = false;
-        }
-
-        @Override
-        public void onBiometricRunningStateChanged(boolean running,
-                BiometricSourceType biometricSourceType) {
-            super.onBiometricRunningStateChanged(running, biometricSourceType);
-            if (running) {
-                show();
-                setCustomIcon();
-            } else {
-                hide();
-            }
         }
     };
 
