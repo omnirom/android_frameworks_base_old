@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/assets/res/any/dimens.xml
-**
-** Copyright 2006, The Android Open Source Project
+/*
+** Copyright 2020, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -17,15 +16,12 @@
 ** limitations under the License.
 */
 -->
-<resources>
-    <dimen name="binary_clock_dot_size">8dp</dimen>
-    <dimen name="binary_clock_stroke_width">2dp</dimen>
-    <dimen name="binary_clock_width">90dp</dimen>
-    <dimen name="binary_clock_height">90dp</dimen>
-    <dimen name="analog_clock_width">100dp</dimen>
-    <dimen name="analog_clock_height">100dp</dimen>
-    <dimen name="digital_clock_two_line_spacing">-20dp</dimen>
-    <dimen name="clock_bottom_margin">8dp</dimen>
 
-    <dimen name="keyguard_fod_switch_bottom_margin">20dp</dimen>
+<!-- These resources are around just to allow their values to be customized
+     for different hardware and product builds. -->
+<resources>
+
+    <!-- Whether to use keyguard_security_container_bottom_margin unconditionally -->
+    <bool name="keyguard_security_container_force_bottom_margin">false</bool>
+
 </resources>

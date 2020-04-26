@@ -78,6 +78,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.InjectionInflationController;
+import com.android.systemui.tuner.TunerService;
 
 import java.util.List;
 
@@ -137,6 +138,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private boolean mIsDragging;
     private float mStartTouchY = -1;
     private boolean mDisappearAnimRunning;
+    private boolean mFodShowing;
+    private static final String KEYGUARD_FDO_UNLOCK_ENABLED = "sysui_keyguard_fod_unlock_enabled";
+
 
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
             new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
@@ -339,6 +343,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mFodShowing) {
+            return true;
+        }
         final int action = event.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_MOVE:
@@ -794,6 +801,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mCurrentSecurityView = newView;
         mSecurityCallback.onSecurityModeChanged(securityMode,
                 securityMode != SecurityMode.None && newView.needsInput());
+        updateBottomMargin();
     }
 
     private KeyguardSecurityViewFlipper getFlipper() {
@@ -962,6 +970,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (mCurrentSecuritySelection != SecurityMode.None) {
             if (reason != PROMPT_REASON_NONE) {
                 Log.i(TAG, "Strong auth required, reason: " + reason);
+                hideFod();
             }
             getSecurityView(mCurrentSecuritySelection).showPromptReason(reason);
         }
@@ -977,5 +986,45 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     public void showUsabilityHint() {
         mSecurityViewFlipper.showUsabilityHint();
     }
-}
 
+    public void hideFod() {
+        if (DEBUG) Log.d(TAG, "hideFod");
+        if (mSecurityViewFlipper.canShowFod()) {
+            if (isFodUnlockEnabled()) {
+                mSecurityViewFlipper.hideFod();
+            }
+            mUpdateMonitor.setFodVisbility(false);
+        }
+    }
+
+    public void showFod() {
+        if (DEBUG) Log.d(TAG, "showFod");
+        if (mSecurityViewFlipper.canShowFod()) {
+            if (isFodUnlockEnabled()) {
+                mSecurityViewFlipper.showFod();
+            }
+            mUpdateMonitor.setFodVisbility(true);
+       }
+    }
+
+    public boolean canShowFod() {
+        return mSecurityViewFlipper.canShowFod();
+    }
+
+    public boolean isFodUnlockEnabled() {
+        return Dependency.get(TunerService.class).getValue(KEYGUARD_FDO_UNLOCK_ENABLED, 1) == 1;
+    }
+
+    public void setFodShowing(boolean value) {
+        mFodShowing = value;
+    }
+
+    private void updateBottomMargin() {
+        // make sure we never have a bottom margin if not wanted after switching the view
+        if (!canShowFod()) {
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
+            lp.setMargins(0, 0, 0, 0);
+            setLayoutParams(lp);
+        }
+    }
+}
