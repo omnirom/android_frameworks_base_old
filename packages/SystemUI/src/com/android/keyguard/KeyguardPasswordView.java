@@ -27,6 +27,7 @@ import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.EditorInfo;
@@ -62,6 +63,11 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     private Interpolator mLinearOutSlowInInterpolator;
     private Interpolator mFastOutLinearInInterpolator;
+    private ViewGroup mContainer;
+    private TextView mSwitchFodButton;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private ViewGroup mSwitchFodButtonContainer;
+    private boolean mFodShowing;
 
     public KeyguardPasswordView(Context context) {
         this(context, null);
@@ -77,6 +83,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
                 context, android.R.interpolator.linear_out_slow_in);
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(
                 context, android.R.interpolator.fast_out_linear_in);
+        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
     }
 
     @Override
@@ -89,7 +96,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         setPasswordEntryEnabled(true);
         setPasswordEntryInputEnabled(true);
         // Don't call showSoftInput when PasswordEntry is invisible or in pausing stage.
-        if (!mResumed || !mPasswordEntry.isVisibleToUser()) {
+        if (!mResumed || !mPasswordEntry.isVisibleToUser() || mFodShowing) {
             return;
         }
         if (wasDisabled) {
@@ -115,7 +122,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         post(new Runnable() {
             @Override
             public void run() {
-                if (isShown() && mPasswordEntry.isEnabled()) {
+                if (isShown() && mPasswordEntry.isEnabled() && !mFodShowing) {
                     mPasswordEntry.requestFocus();
                     if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
                         mImm.showSoftInput(mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
@@ -174,6 +181,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     protected void onFinishInflate() {
         super.onFinishInflate();
 
+        mContainer = findViewById(R.id.container);
         mImm = (InputMethodManager) getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
 
@@ -215,7 +223,13 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
                 mCallback.onCancelClicked();
             });
         }
-
+        mSwitchFodButtonContainer = findViewById(R.id.keyguard_security_container_fod_container);
+        mSwitchFodButton = findViewById(R.id.keyguard_security_container_fod_button);
+        if (mSwitchFodButton != null) {
+            mSwitchFodButton.setOnClickListener(v -> {
+                hideFod();
+            });
+        }
         // If there's more than one IME, enable the IME switcher button
         updateSwitchImeButton();
 
@@ -328,6 +342,9 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     @Override
     public boolean startDisappearAnimation(Runnable finishRunnable) {
+        mSwitchFodButtonContainer.setVisibility(View.GONE);
+        mEcaView.setVisibility(View.GONE);
+
         animate()
                 .alpha(0f)
                 .translationY(mDisappearYTranslation)
@@ -392,5 +409,27 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
             bytes[i] = (byte) chars.charAt(i);
         }
         return bytes;
+    }
+
+    @Override
+    public void showFod() {
+        mFodShowing = true;
+        mSwitchFodButtonContainer.setVisibility(View.VISIBLE);
+        mContainer.setVisibility(View.GONE);
+        mKeyguardUpdateMonitor.setFodVisbility(true);
+    }
+
+    @Override
+    public void hideFod() {
+        mFodShowing = false;
+        mContainer.setVisibility(View.VISIBLE);
+        mSwitchFodButtonContainer.setVisibility(View.GONE);
+        startAppearAnimation();
+        mKeyguardUpdateMonitor.setFodVisbility(false);
+    }
+
+    @Override
+    public boolean canShowFod() {
+        return true;
     }
 }

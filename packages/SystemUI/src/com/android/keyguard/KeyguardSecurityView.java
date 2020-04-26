@@ -148,4 +148,14 @@ public interface KeyguardSecurityView {
     default boolean disallowInterceptTouch(MotionEvent event) {
         return false;
     }
+
+    default void showFod() {
+    }
+
+    default void hideFod() {
+    }
+
+    default boolean canShowFod() {
+        return false;
+    }
 }
