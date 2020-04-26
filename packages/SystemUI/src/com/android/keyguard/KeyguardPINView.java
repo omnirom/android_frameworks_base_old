@@ -21,6 +21,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
@@ -43,6 +44,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     private int mDisappearYTranslation;
     private View[][] mViews;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private TextView mSwitchFodButton;
+    private ViewGroup mSwitchFodButtonContainer;
 
     public KeyguardPINView(Context context) {
         this(context, null);
@@ -119,6 +122,13 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 mCallback.onCancelClicked();
             });
         }
+        mSwitchFodButtonContainer = findViewById(R.id.keyguard_security_container_fod_container);
+        mSwitchFodButton = findViewById(R.id.keyguard_security_container_fod_button);
+        if (mSwitchFodButton != null) {
+            mSwitchFodButton.setOnClickListener(v -> {
+                hideFod();
+            });
+        }
     }
 
     @Override
@@ -148,6 +158,9 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     @Override
     public boolean startDisappearAnimation(final Runnable finishRunnable) {
+        mSwitchFodButtonContainer.setVisibility(View.GONE);
+        mEcaView.setVisibility(View.GONE);
+
         enableClipping(false);
         setTranslationY(0);
         AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 280 /* duration */,
@@ -181,5 +194,24 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    @Override
+    public void showFod() {
+        mSwitchFodButtonContainer.setVisibility(View.VISIBLE);
+        mContainer.setVisibility(View.GONE);
+        mKeyguardUpdateMonitor.setFodVisbility(true);
+    }
+
+    @Override
+    public void hideFod() {
+        mContainer.setVisibility(View.VISIBLE);
+        mSwitchFodButtonContainer.setVisibility(View.GONE);
+        mKeyguardUpdateMonitor.setFodVisbility(false);
+    }
+
+    @Override
+    public boolean canShowFod() {
+        return true;
     }
 }
