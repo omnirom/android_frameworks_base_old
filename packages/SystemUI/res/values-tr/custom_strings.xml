@@ -129,12 +129,13 @@
     <string name="accessibility_dpad_right">İşâretçi sağda</string>
     <string name="screenrecord_stopdot_label">Durma noktasını göster</string>
     <string name="screenrecord_low_quality_label">Düşük kalite</string>
-    <!-- Partial screenshot -->
-    <string name="global_screenshot_selector_capture_description">Kısmî ekran görüntüsü al</string>
-    <string name="global_screenshot_selector_cancel_description">Kısmî ekran görüntüsünü iptal et</string>
     <!-- Immersive tile -->
     <string name="quick_settings_immersive_tile">Tam ekran modu</string>
     <string name="quick_settings_immersive_tile_statusbar">Tam ekran modu: Durum çubuğu</string>
     <string name="quick_settings_immersive_tile_navbar">Tam ekran modu: Gezinti çubuğu</string>
     <string name="quick_settings_immersive_tile_full">Tam ekran modu: Tam</string>
+    <!-- DataSwitch Tile -->
+    <string name="qs_data_switch_label">Veri kartını değiştir</string>
+    <string name="qs_data_switch_changed_1">SIM 1, mobil veri için kullanılıyor</string>
+    <string name="qs_data_switch_changed_2">SIM 2, mobil veri için kullanılıyor</string>
 </resources>

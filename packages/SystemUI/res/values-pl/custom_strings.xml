@@ -129,12 +129,13 @@
     <string name="accessibility_dpad_right">Kursor w prawo</string>
     <string name="screenrecord_stopdot_label">Pokaż kropkę zatrzymania</string>
     <string name="screenrecord_low_quality_label">Niska jakość</string>
-    <!-- Partial screenshot -->
-    <string name="global_screenshot_selector_capture_description">Przechwyć częściowy zrzut ekranu</string>
-    <string name="global_screenshot_selector_cancel_description">Anuluj częściowy zrzut ekranu</string>
     <!-- Immersive tile -->
     <string name="quick_settings_immersive_tile">Tryb pełnoekranowy</string>
     <string name="quick_settings_immersive_tile_statusbar">Pełnoekranowy pasek stanu</string>
     <string name="quick_settings_immersive_tile_navbar">Pełnoekranowy pasek nawigacyjny</string>
     <string name="quick_settings_immersive_tile_full">W pełni pełnoekranowy</string>
+    <!-- DataSwitch Tile -->
+    <string name="qs_data_switch_label">Przełącz kartę danych mobilnych</string>
+    <string name="qs_data_switch_changed_1">Używanie karty SIM 1 dla danych mobilnych</string>
+    <string name="qs_data_switch_changed_2">Używanie karty SIM 2 dla danych mobilnych</string>
 </resources>

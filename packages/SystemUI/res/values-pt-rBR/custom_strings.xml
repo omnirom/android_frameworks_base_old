@@ -103,6 +103,6 @@
     <string name="navbar_editor_title">Editor</string>
     <string name="navbar_editor_summary">Configurar a barra de navegação</string>
     <!-- Navigation bar dpad -->
-    <!-- Partial screenshot -->
     <!-- Immersive tile -->
+    <!-- DataSwitch Tile -->
 </resources>
