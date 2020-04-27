@@ -122,6 +122,8 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected abstract void handleResetMessage();
     protected abstract void updateIcon(int oldState, int newState);
 
+    private boolean mHasFod;
+
     private final Runnable mShowAnimationRunnable = new Runnable() {
         @Override
         public void run() {
@@ -200,6 +202,8 @@ public abstract class BiometricDialogView extends LinearLayout {
         final View leftSpace = mLayout.findViewById(R.id.left_space);
         final View rightSpace = mLayout.findViewById(R.id.right_space);
 
+        mHasFod = mContext.getResources().getBoolean(com.android.internal.R.bool.config_usesFOD);
+
         mDialog = mLayout.findViewById(R.id.dialog);
         mTitleText = mLayout.findViewById(R.id.title);
         mSubtitleText = mLayout.findViewById(R.id.subtitle);
@@ -212,6 +216,11 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         mBiometricIcon.setContentDescription(
                 getResources().getString(getIconDescriptionResourceId()));
+
+        if (mHasFod) {
+            mBiometricIcon.setVisibility(View.INVISIBLE);
+            mDescriptionText.setVisibility(View.INVISIBLE);
+        }
 
         setDismissesDialog(space);
         setDismissesDialog(leftSpace);
@@ -287,7 +296,7 @@ public abstract class BiometricDialogView extends LinearLayout {
             updateState(STATE_AUTHENTICATING);
             mNegativeButton.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
             final int hint = getHintStringResourceId();
-            if (hint != 0) {
+            if (hint != 0 && !mHasFod) {
                 mErrorText.setText(hint);
                 mErrorText.setContentDescription(mContext.getString(hint));
                 mErrorText.setVisibility(View.VISIBLE);
