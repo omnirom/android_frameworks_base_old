@@ -129,12 +129,13 @@
     <string name="accessibility_dpad_right">カーソル右</string>
     <string name="screenrecord_stopdot_label">停止ドットを表示</string>
     <string name="screenrecord_low_quality_label">低品質</string>
-    <!-- Partial screenshot -->
-    <string name="global_screenshot_selector_capture_description">部分スクリーンショットを取得</string>
-    <string name="global_screenshot_selector_cancel_description">部分スクリーンショットを中止</string>
     <!-- Immersive tile -->
     <string name="quick_settings_immersive_tile">全画面モード</string>
     <string name="quick_settings_immersive_tile_statusbar">ステータスバーを隠す</string>
     <string name="quick_settings_immersive_tile_navbar">ナビゲーションバーを隠す</string>
     <string name="quick_settings_immersive_tile_full">全て隠す</string>
+    <!-- DataSwitch Tile -->
+    <string name="qs_data_switch_label">データ SIM の切換え</string>
+    <string name="qs_data_switch_changed_1">SIM 1 をデータ通信に使用中</string>
+    <string name="qs_data_switch_changed_2">SIM 2 をデータ通信に使用中</string>
 </resources>

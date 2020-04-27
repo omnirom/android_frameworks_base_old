@@ -129,12 +129,13 @@
     <string name="accessibility_dpad_right">Kurzor vpravo</string>
     <string name="screenrecord_stopdot_label">Zobrazit tečku ukončení</string>
     <string name="screenrecord_low_quality_label">Nízká kvalita</string>
-    <!-- Partial screenshot -->
-    <string name="global_screenshot_selector_capture_description">Pořídit částečný snímek obrazovky</string>
-    <string name="global_screenshot_selector_cancel_description">Zrušit částečný snímek obrazovky</string>
     <!-- Immersive tile -->
     <string name="quick_settings_immersive_tile">Režim pohlcení</string>
     <string name="quick_settings_immersive_tile_statusbar">Pohlcující stavový řádek</string>
     <string name="quick_settings_immersive_tile_navbar">Pohlcující navigační panel</string>
     <string name="quick_settings_immersive_tile_full">Úplný režim pohlcení</string>
+    <!-- DataSwitch Tile -->
+    <string name="qs_data_switch_label">Přepnout kartu pro data</string>
+    <string name="qs_data_switch_changed_1">Používání SIM 1 pro mobilní data</string>
+    <string name="qs_data_switch_changed_2">Používání SIM 2 pro mobilní data</string>
 </resources>
