@@ -162,4 +162,7 @@
     <string name="qs_data_switch_label">Switch data card</string>
     <string name="qs_data_switch_changed_1">Using SIM 1 for Mobile data</string>
     <string name="qs_data_switch_changed_2">Using SIM 2 for Mobile data</string>
+
+    <string name="screenshot_error_title">Screenshot invalid</string>
+    <string name="screenrecord_error_title">Screen record invalid</string>
 </resources>

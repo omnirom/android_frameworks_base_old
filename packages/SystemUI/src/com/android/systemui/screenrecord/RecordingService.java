@@ -26,6 +26,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.drawable.Icon;
@@ -170,7 +171,7 @@ public class RecordingService extends Service {
                 stopRecording();
 
                 // Delete temp file
-                if (!mTempFile.delete()) {
+                if (mTempFile == null || !mTempFile.delete()) {
                     Log.e(TAG, "Error canceling screen recording!");
                     Toast.makeText(this, R.string.screenrecord_delete_error, Toast.LENGTH_LONG)
                             .show();
@@ -200,37 +201,46 @@ public class RecordingService extends Service {
 
             case ACTION_SHARE:
                 Uri shareUri = Uri.parse(intent.getStringExtra(EXTRA_PATH));
-
-                Intent shareIntent = new Intent(Intent.ACTION_SEND)
-                        .setType("video/mp4")
-                        .putExtra(Intent.EXTRA_STREAM, shareUri);
-                String shareLabel = getResources().getString(R.string.screenrecord_share_label);
-
                 // Close quick shade
                 sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
                 // Remove notification
                 notificationManager.cancel(NOTIFICATION_ID);
 
-                startActivity(Intent.createChooser(shareIntent, shareLabel)
-                                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                if (!isUriValid(this, shareUri)) {
+                    Toast.makeText(this, R.string.screenrecord_error_title, Toast.LENGTH_LONG).show();
+                } else {
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND)
+                            .setType("video/mp4")
+                            .putExtra(Intent.EXTRA_STREAM, shareUri);
+                    String shareLabel = getResources().getString(R.string.screenrecord_share_label);
+                    startActivity(Intent.createChooser(shareIntent, shareLabel)
+                                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                }
                 break;
             case ACTION_DELETE:
                 // Close quick shade
                 sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
-                ContentResolver resolver = getContentResolver();
-                Uri uri = Uri.parse(intent.getStringExtra(EXTRA_PATH));
-                resolver.delete(uri, null, null);
-
-                Toast.makeText(
-                        this,
-                        R.string.screenrecord_delete_description,
-                        Toast.LENGTH_LONG).show();
-
                 // Remove notification
                 notificationManager.cancel(NOTIFICATION_ID);
-                Log.d(TAG, "Deleted recording " + uri);
+
+                ContentResolver resolver = getContentResolver();
+                Uri uri = Uri.parse(intent.getStringExtra(EXTRA_PATH));
+                if (!isUriValid(this, uri)) {
+                    Toast.makeText(this, R.string.screenrecord_error_title, Toast.LENGTH_LONG).show();
+                } else {
+                    try {
+                        resolver.delete(uri, null, null);
+                        Toast.makeText(
+                                this,
+                                R.string.screenrecord_delete_description,
+                                Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "Deleted recording " + uri);
+                    } catch (Exception e) {
+                        // whatever happens
+                    }
+                }
                 break;
         }
         return Service.START_STICKY;
@@ -446,6 +456,9 @@ public class RecordingService extends Service {
     }
 
     private void saveRecording(NotificationManager notificationManager) {
+        if (mTempFile == null) {
+            return;
+        }
         String fileName = new SimpleDateFormat("'screen-'yyyyMMdd-HHmmss'.mp4'")
                 .format(new Date());
 
@@ -470,7 +483,7 @@ public class RecordingService extends Service {
             notificationManager.notify(NOTIFICATION_ID, notification);
 
             mTempFile.delete();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Error saving screen recording: " + e.getMessage());
             Toast.makeText(this, R.string.screenrecord_delete_error, Toast.LENGTH_LONG)
                     .show();
@@ -576,5 +589,20 @@ public class RecordingService extends Service {
     private static Intent getDeleteIntent(Context context, String path) {
         return new Intent(context, RecordingService.class).setAction(ACTION_DELETE)
                 .putExtra(EXTRA_PATH, path);
+    }
+
+    private static boolean isUriValid(Context context, Uri uri) {
+        ContentResolver resolver = context.getContentResolver();
+        Cursor c = context.getContentResolver().query(uri, null, null, null, null);
+        if (c != null) {
+            try {
+                int count = c.getCount();
+                return count > 0;
+            } catch (Exception e) {
+            } finally {
+                c.close();
+            }
+        }
+        return false;
     }
 }
