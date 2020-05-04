@@ -574,10 +574,12 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public void hideFod() {
-        mSwitchFodButtonContainer.setVisibility(View.GONE);
-        mLockPatternView.setVisibility(View.VISIBLE);
-        mLockPatternView.enableInput();
-        startAppearAnimation();
+        if (mSwitchFodButtonContainer.getVisibility() == View.VISIBLE) {
+            mSwitchFodButtonContainer.setVisibility(View.GONE);
+            mLockPatternView.setVisibility(View.VISIBLE);
+            mLockPatternView.enableInput();
+            startAppearAnimation();
+        }
     }
 
     @Override
