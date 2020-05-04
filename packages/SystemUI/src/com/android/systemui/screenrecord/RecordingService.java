@@ -170,7 +170,7 @@ public class RecordingService extends Service {
                 stopRecording();
 
                 // Delete temp file
-                if (!mTempFile.delete()) {
+                if (mTempFile == null || !mTempFile.delete()) {
                     Log.e(TAG, "Error canceling screen recording!");
                     Toast.makeText(this, R.string.screenrecord_delete_error, Toast.LENGTH_LONG)
                             .show();
@@ -219,18 +219,22 @@ public class RecordingService extends Service {
                 // Close quick shade
                 sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
-                ContentResolver resolver = getContentResolver();
-                Uri uri = Uri.parse(intent.getStringExtra(EXTRA_PATH));
-                resolver.delete(uri, null, null);
+                try {
+                    ContentResolver resolver = getContentResolver();
+                    Uri uri = Uri.parse(intent.getStringExtra(EXTRA_PATH));
+                    resolver.delete(uri, null, null);
 
-                Toast.makeText(
-                        this,
-                        R.string.screenrecord_delete_description,
-                        Toast.LENGTH_LONG).show();
+                    Toast.makeText(
+                            this,
+                            R.string.screenrecord_delete_description,
+                            Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "Deleted recording " + uri);
+                } catch (Exception e) {
+                    // whatever happens
+                }
 
                 // Remove notification
                 notificationManager.cancel(NOTIFICATION_ID);
-                Log.d(TAG, "Deleted recording " + uri);
                 break;
         }
         return Service.START_STICKY;
@@ -446,6 +450,9 @@ public class RecordingService extends Service {
     }
 
     private void saveRecording(NotificationManager notificationManager) {
+        if (mTempFile == null) {
+            return;
+        }
         String fileName = new SimpleDateFormat("'screen-'yyyyMMdd-HHmmss'.mp4'")
                 .format(new Date());
 
@@ -470,7 +477,7 @@ public class RecordingService extends Service {
             notificationManager.notify(NOTIFICATION_ID, notification);
 
             mTempFile.delete();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Error saving screen recording: " + e.getMessage());
             Toast.makeText(this, R.string.screenrecord_delete_error, Toast.LENGTH_LONG)
                     .show();
