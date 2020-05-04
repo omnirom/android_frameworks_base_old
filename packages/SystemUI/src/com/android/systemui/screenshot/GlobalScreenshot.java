@@ -52,6 +52,7 @@ import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -440,6 +441,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         // Create a share action for the notification
         PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, 0,
                 new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
+                        .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString())
                         .putExtra(EXTRA_ACTION_INTENT, sharingChooserIntent)
                         .putExtra(EXTRA_DISALLOW_ENTER_PIP, true)
                         .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
@@ -466,6 +468,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         // Create a edit action
         PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, 1,
                 new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
+                        .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString())
                         .putExtra(EXTRA_ACTION_INTENT, editIntent)
                         .putExtra(EXTRA_CANCEL_NOTIFICATION, editIntent.getComponent() != null)
                         .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
@@ -578,9 +581,13 @@ class DeleteImageInBackgroundTask extends AsyncTask<Uri, Void, Void> {
     protected Void doInBackground(Uri... params) {
         if (params.length != 1) return null;
 
-        Uri screenshotUri = params[0];
-        ContentResolver resolver = mContext.getContentResolver();
-        resolver.delete(screenshotUri, null, null);
+        try {
+            Uri screenshotUri = params[0];
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.delete(screenshotUri, null, null);
+        } catch (Exception e) {
+            // whatever happens
+        }
         return null;
     }
 }
@@ -1167,6 +1174,15 @@ class GlobalScreenshot {
 
         @Override
         public void onReceive(Context context, final Intent intent) {
+            if (!intent.hasExtra(SCREENSHOT_URI_ID)) {
+                return;
+            }
+            final Uri uri = Uri.parse(intent.getStringExtra(SCREENSHOT_URI_ID));
+            if (!isUriValid(context, uri)) {
+                cancelScreenshotNotification(context);
+                Toast.makeText(context, R.string.screenshot_error_title, Toast.LENGTH_LONG).show();
+                return;
+            }
             Intent actionIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
             Runnable startActivityRunnable = () -> {
                 try {
@@ -1226,11 +1242,15 @@ class GlobalScreenshot {
 
             // And delete the image from the media store
             final Uri uri = Uri.parse(intent.getStringExtra(SCREENSHOT_URI_ID));
-            new DeleteImageInBackgroundTask(context).execute(uri);
-            if (intent.getBooleanExtra(EXTRA_SMART_ACTIONS_ENABLED, false)) {
-                notifyScreenshotAction(context, intent.getStringExtra(EXTRA_ID),
-                        ACTION_TYPE_DELETE,
-                        false);
+            if (isUriValid(context, uri)) {
+                new DeleteImageInBackgroundTask(context).execute(uri);
+                if (intent.getBooleanExtra(EXTRA_SMART_ACTIONS_ENABLED, false)) {
+                    notifyScreenshotAction(context, intent.getStringExtra(EXTRA_ID),
+                            ACTION_TYPE_DELETE,
+                            false);
+                }
+            } else {
+                Toast.makeText(context, R.string.screenshot_error_title, Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1259,5 +1279,20 @@ class GlobalScreenshot {
         final NotificationManager nm =
                 (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         nm.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
+    }
+
+    private static boolean isUriValid(Context context, Uri uri) {
+        ContentResolver resolver = context.getContentResolver();
+        Cursor c = context.getContentResolver().query(uri, null, null, null, null);
+        if (c != null) {
+            try {
+                int count = c.getCount();
+                return count > 0;
+            } catch (Exception e) {
+            } finally {
+                c.close();
+            }
+        }
+        return false;
     }
 }
