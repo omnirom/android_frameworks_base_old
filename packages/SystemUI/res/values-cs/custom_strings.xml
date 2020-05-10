@@ -91,6 +91,9 @@
     <string name="tuner_nav_bar_show_handle_title">Zobrazit úchyt</string>
     <string name="tuner_nav_bar_legacy_category">Navigace třemi tlačítky</string>
     <string name="tuner_nav_bar_gesture_category">Navigace gesty</string>
+    <string name="tuner_keyguard_transition_animations_title">Zobrazit animace přechodu</string>
+    <string name="tuner_keyguard_transition_animations_summary">Zobrazit zbytečné animace</string>
+    <string name="tuner_qs_long_press_action">Nezobrazovat panely při dlouhém stisku</string>
     <string name="omnijaws_service_error">Chyba</string>
     <string name="omnijaws_service_unkown">Žádné údaje o počasí</string>
     <string name="omnijaws_service_error_long">Chyba při načítání údajů o počasí</string>

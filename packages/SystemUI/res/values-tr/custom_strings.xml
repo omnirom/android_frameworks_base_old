@@ -91,6 +91,9 @@
     <string name="tuner_nav_bar_show_handle_title">Kol göster</string>
     <string name="tuner_nav_bar_legacy_category">3 düğmeli gezinti</string>
     <string name="tuner_nav_bar_gesture_category">El hareketiyle gezinti</string>
+    <string name="tuner_keyguard_transition_animations_title">Geçiş animasyonlarını göster</string>
+    <string name="tuner_keyguard_transition_animations_summary">Lüzumsuz animasyonlar gösterir</string>
+    <string name="tuner_qs_long_press_action">Uzun basıldığında panelleri gösterme</string>
     <string name="omnijaws_service_error">Hatâ</string>
     <string name="omnijaws_service_unkown">Hava durumu verisi yok</string>
     <string name="omnijaws_service_error_long">Hava durumuna dair veriler yüklenemedi</string>

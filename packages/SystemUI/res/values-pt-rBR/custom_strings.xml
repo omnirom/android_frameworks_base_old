@@ -23,6 +23,8 @@
     <string name="global_action_reboot_sub">Sistema</string>
     <string name="global_action_reboot_recovery">Recuperação</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
+    <string name="global_action_reboot_fastboot">Fastboot</string>
+    <string name="global_action_screenrecord">Registro</string>
     <!-- Caffeine tile -->
     <string name="quick_settings_caffeine_label">Cafeína</string>
     <string name="accessibility_quick_settings_caffeine_off">Cafeína desligada</string>
@@ -53,6 +55,7 @@
     <string name="tuner_show_secure_title">Mostrar rodapé de segurança</string>
     <string name="tuner_show_drag_handle">Mostrar alça de arrastar</string>
     <string name="tuner_battery_location_bar">Mostrar a bateria na barra de status</string>
+    <string name="tuner_status_bar_bg_transparency">Fundo transparente da barra de status</string>
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Ligado</string>
     <string name="quick_settings_network_adb_disabled_label">Desligado</string>
@@ -66,12 +69,31 @@
     <string name="accessibility_quick_settings_heads_up_changed_on">Notificações flutuantes ligadas.</string>
     <string name="quick_settings_screenrecord_label">Gravação de tela</string>
     <string name="tuner_keyguard_show_battery_bar_title">Mostrar barra da bateria</string>
+    <string name="tuner_keyguard_show_battery_bar_summary">Mostrar a barra de bateria ao carregar sempre em tela</string>
     <string name="tuner_keyguard_show_battery_bar_always_title">Sempre mostrar barra de bateria</string>
     <string name="tuner_keyguard_show_battery_bar_always_summary">Sempre mostrar a barra de bateria ao carregar</string>
     <string name="tuner_keyguard_battery_percent_title">Mostrar a porcentagem da bateria</string>
     <string name="tuner_keyguard_battery_percent_summary">Forçar mostrar a porcentagem da bateria na barra de status no carregamento</string>
+    <string name="tuner_keyguard_show_watt_title">Mostrar watt de carregamento</string>
+    <string name="tuner_keyguard_show_watt_summary">Mostrar o valor do watt de carregamento em mW</string>
+    <string name="tuner_keyguard_show_current_title">Mostrar carregamento atual</string>
+    <string name="tuner_keyguard_show_current_summary">Mostrar valores atuais de carregamento</string>
     <string name="tuner_keyguard_show_battery_temp_title">Mostrar temperatura da bateria</string>
     <string name="tuner_keyguard_show_battery_temp_summary">Mostrar temperatura da bateria</string>
+    <string name="tuner_battery_percent_disable">Não mostrar porcentagem</string>
+    <string name="tuner_battery_percent_enable">Sempre mostrar porcentagem</string>
+    <string name="tuner_battery_percent_charging">Mostrar porcentagem durante o carregamento</string>
+    <string name="tuner_battery_percent_hide">Não mostrar este ícone</string>
+    <string name="tuner_battery_percent_title">Porcentagem da bateria</string>
+    <string name="tuner_status_bar_show_battery_image">Imagem da bateria</string>
+    <string name="tuner_keyguard_show_lock_icon_title">Mostrar status de bloqueio</string>
+    <string name="tuner_keyguard_show_lock_icon_summary">Mostrar ícone de status de bloqueio atual no topo</string>
+    <string name="tuner_nav_bar_show_handle_title">Exibir Identificador</string>
+    <string name="tuner_nav_bar_legacy_category">Navegação com 3 botões</string>
+    <string name="tuner_nav_bar_gesture_category">Navegação por gestos</string>
+    <string name="tuner_keyguard_transition_animations_title">Mostrar animações de transição</string>
+    <string name="tuner_keyguard_transition_animations_summary">Mostrar animações inúteis</string>
+    <string name="tuner_qs_long_press_action">Não mostrar painéis em um toque longo</string>
     <string name="omnijaws_service_error">Erro</string>
     <string name="omnijaws_service_unkown">Sem dados meteorológicos</string>
     <string name="omnijaws_service_error_long">Erro ao carregar dados meteorológicos</string>
@@ -102,7 +124,21 @@
     <string name="right">Direita</string>
     <string name="navbar_editor_title">Editor</string>
     <string name="navbar_editor_summary">Configurar a barra de navegação</string>
+    <string name="status_bar_vpn">VPN</string>
+    <string name="quick_settings_roaming_title">Indicador de roaming</string>
+    <string name="status_bar_location">Localização</string>
     <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Cursor para a esquerda</string>
+    <string name="accessibility_dpad_right">Cursor para a direita</string>
+    <string name="screenrecord_stopdot_label">Mostrar ponto de parada</string>
+    <string name="screenrecord_low_quality_label">Baixa qualidade</string>
     <!-- Immersive tile -->
+    <string name="quick_settings_immersive_tile">Modo imersivo</string>
+    <string name="quick_settings_immersive_tile_statusbar">Barra de status imersiva</string>
+    <string name="quick_settings_immersive_tile_navbar">Barra de navegação imersiva</string>
+    <string name="quick_settings_immersive_tile_full">Imersivo completo</string>
     <!-- DataSwitch Tile -->
+    <string name="qs_data_switch_label">Trocar cartão de dados</string>
+    <string name="qs_data_switch_changed_1">Usando o SIM 1 para dados móveis</string>
+    <string name="qs_data_switch_changed_2">Usando o SIM 2 para dados móveis</string>
 </resources>

@@ -91,6 +91,9 @@
     <string name="tuner_nav_bar_show_handle_title">ハンドルを表示</string>
     <string name="tuner_nav_bar_legacy_category">3-ボタンナビゲーション</string>
     <string name="tuner_nav_bar_gesture_category">ジェスチャーナビゲーション</string>
+    <string name="tuner_keyguard_transition_animations_title">遷移アニメーションを表示</string>
+    <string name="tuner_keyguard_transition_animations_summary">使わないアニメーションを表示する</string>
+    <string name="tuner_qs_long_press_action">長押しでパネルを表示しない</string>
     <string name="omnijaws_service_error">エラー</string>
     <string name="omnijaws_service_unkown">天気データはありません</string>
     <string name="omnijaws_service_error_long">気象データの読み込みに失敗しました</string>

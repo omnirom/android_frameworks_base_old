@@ -91,6 +91,9 @@
     <string name="tuner_nav_bar_show_handle_title">Handle anzeigen</string>
     <string name="tuner_nav_bar_legacy_category">3-Tasten Navigation</string>
     <string name="tuner_nav_bar_gesture_category">Gesten Navigation</string>
+    <string name="tuner_keyguard_transition_animations_title">Übergangsanimationen anzeigen</string>
+    <string name="tuner_keyguard_transition_animations_summary">Nutzlose Animationen anzeigen</string>
+    <string name="tuner_qs_long_press_action">Panel bei langem Drücken nicht anzeigen</string>
     <string name="omnijaws_service_error">Fehler</string>
     <string name="omnijaws_service_unkown">Keine Wetterdaten</string>
     <string name="omnijaws_service_error_long">Fehler beim Laden der Wetterdaten</string>
