@@ -26,17 +26,17 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
+import android.graphics.PorterDuff;
 import android.os.Handler;
-import android.os.IHwBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.Message;
 import android.os.RemoteException;
-import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.Display;
 import android.view.Gravity;
@@ -65,7 +65,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class FODCircleView extends ImageView implements OnTouchListener,
-        TunerService.Tunable, OmniSettingsService.OmniSettingsObserver {
+        TunerService.Tunable, OmniSettingsService.OmniSettingsObserver, Handler.Callback {
     private static final String TAG = "FODCircleView";
     private final String SCREEN_BRIGHTNESS = "system:" + Settings.System.SCREEN_BRIGHTNESS;
     private final int mPositionX;
@@ -103,6 +103,13 @@ public class FODCircleView extends ImageView implements OnTouchListener,
     private final boolean mFodPressedImage;
     private BitmapDrawable mCustomImage;
 
+    private boolean mSupportsAlwaysOnHbm;
+    private int mHbmOffDelay = 0;
+    private int mHbmOnDelay = 0;
+    private int mCurDim;
+    private final int MSG_HBM_OFF = 1001;
+    private final int MSG_HBM_ON = 1002;
+
     private IFingerprintInscreenCallback mFingerprintInscreenCallback =
             new IFingerprintInscreenCallback.Stub() {
         @Override
@@ -110,7 +117,7 @@ public class FODCircleView extends ImageView implements OnTouchListener,
             mIsInsideCircle = true;
 
             mHandler.post(() -> {
-                setDim(true);
+                //setDim(true);
                 if (mFodPressedImage) {
                     setImageResource(R.drawable.fod_icon_pressed);
                 } else {
@@ -126,7 +133,7 @@ public class FODCircleView extends ImageView implements OnTouchListener,
             mIsInsideCircle = false;
 
             mHandler.post(() -> {
-                setDim(false);
+                //setDim(false);
                 setCustomIcon();
 
                 invalidate();
@@ -151,6 +158,7 @@ public class FODCircleView extends ImageView implements OnTouchListener,
             if (mIsViewAdded) {
                 resetPosition();
                 invalidate();
+                show();
             }
             setCustomIcon();
         }
@@ -244,6 +252,31 @@ public class FODCircleView extends ImageView implements OnTouchListener,
         mPaintFingerprint.setAntiAlias(true);
         mPaintFingerprint.setColor(res.getColor(R.color.config_fodColor));
 
+        IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
+        if (daemon == null) {
+            throw new RuntimeException("Unable to get IFingerprintInscreen");
+        }
+
+        vendor.omni.biometrics.fingerprint.inscreen.V1_1.IFingerprintInscreen
+                    daemonV1_1 = getFingerprintInScreenDaemonV1_1(daemon);
+
+        try {
+            if (daemonV1_1 != null) {
+                mSupportsAlwaysOnHbm = daemonV1_1.supportsAlwaysOnHBM();
+                mHbmOnDelay = daemonV1_1.getHbmOnDelay();
+                mHbmOffDelay = daemonV1_1.getHbmOffDelay();
+            }
+
+            mPositionX = daemon.getPositionX();
+            mPositionY = daemon.getPositionY();
+            mWidth = daemon.getSize();
+            mHeight = mWidth; // We do not expect mWidth != mHeight
+            mShouldBoostBrightness = daemon.shouldBoostBrightness();
+
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed to retrieve FOD daemon 1_1");
+        }
+
         setCustomIcon();
 
         mPaintShow.setAntiAlias(true);
@@ -255,28 +288,13 @@ public class FODCircleView extends ImageView implements OnTouchListener,
 
         mNavigationBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
 
-        try {
-            IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
-            if (daemon == null) {
-                throw new RuntimeException("Unable to get IFingerprintInscreen");
-            }
-            mPositionX = daemon.getPositionX();
-            mPositionY = daemon.getPositionY();
-            mWidth = daemon.getSize();
-            mHeight = mWidth; // We do not expect mWidth != mHeight
-
-            mShouldBoostBrightness = daemon.shouldBoostBrightness();
-        } catch (NoSuchElementException | RemoteException e) {
-            throw new RuntimeException(e);
-        }
-
         if (mPositionX < 0 || mPositionY < 0 || mWidth < 0 || mHeight < 0) {
             throw new RuntimeException("Invalid FOD circle position or size.");
         }
 
         mDreamingMaxOffset = (int) (mWidth * 0.1f);
 
-        mHandler = new Handler(Looper.getMainLooper());
+        mHandler = new Handler(Looper.getMainLooper(), this);
 
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
         mUpdateMonitor.registerCallback(mMonitorCallback);
@@ -293,6 +311,30 @@ public class FODCircleView extends ImageView implements OnTouchListener,
         setDim(false);
     }
 
+
+    public IFingerprintInscreen getFingerprintInScreenDaemon() {
+        if (mFingerprintInscreenDaemon == null) {
+            try {
+                mFingerprintInscreenDaemon = IFingerprintInscreen.getService();
+                if (mFingerprintInscreenDaemon != null) {
+                    mFingerprintInscreenDaemon.setCallback(mFingerprintInscreenCallback);
+                    mFingerprintInscreenDaemon.asBinder().linkToDeath((cookie) -> {
+                        mFingerprintInscreenDaemon = null;
+                    }, 0);
+                }
+            } catch (NoSuchElementException | RemoteException e) {
+                // do nothing
+            }
+        }
+        return mFingerprintInscreenDaemon;
+    }
+
+    public vendor.omni.biometrics.fingerprint.inscreen.V1_1.IFingerprintInscreen
+        getFingerprintInScreenDaemonV1_1(IFingerprintInscreen daemon) {
+        if (daemon == null) return null;
+        return vendor.omni.biometrics.fingerprint.inscreen.V1_1.IFingerprintInscreen.castFrom(
+                   daemon);
+    }
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -350,7 +392,13 @@ public class FODCircleView extends ImageView implements OnTouchListener,
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
             newInside = false;
-            setDim(false);
+            if (!mSupportsAlwaysOnHbm) {
+                setDim(false);
+            } else {
+                setColorFilter(Color.argb(mCurDim, 0, 0, 0),
+                        PorterDuff.Mode.SRC_ATOP);
+                invalidate();
+            }
             setCustomIcon();
         }
 
@@ -368,7 +416,11 @@ public class FODCircleView extends ImageView implements OnTouchListener,
         }
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            setDim(true);
+            if (!mSupportsAlwaysOnHbm) {
+                setDim(true);
+            } else {
+                setColorFilter(Color.argb(0, 0, 0, 0), PorterDuff.Mode.SRC_ATOP);
+            }
             if (mFodPressedImage) {
                 setImageResource(R.drawable.fod_icon_pressed);
             } else {
@@ -417,25 +469,34 @@ public class FODCircleView extends ImageView implements OnTouchListener,
         }
     }
 
-    public synchronized IFingerprintInscreen getFingerprintInScreenDaemon() {
-        if (mFingerprintInscreenDaemon == null) {
-            try {
-                mFingerprintInscreenDaemon = IFingerprintInscreen.getService();
-                if (mFingerprintInscreenDaemon != null) {
-                    mFingerprintInscreenDaemon.setCallback(mFingerprintInscreenCallback);
-                    mFingerprintInscreenDaemon.asBinder().linkToDeath((cookie) -> {
-                        mFingerprintInscreenDaemon = null;
-                    }, 0);
-                }
-            } catch (NoSuchElementException | RemoteException e) {
-                // do nothing
+    public void switchHbm(boolean enable) {
+        if (mShouldBoostBrightness) {
+            if (enable) {
+                mParams.screenBrightness = 1.0f;
+            } else {
+                mParams.screenBrightness = 0.0f;
             }
+            mWindowManager.updateViewLayout(this, mParams);
         }
-        return mFingerprintInscreenDaemon;
+
+        vendor.omni.biometrics.fingerprint.inscreen.V1_1.IFingerprintInscreen daemonV1_1 =
+                getFingerprintInScreenDaemonV1_1(getFingerprintInScreenDaemon());
+
+        try {
+            if (daemonV1_1 != null) {
+                daemonV1_1.switchHbm(enable);
+            }
+        } catch (RemoteException e) {
+            // do nothing
+        }
     }
 
     public void show() {
         if (mIsViewAdded) {
+            if (mSupportsAlwaysOnHbm) {
+                mHandler.sendEmptyMessageDelayed(MSG_HBM_ON, mHbmOnDelay);
+                setDim(true);
+            }
             return;
         }
 
@@ -465,12 +526,24 @@ public class FODCircleView extends ImageView implements OnTouchListener,
         mIsViewAdded = true;
 
         mIsPressed = false;
-        setDim(false);
+        if (mSupportsAlwaysOnHbm) {
+            mHandler.sendEmptyMessageDelayed(MSG_HBM_ON, mHbmOnDelay);
+            setDim(true);
+        } else {
+            setDim(false);
+        }
     }
 
     public void hide() {
         if (!mIsViewAdded) {
             return;
+        }
+
+        if (mSupportsAlwaysOnHbm) {
+            mHandler.sendEmptyMessageDelayed(MSG_HBM_OFF, mHbmOffDelay);
+            if (mHandler.hasMessages(MSG_HBM_ON)) {
+                mHandler.removeMessages(MSG_HBM_ON);
+            }
         }
 
         mIsInsideCircle = false;
@@ -530,12 +603,11 @@ public class FODCircleView extends ImageView implements OnTouchListener,
                     // do nothing
                 }
             }
-
-            if (mShouldBoostBrightness) {
-                mDisplayManager.setTemporaryBrightness(255);
-            }
-
             mParams.dimAmount = ((float) dimAmount) / 255.0f;
+            if (mSupportsAlwaysOnHbm && !mIsPressed) {
+                mCurDim = dimAmount;
+                setColorFilter(Color.argb(dimAmount, 0, 0, 0), PorterDuff.Mode.SRC_ATOP);
+            }
         } else {
             mDisplayManager.setTemporaryBrightness(-1);
             mParams.dimAmount = 0.0f;
@@ -593,4 +665,19 @@ public class FODCircleView extends ImageView implements OnTouchListener,
             }
         }
     };
+
+    @Override
+    public boolean handleMessage(Message msg) {
+        switch (msg.what) {
+            case MSG_HBM_OFF: {
+                switchHbm(false);
+            } break;
+            case MSG_HBM_ON: {
+                switchHbm(true);
+            } break;
+
+        }
+        return true;
+    }
+
 }
