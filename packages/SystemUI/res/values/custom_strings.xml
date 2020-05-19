@@ -109,6 +109,8 @@
     <string name="tuner_qs_long_press_action">Dont show panels on long press</string>
     <string name="tuner_keyguard_fod_unlock_enabled_title">Allow secondary FOD unlock</string>
     <string name="tuner_keyguard_fod_unlock_enabled_summary">For devices with FOD allow using on secondary unlock screens</string>
+    <string name="tuner_keyguard_show_assistant_handle_title">Show assistant handles</string>
+    <string name="tuner_keyguard_show_assistant_handle_summary">Show assistant handles on screen edges</string>
 
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>
