@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -65,6 +66,7 @@ public class LockscreenFragment extends PreferenceFragment {
     private static final String KEY_RIGHT = "right";
     private static final String KEY_CUSTOMIZE = "customize";
     private static final String KEY_SHORTCUT = "shortcut";
+    private static final String KEY_FOD_UNLOCK = "sysui_keyguard_fod_unlock_enabled";
 
     public static final String LOCKSCREEN_LEFT_BUTTON = "sysui_keyguard_left";
     public static final String LOCKSCREEN_LEFT_UNLOCK = "sysui_keyguard_left_unlock";
@@ -82,6 +84,14 @@ public class LockscreenFragment extends PreferenceFragment {
         addPreferencesFromResource(R.xml.lockscreen_settings);
         setupGroup(LOCKSCREEN_LEFT_BUTTON, LOCKSCREEN_LEFT_UNLOCK);
         setupGroup(LOCKSCREEN_RIGHT_BUTTON, LOCKSCREEN_RIGHT_UNLOCK);
+
+        Preference fodUnlock = findPreference(KEY_FOD_UNLOCK);
+        if (fodUnlock != null) {
+            boolean hasFod = getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_FOD);
+            if (!hasFod) {
+                getPreferenceScreen().removePreference(fodUnlock);
+            }
+        }
     }
 
     @Override
