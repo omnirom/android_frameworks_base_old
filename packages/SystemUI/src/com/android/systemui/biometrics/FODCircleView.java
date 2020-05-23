@@ -155,7 +155,9 @@ public class FODCircleView extends ImageView implements OnTouchListener,
             if (mIsViewAdded) {
                 resetPosition();
                 invalidate();
+            if (mSupportsAlwaysOnHbm) {
                 show();
+                }
             }
             setCustomIcon();
         }
