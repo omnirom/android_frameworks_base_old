@@ -57,6 +57,7 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String NAV_BAR_LEFT = "sysui_nav_bar_left";
     public static final String NAV_BAR_RIGHT = "sysui_nav_bar_right";
     public static final String NAV_BAR_SHOW_HANDLE = "sysui_nav_bar_show_handle";
+    public static final String NAV_BAR_SYSTEM_KEYS = "sysui_nav_bar_system_keys";
 
     public static final String MENU_IME_ROTATE = "menu_ime";
     public static final String BACK = "back";
@@ -70,6 +71,9 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String RIGHT = "right";
     public static final String CONTEXTUAL = "contextual";
     public static final String IME_SWITCHER = "ime_switcher";
+    public static final String POWER = "power";
+    public static final String VOLUME_UP = "volup";
+    public static final String VOLUME_DOWN = "voldown";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
@@ -106,6 +110,7 @@ public class NavigationBarInflaterView extends FrameLayout
     private OverviewProxyService mOverviewProxyService;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private boolean mHideHandle;
+    private boolean mAllowSystemKeys;
 
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -179,6 +184,7 @@ public class NavigationBarInflaterView extends FrameLayout
         super.onAttachedToWindow();
         Dependency.get(TunerService.class).addTunable(this, NAV_BAR_VIEWS);
         Dependency.get(TunerService.class).addTunable(this, NAV_BAR_SHOW_HANDLE);
+        Dependency.get(TunerService.class).addTunable(this, NAV_BAR_SYSTEM_KEYS);
         Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_NAVIGATION_BAR_ARROW_KEYS);
     }
 
@@ -193,6 +199,13 @@ public class NavigationBarInflaterView extends FrameLayout
             mHideHandle = newValue != null && newValue.equals("0");
             if (QuickStepContract.isGesturalMode(mNavBarMode)) {
                 onLikelyDefaultLayoutChange();
+            }
+        }
+        if (NAV_BAR_SYSTEM_KEYS.equals(key)) {
+            mAllowSystemKeys = newValue != null && newValue.equals("1");
+            if (!QuickStepContract.isGesturalMode(mNavBarMode) &&
+                    !mOverviewProxyService.shouldShowSwipeUpUI()) {
+                onForceDefaultLayoutChange();
             }
         }
     }
@@ -215,6 +228,11 @@ public class NavigationBarInflaterView extends FrameLayout
             clearViews();
             inflateLayout(newValue);
         }
+    }
+
+    private void onForceDefaultLayoutChange() {
+        clearViews();
+        inflateLayout(mCurrentLayout);
     }
 
     public void setButtonDispatchers(SparseArray<ButtonDispatcher> buttonDispatchers) {
@@ -282,6 +300,7 @@ public class NavigationBarInflaterView extends FrameLayout
     }
 
     protected void inflateLayout(String newLayout) {
+        Log.d(TAG, "inflateLayout " + newLayout);
         mCurrentLayout = newLayout;
         if (newLayout == null) {
             newLayout = getDefaultLayout();
@@ -437,6 +456,12 @@ public class NavigationBarInflaterView extends FrameLayout
             v = inflater.inflate(R.layout.home_handle, parent, false);
         } else if (IME_SWITCHER.equals(button)) {
             v = inflater.inflate(R.layout.ime_switcher, parent, false);
+        } else if (mAllowSystemKeys && POWER.equals(button)) {
+            v = inflater.inflate(R.layout.power, parent, false);
+        } else if (mAllowSystemKeys && VOLUME_UP.equals(button)) {
+            v = inflater.inflate(R.layout.volume_plus, parent, false);
+        } else if (mAllowSystemKeys && VOLUME_DOWN.equals(button)) {
+            v = inflater.inflate(R.layout.volume_minus, parent, false);
         } else if (button.startsWith(KEY)) {
             String uri = extractImage(button);
             int code = extractKeycode(button);

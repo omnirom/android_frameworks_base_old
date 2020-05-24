@@ -26,7 +26,7 @@
         android:summary="%s"
         android:persistent="false"
         android:entries="@array/nav_bar_layouts"
-        android:entryValues="@array/nav_bar_layouts_values" />
+        android:entryValues="@array/nav_bar_layouts_values_new" />
 
     <PreferenceCategory
         android:title="@string/tuner_nav_bar_gesture_category" />
