@@ -136,6 +136,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private KeyButtonDrawable mAccessibilityIcon;
     private KeyButtonDrawable mArrowLeftIcon;
     private KeyButtonDrawable mArrowRightIcon;
+    private KeyButtonDrawable mPowerButton;
+    private KeyButtonDrawable mVolumePlusButton;
+    private KeyButtonDrawable mVolumeMinusButton;
     private TintedKeyButtonDrawable mRotateSuggestionIcon;
 
     private GestureHelper mGestureHelper;
@@ -438,6 +441,18 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return mButtonDispatchers.get(R.id.menu_container);
     }
 
+    public ButtonDispatcher getPowerButton() {
+        return mButtonDispatchers.get(R.id.power);
+    }
+
+    public ButtonDispatcher getVolumePlusButton() {
+        return mButtonDispatchers.get(R.id.volume_plus);
+    }
+
+    public ButtonDispatcher getVolumeMinusButton() {
+        return mButtonDispatchers.get(R.id.volume_minus);
+    }
+
     public SparseArray<ButtonDispatcher> getButtonDispatchers() {
         return mButtonDispatchers;
     }
@@ -507,7 +522,12 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                     false /* hasShadow */);
             mArrowRightIcon = getDrawable(lightContext, darkContext, R.drawable.ic_navbar_chevron_right,
                     false /* hasShadow */);
-
+            mPowerButton = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_power,
+                    false /* hasShadow */);
+            mVolumePlusButton = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_volume_plus,
+                    false /* hasShadow */);
+            mVolumeMinusButton = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_volume_minus,
+                    false /* hasShadow */);
             updateRotateSuggestionButtonStyle(mRotateBtnStyle, false);
 
             if (ALTERNATE_CAR_MODE_UI) {
@@ -672,6 +692,16 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (showDpadArrowKeys()) {
             getKeyButtonViewById(R.id.dpad_left).setImageDrawable(mArrowLeftIcon);
             getKeyButtonViewById(R.id.dpad_right).setImageDrawable(mArrowRightIcon);
+        }
+
+        if (getPowerButton() != null) {
+            getPowerButton().setImageDrawable(mPowerButton);
+        }
+        if (getVolumeMinusButton() != null) {
+            getVolumeMinusButton().setImageDrawable(mVolumeMinusButton);
+        }
+        if (getVolumePlusButton() != null) {
+            getVolumePlusButton().setImageDrawable(mVolumePlusButton);
         }
 
         mBarTransitions.reapplyDarkIntensity();
