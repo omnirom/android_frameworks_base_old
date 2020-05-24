@@ -120,6 +120,10 @@ public class NavigationBarView extends FrameLayout implements
     private KeyButtonDrawable mDockedIcon;
     private KeyButtonDrawable mArrowLeftIcon;
     private KeyButtonDrawable mArrowRightIcon;
+    private KeyButtonDrawable mPowerButton;
+    private KeyButtonDrawable mVolumePlusButton;
+    private KeyButtonDrawable mVolumeMinusButton;
+    private TintedKeyButtonDrawable mRotateSuggestionIcon;
 
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
     private final DeadZone mDeadZone;
@@ -433,6 +437,18 @@ public class NavigationBarView extends FrameLayout implements
         return mButtonDispatchers.get(R.id.home_handle);
     }
 
+    public ButtonDispatcher getPowerButton() {
+        return mButtonDispatchers.get(R.id.power);
+    }
+
+    public ButtonDispatcher getVolumePlusButton() {
+        return mButtonDispatchers.get(R.id.volume_plus);
+    }
+
+    public ButtonDispatcher getVolumeMinusButton() {
+        return mButtonDispatchers.get(R.id.volume_minus);
+    }
+
     public SparseArray<ButtonDispatcher> getButtonDispatchers() {
         return mButtonDispatchers;
     }
@@ -475,6 +491,12 @@ public class NavigationBarView extends FrameLayout implements
         }
         mArrowLeftIcon = getDrawable(R.drawable.ic_navbar_chevron_left);
         mArrowRightIcon = getDrawable(R.drawable.ic_navbar_chevron_right);
+        mPowerButton = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_power,
+                false /* hasShadow */);
+        mVolumePlusButton = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_volume_plus,
+                false /* hasShadow */);
+        mVolumeMinusButton = getDrawable(lightContext, darkContext, R.drawable.ic_sysbar_volume_minus,
+                false /* hasShadow */);
     }
 
     public KeyButtonDrawable getBackDrawable() {
@@ -634,6 +656,16 @@ public class NavigationBarView extends FrameLayout implements
         // right arrow overrules ime in 3 button mode cause there is not enough space
         if (QuickStepContract.isLegacyMode(mNavBarMode) && showDpadArrowKeys()) {
             mContextualButtonGroup.setButtonVisibility(R.id.ime_switcher, false);
+        }
+
+        if (getPowerButton() != null) {
+            getPowerButton().setImageDrawable(mPowerButton);
+        }
+        if (getVolumeMinusButton() != null) {
+            getVolumeMinusButton().setImageDrawable(mVolumeMinusButton);
+        }
+        if (getVolumePlusButton() != null) {
+            getVolumePlusButton().setImageDrawable(mVolumePlusButton);
         }
 
         mBarTransitions.reapplyDarkIntensity();
