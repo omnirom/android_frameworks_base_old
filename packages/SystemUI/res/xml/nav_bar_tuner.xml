@@ -28,6 +28,12 @@
         android:entries="@array/nav_bar_layouts"
         android:entryValues="@array/nav_bar_layouts_values" />
 
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="sysui_nav_bar_system_keys"
+        android:title="@string/tuner_nav_bar_system_keys_title"
+        android:summary="@string/tuner_nav_bar_system_keys_summary"
+        sysui:defValue="false" />
+
     <PreferenceCategory
         android:title="@string/tuner_nav_bar_gesture_category" />
     <com.android.systemui.tuner.TunerSwitch
