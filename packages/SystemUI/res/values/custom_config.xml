@@ -55,4 +55,6 @@
     <!-- Whether to use fingerprint pressed image -->
     <bool name="config_fodPressedImage">false</bool>
 
+    <bool name="config_nav_bar_system_keys">false</bool>
+
 </resources>
