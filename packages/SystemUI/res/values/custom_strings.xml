@@ -111,6 +111,8 @@
     <string name="tuner_keyguard_fod_unlock_enabled_summary">For devices with FOD allow using on secondary unlock screens</string>
     <string name="tuner_keyguard_show_assistant_handle_title">Show assistant handles</string>
     <string name="tuner_keyguard_show_assistant_handle_summary">Show assistant handles on screen edges</string>
+    <string name="tuner_nav_bar_system_keys_title">Enable system keys suppprt</string>
+    <string name="tuner_nav_bar_system_keys_summary">Allow to emulate power, volume up and volume down keys</string>
 
     <string name="omnijaws_service_error">Error</string>
     <string name="omnijaws_service_unkown">No weather data</string>

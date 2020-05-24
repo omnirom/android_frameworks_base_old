@@ -55,7 +55,7 @@ import java.util.ArrayList;
 public class NavBarTuner extends PreferenceFragment {
 
     private static final String LAYOUT = "layout";
-
+    private static final String SYSTEM_KEYS = "sysui_nav_bar_system_keys";
     private final ArrayList<Tunable> mTunables = new ArrayList<>();
     private Handler mHandler;
 
@@ -75,6 +75,12 @@ public class NavBarTuner extends PreferenceFragment {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.nav_bar_tuner);
         bindLayout((ListPreference) findPreference(LAYOUT));
+        Preference p = findPreference(SYSTEM_KEYS);
+        if (p != null) {
+            if (!getContext().getResources().getBoolean(R.bool.config_nav_bar_system_keys)) {
+                getPreferenceScreen().removePreference(p);
+            }
+        }
     }
 
     @Override
