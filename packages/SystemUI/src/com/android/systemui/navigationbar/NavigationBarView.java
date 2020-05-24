@@ -119,6 +119,10 @@ public class NavigationBarView extends FrameLayout {
     private Context mLightContext;
     private int mLightIconColor;
     private int mDarkIconColor;
+    private KeyButtonDrawable mPowerButton;
+    private KeyButtonDrawable mVolumePlusButton;
+    private KeyButtonDrawable mVolumeMinusButton;
+    private KeyButtonDrawable mNotificationsButton;
 
     private EdgeBackGestureHandler mEdgeBackGestureHandler;
     private final DeadZone mDeadZone;
@@ -316,6 +320,10 @@ public class NavigationBarView extends FrameLayout {
         mButtonDispatchers.put(R.id.ime_switcher, imeSwitcherButton);
         mButtonDispatchers.put(R.id.accessibility_button, accessibilityButton);
         mButtonDispatchers.put(R.id.menu_container, mContextualButtonGroup);
+        mButtonDispatchers.put(R.id.power, new ButtonDispatcher(R.id.power));
+        mButtonDispatchers.put(R.id.volume_minus, new ButtonDispatcher(R.id.volume_minus));
+        mButtonDispatchers.put(R.id.volume_plus, new ButtonDispatcher(R.id.volume_plus));
+        mButtonDispatchers.put(R.id.notifications, new ButtonDispatcher(R.id.notifications));
         mDeadZone = new DeadZone(this);
     }
 
@@ -420,6 +428,22 @@ public class NavigationBarView extends FrameLayout {
         return mButtonDispatchers.get(R.id.home_handle);
     }
 
+    public ButtonDispatcher getPowerButton() {
+        return mButtonDispatchers.get(R.id.power);
+    }
+
+    public ButtonDispatcher getVolumePlusButton() {
+        return mButtonDispatchers.get(R.id.volume_plus);
+    }
+
+    public ButtonDispatcher getVolumeMinusButton() {
+        return mButtonDispatchers.get(R.id.volume_minus);
+    }
+
+    public ButtonDispatcher getNotificationsButton() {
+        return mButtonDispatchers.get(R.id.notifications);
+    }
+
     public SparseArray<ButtonDispatcher> getButtonDispatchers() {
         return mButtonDispatchers;
     }
@@ -456,6 +480,10 @@ public class NavigationBarView extends FrameLayout {
         if (orientationChange || densityChange || dirChange) {
             mBackIcon = getBackDrawable();
         }
+        mPowerButton = getDrawable(R.drawable.ic_sysbar_power);
+        mVolumePlusButton = getDrawable(R.drawable.ic_sysbar_volume_plus);
+        mVolumeMinusButton = getDrawable(R.drawable.ic_sysbar_volume_minus);
+        mNotificationsButton = getDrawable(R.drawable.ic_sysbar_notifications);
     }
 
     /**
@@ -608,6 +636,19 @@ public class NavigationBarView extends FrameLayout {
                 || isImeRenderingNavButtons();
         mContextualButtonGroup.setButtonVisibility(R.id.ime_switcher, !disableImeSwitcher);
 
+        if (getPowerButton() != null) {
+            getPowerButton().setImageDrawable(mPowerButton);
+        }
+        if (getVolumeMinusButton() != null) {
+            getVolumeMinusButton().setImageDrawable(mVolumeMinusButton);
+        }
+        if (getVolumePlusButton() != null) {
+            getVolumePlusButton().setImageDrawable(mVolumePlusButton);
+        }
+        if (getNotificationsButton() != null) {
+            getNotificationsButton().setImageDrawable(mNotificationsButton);
+        }
+
         mBarTransitions.reapplyDarkIntensity();
 
         boolean disableHome = isGesturalMode(mNavBarMode)
@@ -652,6 +693,19 @@ public class NavigationBarView extends FrameLayout {
         getHomeButton().setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent  ? View.INVISIBLE : View.VISIBLE);
         getHomeHandle().setVisibility(disableHomeHandle ? View.INVISIBLE : View.VISIBLE);
+
+        if (getPowerButton() != null) {
+            getPowerButton().setVisibility(View.VISIBLE);
+        }
+        if (getVolumeMinusButton() != null) {
+            getVolumeMinusButton().setVisibility(View.VISIBLE);
+        }
+        if (getVolumePlusButton() != null) {
+            getVolumePlusButton().setVisibility(View.VISIBLE);
+        }
+        if (getNotificationsButton() != null) {
+            getNotificationsButton().setVisibility(View.VISIBLE);
+        }
         notifyActiveTouchRegions();
     }
 
