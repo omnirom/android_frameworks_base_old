@@ -180,8 +180,5 @@ interface IWifiManager
     void registerSoftApCallback(in IBinder binder, in ISoftApCallback callback, int callbackIdentifier);
 
     void unregisterSoftApCallback(int callbackIdentifier);
-
-    String getCapabilities(String capaType);
-
 }
 
