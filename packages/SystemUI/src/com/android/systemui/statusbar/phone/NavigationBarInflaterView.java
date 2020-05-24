@@ -70,6 +70,9 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String RIGHT = "right";
     public static final String CONTEXTUAL = "contextual";
     public static final String IME_SWITCHER = "ime_switcher";
+    public static final String POWER = "power";
+    public static final String VOLUME_UP = "volup";
+    public static final String VOLUME_DOWN = "voldown";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
@@ -282,6 +285,7 @@ public class NavigationBarInflaterView extends FrameLayout
     }
 
     protected void inflateLayout(String newLayout) {
+        Log.d(TAG, "inflateLayout " + newLayout);
         mCurrentLayout = newLayout;
         if (newLayout == null) {
             newLayout = getDefaultLayout();
@@ -437,6 +441,12 @@ public class NavigationBarInflaterView extends FrameLayout
             v = inflater.inflate(R.layout.home_handle, parent, false);
         } else if (IME_SWITCHER.equals(button)) {
             v = inflater.inflate(R.layout.ime_switcher, parent, false);
+        } else if (POWER.equals(button)) {
+            v = inflater.inflate(R.layout.power, parent, false);
+        } else if (VOLUME_UP.equals(button)) {
+            v = inflater.inflate(R.layout.volume_plus, parent, false);
+        } else if (VOLUME_DOWN.equals(button)) {
+            v = inflater.inflate(R.layout.volume_minus, parent, false);
         } else if (button.startsWith(KEY)) {
             String uri = extractImage(button);
             int code = extractKeycode(button);
@@ -502,6 +512,7 @@ public class NavigationBarInflaterView extends FrameLayout
                     addToDispatchers(viewGroup.getChildAt(i));
                 }
             }
+            Log.d(TAG, "addToDispatchers " + v.getId());
         }
     }
 
