@@ -69,6 +69,9 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String LEFT = "left";
     public static final String RIGHT = "right";
     public static final String CONTEXTUAL = "contextual";
+    public static final String POWER = "power";
+    public static final String VOLUME_UP = "volup";
+    public static final String VOLUME_DOWN = "voldown";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
@@ -252,6 +255,7 @@ public class NavigationBarInflaterView extends FrameLayout
     }
 
     protected void inflateLayout(String newLayout) {
+        Log.d(TAG, "inflateLayout " + newLayout);
         mCurrentLayout = newLayout;
         if (newLayout == null) {
             newLayout = getDefaultLayout();
@@ -393,6 +397,18 @@ public class NavigationBarInflaterView extends FrameLayout
             v = inflater.inflate(R.layout.clipboard, parent, false);
         } else if (CONTEXTUAL.equals(button)) {
             v = inflater.inflate(R.layout.contextual, parent, false);
+        } else if (POWER.equals(button)) {
+            v = inflater.inflate(R.layout.extra_key, parent, false);
+            ((KeyButtonView) v).setCode(26);
+            ((KeyButtonView) v).setImageResource(R.drawable.ic_sysbar_power);
+        } else if (VOLUME_UP.equals(button)) {
+            v = inflater.inflate(R.layout.extra_key, parent, false);
+            ((KeyButtonView) v).setCode(24);
+            ((KeyButtonView) v).setImageResource(R.drawable.ic_sysbar_volume_plus);
+        } else if (VOLUME_DOWN.equals(button)) {
+            v = inflater.inflate(R.layout.extra_key, parent, false);
+            ((KeyButtonView) v).setCode(25);
+            ((KeyButtonView) v).setImageResource(R.drawable.ic_sysbar_volume_minus);
         } else if (button.startsWith(KEY)) {
             String uri = extractImage(button);
             int code = extractKeycode(button);
