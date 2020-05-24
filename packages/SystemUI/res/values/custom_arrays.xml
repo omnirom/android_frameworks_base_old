@@ -23,4 +23,11 @@
         <item>@string/tuner_battery_percent_enable</item>
         <item>@string/tuner_battery_percent_charging</item>
     </string-array>
+
+    <string-array name="nav_bar_layouts_values_new" translatable="false">
+        <item>default</item>
+        <item>left;back,home,recent;right</item>
+        <item>left,back,home,recent,right;space;space</item>
+        <item>space;space;left,back,home,recent,right</item>
+    </string-array>
 </resources>
