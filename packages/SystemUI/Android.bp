@@ -65,7 +65,6 @@ android_library {
         "dagger2-2.19",
         "jsr330",
         "vendor.omni.biometrics.fingerprint.inscreen-V1.0-java",
-        "vendor.omni.biometrics.fingerprint.inscreen-V1.1-java",
     ],
     manifest: "AndroidManifest.xml",
 
