@@ -155,9 +155,7 @@ public class FODCircleView extends ImageView implements OnTouchListener,
             if (mIsViewAdded) {
                 resetPosition();
                 invalidate();
-                if (mSupportsAlwaysOnHbm) {
-                    show();
-                }
+                show();
             }
             setCustomIcon();
         }
@@ -170,9 +168,7 @@ public class FODCircleView extends ImageView implements OnTouchListener,
                 resetPosition();
                 mWasDreaming = mIsDreaming;
                 mIsDreaming = false;
-                if (mSupportsAlwaysOnHbm) {
-                    show();
-                }
+                show();
             } else {
                 mIsDreaming = mWasDreaming;
             }
