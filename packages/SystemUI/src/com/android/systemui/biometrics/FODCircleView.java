@@ -386,11 +386,11 @@ public class FODCircleView extends ImageView implements OnTouchListener,
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
             newInside = false;
-            if (mSupportsAlwaysOnHbm) {
+            if (!mSupportsAlwaysOnHbm || mIsDreaming) {
+                setDim(false);
+            } else {
                 setColorFilter(Color.argb(mCurDim, 0, 0, 0),
                         PorterDuff.Mode.SRC_ATOP);
-            } else {
-                setDim(false);
             }
             setCustomIcon();
         }
