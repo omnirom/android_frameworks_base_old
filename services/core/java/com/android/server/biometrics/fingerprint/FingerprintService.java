@@ -1029,7 +1029,7 @@ public class FingerprintService extends BiometricServiceBase {
         return mDaemon;
     }
 
-    public IFingerprintInscreen getFingerprintInScreenDaemon() {
+    private synchronized IFingerprintInscreen getFingerprintInScreenDaemon() {
         if (!mHasFod) {
             return null;
         }
