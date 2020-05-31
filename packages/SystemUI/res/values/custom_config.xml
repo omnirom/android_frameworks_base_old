@@ -28,6 +28,7 @@
 
     <!-- Color of the FOD view -->
     <color name="config_fodColor">#00ff00</color>
+    <color name="config_fodColorBackground">#00212121</color>
 
         <!-- The CPU temperature sensor path, defaults to empty -->
     <string name="config_cpuTempSensor" translatable="false"></string>
