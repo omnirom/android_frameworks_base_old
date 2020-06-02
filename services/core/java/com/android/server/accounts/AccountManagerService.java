@@ -4412,7 +4412,6 @@ public class AccountManagerService
         return true;
     }
 
-    @Override
     public boolean renameSharedAccountAsUser(Account account, String newName, int userId) {
         userId = handleIncomingUser(userId);
         UserAccounts accounts = getUserAccounts(userId);
@@ -4428,7 +4427,6 @@ public class AccountManagerService
         return r > 0;
     }
 
-    @Override
     public boolean removeSharedAccountAsUser(Account account, int userId) {
         return removeSharedAccountAsUser(account, userId, getCallingUid());
     }
@@ -4446,7 +4444,6 @@ public class AccountManagerService
         return deleted;
     }
 
-    @Override
     public Account[] getSharedAccountsAsUser(int userId) {
         userId = handleIncomingUser(userId);
         UserAccounts accounts = getUserAccounts(userId);
