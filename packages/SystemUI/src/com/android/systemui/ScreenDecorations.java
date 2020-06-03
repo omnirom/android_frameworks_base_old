@@ -159,7 +159,6 @@ public class ScreenDecorations extends SystemUI implements Tunable,
             mCutoutBottom.setShowProtection(false);
         }
     };
->>>>>>> 91cff429459ebbe423fe10497db278dfecc669e3
 
     /**
      * Converts a set of {@link Rect}s into a {@link Region}

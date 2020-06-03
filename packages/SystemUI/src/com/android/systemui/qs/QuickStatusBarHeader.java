@@ -462,6 +462,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         DisplayCutout cutout = insets.getDisplayCutout();
         Pair<Integer, Integer> padding = PhoneStatusBarView.cornerCutoutMargins(
                 cutout, getDisplay());
+
+        final TunerService tunerService = Dependency.get(TunerService.class);
+        tunerService.addTunable(this, QSFooterImpl.QS_SHOW_DRAG_HANDLE);
+        tunerService.addTunable(this, QS_BATTERY_LOCATION_BAR);
+
         if (padding == null) {
             mSystemIconsView.setPaddingRelative(
                     getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start),
@@ -473,10 +478,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                     padding.first,
                     getResources().getDimensionPixelSize(R.dimen.status_bar_padding_top),
                     padding.second, 0);
+        }
 
-        final TunerService tunerService = Dependency.get(TunerService.class);
-        tunerService.addTunable(this, QSFooterImpl.QS_SHOW_DRAG_HANDLE);
-        tunerService.addTunable(this, QS_BATTERY_LOCATION_BAR);
+        return super.onApplyWindowInsets(insets);
     }
 
     @Override
