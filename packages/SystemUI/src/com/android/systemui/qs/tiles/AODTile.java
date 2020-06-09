@@ -22,7 +22,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.View;
 import android.service.quicksettings.Tile;
@@ -40,8 +39,11 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.R;
+import com.android.systemui.util.settings.SecureSettings;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -52,10 +54,10 @@ public class AODTile extends QSTileImpl<BooleanState> implements
 
     public static final String TILE_SPEC = "aod";
 
-    private boolean mAodDisabled;
     private boolean mListening;
     private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_aod);
     private final BatteryController mBatteryController;
+    private final SettingObserver mSetting;
 
     @Inject
     public AODTile(
@@ -67,11 +69,21 @@ public class AODTile extends QSTileImpl<BooleanState> implements
             MetricsLogger metricsLogger,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
+            QSLogger qsLogger,
+            SecureSettings secureSettings,
             BatteryController batteryController,
-            QSLogger qsLogger
+            UserTracker userTracker
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
+
+        mSetting = new SettingObserver(secureSettings, mHandler, Settings.Secure.DOZE_ALWAYS_ON,
+                userTracker.getUserId()) {
+            @Override
+            protected void handleValueChanged(int value, boolean observedChange) {
+                handleRefreshState(value);
+            }
+        };
 
         mBatteryController = batteryController;
         batteryController.observe(getLifecycle(), this);
@@ -80,6 +92,12 @@ public class AODTile extends QSTileImpl<BooleanState> implements
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
         refreshState();
+    }
+
+    @Override
+    protected void handleDestroy() {
+        super.handleDestroy();
+        mSetting.setListening(false);
     }
 
     @Override
@@ -96,12 +114,20 @@ public class AODTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
+    public void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
+        mSetting.setListening(listening);
+    }
+
+    @Override
+    protected void handleUserSwitch(int newUserId) {
+        mSetting.setUserId(newUserId);
+        handleRefreshState(mSetting.getValue());
+    }
+
+    @Override
     public void handleClick(@Nullable View view) {
-        mAodDisabled = !mAodDisabled;
-        Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                Settings.Secure.DOZE_ALWAYS_ON,
-                mAodDisabled ? 0 : 1, UserHandle.USER_CURRENT);
-        refreshState();
+        mSetting.setValue(mState.value ? 0 : 1);
     }
 
     @Override
@@ -116,55 +142,31 @@ public class AODTile extends QSTileImpl<BooleanState> implements
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        final int value = arg instanceof Integer ? (Integer) arg : mSetting.getValue();
+        final boolean enable = value != 0;
         if (state.slash == null) {
             state.slash = new SlashState();
         }
-        mAodDisabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.DOZE_ALWAYS_ON, 1, UserHandle.USER_CURRENT) == 0;
         state.icon = mIcon;
-        state.value = mAodDisabled;
+        state.value = enable;
         state.slash.isSlashed = state.value;
         state.label = mContext.getString(R.string.quick_settings_aod_label);
         if (mBatteryController.isAodPowerSave()) {
             state.state = Tile.STATE_UNAVAILABLE;
             state.secondaryLabel = mContext.getString(
                            R.string.quick_settings_aod_off_powersave_label);
-        } else if (mAodDisabled) {
-            state.state = Tile.STATE_INACTIVE;
-            state.secondaryLabel = mContext.getString(
-                           R.string.switch_bar_off);
         } else {
-            state.state = Tile.STATE_ACTIVE;
-            state.secondaryLabel = mContext.getString(
-                           R.string.switch_bar_on);
+            state.state = enable ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+            if (enable) {
+                state.secondaryLabel = mContext.getString(R.string.switch_bar_on);
+            } else {
+                state.secondaryLabel = mContext.getString(R.string.switch_bar_off);
+            }
         }
     }
 
     @Override
     public int getMetricsCategory() {
         return MetricsEvent.CUSTOM_QUICK_TILES;
-    }
-
-    private ContentObserver mObserver = new ContentObserver(mHandler) {
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            refreshState();
-        }
-    };
-
-    @Override
-    public void handleSetListening(boolean listening) {
-        if (mObserver == null) {
-            return;
-        }
-        if (mListening != listening) {
-            mListening = listening;
-            if (listening) {
-                mContext.getContentResolver().registerContentObserver(
-                        Settings.Secure.getUriFor(Settings.Secure.DOZE_ALWAYS_ON), false, mObserver);
-            } else {
-                mContext.getContentResolver().unregisterContentObserver(mObserver);
-            }
-        }
     }
 }
