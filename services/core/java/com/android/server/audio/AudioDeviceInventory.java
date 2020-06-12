@@ -497,11 +497,6 @@ public class AudioDeviceInventory {
                                 + " codec=" + AudioSystem.audioFormatToString(a2dpCodec))
                         .printLog(TAG));
             }
-
-            if (event == BtHelper.EVENT_ACTIVE_DEVICE_CHANGE) {
-                Log.i(TAG, "Unmute the stream after reconfigure");
-                mDeviceBroker.postAccessoryPlugMediaUnmute(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
-            }
         }
         mmi.record();
     }
