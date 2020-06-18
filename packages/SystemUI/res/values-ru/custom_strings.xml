@@ -91,6 +91,9 @@
     <string name="tuner_nav_bar_show_handle_title">Показать дескриптор</string>
     <string name="tuner_nav_bar_legacy_category">3-х кнопочная навигация</string>
     <string name="tuner_nav_bar_gesture_category">Навигация жестами</string>
+    <string name="tuner_keyguard_transition_animations_title">Показать анимации перехода</string>
+    <string name="tuner_keyguard_transition_animations_summary">Показать бесполезные анимации</string>
+    <string name="tuner_qs_long_press_action">Не показывать панели при долгом нажатии</string>
     <string name="omnijaws_service_error">Ошибка</string>
     <string name="omnijaws_service_unkown">Нет данных погоды</string>
     <string name="omnijaws_service_error_long">Ошибка загрузки данных о погоде</string>

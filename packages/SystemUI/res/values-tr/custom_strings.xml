@@ -130,7 +130,7 @@
     <!-- Navigation bar dpad -->
     <string name="accessibility_dpad_left">İşâretçi solda</string>
     <string name="accessibility_dpad_right">İşâretçi sağda</string>
-    <string name="screenrecord_stopdot_label">Durma noktasını göster</string>
+    <string name="screenrecord_stopdot_label">Durdurma noktasını göster</string>
     <string name="screenrecord_low_quality_label">Düşük kalite</string>
     <!-- Immersive tile -->
     <string name="quick_settings_immersive_tile">Tam ekran modu</string>
