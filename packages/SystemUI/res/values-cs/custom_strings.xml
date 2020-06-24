@@ -49,6 +49,8 @@
     <string name="qs_menu_item_titles">Zobrazit popisky</string>
     <string name="qs_menu_item_qs_columns">Sloupce panelu QS</string>
     <string name="qs_menu_item_columns_auto">Automaticky</string>
+    <string name="tuner_show_brightness_mode">Zobrazit přepínač režimu jasu</string>
+    <string name="tuner_show_brightness_side_buttons">Zobrazit boční tlačítka posuvníku jasu</string>
     <string name="tuner_quick_settings">Rychlá nastavení</string>
     <string name="tuner_show_brightness_new">Zobrazit posuvník jasu</string>
     <string name="tuner_brightness_position_bottom">Posuvník jasu ve spodní části</string>
@@ -94,6 +96,10 @@
     <string name="tuner_keyguard_transition_animations_title">Zobrazit animace přechodu</string>
     <string name="tuner_keyguard_transition_animations_summary">Zobrazit zbytečné animace</string>
     <string name="tuner_qs_long_press_action">Nezobrazovat panely při dlouhém stisku</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_title">Povolit sekundární odemčení FOD</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_summary">Pro zařízení s FOD umožní používat odemčení na sekundárních obrazovkách</string>
+    <string name="tuner_keyguard_show_assistant_handle_title">Zobrazit pomocný úchop</string>
+    <string name="tuner_keyguard_show_assistant_handle_summary">Zobrazit pomocný úchop na okrajích obrazovky</string>
     <string name="omnijaws_service_error">Chyba</string>
     <string name="omnijaws_service_unkown">Žádné údaje o počasí</string>
     <string name="omnijaws_service_error_long">Chyba při načítání údajů o počasí</string>
@@ -141,4 +147,6 @@
     <string name="qs_data_switch_label">Přepnout kartu pro data</string>
     <string name="qs_data_switch_changed_1">Používání SIM 1 pro mobilní data</string>
     <string name="qs_data_switch_changed_2">Používání SIM 2 pro mobilní data</string>
+    <string name="screenshot_error_title">Neplatný snímek obrazovky</string>
+    <string name="screenrecord_error_title">Neplatný videozáznam obrazovky</string>
 </resources>

@@ -49,6 +49,8 @@
     <string name="qs_menu_item_titles">Beschriftungen anzeigen</string>
     <string name="qs_menu_item_qs_columns">Quickbar Spalten</string>
     <string name="qs_menu_item_columns_auto">Automatisch</string>
+    <string name="tuner_show_brightness_mode">Zeige Umschalter für Helligkeitsmodus</string>
+    <string name="tuner_show_brightness_side_buttons">Zeige Helligkeitsregler-Seitenschaltflächen</string>
     <string name="tuner_quick_settings">Schnelleinstellungen</string>
     <string name="tuner_show_brightness_new">Zeige Helligkeitsregler</string>
     <string name="tuner_brightness_position_bottom">Helligkeitsregler unten</string>
@@ -94,6 +96,10 @@
     <string name="tuner_keyguard_transition_animations_title">Übergangsanimationen anzeigen</string>
     <string name="tuner_keyguard_transition_animations_summary">Nutzlose Animationen anzeigen</string>
     <string name="tuner_qs_long_press_action">Panel bei langem Drücken nicht anzeigen</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_title">Sekundäres FOD Entsperren erlauben</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_summary">Erlaubt es den Geräten mit FOD die Verwendung auf dem sekundären Entsperrbildschirm</string>
+    <string name="tuner_keyguard_show_assistant_handle_title">Assistenten-Handles anzeigen</string>
+    <string name="tuner_keyguard_show_assistant_handle_summary">Assistenten-Handles an Bildschirmrändern anzeigen</string>
     <string name="omnijaws_service_error">Fehler</string>
     <string name="omnijaws_service_unkown">Keine Wetterdaten</string>
     <string name="omnijaws_service_error_long">Fehler beim Laden der Wetterdaten</string>
@@ -141,4 +147,6 @@
     <string name="qs_data_switch_label">Daten SIM wechseln</string>
     <string name="qs_data_switch_changed_1">SIM 1 für mobile Daten verwenden</string>
     <string name="qs_data_switch_changed_2">SIM 2 für mobile Daten verwenden</string>
+    <string name="screenshot_error_title">Screenshot ungültig</string>
+    <string name="screenrecord_error_title">Bildschirmaufnahme ungültig</string>
 </resources>
