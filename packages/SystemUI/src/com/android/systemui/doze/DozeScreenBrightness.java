@@ -228,6 +228,11 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     }
 
     private int clampToUserSetting(int brightness) {
+        boolean forceCustomBrightness = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_DOZE_BRIGHTNESS_FORCE, 0, UserHandle.USER_CURRENT) == 1;
+        if (forceCustomBrightness) {
+            return brightness;
+        }
         int userSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS, Integer.MAX_VALUE,
                 UserHandle.USER_CURRENT);
