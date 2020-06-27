@@ -72,11 +72,11 @@
     <string name="quick_settings_network_adb_toast">USB debugging is not enabled</string>
 
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Peek notifications</string>
-    <string name="accessibility_quick_settings_heads_up_off">Peek notifications disabled.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Peek notifications allowed.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Peek notifications turned off.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Peek notifications turned on.</string>
+    <string name="quick_settings_heads_up_label">Heads-up notifications</string>
+    <string name="accessibility_quick_settings_heads_up_off">Heads-up notifications disabled.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Heads-up notifications allowed.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Heads-up notifications turned off.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Heads-up notifications turned on.</string>
 
     <string name="quick_settings_screenrecord_label">Screenrecord</string>
 
