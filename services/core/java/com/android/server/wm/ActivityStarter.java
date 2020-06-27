@@ -1043,6 +1043,12 @@ class ActivityStarter {
                     + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
             return false;
         }
+        // don't abort if its an omni package
+        if (callingPackage.startsWith("org.omnirom")) {
+            Slog.w(TAG, "Background activity start for " + callingPackage
+                    + " allowed because its a omni package.");
+            return false;
+        }
         // anything that has fallen through would currently be aborted
         Slog.w(TAG, "Background activity start [callingPackage: " + callingPackage
                 + "; callingUid: " + callingUid
