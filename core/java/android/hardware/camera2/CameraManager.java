@@ -1124,8 +1124,11 @@ public final class CameraManager {
                         }
                     }
                 }
-                if (exposeAuxCamera == false && (Integer.parseInt(cameraId) >= 2)) {
-                    throw new IllegalArgumentException("invalid cameraId");
+                try {
+                    if (exposeAuxCamera == false && (Integer.parseInt(cameraId) >= 2)) {
+                        throw new IllegalArgumentException("invalid cameraId");
+                    }
+                } catch (NumberFormatException e) {
                 }
 
                 ICameraService cameraService = getCameraService();
@@ -1327,9 +1330,12 @@ public final class CameraManager {
             }
 
             if (exposeMonoCamera == false) {
-                if (Integer.parseInt(id) >= 2) {
-                    Log.w(TAG, "[soar.cts] ignore the status update of camera: " + id);
-                    return;
+                try {
+                    if (Integer.parseInt(id) >= 2) {
+                        Log.w(TAG, "[soar.cts] ignore the status update of camera: " + id);
+                        return;
+                    }
+                } catch (NumberFormatException e) {
                 }
             }
 
@@ -1426,12 +1432,14 @@ public final class CameraManager {
             }
 
             if (exposeMonoCamera == false) {
-                if (Integer.parseInt(id) >= 2) {
+                try {
+                    if (Integer.parseInt(id) >= 2) {
                     Log.w(TAG, "ignore the torch status update of camera: " + id);
-                    return;
+                        return;
+                    }
+                } catch (NumberFormatException e) {
                 }
             }
-
 
             if (!validTorchStatus(status)) {
                 Log.e(TAG, String.format("Ignoring invalid device %s torch status 0x%x", id,
