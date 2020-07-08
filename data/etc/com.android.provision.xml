@@ -17,5 +17,6 @@
 <permissions>
     <privapp-permissions package="com.android.provision">
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+        <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
     </privapp-permissions>
 </permissions>
