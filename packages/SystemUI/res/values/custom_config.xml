@@ -38,5 +38,7 @@
     <integer name="quick_settings_num_columns_port_max">8</integer>
     <integer name="quick_settings_num_columns_land_max">9</integer>
 
+    <!-- if true will auto-hide all battery display if battery present is false -->
+    <bool name="config_batteryPresentVisibility">false</bool>
 </resources>
 
