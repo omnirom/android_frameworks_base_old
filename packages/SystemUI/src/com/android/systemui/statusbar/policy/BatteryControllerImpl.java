@@ -73,6 +73,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private boolean mCharged;
     protected boolean mPowerSave;
     private boolean mAodPowerSave;
+    protected boolean mPresent = true;
     private boolean mTestmode = false;
     @VisibleForTesting
     boolean mHasReceivedBattery = false;
@@ -125,6 +126,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         pw.print("  mCharging="); pw.println(mCharging);
         pw.print("  mCharged="); pw.println(mCharged);
         pw.print("  mPowerSave="); pw.println(mPowerSave);
+        pw.print("  mPresent="); pw.println(mPresent);
     }
 
     @Override
@@ -139,6 +141,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         }
         if (!mHasReceivedBattery) return;
         cb.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
+        cb.onBatteryPresent(mPresent);
         cb.onPowerSaveChanged(mPowerSave);
     }
 
@@ -164,6 +167,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
                     BatteryManager.BATTERY_STATUS_UNKNOWN);
             mCharged = status == BatteryManager.BATTERY_STATUS_FULL;
             mCharging = mCharged || status == BatteryManager.BATTERY_STATUS_CHARGING;
+            mPresent = intent.getBooleanExtra(BatteryManager.EXTRA_PRESENT, true);
 
             fireBatteryLevelChanged();
         } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)) {
@@ -304,6 +308,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             final int N = mChangeCallbacks.size();
             for (int i = 0; i < N; i++) {
                 mChangeCallbacks.get(i).onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
+                mChangeCallbacks.get(i).onBatteryPresent(mPresent);
             }
         }
     }
