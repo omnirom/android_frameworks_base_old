@@ -121,6 +121,7 @@ public class KeyguardIndicationController implements StateListener,
     private int mChargingSpeed;
     private int mChargingWattage;
     private int mBatteryLevel;
+    private boolean mBatteryPresent = true;
     private long mChargingTimeRemaining;
     private float mDisclosureMaxAlpha;
     private String mMessageToShowOnScreenOn;
@@ -408,7 +409,7 @@ public class KeyguardIndicationController implements StateListener,
                     } else {
                         mTextView.switchIndication(indication);
                     }
-                } else {
+                } else if (mBatteryPresent) {
                     String percentage = NumberFormat.getPercentInstance()
                             .format(mBatteryLevel / 100f);
                     mTextView.switchIndication(percentage);
@@ -421,7 +422,7 @@ public class KeyguardIndicationController implements StateListener,
             String trustManagedIndication = getTrustManagedIndication();
 
             String powerIndication = null;
-            if (mPowerPluggedIn) {
+            if (mPowerPluggedIn && mBatteryPresent) {
                 powerIndication = computePowerIndication();
             }
 
@@ -451,7 +452,7 @@ public class KeyguardIndicationController implements StateListener,
             } else if (!TextUtils.isEmpty(mAlignmentIndication)) {
                 mTextView.switchIndication(mAlignmentIndication);
                 isError = true;
-            } else if (mPowerPluggedIn) {
+            } else if (mPowerPluggedIn && mBatteryPresent) {
                 if (DEBUG_CHARGING_SPEED) {
                     powerIndication += ",  " + (mChargingWattage / 1000) + " mW";
                 }
@@ -686,6 +687,7 @@ public class KeyguardIndicationController implements StateListener,
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mContext);
             mBatteryLevel = status.level;
+            mBatteryPresent = status.isBatteryPresent();
             try {
                 mChargingTimeRemaining = mPowerPluggedIn
                         ? mBatteryInfo.computeChargeTimeRemaining() : -1;

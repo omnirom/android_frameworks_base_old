@@ -24,11 +24,13 @@ import static android.os.BatteryManager.EXTRA_LEVEL;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
+import static android.os.BatteryManager.EXTRA_PRESENT;
 import static android.os.BatteryManager.EXTRA_STATUS;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
+import android.util.Log;
 
 import com.android.settingslib.R;
 
@@ -49,6 +51,7 @@ public class BatteryStatus {
     public final int plugged;
     public final int health;
     public final int maxChargingWattage;
+    public final boolean mPresent;
 
     public BatteryStatus(int status, int level, int plugged, int health,
             int maxChargingWattage) {
@@ -57,6 +60,7 @@ public class BatteryStatus {
         this.plugged = plugged;
         this.health = health;
         this.maxChargingWattage = maxChargingWattage;
+        this.mPresent = true;
     }
 
     public BatteryStatus(Intent batteryChangedIntent) {
@@ -80,6 +84,7 @@ public class BatteryStatus {
         } else {
             maxChargingWattage = -1;
         }
+        mPresent = batteryChangedIntent.getBooleanExtra(EXTRA_PRESENT, true);
     }
 
     /**
@@ -143,5 +148,9 @@ public class BatteryStatus {
     public String toString() {
         return "BatteryStatus{status=" + status + ",level=" + level + ",plugged=" + plugged
                 + ",health=" + health + ",maxChargingWattage=" + maxChargingWattage + "}";
+    }
+
+    public boolean isBatteryPresent() {
+        return mPresent;
     }
 }

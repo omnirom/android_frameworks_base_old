@@ -42,6 +42,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     private boolean mPowerSave;
     private boolean mCharging;
     private boolean mPluggedIn;
+    private boolean mPresent = true;
 
     private Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_battery_saver);
 
@@ -107,7 +108,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.state = mPluggedIn ? Tile.STATE_UNAVAILABLE
+        state.state = (mPluggedIn || !mPresent) ? Tile.STATE_UNAVAILABLE
                 : mPowerSave ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.icon = mIcon;
         state.label = mContext.getString(R.string.battery_detail_switch_title);
@@ -128,6 +129,12 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
         mPowerSave = isPowerSave;
+        refreshState(null);
+    }
+
+    @Override
+    public void onBatteryPresent(boolean present) {
+        mPresent = present;
         refreshState(null);
     }
 }
