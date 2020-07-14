@@ -39,6 +39,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -101,6 +102,7 @@ public class BatteryMeterView extends LinearLayout implements
     private boolean mIgnoreTunerUpdates;
     private boolean mIsSubscribedForTunerUpdates;
     private boolean mCharging;
+    private boolean mPresent = true;
 
     private DualToneHandler mDualToneHandler;
     private int mUser;
@@ -288,9 +290,11 @@ public class BatteryMeterView extends LinearLayout implements
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
-            ArraySet<String> icons = StatusBarIconController.getIconBlacklist(
-                    getContext(), newValue);
-            setVisibility(icons.contains(mSlotBattery) ? View.GONE : View.VISIBLE);
+            if (mPresent) {
+                ArraySet<String> icons = StatusBarIconController.getIconBlacklist(
+                        getContext(), newValue);
+                setVisibility(icons.contains(mSlotBattery) ? View.GONE : View.VISIBLE);
+            }
         }
     }
 
@@ -331,6 +335,12 @@ public class BatteryMeterView extends LinearLayout implements
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
         mDrawable.setPowerSaveEnabled(isPowerSave);
+    }
+
+    @Override
+    public void onBatteryPresent(boolean present) {
+        mPresent = present;
+        setVisibility(mPresent ? View.VISIBLE : View.GONE);
     }
 
     private TextView loadPercentView() {
