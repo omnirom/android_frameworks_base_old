@@ -113,6 +113,10 @@ public class BatteryMeterView extends LinearLayout implements
     private int mNonAdaptedForegroundColor;
     private int mNonAdaptedBackgroundColor;
 
+    // omni additions
+    private boolean mPresent;
+    private boolean mUserVisible;
+
     public BatteryMeterView(Context context) {
         this(context, null, 0);
     }
@@ -289,7 +293,7 @@ public class BatteryMeterView extends LinearLayout implements
         if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
             if (mUserHideable) {
                 ArraySet<String> icons = StatusBarIconController.getIconBlacklist(newValue);
-                setVisibility(icons.contains(SLOT_BATTERY) ? View.GONE : View.VISIBLE);
+                setUserVisibility(!icons.contains(SLOT_BATTERY));
             }
         } else if (TUNER_SHOW_BATTERY_IMAGE.equals(key)) {
             final boolean hideImage = newValue != null && Integer.parseInt(newValue) == 0;
@@ -334,6 +338,16 @@ public class BatteryMeterView extends LinearLayout implements
         mLevel = level;
         updateShowPercent();
         updatePercentText();
+    }
+
+    @Override
+    public void onBatteryPresent(boolean present) {
+        mPresent = present;
+        if (!mPresent) {
+            setVisibility(View.GONE);
+        } else {
+            setVisibility(mUserVisible ? View.VISIBLE : View.GONE);
+        }
     }
 
     @Override
@@ -508,5 +522,14 @@ public class BatteryMeterView extends LinearLayout implements
 
     public void setUserHideable(boolean value) {
         mUserHideable = value;
+    }
+
+    public void setUserVisibility(boolean visible) {
+        mUserVisible = visible;
+        if (mPresent) {
+            setVisibility(visible ? View.VISIBLE : View.GONE);
+        } else {
+            setVisibility(View.GONE);
+        }
     }
 }

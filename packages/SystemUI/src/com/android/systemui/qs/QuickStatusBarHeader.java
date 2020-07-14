@@ -628,8 +628,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
         if (QS_BATTERY_LOCATION_BAR.equals(key)) {
             boolean showBatteryInBar = newValue != null && Integer.parseInt(newValue) == 1;
-            mBatteryMeterView.setVisibility(showBatteryInBar ? View.VISIBLE : View.GONE);
-            mBatteryRemainingIcon.setVisibility(showBatteryInBar ? View.GONE : View.VISIBLE);
+            mBatteryMeterView.setUserVisibility(showBatteryInBar);
+            mBatteryRemainingIcon.setUserVisibility(!showBatteryInBar);
         }
     }
 
