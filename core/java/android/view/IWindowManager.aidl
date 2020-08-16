@@ -638,4 +638,8 @@ interface IWindowManager
      * native InputManager before proceeding with tests.
      */
     void syncInputTransactions();
+
+    // this can only be called with the SET_ORIENTATION permission.
+    @UnsupportedAppUsage
+    void setRotateForApp(int fixedToUserRotation);
 }
