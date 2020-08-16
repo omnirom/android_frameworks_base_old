@@ -3659,6 +3659,15 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void setRotateForApp(@DisplayRotation.FixedToUserRotation int fixedToUserRotation) {
+        if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
+                "freezeRotation()")) {
+            throw new SecurityException("Requires SET_ORIENTATION permission");
+        }
+        setRotateForApp(Display.DEFAULT_DISPLAY, fixedToUserRotation);
+    }
+
+    @Override
     public void freezeRotation(int rotation) {
         freezeDisplayRotation(Display.DEFAULT_DISPLAY, rotation);
     }
