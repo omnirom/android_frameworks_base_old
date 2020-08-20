@@ -49,6 +49,8 @@
     <string name="qs_menu_item_titles">Etiketleri göster</string>
     <string name="qs_menu_item_qs_columns">Hızlı çubuğun sütunları</string>
     <string name="qs_menu_item_columns_auto">Kendiliğinden</string>
+    <string name="tuner_show_brightness_mode">Parlaklık modu düğmesini göster</string>
+    <string name="tuner_show_brightness_side_buttons">Parlaklık kaydırağının yan düğmelerini göster</string>
     <string name="tuner_quick_settings">Hızlı ayarlar</string>
     <string name="tuner_show_brightness_new">Parlaklık kaydırağını göster</string>
     <string name="tuner_brightness_position_bottom">Parlaklık kaydırağı altta</string>
@@ -59,14 +61,14 @@
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Devrede</string>
     <string name="quick_settings_network_adb_disabled_label">Devre dışı</string>
-    <string name="quick_settings_network_adb_label">Şebeke üzerinden ADB</string>
+    <string name="quick_settings_network_adb_label">Ağ üzerinden ADB</string>
     <string name="quick_settings_network_adb_toast">USB hatâ ayıklama devre dışıdır</string>
     <!-- Heads Up QS Tile -->
     <string name="quick_settings_heads_up_label">Ekran üstü bildirimler</string>
-    <string name="accessibility_quick_settings_heads_up_off">Ekran üstü bildirimler devre dışı.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Ekran üstü bildirimler devrede.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Ekran üstü bildirimler devre dışı.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Ekran üstü bildirimler devrede.</string>
+    <string name="accessibility_quick_settings_heads_up_off">Ekran üstü bildirimler devre dışıdır.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Ekran üstü bildirimler devrededir.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Ekran üstü bildirimler kapalıdır.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Ekran üstü bildirimler açıktır.</string>
     <string name="quick_settings_screenrecord_label">Ekran kaydı</string>
     <string name="tuner_keyguard_show_battery_bar_title">Pil çubuğunu göster</string>
     <string name="tuner_keyguard_show_battery_bar_summary">Always on display\'de şarj edilirken pil çubuğunu gösterir</string>
@@ -94,6 +96,10 @@
     <string name="tuner_keyguard_transition_animations_title">Geçiş animasyonlarını göster</string>
     <string name="tuner_keyguard_transition_animations_summary">Lüzumsuz animasyonlar gösterir</string>
     <string name="tuner_qs_long_press_action">Uzun basıldığında panelleri gösterme</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_title">İkincil FOD kilit açmaya izin ver</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_summary">FOD (ekran üstü parmak izi tarayıcısı) özelliğine sahip cihazlar için ikincil kilit açma ekranlarında kullanmaya izin verin</string>
+    <string name="tuner_keyguard_show_assistant_handle_title">Asistanı göster</string>
+    <string name="tuner_keyguard_show_assistant_handle_summary">Ekran köşelerinde asistanı gösterir</string>
     <string name="omnijaws_service_error">Hatâ</string>
     <string name="omnijaws_service_unkown">Hava durumu verisi yok</string>
     <string name="omnijaws_service_error_long">Hava durumuna dair veriler yüklenemedi</string>
@@ -141,4 +147,6 @@
     <string name="qs_data_switch_label">Veri kartını değiştir</string>
     <string name="qs_data_switch_changed_1">SIM 1, mobil veri için kullanılıyor</string>
     <string name="qs_data_switch_changed_2">SIM 2, mobil veri için kullanılıyor</string>
+    <string name="screenshot_error_title">Ekran görüntüsü geçersizdir</string>
+    <string name="screenrecord_error_title">Ekran kaydı geçersizdir</string>
 </resources>

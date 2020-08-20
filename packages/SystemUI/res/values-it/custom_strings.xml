@@ -59,11 +59,6 @@
     <string name="quick_settings_network_adb_label">ADB attraverso la rete</string>
     <string name="quick_settings_network_adb_toast">Il debug USB non è attivato</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Notifiche Peek</string>
-    <string name="accessibility_quick_settings_heads_up_off">Le notifiche peek sono disattivate.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Notifiche peek permesse.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Notifiche peek disattivate.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Notifiche peek attivate.</string>
     <string name="quick_settings_screenrecord_label">Registra schermo</string>
     <string name="tuner_keyguard_show_battery_bar_title">Mostra barra della batteria</string>
     <string name="tuner_keyguard_show_battery_bar_summary">Mostra barra della batteria durante la ricarica e il display always on</string>

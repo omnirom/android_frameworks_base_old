@@ -55,11 +55,6 @@
     <string name="quick_settings_network_adb_label">ADB através da rede</string>
     <string name="quick_settings_network_adb_toast">A depuração USB não está ligada</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Notificações flutuantes</string>
-    <string name="accessibility_quick_settings_heads_up_off">Notificações flutuantes desativadas.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Notificações flutuantes ativadas.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Notificações flutuantes desligadas.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Notificações flutuantes ligadas.</string>
     <string name="quick_settings_screenrecord_label">Gravar ecrã</string>
     <string name="omnijaws_service_error">Erro</string>
     <string name="omnijaws_service_unkown">Sem dados meteorológicos</string>

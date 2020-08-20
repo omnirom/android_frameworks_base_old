@@ -49,11 +49,6 @@
     <string name="quick_settings_network_adb_label">Şəbəkədən ADB</string>
     <string name="quick_settings_network_adb_toast">USB xəta ayırıcı aktivləşdirilməyib</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Üst bildirişlər</string>
-    <string name="accessibility_quick_settings_heads_up_off">Üst bildirişlər qapadıldı.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Üst bildirişlərə icazə verildi.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Üst bildirişlər qapadıldı.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Üst bildirişlərə icazə verildi.</string>
     <string name="omnijaws_service_error">Xəta</string>
     <string name="omnijaws_detail_header">Hava</string>
     <string name="omnijaws_label_default">Hava</string>

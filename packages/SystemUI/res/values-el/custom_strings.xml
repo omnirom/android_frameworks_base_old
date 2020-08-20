@@ -55,11 +55,6 @@
     <string name="quick_settings_network_adb_label">ADB μέσω δικτύου</string>
     <string name="quick_settings_network_adb_toast">Ανενεργός ο εντοπισμός σφαλμάτων USB</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Αναδυόμενες ειδοποιήσεις</string>
-    <string name="accessibility_quick_settings_heads_up_off">Αναδυόμενες ειδοποιήσεις ανενεργές.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Επιτρέπονται οι αναδυόμενες ειδοποιήσεις.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Αναδυόμενες ειδοποιήσεις απενεργοποιημένες.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Αναδυόμενες ειδοποιήσεις ενεργοποιημένες.</string>
     <string name="quick_settings_screenrecord_label">Καταγραφή οθόνης</string>
     <string name="omnijaws_service_error">Σφάλμα</string>
     <string name="omnijaws_service_unkown">Δεν υπάρχουν δεδομένα καιρού</string>

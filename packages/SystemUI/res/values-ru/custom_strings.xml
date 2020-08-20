@@ -62,11 +62,6 @@
     <string name="quick_settings_network_adb_label">Отладки по сети</string>
     <string name="quick_settings_network_adb_toast">Отладка по USB отключена</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Всплывающие уведомления</string>
-    <string name="accessibility_quick_settings_heads_up_off">Всплывающие уведомления выкл.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Всплывающие уведомления вкл.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Всплывающие уведомления выключены.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Всплывающие уведомления включены.</string>
     <string name="quick_settings_screenrecord_label">Запись экрана</string>
     <string name="tuner_keyguard_show_battery_bar_title">Показать панель батареи</string>
     <string name="tuner_keyguard_show_battery_bar_summary">Показывать панель батареи на AOD</string>
