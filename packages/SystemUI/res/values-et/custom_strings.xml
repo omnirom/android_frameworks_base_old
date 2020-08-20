@@ -59,11 +59,6 @@
     <string name="quick_settings_network_adb_label">ADB üle võrgu</string>
     <string name="quick_settings_network_adb_toast">USB silumine pole lubatud</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Piiluvad teated</string>
-    <string name="accessibility_quick_settings_heads_up_off">Piiluvad teated keelatud.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Piiluvad teated lubatud.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Piiluvad teated välja lülitatud.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Piiluvad teated sisse lülitatud.</string>
     <string name="quick_settings_screenrecord_label">Kuva lindistamine</string>
     <string name="tuner_keyguard_show_battery_bar_title">Kuva akuriba</string>
     <string name="tuner_keyguard_show_battery_bar_summary">Kuva akuriba laadimise ajal alati sees ekraanil</string>

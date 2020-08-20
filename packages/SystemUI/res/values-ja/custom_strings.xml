@@ -49,6 +49,8 @@
     <string name="qs_menu_item_titles">ラベルを表示</string>
     <string name="qs_menu_item_qs_columns">クイックバーの列数</string>
     <string name="qs_menu_item_columns_auto">自動</string>
+    <string name="tuner_show_brightness_mode">明るさモードスイッチを表示する</string>
+    <string name="tuner_show_brightness_side_buttons">ボタンを明るさスライダーの側に表示する</string>
     <string name="tuner_quick_settings">クイック設定</string>
     <string name="tuner_show_brightness_new">明るさスライダーを表示</string>
     <string name="tuner_brightness_position_bottom">下部の明るさスライダー</string>
@@ -62,11 +64,6 @@
     <string name="quick_settings_network_adb_label">ネット経由の\nADB</string>
     <string name="quick_settings_network_adb_toast">USB デバッグが有効になっていません</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">通知の表示</string>
-    <string name="accessibility_quick_settings_heads_up_off">通知の表示 OFF</string>
-    <string name="accessibility_quick_settings_heads_up_on">通知の表示 ON</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">通知の表示を OFF にしました</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">通知の表示を ON にしました</string>
     <string name="quick_settings_screenrecord_label">画面録画</string>
     <string name="tuner_keyguard_show_battery_bar_title">バッテリーバーを表示</string>
     <string name="tuner_keyguard_show_battery_bar_summary">充電中は Always on Display 時にバッテリーバーを表示する</string>
@@ -94,6 +91,7 @@
     <string name="tuner_keyguard_transition_animations_title">遷移アニメーションを表示</string>
     <string name="tuner_keyguard_transition_animations_summary">使わないアニメーションを表示する</string>
     <string name="tuner_qs_long_press_action">長押しでパネルを表示しない</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_title">セカンダリ画面内指紋認証ロック解除を許可する</string>
     <string name="omnijaws_service_error">エラー</string>
     <string name="omnijaws_service_unkown">天気データはありません</string>
     <string name="omnijaws_service_error_long">気象データの読み込みに失敗しました</string>
@@ -141,4 +139,6 @@
     <string name="qs_data_switch_label">データ SIM の切換え</string>
     <string name="qs_data_switch_changed_1">SIM 1 をデータ通信に使用中</string>
     <string name="qs_data_switch_changed_2">SIM 2 をデータ通信に使用中</string>
+    <string name="screenshot_error_title">スクリーンショットが無効です</string>
+    <string name="screenrecord_error_title">画面録画が無効です</string>
 </resources>

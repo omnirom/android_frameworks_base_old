@@ -56,11 +56,6 @@
     <string name="quick_settings_network_adb_label">無線 ADB 偵錯</string>
     <string name="quick_settings_network_adb_toast">未啟用 USB 偵錯</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">迅速瀏覽通知</string>
-    <string name="accessibility_quick_settings_heads_up_off">「迅速瀏覽」已停用</string>
-    <string name="accessibility_quick_settings_heads_up_on">允許「迅速瀏覽」</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">「迅速瀏覽」已關閉</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">「迅速瀏覽」已開啟</string>
     <string name="quick_settings_screenrecord_label">螢幕錄影</string>
     <string name="omnijaws_service_error">錯誤</string>
     <string name="omnijaws_service_unkown">無天氣資料</string>

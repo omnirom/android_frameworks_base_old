@@ -55,11 +55,6 @@
     <string name="quick_settings_network_adb_label">ADB cez sieť</string>
     <string name="quick_settings_network_adb_toast">USB ladenie nie je povolené</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Vyskakujúce upozornenia</string>
-    <string name="accessibility_quick_settings_heads_up_off">Vyskakujúce upozornenia vypnuté.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Vyskakujúce upozornenia zapnuté.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Vyskakujúce upozornenia boli vypnuté.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Vyskakujúce upozornenia boli zapnuté.</string>
     <string name="quick_settings_screenrecord_label">Záznam obrazovky</string>
     <string name="omnijaws_service_error">Chyba</string>
     <string name="omnijaws_service_unkown">Žiadne údaje o počasí</string>

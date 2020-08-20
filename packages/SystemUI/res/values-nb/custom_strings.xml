@@ -48,9 +48,6 @@
     <string name="quick_settings_network_adb_label">ADB over nettverk</string>
     <string name="quick_settings_network_adb_toast">USB-feilsøking er ikke aktivert</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Snikktitt på varsler</string>
-    <string name="accessibility_quick_settings_heads_up_off">Sniktitt på varsler deaktivert.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Sniktitt på varsler aktivert.</string>
     <string name="quick_settings_screenrecord_label">Skjermopptak</string>
     <string name="omnijaws_service_error">Feil</string>
     <string name="omnijaws_service_unkown">Ingen værdata</string>

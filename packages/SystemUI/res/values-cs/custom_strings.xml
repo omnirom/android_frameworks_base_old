@@ -64,11 +64,11 @@
     <string name="quick_settings_network_adb_label">ADB přes síť</string>
     <string name="quick_settings_network_adb_toast">USB ladění není povoleno</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Prohlížení oznámení</string>
-    <string name="accessibility_quick_settings_heads_up_off">Prohlížení oznámení zakázáno.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Prohlížení oznámení povoleno.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Prohlížení oznámení vypnuto.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Prohlížení oznámení zapnuto.</string>
+    <string name="quick_settings_heads_up_label">Plovoucí oznámení</string>
+    <string name="accessibility_quick_settings_heads_up_off">Plovoucí oznámení jsou zakázána.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Plovoucí oznámení jsou povolena.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Plovoucí oznámení vypnuto.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Plovoucí oznámení zapnuto.</string>
     <string name="quick_settings_screenrecord_label">Nahrávání obrazovky</string>
     <string name="tuner_keyguard_show_battery_bar_title">Zobrazit pruh baterie</string>
     <string name="tuner_keyguard_show_battery_bar_summary">Zobrazit pruh baterie při nabíjení v režimu AOD</string>

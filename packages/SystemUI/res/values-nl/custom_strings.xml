@@ -55,11 +55,6 @@
     <string name="quick_settings_network_adb_label">ADB over netwerk</string>
     <string name="quick_settings_network_adb_toast">USB-foutopsporing is niet ingeschakeld</string>
     <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Heads-up meldingen</string>
-    <string name="accessibility_quick_settings_heads_up_off">Heads-up meldingen uitgeschakeld.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Heads-up meldingen toegestaan.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Heads-up meldingen uitgeschakeld.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Heads-up meldingen ingeschakeld.</string>
     <string name="quick_settings_screenrecord_label">Schermopname</string>
     <string name="omnijaws_service_error">Fout</string>
     <string name="omnijaws_service_unkown">Geen weergegevens</string>
