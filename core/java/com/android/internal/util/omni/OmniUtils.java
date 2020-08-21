@@ -62,7 +62,7 @@ public class OmniUtils {
     /**
      * @hide
      */
-    public static void sendKeycode(int keycode) {
+    public static void sendKeycode(int keycode, boolean longpress) {
         long when = SystemClock.uptimeMillis();
         final KeyEvent evDown = new KeyEvent(when, when, KeyEvent.ACTION_DOWN, keycode, 0,
                 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
@@ -84,7 +84,7 @@ public class OmniUtils {
                 InputManager.getInstance().injectInputEvent(evUp,
                         InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
             }
-        }, 20);
+        }, longpress ? 750 : 20);
     }
 
     public static void goToSleep(Context context) {

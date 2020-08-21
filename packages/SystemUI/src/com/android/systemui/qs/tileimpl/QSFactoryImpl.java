@@ -46,6 +46,7 @@ import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
+import com.android.systemui.qs.tiles.PowerButtonTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.ScreenrecordTile;
 import com.android.systemui.qs.tiles.ScreenshotTile;
@@ -94,6 +95,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<ImmersiveTile> mImmersiveTileProvider;
     private final Provider<ScreenshotTile> mScreenshotTileProvider;
     private final Provider<DataSwitchTile> mDataSwitchTileProvider;
+    private final Provider<PowerButtonTile> mPowerButtonTileProvider;
 
     private QSTileHost mHost;
 
@@ -125,7 +127,8 @@ public class QSFactoryImpl implements QSFactory {
             Provider<HeadsUpTile> headsupTileProvider,
             Provider<ImmersiveTile> immersiveTileProvider,
             Provider<ScreenshotTile> screenshotTileProvider,
-            Provider<DataSwitchTile> dataSwitchTileProvider) {
+            Provider<DataSwitchTile> dataSwitchTileProvider,
+            Provider<PowerButtonTile> powerButtonTileProvider) {
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
         mCellularTileProvider = cellularTileProvider;
@@ -155,6 +158,7 @@ public class QSFactoryImpl implements QSFactory {
         mImmersiveTileProvider = immersiveTileProvider;
         mScreenshotTileProvider = screenshotTileProvider;
         mDataSwitchTileProvider = dataSwitchTileProvider;
+        mPowerButtonTileProvider = powerButtonTileProvider;
     }
 
     public void setHost(QSTileHost host) {
@@ -227,6 +231,8 @@ public class QSFactoryImpl implements QSFactory {
                 return mScreenshotTileProvider.get();
             case "dataswitch":
                 return mDataSwitchTileProvider.get();
+            case "power":
+                return mPowerButtonTileProvider.get();
         }
 
         // Intent tiles.
