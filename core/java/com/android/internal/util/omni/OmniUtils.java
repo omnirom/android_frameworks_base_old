@@ -62,6 +62,13 @@ public class OmniUtils {
     /**
      * @hide
      */
+    public static void sendKeycode(int keycode) {
+        sendKeycode(keycode, false);
+    }
+
+    /**
+     * @hide
+     */
     public static void sendKeycode(int keycode, boolean longpress) {
         long when = SystemClock.uptimeMillis();
         final KeyEvent evDown = new KeyEvent(when, when, KeyEvent.ACTION_DOWN, keycode, 0,
