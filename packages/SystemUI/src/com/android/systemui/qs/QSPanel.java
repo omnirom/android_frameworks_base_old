@@ -309,6 +309,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 addView(mBrightnessView, getBrightnessViewPositionBottom());
                 mBrightnessBottom = true;
             }
+            // after mBrightnessBottom changed we must update
+            updateBrightnessPlaceholder();
         }
         if (QS_SHOW_BRIGHTNESS_SIDE_BUTTONS.equals(key)) {
             mShowBrightnessSideButtons = (newValue == null || Integer.parseInt(newValue) == 0)
@@ -348,6 +350,18 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         } else {
             mBrightnessVisible = false;
             mBrightnessView.setVisibility(GONE);
+            mBrightnessPlaceholder.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void updateBrightnessPlaceholder() {
+        if (mBrightnessVisible) {
+            if (!mBrightnessBottom) {
+                mBrightnessPlaceholder.setVisibility(View.GONE);
+            } else {
+                mBrightnessPlaceholder.setVisibility(View.VISIBLE);
+            }
+        } else {
             mBrightnessPlaceholder.setVisibility(View.VISIBLE);
         }
     }
