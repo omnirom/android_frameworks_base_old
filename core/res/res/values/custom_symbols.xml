@@ -25,4 +25,7 @@
 
     <!-- Switch USB controller on Asus ROG devices-->
     <java-symbol type="bool" name="config_switchUsbController" />
+
+
+    <java-symbol type="array" name="config_vendorPlatformSignatures" />
 </resources>
