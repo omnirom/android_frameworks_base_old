@@ -400,7 +400,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private boolean advancedRebootEnabled(Context context) {
         boolean advancedRebootEnabled = Settings.System.getIntForUser(context.getContentResolver(),
                 Settings.System.OMNI_ADVANCED_REBOOT, 0, UserHandle.USER_CURRENT) == 1;
-        return advancedRebootEnabled;
+        return advancedRebootEnabled && mRebootMenuActions.length > 1;
     }
 
     private boolean isSecureLocked() {
