@@ -546,6 +546,8 @@ public final class PowerManagerService extends SystemService
     // True if doze should not be started until after the screen off transition.
     private boolean mDozeAfterScreenOff;
 
+    private boolean mEnableAutoSuspendConfig;
+
     // The minimum screen off timeout, in milliseconds.
     private long mMinimumScreenOffTimeoutConfig;
 
@@ -1466,6 +1468,8 @@ public final class PowerManagerService extends SystemService
                 com.android.internal.R.bool.config_powerDecoupleAutoSuspendModeFromDisplay);
         mDecoupleHalInteractiveModeFromDisplayConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_powerDecoupleInteractiveModeFromDisplay);
+        mEnableAutoSuspendConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_enableAutoSuspend);
         mWakeUpWhenPluggedOrUnpluggedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
         mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig = resources.getBoolean(
@@ -3824,6 +3828,12 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     private void setHalAutoSuspendModeLocked(boolean enable) {
+        if (!mEnableAutoSuspendConfig) {
+            if (DEBUG) {
+                Slog.d(TAG, "Setting HAL auto-suspend mode to " + enable + " blocked by config_enableAutoSuspend=false");
+            }
+            return;
+        }
         if (enable != mHalAutoSuspendModeEnabled) {
             if (DEBUG) {
                 Slog.d(TAG, "Setting HAL auto-suspend mode to " + enable);
