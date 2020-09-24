@@ -1,0 +1,3 @@
+<resources>
+    <java-symbol type="bool" name="config_enableAutoSuspend" />
+</resources>
