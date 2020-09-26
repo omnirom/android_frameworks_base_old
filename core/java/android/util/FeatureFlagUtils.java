@@ -56,7 +56,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(DYNAMIC_SYSTEM, "false");
         DEFAULT_FLAGS.put(SEAMLESS_TRANSFER, "false");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
-        DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
+        DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "true");
         DEFAULT_FLAGS.put("settings_wifi_details_datausage_header", "false");
         DEFAULT_FLAGS.put("settings_skip_direction_mutable", "true");
         DEFAULT_FLAGS.put(SETTINGS_WIFITRACKER2, "true");
