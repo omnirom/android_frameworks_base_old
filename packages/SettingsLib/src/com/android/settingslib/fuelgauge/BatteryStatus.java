@@ -59,10 +59,10 @@ public class BatteryStatus {
     public int maxChargingWattage;
     public final double currBatteryTemp;
     public final double currChargingVolt;
-    public final boolean mPresent;
+    public final boolean present;
 
     public BatteryStatus(int status, int level, int plugged, int health,
-            int maxChargingWattage, double currChargingVolt, double currBatteryTemp) {
+            int maxChargingWattage, double currChargingVolt, double currBatteryTemp, boolean present) {
         this.status = status;
         this.level = level;
         this.plugged = plugged;
@@ -70,7 +70,7 @@ public class BatteryStatus {
         this.maxChargingWattage = maxChargingWattage;
         this.currChargingVolt = currChargingVolt;
         this.currBatteryTemp = currBatteryTemp;
-        this.mPresent = true;
+        this.present = present;
     }
 
     public BatteryStatus(Intent batteryChangedIntent) {
@@ -78,6 +78,8 @@ public class BatteryStatus {
         plugged = batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, 0);
         level = batteryChangedIntent.getIntExtra(EXTRA_LEVEL, 0);
         health = batteryChangedIntent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
+        present = batteryChangedIntent.getBooleanExtra(EXTRA_PRESENT, true);
+
         final int maxChargingMicroAmp = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT,
                 -1);
         int maxChargingMicroVolt = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
@@ -100,7 +102,6 @@ public class BatteryStatus {
                 + " maxChargingWattage = " + maxChargingWattage
                 + " currChargingVolt = " + currChargingVolt
                 + " currBatteryTemp = " + currBatteryTemp);
-        mPresent = batteryChangedIntent.getBooleanExtra(EXTRA_PRESENT, true);
     }
 
     /**
@@ -195,10 +196,6 @@ public class BatteryStatus {
                 + ",health=" + health + ",maxChargingWattage=" + maxChargingWattage
                 + ",currChargingVolt=" + currChargingVolt
                 + ",currBatteryTemp=" + currBatteryTemp + "}";
-    }
-
-    public boolean isBatteryPresent() {
-        return mPresent;
     }
 
 }
