@@ -5647,6 +5647,35 @@ public final class Settings {
             return isCallingPackageAllowedToWriteSettings(context, Process.myUid(),
                     context.getOpPackageName(), false);
         }
+
+        /**
+         Add omni settings like e.g.
+         @hide
+         public static final String OMNI_FOO_BAR_BALABALA = "foo_bar_balabala";
+        */
+
+        /**
+         * SettingsBackupAgent will combine its list with this so we dont need
+         * to add new things into SettingsProvider SystemSettings
+         * @hide
+         */
+        public static final String[] OMNI_SETTINGS_TO_BACKUP = {
+            // OMNI_FOO_BAR_BALABALA
+        };
+
+        /**
+         * SettingsBackupAgent will combine its list with this so we dont need
+         * to add new things into SettingsProvider SystemSettingsValidators
+         * we cant use Validators interface so use a simple integer mapping
+         * BOOLEAN_VALIDATOR == 0
+         * ANY_INTEGER_VALIDATOR == 1
+         * ANY_STRING_VALIDATOR == 2
+         * @hide
+         */
+        public static final Map<String, Integer> OMNI_SETTINGS_VALIDATORS = new ArrayMap<>();
+        static {
+            //OMNI_SETTINGS_VALIDATORS.put(OMNI_FOO_BAR_BALABALA, 1);
+        }
     }
 
     /**
