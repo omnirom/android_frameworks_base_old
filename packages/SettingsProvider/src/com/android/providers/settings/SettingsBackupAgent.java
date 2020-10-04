@@ -40,6 +40,7 @@ import android.provider.settings.backup.SecureSettings;
 import android.provider.settings.backup.SystemSettings;
 import android.provider.settings.validators.GlobalSettingsValidators;
 import android.provider.settings.validators.SecureSettingsValidators;
+import android.provider.settings.validators.SettingsValidators;
 import android.provider.settings.validators.SystemSettingsValidators;
 import android.provider.settings.validators.Validator;
 import android.util.ArrayMap;
@@ -596,7 +597,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         Cursor cursor = getContentResolver().query(Settings.System.CONTENT_URI, PROJECTION, null,
                 null, null);
         try {
-            return extractRelevantValues(cursor, SystemSettings.SETTINGS_TO_BACKUP);
+            String[] settings = ArrayUtils.concatElements(String.class, SystemSettings.SETTINGS_TO_BACKUP,
+                    Settings.System.OMNI_SETTINGS_TO_BACKUP);
+            return extractRelevantValues(cursor, settings);
         } finally {
             cursor.close();
         }
@@ -853,8 +856,23 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             validators = SecureSettingsValidators.VALIDATORS;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
             whitelist = ArrayUtils.concatElements(String.class, SystemSettings.SETTINGS_TO_BACKUP,
-                    Settings.System.LEGACY_RESTORE_SETTINGS);
+                    Settings.System.LEGACY_RESTORE_SETTINGS, Settings.System.OMNI_SETTINGS_TO_BACKUP);
             validators = SystemSettingsValidators.VALIDATORS;
+
+            final Map<String, Integer> omniValidators = Settings.System.OMNI_SETTINGS_VALIDATORS;
+            // BOOLEAN_VALIDATOR == 0
+            // ANY_INTEGER_VALIDATOR == 1
+            // ANY_STRING_VALIDATOR == 2
+            for (String key : omniValidators.keySet()) {
+                Integer validatorId = omniValidators.get(key);
+                if (validatorId == 0) {
+                    validators.put(key, SettingsValidators.BOOLEAN_VALIDATOR);
+                } else if (validatorId == 1) {
+                    validators.put(key, SettingsValidators.ANY_INTEGER_VALIDATOR);
+                } else if (validatorId == 2) {
+                    validators.put(key, SettingsValidators.ANY_STRING_VALIDATOR);
+                }
+            }
         } else if (contentUri.equals(Settings.Global.CONTENT_URI)) {
             whitelist = ArrayUtils.concatElements(String.class, GlobalSettings.SETTINGS_TO_BACKUP,
                     Settings.Global.LEGACY_RESTORE_SETTINGS);
