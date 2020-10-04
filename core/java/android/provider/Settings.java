@@ -5217,6 +5217,44 @@ public final class Settings {
             return isCallingPackageAllowedToWriteSettings(context, Process.myUid(),
                     context.getOpPackageName(), false);
         }
+
+        // omni start
+        /**
+         * @hide
+         */
+         public static final String OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE = "qs_layout_columns_landscape";
+
+         /**
+         * @hide
+         */
+        public static final String OMNI_QS_LAYOUT_COLUMNS = "qs_layout_columns";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_QS_QUICKBAR_COLUMNS = "qs_quickbar_columns";
+
+        /**
+         * @hide
+         */
+        public static final String[] OMNI_SETTINGS_TO_BACKUP = {
+            OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE,
+            OMNI_QS_LAYOUT_COLUMNS,
+            OMNI_QS_QUICKBAR_COLUMNS,
+        };
+
+        // BOOLEAN_VALIDATOR == 0
+        // ANY_INTEGER_VALIDATOR == 1
+        /**
+         * @hide
+         */
+        public static final Map<String, Integer> OMNI_SETTINGS_VALIDATORS = new ArrayMap<>();
+        static {
+            VALIDATORS.put(OMNI_QS_QUICKBAR_COLUMNS, 1);
+            VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE,
+                    1);
+            VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS, 1);
+        }
     }
 
     /**
