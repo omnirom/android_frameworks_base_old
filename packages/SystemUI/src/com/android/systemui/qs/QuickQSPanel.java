@@ -21,6 +21,8 @@ import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEX
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -52,7 +54,6 @@ import javax.inject.Named;
  */
 public class QuickQSPanel extends QSPanel {
 
-    public static final String NUM_QUICK_TILES = "sysui_qqs_count";
     private static final String TAG = "QuickQSPanel";
     // Start it at 6 so a non-zero value can be obtained statically.
     private static int sDefaultMaxTiles = 6;
@@ -96,7 +97,7 @@ public class QuickQSPanel extends QSPanel {
 
     @Override
     protected TileLayout createRegularTileLayout() {
-        return new QuickQSPanel.HeaderTileLayout(mContext, mUiEventLogger);
+        return new QuickQSPanel.HeaderTileLayout(mContext, this, mUiEventLogger);
     }
 
     @Override
@@ -130,13 +131,12 @@ public class QuickQSPanel extends QSPanel {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Dependency.get(TunerService.class).addTunable(mNumTiles, NUM_QUICK_TILES);
+        updateSettings();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Dependency.get(TunerService.class).removeTunable(mNumTiles);
     }
 
     @Override
@@ -173,9 +173,11 @@ public class QuickQSPanel extends QSPanel {
     }
 
     public void setMaxTiles(int maxTiles) {
-        mMaxTiles = maxTiles;
-        if (mHost != null) {
-            setTiles(mHost.getTiles());
+        if (mMaxTiles != maxTiles) {
+            mMaxTiles = maxTiles;
+            if (mHost != null) {
+                setTiles(mHost.getTiles());
+            }
         }
     }
 
@@ -198,13 +200,6 @@ public class QuickQSPanel extends QSPanel {
         }
         super.setTiles(quickTiles, true);
     }
-
-    private final Tunable mNumTiles = new Tunable() {
-        @Override
-        public void onTuningChanged(String key, String newValue) {
-            setMaxTiles(parseNumTiles(newValue));
-        }
-    };
 
     public int getNumQuickTiles() {
         return mMaxTiles;
@@ -268,15 +263,20 @@ public class QuickQSPanel extends QSPanel {
         return QSEvent.QQS_TILE_VISIBLE;
     }
 
+    public int getNumColumns() {
+        return getNumQuickTiles();
+    }
+
     private static class HeaderTileLayout extends TileLayout {
 
         private final UiEventLogger mUiEventLogger;
-
         private Rect mClippingBounds = new Rect();
+        private QuickQSPanel mPanel;
 
-        public HeaderTileLayout(Context context, UiEventLogger uiEventLogger) {
+        public HeaderTileLayout(Context context, QuickQSPanel panel, UiEventLogger uiEventLogger) {
             super(context);
             mUiEventLogger = uiEventLogger;
+            mPanel = panel;
             setClipChildren(false);
             setClipToPadding(false);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
@@ -326,8 +326,10 @@ public class QuickQSPanel extends QSPanel {
         @Override
         public boolean updateResources() {
             mCellWidth = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+            mCellMarginHorizontal = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
+            mCellWidth += mCellMarginHorizontal;
             mCellHeight = mCellWidth;
-
+            updateSettings();
             return false;
         }
 
@@ -408,11 +410,38 @@ public class QuickQSPanel extends QSPanel {
             boolean startedListening = !mListening && listening;
             super.setListening(listening);
             if (startedListening) {
-                for (int i = 0; i < getNumVisibleTiles(); i++) {
-                    QSTile tile = mRecords.get(i).tile;
+                for (TileRecord record : mRecords) {
+                    QSTile tile = record.tile;
                     mUiEventLogger.logWithInstanceId(QSEvent.QQS_TILE_VISIBLE, 0,
                             tile.getMetricsSpec(), tile.getInstanceId());
                 }
+            }
+        }
+
+        @Override
+        public int getNumColumns() {
+            return mColumns;
+        }
+
+        @Override
+        public boolean isShowTitles() {
+            return false;
+        }
+
+        @Override
+        public void updateSettings() {
+            if (mPanel != null) {
+                mSettingsColumns = updateSettingsColumns();
+                int qsColumns = Settings.System.getIntForUser(
+                        mContext.getContentResolver(), Settings.System.OMNI_QS_QUICKBAR_COLUMNS,
+                        sDefaultMaxTiles, UserHandle.USER_CURRENT);
+                if (qsColumns == -1) {
+                    mPanel.setMaxTiles(Math.max(sDefaultMaxTiles, mSettingsColumns));
+                } else {
+                    mPanel.setMaxTiles(Math.max(sDefaultMaxTiles, qsColumns));
+                }
+                mColumns = mPanel.getNumQuickTiles();
+                requestLayout();
             }
         }
     }
