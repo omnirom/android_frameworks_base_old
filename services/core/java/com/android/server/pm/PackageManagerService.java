@@ -2084,7 +2084,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (mIsUpgrade) {
                 PackageManagerServiceUtils.logCriticalInfo(Log.INFO,
                         "Upgrading from " + ver.fingerprint + " (" + ver.buildFingerprint + ") to "
-                                + PackagePartitions.FINGERPRINT + " (" + Build.FINGERPRINT + ")");
+                                + PackagePartitions.FINGERPRINT + " (" + String.valueOf(Build.TIME) + ")");
             }
 
             mInitAppsHelper = new InitAppsHelper(this, mApexManager, mInstallPackageHelper,
@@ -2253,7 +2253,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                                         | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
                     }
                 }
-                ver.buildFingerprint = Build.FINGERPRINT;
+                ver.buildFingerprint = String.valueOf(Build.TIME);
                 ver.fingerprint = PackagePartitions.FINGERPRINT;
             }
 
