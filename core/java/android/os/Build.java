@@ -63,6 +63,11 @@ public class Build {
     public static final String BOARD = getString("ro.product.board");
 
     /**
+     * @hide
+     */
+    public static final String DATE = getString("ro.build.date");
+
+    /**
      * The name of the instruction set (CPU type + ABI convention) of native code.
      *
      * @deprecated Use {@link #SUPPORTED_ABIS} instead.
@@ -1027,6 +1032,9 @@ public class Build {
 
     /** A string that uniquely identifies this build.  Do not attempt to parse this value. */
     public static final String FINGERPRINT = deriveFingerprint();
+
+    /** @hide */
+    public static final String OMNI_FINGERPRINT = getString("ro.build.date");
 
     /**
      * Some devices split the fingerprint components between multiple
