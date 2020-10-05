@@ -433,7 +433,7 @@ public final class Settings implements Watchable, Snappable {
         int databaseVersion;
 
         /**
-         * Last known value of {@link Build#FINGERPRINT}. Used to determine when
+         * Last known value of {@link Build#TIME}. Used to determine when
          * an system update has occurred, meaning we need to clear code caches.
          */
         String fingerprint;
@@ -445,7 +445,7 @@ public final class Settings implements Watchable, Snappable {
         public void forceCurrent() {
             sdkVersion = Build.VERSION.SDK_INT;
             databaseVersion = CURRENT_DATABASE_VERSION;
-            fingerprint = PackagePartitions.FINGERPRINT;
+            fingerprint = String.valueOf(Build.TIME);
         }
     }
 
@@ -5480,7 +5480,7 @@ public final class Settings implements Watchable, Snappable {
         }
 
         private String getExtendedFingerprint(long version) {
-            return PackagePartitions.FINGERPRINT + "?pc_version=" + version;
+            return Build.TIME + "?pc_version=" + version;
         }
 
         private static long uniformRandom(double low, double high) {
