@@ -15,5 +15,9 @@
   ~ limitations under the License
   -->
 <resources>
-    <integer name="quick_settings_num_columns">3</integer>
+    <!-- why should it be less then normal values-land -->
+    <!-- <integer name="quick_settings_num_columns">3</integer>-->
+
+    <!-- using else default 4 will break qs media display -->
+    <integer name="quick_settings_max_rows">3</integer>
 </resources>
