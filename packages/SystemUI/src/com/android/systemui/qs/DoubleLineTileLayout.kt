@@ -41,6 +41,7 @@ class DoubleLineTileLayout(
     private var cellMarginHorizontal = 0
     private var cellMarginVertical = 0
     private var tilesToShow = 0
+    private var actualColumns = 0
 
     init {
         isFocusableInTouchMode = true
@@ -77,7 +78,7 @@ class DoubleLineTileLayout(
     override fun updateResources(): Boolean {
         with(mContext.resources) {
             smallTileSize = getDimensionPixelSize(R.dimen.qs_quick_tile_size)
-            cellMarginHorizontal = getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal_two_line)
+            cellMarginHorizontal = getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal)
             cellMarginVertical = getDimensionPixelSize(R.dimen.new_qs_vertical_margin)
         }
         requestLayout()
@@ -132,7 +133,7 @@ class DoubleLineTileLayout(
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         val availableWidth = r - l - paddingLeft - paddingRight
         val maxColumns = calculateMaxColumns(availableWidth)
-        val actualColumns = Math.min(maxColumns, mRecords.size / NUM_LINES)
+        actualColumns = Math.min(maxColumns, mRecords.size / NUM_LINES)
         if (actualColumns == 0) {
             // No tileSize or horizontal margin
             return
@@ -162,4 +163,17 @@ class DoubleLineTileLayout(
     }
 
     private fun getTopBottomRow() = smallTileSize + cellMarginVertical
+
+    override fun getNumColumns(): Int {
+        return actualColumns
+    }
+
+    // this is only used in QuickQSPanel
+    override fun isShowTitles(): Boolean {
+        return false
+    }
+
+    override fun updateSettings() {
+        requestLayout()
+    }
 }
