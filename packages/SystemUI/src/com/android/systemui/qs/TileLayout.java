@@ -3,9 +3,12 @@ package com.android.systemui.qs;
 import static com.android.systemui.util.Utils.useQsMediaPlayer;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -81,7 +84,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     @Override
     public boolean setMaxColumns(int maxColumns) {
         mMaxColumns = maxColumns;
-        return updateColumns();
+        return updateColumns(mColumns);
     }
 
     public void addTile(TileRecord tile) {
@@ -118,16 +121,18 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);
         mMaxAllowedRows = Math.max(1, getResources().getInteger(R.integer.quick_settings_max_rows));
         if (mLessRows) mMaxAllowedRows = Math.max(mMinRows, mMaxAllowedRows - 1);
-        if (updateColumns()) {
+        int settingsColumns = getSettingsColumns();
+        if (updateColumns(settingsColumns)) {
             requestLayout();
             return true;
         }
         return false;
     }
 
-    private boolean updateColumns() {
+    private boolean updateColumns(int newColumns) {
         int oldColumns = mColumns;
-        mColumns = Math.min(mResourceColumns, mMaxColumns);
+        mColumns = Math.min(newColumns, mMaxColumns);
+        Log.d(TAG, "updateColumns " + oldColumns + " -> " + mColumns);
         return oldColumns != mColumns;
     }
 
@@ -236,5 +241,31 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     @Override
     public int getNumVisibleTiles() {
         return mRecords.size();
+    }
+
+    private int getSettingsColumns() {
+        final Resources res = mContext.getResources();
+        boolean isPortrait = res.getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT;
+        int columns = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_QS_LAYOUT_COLUMNS, mResourceColumns,
+                UserHandle.USER_CURRENT);
+        int columnsLandscape = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE, mResourceColumns,
+                UserHandle.USER_CURRENT);
+        return isPortrait ? columns : columnsLandscape;
+    }
+
+    @Override
+    public int getNumColumns() {
+        return mColumns;
+    }
+
+    @Override
+    public void updateSettings() {
+        int settingsColumns = getSettingsColumns();
+        if (updateColumns(settingsColumns)) {
+            requestLayout();
+        }
     }
 }

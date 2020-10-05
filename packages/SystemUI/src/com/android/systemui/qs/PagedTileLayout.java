@@ -579,4 +579,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     public interface PageListener {
         void onPageChanged(boolean isFirst);
     }
+
+    @Override
+    public int getNumColumns() {
+        return mPages.get(0).getNumColumns();
+    }
+
+    @Override
+    public void updateSettings() {
+        mPages.get(0).updateSettings();
+    }
 }

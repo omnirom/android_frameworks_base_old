@@ -1175,6 +1175,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
     }
 
+    public int getNumColumns() {
+        return mTileLayout.getNumColumns();
+    }
+
+    public void updateSettings() {
+        mTileLayout.updateSettings();
+    }
 
     protected static class Record {
         DetailAdapter detailAdapter;
@@ -1228,5 +1235,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         default void setExpansion(float expansion) {}
 
         int getNumVisibleTiles();
+
+        int getNumColumns();
+
+        default void updateSettings() {}
     }
 }
