@@ -7133,7 +7133,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         PackageManagerService m = new PackageManagerService(injector, onlyCore, factoryTest,
-                Build.FINGERPRINT, Build.IS_ENG, Build.IS_USERDEBUG, Build.VERSION.SDK_INT,
+                String.valueOf(Build.TIME), Build.IS_ENG, Build.IS_USERDEBUG, Build.VERSION.SDK_INT,
                 Build.VERSION.INCREMENTAL);
         t.traceEnd(); // "create package manager"
 
@@ -7623,7 +7623,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     !buildFingerprint.equals(ver.fingerprint);
             if (mIsUpgrade) {
                 PackageManagerServiceUtils.logCriticalInfo(Log.INFO,
-                        "Upgrading from " + ver.fingerprint + " to " + Build.FINGERPRINT);
+                        "Upgrading from " + ver.fingerprint + " to " + Build.TIME);
             }
 
             // when upgrading from pre-M, promote system app permissions from install to runtime
@@ -8011,7 +8011,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // this situation.
             if (mIsUpgrade) {
                 Slog.i(TAG, "Build fingerprint changed from " + ver.fingerprint + " to "
-                        + Build.FINGERPRINT + "; regranting permissions for internal storage");
+                        + Build.TIME + "; regranting permissions for internal storage");
             }
             mPermissionManager.onStorageVolumeMounted(
                     StorageManager.UUID_PRIVATE_INTERNAL, mIsUpgrade);
@@ -8094,7 +8094,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                         | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
                     }
                 }
-                ver.fingerprint = Build.FINGERPRINT;
+                ver.fingerprint = String.valueOf(Build.TIME);
             }
 
             // Legacy existing (installed before Q) non-system apps to hide
@@ -8508,7 +8508,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // identify cached items. In particular, changing the value of certain
         // feature flags should cause us to invalidate any caches.
         final String cacheName = FORCE_PACKAGE_PARSED_CACHE_ENABLED ? "debug"
-                : SystemProperties.digestOf("ro.build.fingerprint");
+                : SystemProperties.digestOf("ro.build.date.utc");
 
         // Reconcile cache directories, keeping only what we'd actually use.
         for (File cacheDir : FileUtils.listFilesOrEmpty(cacheBaseDir)) {
@@ -25546,7 +25546,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.w(TAG, "Failed to scan " + ps.getPath() + ": " + e.getMessage());
                 }
 
-                if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
+                if (!String.valueOf(Build.TIME).equals(ver.fingerprint)) {
                     clearAppDataLIF(ps.pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
                             | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY
                             | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
@@ -25581,10 +25581,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         synchronized (mLock) {
-            final boolean isUpgrade = !Build.FINGERPRINT.equals(ver.fingerprint);
+            final boolean isUpgrade = !String.valueOf(Build.TIME).equals(ver.fingerprint);
             if (isUpgrade) {
                 logCriticalInfo(Log.INFO, "Build fingerprint changed from " + ver.fingerprint
-                        + " to " + Build.FINGERPRINT + "; regranting permissions for "
+                        + " to " + Build.TIME + "; regranting permissions for "
                         + volumeUuid);
             }
             mPermissionManager.onStorageVolumeMounted(volumeUuid, isUpgrade);
