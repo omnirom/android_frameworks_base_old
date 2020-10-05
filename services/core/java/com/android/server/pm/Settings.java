@@ -421,7 +421,7 @@ public final class Settings implements Watchable, Snappable {
         int databaseVersion;
 
         /**
-         * Last known value of {@link Build#FINGERPRINT}. Used to determine when
+         * Last known value of {@link Build#TIME}. Used to determine when
          * an system update has occurred, meaning we need to clear code caches.
          */
         String fingerprint;
@@ -433,7 +433,7 @@ public final class Settings implements Watchable, Snappable {
         public void forceCurrent() {
             sdkVersion = Build.VERSION.SDK_INT;
             databaseVersion = CURRENT_DATABASE_VERSION;
-            fingerprint = Build.FINGERPRINT;
+            fingerprint = String.valueOf(Build.TIME);
         }
     }
 
@@ -2972,7 +2972,7 @@ public final class Settings implements Watchable, Snappable {
         // on update drop the files before loading them.
         if (PackageManagerService.CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE) {
             final VersionInfo internal = getInternalVersion();
-            if (!Build.FINGERPRINT.equals(internal.fingerprint)) {
+            if (!String.valueOf(Build.TIME).equals(internal.fingerprint)) {
                 for (UserInfo user : users) {
                     mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(user.id);
                 }
@@ -5346,7 +5346,7 @@ public final class Settings implements Watchable, Snappable {
         }
 
         private String getExtendedFingerprint(long version) {
-            return Build.FINGERPRINT + "?pc_version=" + version;
+            return Build.TIME + "?pc_version=" + version;
         }
 
         public void writeStateForUserAsyncLPr(int userId) {
