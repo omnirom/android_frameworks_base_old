@@ -70,6 +70,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mLastExcessHeight;
     private int mMinRows = 1;
     private int mMaxColumns = TileLayout.NO_MAX_COLUMNS;
+    private int mColumns = -1;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -208,6 +209,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 .inflate(R.layout.qs_paged_page, this, false);
         page.setMinRows(mMinRows);
         page.setMaxColumns(mMaxColumns);
+        if (mColumns != -1) {
+            page.updateColumns(mColumns);
+        }
         return page;
     }
 
@@ -321,7 +325,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         // Update bottom padding, useful for removing extra space once the panel page indicator is
         // hidden.
         Resources res = getContext().getResources();
-        mHorizontalClipBound = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
+        mHorizontalClipBound = 0; //res.getDimensionPixelSize(R.dimen.notification_side_paddings);
         setPadding(0, 0, 0,
                 getContext().getResources().getDimensionPixelSize(
                         R.dimen.qs_paged_tile_layout_padding_bottom));
@@ -338,6 +342,21 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        // if we detect that the size has changed and we can show more/less
+        // columns trigger an update and post a relayout
+        if (updateVisibleColumns(getMeasuredWidth())) {
+            Log.d(TAG, "onLayout " + getNumColumns());
+            // will update all current pages
+            updateColumns(getNumColumns());
+            post(() -> {
+                // make sure any new pages created in distributeTiles get correct
+                // num of columns
+                mColumns = getNumColumns();
+                distributeTiles();
+                mColumns = -1;
+            });
+        }
+
         super.onLayout(changed, l, t, r, b);
         mClippingRect.set(mHorizontalClipBound, 0, (r - l) - mHorizontalClipBound, b - t);
         setClipBounds(mClippingRect);
@@ -578,5 +597,44 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     public interface PageListener {
         void onPageChanged(boolean isFirst);
+    }
+
+    @Override
+    public int getNumColumns() {
+        return mPages.get(0).getNumColumns();
+    }
+
+    @Override
+    public void updateSettings() {
+        for (int i = 0; i < mPages.size(); i++) {
+            mPages.get(i).updateSettings();
+        }
+        mDistributeTiles = true;
+    }
+
+    @Override
+    public boolean isShowTitles() {
+        return mPages.get(0).isShowTitles();
+    }
+
+    @Override
+    public int getSettingsColumns() {
+        return mPages.get(0).getSettingsColumns();
+    }
+
+    private void updateColumns(int columns) {
+        for (int i = 0; i < mPages.size(); i++) {
+            mPages.get(i).updateColumns(columns);
+        }
+    }
+    
+    // we only need to check the first page and then call
+    // updateColumns later
+    private boolean updateVisibleColumns(int measuredWidth) {
+        boolean changed = false;
+        if (mPages.get(0).updateVisibleColumns(measuredWidth)) {
+            changed = true;
+        }
+        return changed;
     }
 }
