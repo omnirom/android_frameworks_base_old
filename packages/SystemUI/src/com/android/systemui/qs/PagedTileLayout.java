@@ -82,6 +82,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mClippingRect = new Rect();
     }
     private int mLastMaxHeight = -1;
+    private int mLastMaxWidth = -1;
 
     public void saveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_PAGE, getCurrentItem());
@@ -321,7 +322,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         // Update bottom padding, useful for removing extra space once the panel page indicator is
         // hidden.
         Resources res = getContext().getResources();
-        mHorizontalClipBound = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
+        mHorizontalClipBound = 0; //res.getDimensionPixelSize(R.dimen.notification_side_paddings);
         setPadding(0, 0, 0,
                 getContext().getResources().getDimensionPixelSize(
                         R.dimen.qs_paged_tile_layout_padding_bottom));
@@ -405,6 +406,13 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
+        // we rely on width sent down first
+        if (mLastMaxWidth != MeasureSpec.getSize(widthMeasureSpec)) {
+            mLastMaxWidth = MeasureSpec.getSize(widthMeasureSpec);
+            if (updateVisibleColumns(mLastMaxWidth)) {
+                distributeTiles();
+            }
+        }
         // The ViewPager likes to eat all of the space, instead force it to wrap to the max height
         // of the pages.
         int maxHeight = 0;
@@ -587,7 +595,10 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     public void updateSettings() {
-        mPages.get(0).updateSettings();
+        for (int i = 0; i < mPages.size(); i++) {
+            mPages.get(i).updateSettings();
+        }
+        mDistributeTiles = true;
     }
 
     @Override
@@ -598,5 +609,15 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     @Override
     public int getSettingsColumns() {
         return mPages.get(0).getSettingsColumns();
+    }
+
+    private boolean updateVisibleColumns(int measuredWidth) {
+        boolean changed = false;
+        for (int i = 0; i < mPages.size(); i++) {
+            if (mPages.get(i).updateVisibleColumns(measuredWidth)) {
+                changed = true;
+            }
+        }
+        return changed;
     }
 }

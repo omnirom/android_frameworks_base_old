@@ -264,10 +264,7 @@ public class QuickQSPanel extends QSPanel {
     }
 
     public int getNumColumns() {
-        if (mFullPanel != null) {
-            return mFullPanel.getNumColumns();
-        }
-        return sDefaultMaxTiles;
+        return getNumQuickTiles();
     }
 
     private static class HeaderTileLayout extends TileLayout {
@@ -329,6 +326,8 @@ public class QuickQSPanel extends QSPanel {
         @Override
         public boolean updateResources() {
             mCellWidth = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+            mCellMarginHorizontal = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
+            mCellWidth += mCellMarginHorizontal;
             mCellHeight = mCellWidth;
             updateSettings();
             return false;
@@ -347,15 +346,13 @@ public class QuickQSPanel extends QSPanel {
             final int leftoverWhitespace = availableWidth - maxTiles * mCellWidth;
             final int smallestHorizontalMarginNeeded;
             smallestHorizontalMarginNeeded = leftoverWhitespace / Math.max(1, maxTiles - 1);
-            // TODO
-            mColumns = maxTiles;
 
             if (smallestHorizontalMarginNeeded > 0){
                 mCellMarginHorizontal = smallestHorizontalMarginNeeded;
-                //mColumns = maxTiles;
+                mColumns = maxTiles;
             } else{
-                /*mColumns = mCellWidth == 0 ? 1 :
-                        Math.min(maxTiles, availableWidth / mCellWidth );*/
+                mColumns = mCellWidth == 0 ? 1 :
+                        Math.min(maxTiles, availableWidth / mCellWidth );
                 // If we can only fit one column, use mCellMarginHorizontal to center it.
                 if (mColumns == 1) {
                     mCellMarginHorizontal = (availableWidth - mCellWidth) / 2;
@@ -434,14 +431,16 @@ public class QuickQSPanel extends QSPanel {
         @Override
         public void updateSettings() {
             if (mPanel != null) {
+                mSettingsColumns = updateSettingsColumns();
                 int qsColumns = Settings.System.getIntForUser(
                         mContext.getContentResolver(), Settings.System.OMNI_QS_QUICKBAR_COLUMNS,
                         sDefaultMaxTiles, UserHandle.USER_CURRENT);
                 if (qsColumns == -1) {
-                    mPanel.setMaxTiles(Math.max(sDefaultMaxTiles, getSettingsColumns()));
+                    mPanel.setMaxTiles(Math.max(sDefaultMaxTiles, mSettingsColumns));
                 } else {
                     mPanel.setMaxTiles(Math.max(sDefaultMaxTiles, qsColumns));
                 }
+                mColumns = mPanel.getNumQuickTiles();
                 requestLayout();
             }
         }

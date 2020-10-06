@@ -485,7 +485,7 @@
     <dimen name="qs_tile_height">106dp</dimen>
     <!--notification_side_paddings + notification_content_margin_start - (qs_quick_tile_size - qs_tile_background_size) / 2 -->
     <dimen name="qs_tile_layout_margin_side">18dp</dimen>
-    <dimen name="qs_tile_margin_horizontal">18dp</dimen>
+    <dimen name="qs_tile_margin_horizontal">8dp</dimen>
     <dimen name="qs_tile_margin_horizontal_two_line">2dp</dimen>
     <dimen name="qs_tile_margin_vertical">24dp</dimen>
     <dimen name="qs_tile_margin_top_bottom">12dp</dimen>
