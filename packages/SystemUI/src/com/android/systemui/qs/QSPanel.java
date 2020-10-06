@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -497,8 +498,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mListening) {
             refreshAllTiles();
         }
-        if (mTileLayout != null) {
-            mTileLayout.updateResources();
+        if (mRegularTileLayout != null) {
+            mRegularTileLayout.updateResources();
+        }
+        if (mHorizontalTileLayout != null) {
+            mHorizontalTileLayout.updateResources();
         }
     }
 
@@ -583,9 +587,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             newLayout.setListening(mListening);
             if (needsDynamicRowsAndColumns()) {
                 newLayout.setMinRows(horizontal ? 2 : 1);
-                // media player uses half width so use half of the columns
-                newLayout.setMaxColumns(horizontal ? (int) (newLayout.getSettingsColumns() / 2) : TileLayout.NO_MAX_COLUMNS);
             }
+            // request layout to calc num of columns
+            newLayout.updateSettings();
             updateTileLayoutMargins();
             updateFooterMargin();
             updateDividerMargin();
@@ -1188,12 +1192,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             mHorizontalTileLayout.updateSettings();
         }
         if (mTileLayout != null) {
-            boolean horizontal = shouldUseHorizontalLayout();
-            if (needsDynamicRowsAndColumns()) {
-                // media player uses half width so use half of the columns
-                mTileLayout.setMaxColumns(horizontal ? (int) (mRegularTileLayout.getSettingsColumns() / 2) : TileLayout.NO_MAX_COLUMNS);
-                mTileLayout.updateSettings();
-            }
             for (TileRecord r : mRecords) {
                 configureTile(r.tile, r.tileView);
             }
