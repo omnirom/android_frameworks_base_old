@@ -129,6 +129,7 @@ public class Utils {
      * Off by default, but can be disabled by setting to 0
      */
     public static boolean useQsMediaPlayer(Context context) {
+        // TODO maxwen - we want a settings here
         return true;
     }
 

@@ -44,6 +44,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private int mMaxColumns = NO_MAX_COLUMNS;
     private int mResourceColumns;
     protected boolean mShowTitles = true;
+    protected int mSettingsColumns;
 
     public TileLayout(Context context) {
         this(context, null);
@@ -116,6 +117,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     public boolean updateResources() {
         final Resources res = mContext.getResources();
         mResourceColumns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
+        mColumns = mResourceColumns;
         mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
@@ -141,6 +143,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         final int width = MeasureSpec.getSize(widthMeasureSpec);
         final int availableWidth = width - getPaddingStart() - getPaddingEnd();
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+
         if (heightMode == MeasureSpec.UNSPECIFIED) {
             mRows = (numTiles + mColumns - 1) / mColumns;
         }
@@ -241,6 +244,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     @Override
     public int getSettingsColumns() {
+        return mSettingsColumns;
+    }
+
+    protected int updateSettingsColumns() {
         final Resources res = mContext.getResources();
         boolean isPortrait = res.getConfiguration().orientation
                 == Configuration.ORIENTATION_PORTRAIT;
@@ -250,7 +257,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         int columnsLandscape = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE, mResourceColumns,
                 UserHandle.USER_CURRENT);
-        return isPortrait ? columns : columnsLandscape;
+        return Math.max(isPortrait ? columns : columnsLandscape, mResourceColumns);
     }
 
     @Override
@@ -265,7 +272,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     @Override
     public void updateSettings() {
-        int settingsColumns = getSettingsColumns();
+        mSettingsColumns = updateSettingsColumns();
+
         boolean showTitles = mShowTitles;
         mShowTitles = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.OMNI_QS_TILE_TITLE_VISIBILITY, 1,
@@ -275,7 +283,33 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         } else {
             mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height_wo_label);
         }
-        updateColumns(settingsColumns);
-        requestLayout();
+        if (getMeasuredWidth() != 0) {
+            updateColumns(getMaxVisibleColumns(mSettingsColumns, getMeasuredWidth()));
+            requestLayout();
+        } else {
+            updateColumns(mSettingsColumns);
+        }
+    }
+
+    protected int getMaxVisibleColumns(int columns, int measuredWidth) {
+        int maxColumns = 0;
+
+        final int cellWidth = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size) + mCellMarginHorizontal;
+        final int availableWidth = measuredWidth - getPaddingStart() - getPaddingEnd();
+        final int leftoverWhitespace = availableWidth - columns * cellWidth;
+        final int smallestHorizontalMarginNeeded = leftoverWhitespace / Math.max(1, columns - 1);
+
+        if (smallestHorizontalMarginNeeded > 0){
+            maxColumns = columns;
+        } else{
+            maxColumns = cellWidth == 0 ? 1 :
+                    Math.min(columns, availableWidth / cellWidth );
+        }
+
+        return maxColumns;
+    }
+
+    protected boolean updateVisibleColumns(int measuredWidth) {
+        return updateColumns(getMaxVisibleColumns(mSettingsColumns, measuredWidth));
     }
 }
