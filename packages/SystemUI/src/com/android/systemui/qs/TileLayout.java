@@ -208,6 +208,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
         // Layout each QS tile.
         final int tilesToLayout = Math.min(numRecords, mRows * mColumns);
+        Log.d(TAG, "layoutTileRecords " + numRecords + " " + tilesToLayout);
         for (int i = 0; i < tilesToLayout; i++, column++) {
             // If we reached the last column available to layout a tile, wrap back to the next row.
             if (column == mColumns) {
@@ -274,7 +275,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     public void updateSettings() {
         mSettingsColumns = updateSettingsColumns();
 
-        boolean showTitles = mShowTitles;
         mShowTitles = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.OMNI_QS_TILE_TITLE_VISIBILITY, 1,
                 UserHandle.USER_CURRENT) == 1;

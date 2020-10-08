@@ -102,8 +102,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final H mHandler = new H();
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private QSTileRevealController mQsTileRevealController;
-    /** Whether or not the QS media player feature is enabled. */
-    protected boolean mUsingMediaPlayer;
     private int mVisualMarginStart;
     private int mVisualMarginEnd;
 
@@ -163,7 +161,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             UiEventLogger uiEventLogger
     ) {
         super(context, attrs);
-        mUsingMediaPlayer = useQsMediaPlayer(context);
         mMediaTotalBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.quick_settings_bottom_margin_media);
         mMediaHost = mediaHost;
@@ -183,7 +180,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mMovableContentStartIndex = getChildCount();
         mRegularTileLayout = createRegularTileLayout();
 
-        if (mUsingMediaPlayer) {
+        if (getUseQsMediaPlayer()) {
             mHorizontalLinearLayout = new RemeasuringLinearLayout(mContext);
             mHorizontalLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
             mHorizontalLinearLayout.setClipChildren(false);
@@ -195,7 +192,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             mHorizontalContentContainer.setClipToPadding(false);
 
             mHorizontalTileLayout = createHorizontalTileLayout();
-            LayoutParams lp = new LayoutParams(0, LayoutParams.WRAP_CONTENT, 1);
+            LayoutParams lp = new LayoutParams(300, LayoutParams.WRAP_CONTENT);
+            //LayoutParams lp = new LayoutParams(0, LayoutParams.WRAP_CONTENT, 1);
             int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
             lp.setMarginStart(0);
             lp.setMarginEnd(marginSize);
@@ -262,7 +260,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
      * Update the way the media disappears based on if we're using the horizontal layout
      */
     private void updateMediaDisappearParameters() {
-        if (!mUsingMediaPlayer) {
+        if (!getUseQsMediaPlayer()) {
             return;
         }
         DisappearParameters parameters = mMediaHost.getDisappearParameters();
@@ -498,8 +496,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mListening) {
             refreshAllTiles();
         }
-        if (mTileLayout != null) {
-            mTileLayout.updateResources();
+        if (mRegularTileLayout != null) {
+            mRegularTileLayout.updateResources();
+        }
+        if (mHorizontalTileLayout != null) {
+            mHorizontalTileLayout.updateResources();
         }
     }
 
@@ -549,14 +550,15 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private boolean switchTileLayout(boolean force) {
         /** Whether or not the QuickQSPanel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
-        Log.d(TAG, "switchTileLayout horizontal = " + horizontal+ " force = " + force);
         if (mDivider != null) {
-            if (!horizontal && mUsingMediaPlayer && mMediaHost.getVisible()) {
+            if (!horizontal && getUseQsMediaPlayer() && mMediaHost.getVisible()) {
                 mDivider.setVisibility(View.VISIBLE);
             } else {
                 mDivider.setVisibility(View.GONE);
             }
         }
+        Log.d(TAG, "switchTileLayout horizontal = " + horizontal + " " + mMediaHost.getVisible());
+
         if (horizontal != mUsingHorizontalLayout || force) {
             mUsingHorizontalLayout = horizontal;
             View visibleView = horizontal ? mHorizontalLinearLayout : (View) mRegularTileLayout;
@@ -585,9 +587,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             newLayout.setListening(mListening);
             if (needsDynamicRowsAndColumns()) {
                 newLayout.setMinRows(horizontal ? 2 : 1);
-                // request layout to calc num of columns
-                newLayout.updateSettings();
             }
+            // request layout to calc num of columns
+            newLayout.updateSettings();
             updateTileLayoutMargins();
             updateFooterMargin();
             updateDividerMargin();
@@ -663,13 +665,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     private boolean shouldUseHorizontalLayout() {
-        return mUsingMediaPlayer && mMediaHost.getVisible()
+        return getUseQsMediaPlayer() && mMediaHost.getVisible()
                 && getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     protected void reAttachMediaHost() {
-        if (!mUsingMediaPlayer) {
+        if (!getUseQsMediaPlayer()) {
             return;
         }
         boolean horizontal = shouldUseHorizontalLayout();
@@ -680,16 +682,23 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             if (currentParent != null) {
                 currentParent.removeView(host);
             }
+            Log.d(TAG, "reAttachMediaHost   " + currentParent + " " + newParent);
             newParent.addView(host);
+                    
             LinearLayout.LayoutParams layoutParams = (LayoutParams) host.getLayoutParams();
             layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            layoutParams.width = horizontal ? 0 : ViewGroup.LayoutParams.MATCH_PARENT;
-            layoutParams.weight = horizontal ? 1.2f : 0;
+            layoutParams.width = horizontal ? 300 : ViewGroup.LayoutParams.MATCH_PARENT;
+            //layoutParams.weight = horizontal ? 1.2f : 0;
+            //layoutParams.width = horizontal ? 0 : ViewGroup.LayoutParams.MATCH_PARENT;
+            //layoutParams.weight = horizontal ? 1.2f : 0;
+
             // Add any bottom margin, such that the total spacing is correct. This is only
             // necessary if the view isn't horizontal, since otherwise the padding is
             // carried in the parent of this view (to ensure correct vertical alignment)
             layoutParams.bottomMargin = !horizontal || displayMediaMarginsOnMedia()
                     ? mMediaTotalBottomMargin - getPaddingBottom() : 0;
+            host.setLayoutParams(layoutParams);
+            newParent.requestLayout();
         }
     }
 
@@ -1113,7 +1122,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
      * Update the margins of the media hosts
      */
     protected void updateMediaHostContentMargins() {
-        if (mUsingMediaPlayer) {
+        if (getUseQsMediaPlayer()) {
             int marginStart = mContentMarginStart;
             if (mUsingHorizontalLayout) {
                 marginStart = 0;
@@ -1198,6 +1207,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     private void configureTile(QSTile t, QSTileView v) {
         v.setHideLabel(!mTileLayout.isShowTitles());
+    }
+
+    private boolean getUseQsMediaPlayer() {
+        return useQsMediaPlayer(getContext());
     }
 
     protected static class Record {

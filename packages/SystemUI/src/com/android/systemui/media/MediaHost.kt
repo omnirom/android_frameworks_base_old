@@ -2,6 +2,7 @@ package com.android.systemui.media
 
 import android.graphics.Rect
 import android.util.ArraySet
+import android.util.Log
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import com.android.systemui.util.animation.DisappearParameters
@@ -75,6 +76,7 @@ class MediaHost @Inject constructor(
         hostView = mediaHierarchyManager.register(this)
         hostView.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(v: View?) {
+                Log.d("MediaHost", "onViewAttachedToWindow")
                 // we should listen to the combined state change, since otherwise there might
                 // be a delay until the views and the controllers are initialized, leaving us
                 // with either a blank view or the controllers not yet initialized and the
@@ -84,6 +86,8 @@ class MediaHost @Inject constructor(
             }
 
             override fun onViewDetachedFromWindow(v: View?) {
+                Log.d("MediaHost", "onViewDetachedFromWindow")
+
                 mediaDataFilter.removeListener(listener)
             }
         })
@@ -117,6 +121,7 @@ class MediaHost @Inject constructor(
         } else {
             mediaDataFilter.hasAnyMedia()
         }
+        Log.d("MediaHost", "visible= " + visible)
         val newVisibility = if (visible) View.VISIBLE else View.GONE
         if (newVisibility != hostView.visibility) {
             hostView.visibility = newVisibility

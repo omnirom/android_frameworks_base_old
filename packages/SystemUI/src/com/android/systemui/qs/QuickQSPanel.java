@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -309,6 +310,7 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         protected void onLayout(boolean changed, int l, int t, int r, int b) {
+            Log.d(TAG, "onLayout " + mColumns + " " + mRecords.size());
             // We only care about clipping on the right side
             mClippingBounds.set(0, 0, r - l, 10000);
             setClipBounds(mClippingBounds);
@@ -325,6 +327,7 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public boolean updateResources() {
+            Log.d(TAG, "updateResources");
             mCellWidth = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
             mCellMarginHorizontal = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
             mCellWidth += mCellMarginHorizontal;
@@ -334,6 +337,7 @@ public class QuickQSPanel extends QSPanel {
         }
 
         private boolean calculateColumns() {
+            Log.d(TAG, "calculateColumns " + mColumns);
             int prevNumColumns = mColumns;
             int maxTiles = mRecords.size();
 
@@ -362,6 +366,8 @@ public class QuickQSPanel extends QSPanel {
                 }
 
             }
+            Log.d(TAG, "calculateColumns prevNumColumns = " + prevNumColumns + " -> mColumns = " + mColumns);
+
             return mColumns != prevNumColumns;
         }
 
@@ -379,6 +385,7 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            Log.d(TAG, "onMeasure");
             // Measure each QS tile.
             for (TileRecord record : mRecords) {
                 if (record.tileView.getVisibility() == GONE) continue;
@@ -430,6 +437,7 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public void updateSettings() {
+            Log.d(TAG, "updateSettings");
             if (mPanel != null) {
                 mSettingsColumns = updateSettingsColumns();
                 int qsColumns = Settings.System.getIntForUser(
