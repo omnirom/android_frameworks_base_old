@@ -30,6 +30,8 @@ import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -103,7 +105,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private QSTileRevealController mQsTileRevealController;
     /** Whether or not the QS media player feature is enabled. */
-    protected boolean mUsingMediaPlayer;
+    private final boolean mUsingMediaPlayer;
     private int mVisualMarginStart;
     private int mVisualMarginEnd;
 
@@ -151,6 +153,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     // omni
     private View mBrightnessPlaceholder;
+    private boolean mUsingMediaPlayerUser = true;
 
     @Inject
     public QSPanel(
@@ -262,7 +265,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
      * Update the way the media disappears based on if we're using the horizontal layout
      */
     private void updateMediaDisappearParameters() {
-        if (!mUsingMediaPlayer) {
+        if (!getUseQsMediaPlayer()) {
             return;
         }
         DisappearParameters parameters = mMediaHost.getDisappearParameters();
@@ -553,7 +556,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         /** Whether or not the QuickQSPanel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
         if (mDivider != null) {
-            if (!horizontal && mUsingMediaPlayer && mMediaHost.getVisible()) {
+            if (!horizontal && getUseQsMediaPlayer() && mMediaHost.getVisible()) {
                 mDivider.setVisibility(View.VISIBLE);
             } else {
                 mDivider.setVisibility(View.GONE);
@@ -665,13 +668,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     private boolean shouldUseHorizontalLayout() {
-        return mUsingMediaPlayer && mMediaHost.getVisible()
+        return getUseQsMediaPlayer() && mMediaHost.getVisible()
                 && getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     protected void reAttachMediaHost() {
-        if (!mUsingMediaPlayer) {
+        if (!getUseQsMediaPlayer()) {
             return;
         }
         boolean horizontal = shouldUseHorizontalLayout();
@@ -1115,7 +1118,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
      * Update the margins of the media hosts
      */
     protected void updateMediaHostContentMargins() {
-        if (mUsingMediaPlayer) {
+        if (getUseQsMediaPlayer()) {
             int marginStart = mContentMarginStart;
             if (mUsingHorizontalLayout) {
                 marginStart = 0;
@@ -1185,6 +1188,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     public void updateSettings() {
+        boolean useQsMediaPlayerUser = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_QS_MEDIA_PLAYER, 1,
+                UserHandle.USER_CURRENT) == 1;
+
         if (mRegularTileLayout != null) {
             mRegularTileLayout.updateSettings();
         }
@@ -1196,10 +1203,19 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 configureTile(r.tile, r.tileView);
             }
         }
+        
+        if (mUsingMediaPlayerUser != useQsMediaPlayerUser) {
+            mUsingMediaPlayerUser = useQsMediaPlayerUser;
+            switchTileLayout(false);
+        }
     }
 
     private void configureTile(QSTile t, QSTileView v) {
         v.setHideLabel(!mTileLayout.isShowTitles());
+    }
+
+    private boolean getUseQsMediaPlayer() {
+        return mUsingMediaPlayerUser && mUsingMediaPlayer;
     }
 
     protected static class Record {
