@@ -20,6 +20,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.View;
 
@@ -129,8 +130,9 @@ public class Utils {
      * Off by default, but can be disabled by setting to 0
      */
     public static boolean useQsMediaPlayer(Context context) {
-        // TODO maxwen - we want a settings here
-        return true;
+        return Settings.System.getIntForUser(
+                context.getContentResolver(), Settings.System.OMNI_QS_MEDIA_PLAYER, 1,
+                UserHandle.USER_CURRENT) == 1;
     }
 
     /**
