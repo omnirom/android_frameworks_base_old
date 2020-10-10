@@ -21,7 +21,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -39,8 +42,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSDetailClipper;
@@ -62,11 +67,13 @@ import javax.inject.Inject;
  * This adds itself to the status bar window, so it can appear on top of quick settings and
  * *someday* do fancy animations to get into/out of it.
  */
-public class QSCustomizer extends LinearLayout implements OnMenuItemClickListener {
+public class QSCustomizer extends LinearLayout implements OnMenuItemClickListener,
+        OmniSettingsService.OmniSettingsObserver {
 
     private static final int MENU_RESET = Menu.FIRST;
     private static final String EXTRA_QS_CUSTOMIZING = "qs_customizing";
     private static final String TAG = "QSCustomizer";
+    private static final boolean DEBUG = false;
 
     private final QSDetailClipper mClipper;
     private final LightBarController mLightBarController;
@@ -88,6 +95,11 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private boolean mOpening;
     private boolean mIsShowingNavBackdrop;
     private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
+    private int mResourceColumns;
+    private int mSettingsColumns;
+    private int mCellMarginHorizontal;
+    private int mColumns = 3;
+    private boolean mShowLabels = true;
 
     @Inject
     public QSCustomizer(Context context, AttributeSet attrs,
@@ -122,7 +134,10 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mTileQueryHelper.setListener(mTileAdapter);
         mRecyclerView.setAdapter(mTileAdapter);
         mTileAdapter.getItemTouchHelper().attachToRecyclerView(mRecyclerView);
-        GridLayoutManager layout = new GridLayoutManager(getContext(), 3) {
+        mResourceColumns = Math.max(1, mContext.getResources().getInteger(R.integer.quick_settings_num_columns));
+        mCellMarginHorizontal = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
+
+        GridLayoutManager layout = new GridLayoutManager(getContext(), getSettingsColumns()) {
             @Override
             public void onInitializeAccessibilityNodeInfoForItem(RecyclerView.Recycler recycler,
                     RecyclerView.State state, View host, AccessibilityNodeInfoCompat info) {
@@ -153,6 +168,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         lp.height = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
         mTransparentView.setLayoutParams(lp);
+        updateSettings();
     }
 
     private void updateNavBackDrop(Configuration newConfig) {
@@ -201,6 +217,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mNotifQsContainer.setCustomizerShowing(true);
             mKeyguardStateController.addCallback(mKeyguardCallback);
             updateNavColors();
+            attachSettings();
         }
     }
 
@@ -218,6 +235,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mNotifQsContainer.setCustomizerShowing(true);
             mKeyguardStateController.addCallback(mKeyguardCallback);
             updateNavColors();
+            attachSettings();
         }
     }
 
@@ -246,6 +264,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mNotifQsContainer.setCustomizerShowing(false);
             mKeyguardStateController.removeCallback(mKeyguardCallback);
             updateNavColors();
+            detachSettings();
         }
     }
 
@@ -368,4 +387,92 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mNotifQsContainer.setCustomizerAnimating(false);
         }
     };
+
+    private void attachSettings() {
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_QS_LAYOUT_COLUMNS);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_QS_TILE_TITLE_VISIBILITY);
+    }
+
+    private void detachSettings() {
+        Dependency.get(OmniSettingsService.class).removeObserver(this);
+    }
+
+    private void updateSettings() {
+        mSettingsColumns = getSettingsColumns();
+        boolean showLabels = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_QS_TILE_TITLE_VISIBILITY, 1,
+                UserHandle.USER_CURRENT) == 1;
+        int columns = getMaxVisibleColumns(mSettingsColumns, getMeasuredWidth());
+        if (columns != mColumns || showLabels != mShowLabels){
+            mColumns = columns;
+            mShowLabels = showLabels;
+            updateGridLayoud();
+        }
+    }
+
+    private void updateGridLayoud() {
+        if (DEBUG) Log.d(TAG, "updateGridLayoud " + mColumns);
+        GridLayoutManager manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
+        manager.setSpanCount(mColumns);
+        mTileAdapter.setColumns(mColumns);
+        mTileAdapter.setShowLabels(mShowLabels);
+        mTileAdapter.notifyDataSetChanged();
+        manager.requestLayout();
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        updateSettings();
+    }
+
+    private int getSettingsColumns() {
+        boolean isPortrait = mContext.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT;
+        int columns = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_QS_LAYOUT_COLUMNS, mResourceColumns,
+                UserHandle.USER_CURRENT);
+        int columnsLandscape = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE, mResourceColumns,
+                UserHandle.USER_CURRENT);
+        return Math.max(isPortrait ? columns : columnsLandscape, mResourceColumns);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        // if we detect that the size has changed and we can show more/less
+        // columns trigger an update and post a relayout
+        int columns = getMaxVisibleColumns(mSettingsColumns, getMeasuredWidth());
+        if (columns != mColumns) {
+            mColumns = columns;
+            post(() -> {
+                updateGridLayoud();
+            });
+        }
+        super.onLayout(changed, l, t, r, b);
+    }
+
+    /*
+     * retuns how many columns of tiles would fit into measuredWidth
+     */
+    private int getMaxVisibleColumns(int columns, int measuredWidth) {
+        int maxColumns = 0;
+
+        final int cellWidth = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size) + mCellMarginHorizontal;
+        final int availableWidth = measuredWidth - getPaddingStart() - getPaddingEnd();
+        final int leftoverWhitespace = availableWidth - columns * cellWidth;
+        final int smallestHorizontalMarginNeeded = leftoverWhitespace / Math.max(1, columns);
+
+        if (smallestHorizontalMarginNeeded > 0){
+            maxColumns = columns;
+        } else{
+            maxColumns = Math.min(columns, availableWidth / cellWidth );
+        }
+
+        return maxColumns;
+    }
+
+    private int getMaxPossibleColumns() {
+        return getMaxVisibleColumns(42, getMeasuredWidth());
+    }
 }
