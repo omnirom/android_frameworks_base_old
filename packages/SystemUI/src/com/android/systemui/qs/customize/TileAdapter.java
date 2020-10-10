@@ -93,6 +93,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private CharSequence mAccessibilityFromLabel;
     private QSTileHost mHost;
     private final UiEventLogger mUiEventLogger;
+    private int mColumns = 3;
+    private boolean mShowLabels;
 
     public TileAdapter(Context context, UiEventLogger uiEventLogger) {
         mContext = context;
@@ -314,6 +316,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         holder.mTileView.handleStateChanged(info.state);
         holder.mTileView.setShowAppLabel(position > mEditIndex && !info.isSystem);
+        holder.mTileView.setHideLabel(!mShowLabels);
 
         if (!mAccessibilityManager.isTouchExplorationEnabled()) {
             holder.mTileView.setOnClickListener(new OnClickListener() {
@@ -499,6 +502,14 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         notifyItemMoved(from, to);
     }
 
+    protected void setColumns(int columns) {
+        mColumns = columns;
+    }
+
+    protected void setShowLabels(boolean showLabels) {
+        mShowLabels = showLabels;
+    }
+
     public class Holder extends ViewHolder {
         private CustomizeTileView mTileView;
 
@@ -550,7 +561,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         @Override
         public int getSpanSize(int position) {
             final int type = getItemViewType(position);
-            return type == TYPE_EDIT || type == TYPE_DIVIDER || type == TYPE_HEADER ? 3 : 1;
+            return type == TYPE_EDIT || type == TYPE_DIVIDER || type == TYPE_HEADER ? mColumns : 1;
         }
     };
 
