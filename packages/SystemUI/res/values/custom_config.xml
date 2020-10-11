@@ -25,5 +25,11 @@
     <string name="quick_settings_tiles_extra" translatable="false">
     </string>
 
+    <!-- absolute maximum for qs columns 
+         does NOT mean this value can be reached
+         there is always calcuilation that uses the current available space
+         to get the maximal number to be used
+         so this value is used only in the config ui -->
+    <integer name="quick_settings_num_columns_max">9</integer>
 </resources>
 
