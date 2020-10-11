@@ -151,6 +151,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     // omni
     private View mBrightnessPlaceholder;
+    private int mFooterMargin;
 
     @Inject
     public QSPanel(
@@ -490,6 +491,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         int tileBg = getResources().getDimensionPixelSize(R.dimen.qs_tile_background_size);
         mFooterMarginStartHorizontal = getResources().getDimensionPixelSize(
                 R.dimen.qs_footer_horizontal_margin);
+        mFooterMargin = getResources().getDimensionPixelSize(
+                R.dimen.qs_footer_margin);
         mVisualTilePadding = (int) ((tileSize - tileBg) / 2.0f);
         updatePadding();
 
@@ -1069,13 +1072,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     private void updateFooterMargin() {
         if (mFooter != null) {
-            int footerMargin = 0;
-            int indicatorMargin = 0;
+            int footerMargin = mFooterMargin;
+            int indicatorMargin = mFooterMargin;
             if (mUsingHorizontalLayout) {
                 footerMargin = mFooterMarginStartHorizontal;
                 indicatorMargin = footerMargin - mVisualMarginEnd;
             }
-            updateMargins(mFooter, footerMargin, 0);
+            updateMargins(mFooter, footerMargin, footerMargin);
             // The page indicator isn't centered anymore because of the visual positioning.
             // Let's fix it by adding some margin
             if (mFooterPageIndicator != null) {
