@@ -23,6 +23,9 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,6 +34,8 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.SeekBar;
+import android.widget.Switch;
 
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup;
@@ -64,6 +69,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private static final int TYPE_ACCESSIBLE_DROP = 2;
     private static final int TYPE_HEADER = 3;
     private static final int TYPE_DIVIDER = 4;
+    private static final int TYPE_SETTINGS = 5;
 
     private static final long EDIT_ID = 10000;
     private static final long DIVIDER_ID = 20000;
@@ -71,6 +77,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private static final int ACTION_NONE = 0;
     private static final int ACTION_ADD = 1;
     private static final int ACTION_MOVE = 2;
+
+    private static final String TAG = "QSCustomizer::TileAdapter";
 
     private final Context mContext;
 
@@ -94,7 +102,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private QSTileHost mHost;
     private final UiEventLogger mUiEventLogger;
     private int mColumns = 3;
-    private boolean mShowLabels;
+    private boolean mShowLabels = true;
+    private boolean mShowSettings;
+    private View mSettingsCOntainer;
 
     public TileAdapter(Context context, UiEventLogger uiEventLogger) {
         mContext = context;
@@ -102,6 +112,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mItemTouchHelper = new ItemTouchHelper(mCallbacks);
         mDecoration = new TileItemDecoration(context);
+        // TODO really?
         mMinNumTiles = context.getResources().getInteger(R.integer.quick_settings_min_num_tiles);
     }
 
@@ -120,7 +131,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     public void saveSpecs(QSTileHost host) {
         List<String> newSpecs = new ArrayList<>();
         clearAccessibilityState();
-        for (int i = 1; i < mTiles.size() && mTiles.get(i) != null; i++) {
+        for (int i = (mShowSettings ? 2 : 1); i < mTiles.size() && mTiles.get(i) != null; i++) {
             newSpecs.add(mTiles.get(i).spec);
         }
         host.changeTiles(mCurrentSpecs, newSpecs);
@@ -164,6 +175,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         mOtherTiles = new ArrayList<TileInfo>(mAllTiles);
         mTiles.clear();
+        if (mShowSettings) {
+            mTiles.add(null);
+        }
         mTiles.add(null);
         for (int i = 0; i < mCurrentSpecs.size(); i++) {
             final TileInfo tile = getAndRemoveOther(mCurrentSpecs.get(i));
@@ -197,8 +211,17 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     @Override
     public int getItemViewType(int position) {
-        if (position == 0) {
-            return TYPE_HEADER;
+        if (mShowSettings) {
+            if (position == 0) {
+                return TYPE_SETTINGS;
+            }
+            if (position == 1) {
+                return TYPE_HEADER;
+            }
+        } else {
+             if (position == 0) {
+                return TYPE_HEADER;
+            }
         }
         if (mAccessibilityAction == ACTION_ADD && position == mEditIndex - 1) {
             return TYPE_ACCESSIBLE_DROP;
@@ -224,6 +247,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         if (viewType == TYPE_EDIT) {
             return new Holder(inflater.inflate(R.layout.qs_customize_divider, parent, false));
+        }
+        if (viewType == TYPE_SETTINGS) {
+            View settingsContainer = inflater.inflate(R.layout.qs_customize_settings, parent, false);
+            return new Holder(settingsContainer);
         }
         FrameLayout frame = (FrameLayout) inflater.inflate(R.layout.qs_customize_tile_frame, parent,
                 false);
@@ -255,6 +282,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     @Override
     public void onBindViewHolder(final Holder holder, int position) {
+        if (holder.getItemViewType() == TYPE_SETTINGS) {
+            return;
+        }
         if (holder.getItemViewType() == TYPE_HEADER) {
             setSelectableForHeaders(holder.itemView);
             return;
@@ -268,7 +298,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             final String titleText;
             Resources res = mContext.getResources();
             if (mCurrentDrag == null) {
-                titleText = res.getString(R.string.drag_to_add_tiles);
+                titleText = res.getString(R.string.drag_or_touch_to_add_tiles);
             } else if (!canRemoveTiles() && mCurrentDrag.getAdapterPosition() < mEditIndex) {
                 titleText = res.getString(R.string.drag_to_remove_disabled, mMinNumTiles);
             } else {
@@ -323,9 +353,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 @Override
                 public void onClick(View v) {
                     int position = holder.getAdapterPosition();
+                    final TileInfo info = mTiles.get(position);
                     if (position < mEditIndex) {
                         if (canRemoveTiles()) {
-                            move(position, mEditIndex, holder.mTileView);
+                            move(position, info.isSystem ? mEditIndex : mTileDividerIndex, holder.mTileView);
                         } else {
                             // TODO
                         }
@@ -474,7 +505,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         // If there is no third null, then there are no non-system tiles.
         mEditIndex = -1;
         mTileDividerIndex = mTiles.size();
-        for (int i = 1; i < mTiles.size(); i++) {
+        for (int i = (mShowSettings ? 2 : 1); i < mTiles.size(); i++) {
             if (mTiles.get(i) == null) {
                 if (mEditIndex == -1) {
                     mEditIndex = i;
@@ -508,6 +539,13 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     protected void setShowLabels(boolean showLabels) {
         mShowLabels = showLabels;
+    }
+
+    protected void setShowSettings(boolean showSettings) {
+        mShowSettings = showSettings;
+        recalcSpecs();
+        updateDividerLocations();
+        notifyDataSetChanged();
     }
 
     public class Holder extends ViewHolder {
@@ -561,7 +599,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         @Override
         public int getSpanSize(int position) {
             final int type = getItemViewType(position);
-            return type == TYPE_EDIT || type == TYPE_DIVIDER || type == TYPE_HEADER ? mColumns : 1;
+            return type == TYPE_EDIT || type == TYPE_DIVIDER || type == TYPE_HEADER || type == TYPE_SETTINGS ? mColumns : 1;
         }
     };
 
@@ -583,7 +621,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             for (int i = 0; i < childCount; i++) {
                 final View child = parent.getChildAt(i);
                 final ViewHolder holder = parent.getChildViewHolder(child);
-                if (holder.getAdapterPosition() == 0 ||
+                if (holder.getAdapterPosition() == 0 || (mShowSettings && holder.getAdapterPosition() == 1) ||
                         holder.getAdapterPosition() < mEditIndex && !(child instanceof TextView)) {
                     continue;
                 }
@@ -650,7 +688,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             if (!canRemoveTiles() && current.getAdapterPosition() < mEditIndex) {
                 return position < mEditIndex;
             }
-            return position <= mEditIndex + 1;
+            TileInfo info = mTiles.get(current.getAdapterPosition());
+            return position <= (info.isSystem ? (mEditIndex + 1) : mTileDividerIndex);
         }
 
         @Override
@@ -659,6 +698,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 case TYPE_EDIT:
                 case TYPE_DIVIDER:
                 case TYPE_HEADER:
+                case TYPE_SETTINGS:
                     // Fall through
                     return makeMovementFlags(0, 0);
                 default:
@@ -675,6 +715,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             if (from == 0 || from == RecyclerView.NO_POSITION ||
                     to == 0 || to == RecyclerView.NO_POSITION) {
                 return false;
+            }
+            TileInfo info = mTiles.get(from);
+            if (to > mEditIndex && !info.isSystem) {
+                to = mTileDividerIndex;
             }
             return move(from, to, target.itemView);
         }
