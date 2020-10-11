@@ -18,6 +18,7 @@ package com.android.systemui.qs.customize;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -70,7 +72,6 @@ import javax.inject.Inject;
 public class QSCustomizer extends LinearLayout implements OnMenuItemClickListener,
         OmniSettingsService.OmniSettingsObserver {
 
-    private static final int MENU_RESET = Menu.FIRST;
     private static final String EXTRA_QS_CUSTOMIZING = "qs_customizing";
     private static final String TAG = "QSCustomizer";
     private static final boolean DEBUG = false;
@@ -100,6 +101,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private int mCellMarginHorizontal;
     private int mColumns = 3;
     private boolean mShowLabels = true;
+    private boolean mSettingsShown;
+    private int mOrientation = -1;
 
     @Inject
     public QSCustomizer(Context context, AttributeSet attrs,
@@ -124,8 +127,10 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             }
         });
         mToolbar.setOnMenuItemClickListener(this);
-        mToolbar.getMenu().add(Menu.NONE, MENU_RESET, 0,
-                mContext.getString(com.android.internal.R.string.reset));
+
+        MenuInflater menuInflater = new MenuInflater(mContext);
+        menuInflater.inflate(R.menu.qs_customize_menu, mToolbar.getMenu());
+
         mToolbar.setTitle(R.string.qs_edit);
         mRecyclerView = findViewById(android.R.id.list);
         mTransparentView = findViewById(R.id.customizer_transparent_view);
@@ -153,6 +158,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mLightBarController = lightBarController;
         mKeyguardStateController = keyguardStateController;
         mScreenLifecycle = screenLifecycle;
+        mOrientation = getResources().getConfiguration().orientation;
         updateNavBackDrop(getResources().getConfiguration());
     }
 
@@ -161,6 +167,11 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         super.onConfigurationChanged(newConfig);
         updateNavBackDrop(newConfig);
         updateResources();
+        if (mOrientation != newConfig.orientation) {
+            // force reinflate of settings - needed if orientation changed
+            mRecyclerView.setAdapter(mTileAdapter);
+        }
+        mOrientation = newConfig.orientation;
     }
 
     private void updateResources() {
@@ -203,6 +214,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
      */
     public void show(int x, int y) {
         if (!isShown) {
+            mTileAdapter.setShowSettings(false);
+            mSettingsShown = false;
             int containerLocation[] = findViewById(R.id.customize_container).getLocationOnScreen();
             mX = x - containerLocation[0];
             mY = y - containerLocation[1];
@@ -224,6 +237,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     public void showImmediately() {
         if (!isShown) {
+            mTileAdapter.setShowSettings(false);
+            mSettingsShown = false;
             setVisibility(VISIBLE);
             mClipper.cancelAnimator();
             mClipper.showBackground();
@@ -283,11 +298,18 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case MENU_RESET:
-                mUiEventLogger.log(QSEditEvent.QS_EDIT_RESET);
-                reset();
-                break;
+        int id = item.getItemId();
+        if (id == R.id.menu_item_reset) {
+            mUiEventLogger.log(QSEditEvent.QS_EDIT_RESET);
+            reset();
+        } else if (id == R.id.menu_item_settings) {
+            if (mSettingsShown) {
+                mTileAdapter.setShowSettings(false);
+                mSettingsShown = false;
+            } else {
+                mTileAdapter.setShowSettings(true);
+                mSettingsShown = true;
+            }
         }
         return false;
     }
@@ -391,6 +413,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private void attachSettings() {
         Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_QS_LAYOUT_COLUMNS);
         Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_QS_QUICKBAR_COLUMNS);
         Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_QS_TILE_TITLE_VISIBILITY);
     }
 
