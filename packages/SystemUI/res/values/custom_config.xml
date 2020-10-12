@@ -30,6 +30,8 @@
          there is always check that uses the current available space
          to get the maximal number to be used
          so this value is used only in the config ui -->
-    <integer name="quick_settings_num_columns_max">9</integer>
+    <integer name="quick_settings_num_columns_port_max">8</integer>
+    <integer name="quick_settings_num_columns_land_max">9</integer>
+
 </resources>
 
