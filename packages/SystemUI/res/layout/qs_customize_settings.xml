@@ -21,6 +21,40 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/qs_customize_settings_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="60dp"
+        android:orientation="horizontal"
+        android:layout_marginBottom="10dp"
+        android:background="?android:attr/colorBackground"
+        android:layout_gravity="center_vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginStart="20dp"
+            android:text="@string/customize_settings_info_text"/>
+
+        <TextView
+            android:id="@+id/qs_customize_settings_info_dismiss"
+            style="@style/QSBorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="80dp"
+            android:text="@android:string/ok"
+            android:focusable="true"
+            android:textColor="?android:attr/colorAccent"
+            android:layout_gravity="center_vertical" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -55,7 +89,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:max="@integer/quick_settings_num_columns_max"
+                android:max="@integer/quick_settings_num_columns_port_max"
                 android:min="@integer/quick_settings_num_columns" />
 
             <TextView
@@ -63,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
-                android:text="@integer/quick_settings_num_columns_max" />
+                android:text="@integer/quick_settings_num_columns_port_max" />
         </LinearLayout>
 
         <LinearLayout
@@ -95,7 +129,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:max="@integer/quick_settings_num_columns_max"
+                android:max="@integer/quick_settings_num_columns_land_max"
                 android:min="@integer/quick_settings_num_columns" />
 
             <TextView
@@ -103,7 +137,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
-                android:text="@integer/quick_settings_num_columns_max" />
+                android:text="@integer/quick_settings_num_columns_land_max" />
         </LinearLayout>
     </LinearLayout>
 
@@ -115,69 +149,90 @@
         android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:contentDescription="@string/customize_quickbar_label"
-            android:drawableStart="@drawable/ic_quickbar"
-            android:gravity="center_vertical" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="10dp"
-            android:gravity="center_vertical"
-            android:text="@integer/quick_qs_panel_max_columns" />
-
-        <SeekBar
-            android:id="@+id/qs_customize_settings_quickbar"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:max="@integer/quick_settings_num_columns_max"
-            android:min="@integer/quick_qs_panel_max_columns" />
+            android:orientation="horizontal">
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@string/customize_quickbar_label"
+                android:drawableStart="@drawable/ic_quickbar"
+                android:gravity="center_vertical" />
 
-        <TextView
-            android:layout_width="wrap_content"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="10dp"
+                android:gravity="center_vertical"
+                android:text="@integer/quick_qs_panel_max_columns" />
+
+            <SeekBar
+                android:id="@+id/qs_customize_settings_quickbar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:max="@integer/quick_settings_num_columns_land_max"
+                android:min="@integer/quick_qs_panel_max_columns" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:text="@integer/quick_settings_num_columns_land_max" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:gravity="center_vertical"
-            android:text="@integer/quick_settings_num_columns_max" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
             android:layout_marginStart="20dp"
-            android:gravity="center_vertical"
-            android:contentDescription="@string/customize_quickbar_sync"
-            android:drawableStart="@drawable/ic_quickbar_sync" />
+            android:orientation="horizontal">
 
-        <Switch
-            android:id="@+id/qs_customize_settings_quickbar_follow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="10dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:contentDescription="@string/customize_quickbar_sync"
+                android:drawableStart="@drawable/ic_quickbar_sync" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="20dp"
-            android:contentDescription="@string/customize_show_labels"
-            android:drawableStart="@drawable/ic_text_label"
-            android:gravity="center_vertical" />
+            <Switch
+                android:id="@+id/qs_customize_settings_quickbar_follow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="10dp" />
 
-        <Switch
-            android:id="@+id/qs_customize_settings_show_labels"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="10dp" />
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@string/customize_show_labels"
+                android:drawableStart="@drawable/ic_text_label"
+                android:gravity="center_vertical" />
+
+            <Switch
+                android:id="@+id/qs_customize_settings_show_labels"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="10dp" />
+
+        </LinearLayout>
     </LinearLayout>
 </com.android.systemui.qs.customize.QSCustomizerSettings>

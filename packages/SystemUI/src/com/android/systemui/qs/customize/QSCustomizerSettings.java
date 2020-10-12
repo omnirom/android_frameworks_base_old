@@ -25,6 +25,7 @@ import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.SeekBar;
@@ -35,6 +36,8 @@ import com.android.systemui.R;
 public class QSCustomizerSettings extends LinearLayout {
     private static final String TAG = "QSCustomizer::QSCustomizerSettings";
     private static final boolean DEBUG = false;
+    private static final String PREFS = "qscustomizer_prefs";
+    private static final String COLUMNS_TOOLTIP_SHOWN = "columns_tooltip_shown";
 
     public QSCustomizerSettings(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
@@ -126,5 +129,19 @@ public class QSCustomizerSettings extends LinearLayout {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
+        showInfoTooltip();
+    }
+
+    private void showInfoTooltip() {
+        if (!mContext.getSharedPreferences(PREFS, 0).getBoolean(COLUMNS_TOOLTIP_SHOWN, false)) {
+            final View info = findViewById(R.id.qs_customize_settings_info);
+            info.setVisibility(View.VISIBLE);
+            View dismiss = findViewById(R.id.qs_customize_settings_info_dismiss);
+            dismiss.setOnClickListener(v -> {
+                mContext.getSharedPreferences(PREFS, 0).edit().putBoolean(
+                        COLUMNS_TOOLTIP_SHOWN, true).apply();
+                info.setVisibility(View.GONE);
+            });
+        }
     }
 }
