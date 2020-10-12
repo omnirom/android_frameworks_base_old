@@ -135,6 +135,12 @@ public class ImsUtImplBase {
         }
 
         @Override
+        public int queryCFForServiceClass(int condition, String number, int serviceClass) throws
+                RemoteException {
+             return ImsUtImplBase.this.queryCFForServiceClass(condition, number, serviceClass);
+        }
+
+        @Override
         public int queryCallWaiting() throws RemoteException {
             return ImsUtImplBase.this.queryCallWaiting();
         }
@@ -255,6 +261,14 @@ public class ImsUtImplBase {
      * Retrieves the configuration of the call forward.
      */
     public int queryCallForward(int condition, String number) {
+        return -1;
+    }
+
+    /**
+     * Retrieves the configuration of the call forward for specified service class.
+     */
+    public int queryCFForServiceClass(int condition, String number,
+            int serviceClass) {
         return -1;
     }
 

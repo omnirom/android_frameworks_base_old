@@ -32,6 +32,7 @@ class RefreshRatePolicy {
     private final ArraySet<String> mNonHighRefreshRatePackages = new ArraySet<>();
     private final HighRefreshRateBlacklist mHighRefreshRateBlacklist;
     private final WindowManagerService mWmService;
+    private final ForceRefreshRatePackageList mForceList;
 
     /**
      * The following constants represent priority of the window. SF uses this information when
@@ -59,6 +60,7 @@ class RefreshRatePolicy {
         mLowRefreshRateId = findLowRefreshRateModeId(displayInfo);
         mHighRefreshRateBlacklist = blacklist;
         mWmService = wmService;
+        mForceList = new ForceRefreshRatePackageList(mWmService, displayInfo);
     }
 
     /**
@@ -93,6 +95,12 @@ class RefreshRatePolicy {
         // to run in default refresh rate.
         if (w.isAnimating(TRANSITION | PARENTS)) {
             return 0;
+        }
+
+        // If app is forced to specified refresh rate, return the specified refresh rate
+        int forceRefreshRateId = mForceList.getForceRefreshRateId(w.getOwningPackage());
+        if(forceRefreshRateId > 0) {
+            return forceRefreshRateId;
         }
 
         // If app requests a certain refresh rate or mode, don't override it.

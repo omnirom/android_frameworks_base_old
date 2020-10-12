@@ -113,6 +113,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceSpecificException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -496,8 +497,7 @@ public class Tethering {
             if (up) {
                 maybeTrackNewInterfaceLocked(iface);
             } else {
-                if (ifaceNameToType(iface) == TETHERING_BLUETOOTH
-                        || ifaceNameToType(iface) == TETHERING_WIGIG) {
+                if (ifaceNameToType(iface) == TETHERING_WIGIG) {
                     stopTrackingInterfaceLocked(iface);
                 } else {
                     // Ignore usb0 down after enabling RNDIS.
@@ -1190,7 +1190,9 @@ public class Tethering {
         }
 
         if (!TextUtils.isEmpty(ifname)) {
-            maybeTrackNewInterfaceLocked(ifname);
+            final int interfaceType =
+                    (ifaceNameToType(ifname) == TETHERING_WIGIG ? TETHERING_WIGIG : TETHERING_WIFI);
+            maybeTrackNewInterfaceLocked(ifname, interfaceType);
             changeInterfaceState(ifname, ipServingMode);
         } else {
             mLog.e(String.format(

@@ -133,10 +133,10 @@ java_sdk_library {
     visibility: ["//visibility:public"],
 
     // Restrict access to implementation library.
-    impl_library_visibility: [
-        "//visibility:override", // Ignore the visibility property.
-        "//frameworks/opt/net/wifi/service:__subpackages__",
-    ] + test_access_hidden_api_whitelist,
+//    impl_library_visibility: [
+//        "//visibility:override", // Ignore the visibility property.
+//        "//frameworks/opt/net/wifi/service:__subpackages__",
+//    ] + test_access_hidden_api_whitelist,
 
     apex_available: [
         "com.android.wifi",
@@ -163,7 +163,21 @@ java_defaults {
         // if sdk_version="" this gets automatically included, but here we need to add manually.
         "framework-res",
     ],
-    visibility: test_access_hidden_api_whitelist,
+     visibility: test_access_hidden_api_whitelist,
+}
+
+java_defaults {
+    name: "framework-wifi-vendor-hide-access-defaults",
+    sdk_version: "core_platform", // tests can use @CorePlatformApi's
+    libs: [
+        // order matters: classes in framework-wifi are resolved before framework, meaning
+        // @hide APIs in framework-wifi are resolved before @SystemApi stubs in framework
+        "framework-wifi.impl",
+        "framework",
+
+        // if sdk_version="" this gets automatically included, but here we need to add manually.
+        "framework-res",
+    ],
 }
 
 filegroup {

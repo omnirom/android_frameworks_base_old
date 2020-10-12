@@ -39,6 +39,8 @@ import android.widget.ImageView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Displays a PIN pad for entering a PUK (Pin Unlock Kode) provided by a carrier.
@@ -62,6 +64,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     private AlertDialog mRemainingAttemptsDialog;
     private int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private ImageView mSimImageView;
+    private Map<String, String> mWrongPukCodeMessageMap =  new HashMap<>(4);
 
     KeyguardUpdateMonitorCallback mUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
         @Override
@@ -92,6 +95,35 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
 
     public KeyguardSimPukView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        updateWrongPukMessageMap(context);
+    }
+
+    void updateWrongPukMessageMap(Context context) {
+        String[] customizationConfigs = context.getResources().
+                getStringArray(R.array.kg_wrong_puk_code_message_list);
+        if ( customizationConfigs.length == 0 ){
+            Log.d(TAG, "There is no customization PUK prompt");
+            return;
+        }
+        for(String config : customizationConfigs ) {
+            String[] kv = config.trim().split(":");
+            if ( kv.length != 2) {
+                Log.e(TAG, "invalid key value config " + config);
+                continue;
+            }
+            mWrongPukCodeMessageMap.put(kv[0], kv[1]);
+        }
+    }
+
+    private String getMessageTextForWrongPukCode(int subId) {
+        String message = null;
+        SubscriptionInfo info = Dependency.get(KeyguardUpdateMonitor.class)
+                    .getSubscriptionInfoForSubId(mSubId);
+        if ( info != null ) {
+            String mccMNC = info.getMccString()+info.getMncString();
+            message = mWrongPukCodeMessageMap.get(mccMNC);
+        }
+        return message;
     }
 
     private class StateMachine {
@@ -209,7 +241,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
 
     private void handleSubInfoChangeIfNeeded() {
         KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
-        int subId = monitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PUK_REQUIRED);
+        int subId = monitor.getUnlockedSubIdForState(TelephonyManager.SIM_STATE_PUK_REQUIRED);
         if (subId != mSubId && SubscriptionManager.isValidSubscriptionId(subId)) {
             mSubId = subId;
             mShowDefaultMessage = true;
@@ -227,7 +259,12 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         String displayMessage;
 
         if (attemptsRemaining == 0) {
-            displayMessage = getContext().getString(R.string.kg_password_wrong_puk_code_dead);
+            String message = getMessageTextForWrongPukCode(mSubId);
+            if ( message == null ) {
+                displayMessage = getContext().getString(R.string.kg_password_wrong_puk_code_dead);
+            }else {
+                displayMessage = message;
+            }
         } else if (attemptsRemaining > 0) {
             int msgId = isDefault ? R.plurals.kg_password_default_puk_message :
                     R.plurals.kg_password_wrong_puk_code;
@@ -448,8 +485,8 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                                 if (DEBUG) Log.d(LOG_TAG, "verifyPasswordAndUnlock "
                                         + " UpdateSim.onSimCheckResponse: "
                                         + " attemptsRemaining=" + result.getAttemptsRemaining());
-                                mStateMachine.reset();
                             }
+                            mStateMachine.reset();
                             mCheckSimPukThread = null;
                         }
                     });

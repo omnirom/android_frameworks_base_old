@@ -563,6 +563,10 @@ public final class RingtonePickerActivity extends AlertActivity implements
     protected void onStop() {
         super.onStop();
 
+        // must remove mHandler 's callback, or will result in one random issue:
+        // media playback occurs even though this activity has been destroyed.
+        mHandler.removeCallbacks(this);
+
         if (!isChangingConfigurations()) {
             stopAnyPlayingRingtone();
         } else {

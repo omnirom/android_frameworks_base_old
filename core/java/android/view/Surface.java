@@ -83,6 +83,8 @@ public class Surface implements Parcelable {
     private static native int nativeGetHeight(long nativeObject);
 
     private static native long nativeGetNextFrameNumber(long nativeObject);
+    private static native boolean nativeIsBufferAccumulated(long nativeObject);
+    private static native void nativeSetPresentTimeMode(long nativeObject, int mode);
     private static native int nativeSetScalingMode(long nativeObject, int scalingMode);
     private static native int nativeForceScopedDisconnect(long nativeObject);
     private static native int nativeAttachAndQueueBufferWithColorSpace(long nativeObject,
@@ -705,6 +707,28 @@ public class Surface implements Parcelable {
         synchronized (mLock) {
             checkNotReleasedLocked();
             nativeAllocateBuffers(mNativeObject);
+        }
+    }
+
+    /**
+     * Returns true if buffer accumulated
+     * @hide
+     */
+    public boolean isBufferAccumulated() {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            return nativeIsBufferAccumulated(mNativeObject);
+        }
+    }
+
+    /**
+     * Set the mode to indicate if need to set present time for the buffer
+     * @hide
+     */
+    public void setPresentTimeMode(int mode) {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            nativeSetPresentTimeMode(mNativeObject, mode);
         }
     }
 

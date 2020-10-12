@@ -50,7 +50,7 @@ import android.util.Log;
  */
 public final class ClientOperation implements Operation, BaseStream {
 
-    private static final String TAG = "ClientOperation";
+    private static final String TAG = "ObexClientOperation";
 
     private static final boolean V = ObexHelper.VDBG;
 
@@ -460,6 +460,7 @@ public final class ClientOperation implements Operation, BaseStream {
                 > mMaxPacketSize) {
             int end = 0;
             int start = 0;
+            int processedLen = 0;
             // split & send the headerArray in multiple packets.
 
             while (end != headerArray.length) {
@@ -486,10 +487,17 @@ public final class ClientOperation implements Operation, BaseStream {
 
                 byte[] sendHeader = new byte[end - start];
                 System.arraycopy(headerArray, start, sendHeader, 0, sendHeader.length);
+                processedLen += sendHeader.length;
+                opCode = (processedLen == headerArray.length) ? ObexHelper.OBEX_OPCODE_GET_FINAL
+                        : ObexHelper.OBEX_OPCODE_GET;
+                //Set GET FINAL (0x83) for Last Request Header packet as per GOEP2.1
                 if (!mParent.sendRequest(opCode, sendHeader, mReplyHeader, mPrivateInput, false)) {
                     return false;
                 }
-
+                if (mReplyHeader.responseCode == ResponseCodes.OBEX_HTTP_OK) {
+                    Log.i(TAG, "sendRequest return OBEX_HTTP_OK");
+                    return true;
+                }
                 if (mReplyHeader.responseCode != ResponseCodes.OBEX_HTTP_CONTINUE) {
                     return false;
                 }

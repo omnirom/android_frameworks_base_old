@@ -873,6 +873,7 @@
   <java-symbol type="string" name="wifi_calling_off_summary" />
   <java-symbol type="string" name="wfc_mode_wifi_preferred_summary" />
   <java-symbol type="string" name="wfc_mode_cellular_preferred_summary" />
+  <java-symbol type="string" name="wfc_mode_ims_preferred_summary" />
   <java-symbol type="string" name="wfc_mode_wifi_only_summary" />
   <java-symbol type="string" name="policydesc_disableCamera" />
   <java-symbol type="string" name="policydesc_encryptedStorage" />
@@ -1345,6 +1346,21 @@
   <java-symbol type="drawable" name="ic_wifi_signal_2" />
   <java-symbol type="drawable" name="ic_wifi_signal_3" />
   <java-symbol type="drawable" name="ic_wifi_signal_4" />
+  <java-symbol type="drawable" name="ic_wifi_4_signal_0" />
+  <java-symbol type="drawable" name="ic_wifi_4_signal_1" />
+  <java-symbol type="drawable" name="ic_wifi_4_signal_2" />
+  <java-symbol type="drawable" name="ic_wifi_4_signal_3" />
+  <java-symbol type="drawable" name="ic_wifi_4_signal_4" />
+  <java-symbol type="drawable" name="ic_wifi_5_signal_0" />
+  <java-symbol type="drawable" name="ic_wifi_5_signal_1" />
+  <java-symbol type="drawable" name="ic_wifi_5_signal_2" />
+  <java-symbol type="drawable" name="ic_wifi_5_signal_3" />
+  <java-symbol type="drawable" name="ic_wifi_5_signal_4" />
+  <java-symbol type="drawable" name="ic_wifi_6_signal_0" />
+  <java-symbol type="drawable" name="ic_wifi_6_signal_1" />
+  <java-symbol type="drawable" name="ic_wifi_6_signal_2" />
+  <java-symbol type="drawable" name="ic_wifi_6_signal_3" />
+  <java-symbol type="drawable" name="ic_wifi_6_signal_4" />
   <java-symbol type="drawable" name="ic_signal_wifi_transient_animation" />
   <java-symbol type="drawable" name="ic_hotspot_transient_animation" />
   <java-symbol type="drawable" name="ic_bluetooth_transient_animation" />
@@ -2037,6 +2053,7 @@
   <java-symbol type="string" name="config_geocoderProviderPackageName" />
   <java-symbol type="string" name="config_geofenceProviderPackageName" />
   <java-symbol type="string" name="config_networkLocationProviderPackageName" />
+  <java-symbol type="string" name="config_comboNetworkLocationProvider" />
   <java-symbol type="string" name="config_wimaxManagerClassname" />
   <java-symbol type="string" name="config_wimaxNativeLibLocation" />
   <java-symbol type="string" name="config_wimaxServiceClassname" />
@@ -2159,6 +2176,7 @@
   <java-symbol type="string" name="config_defaultNetworkScorerPackageName" />
   <java-symbol type="string" name="config_persistentDataPackageName" />
   <java-symbol type="string" name="config_deviceConfiguratorPackageName" />
+  <java-symbol type="string" name="config_optionalPackageVerifierName" />
 
   <java-symbol type="layout" name="resolver_list" />
   <java-symbol type="id" name="resolver_list" />
@@ -3648,7 +3666,11 @@
   <java-symbol type="dimen" name="car_padding_4" />
   <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.Alert.UserSwitchingDialog" />
 
+  <java-symbol type="integer" name="config_sms_authorization_timeout_ms" />
+  <java-symbol type="bool" name="config_sms_authorization_enabled" />
+
   <java-symbol type="string" name="battery_saver_description_with_learn_more" />
+  <java-symbol type="bool" name="config_primarycard" />
   <java-symbol type="string" name="confirm_battery_saver" />
 
   <java-symbol type="attr" name="opticalInsetLeft" />
@@ -3659,6 +3681,10 @@
   <java-symbol type="drawable" name="ic_lock_lockdown" />
   <java-symbol type="drawable" name="ic_arrow_forward" />
   <java-symbol type="drawable" name="ic_permission" />
+
+  <!-- For Dual SoftaAp -->
+  <java-symbol type="array" name="config_wifi_dual_sap_interfaces" />
+  <java-symbol type="bool" name="config_wifi_dual_sap_mode_enabled" />
 
   <java-symbol type="integer" name="config_defaultHapticFeedbackIntensity" />
   <java-symbol type="integer" name="config_defaultNotificationVibrationIntensity" />

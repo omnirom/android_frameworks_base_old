@@ -93,8 +93,7 @@ public class SettingsInjector {
      * {@link Message#what} value sent after the timeout waiting for a status message.
      */
     private static final int WHAT_TIMEOUT = 3;
-
-    private final Context mContext;
+    protected final Context mContext;
 
     /**
      * The settings that were injected
@@ -213,7 +212,7 @@ public class SettingsInjector {
      *
      * Duplicates some code from {@link android.content.pm.RegisteredServicesCache}.
      */
-    private static InjectedSetting parseServiceInfo(ResolveInfo service, UserHandle userHandle,
+    protected InjectedSetting parseServiceInfo(ResolveInfo service, UserHandle userHandle,
             PackageManager pm) throws XmlPullParserException, IOException {
 
         ServiceInfo si = service.serviceInfo;

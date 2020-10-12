@@ -508,7 +508,7 @@ public class UpstreamNetworkMonitor {
         public UpstreamNetworkState ns = null;
     }
 
-    private static TypeStatePair findFirstAvailableUpstreamByType(
+    private TypeStatePair findFirstAvailableUpstreamByType(
             Iterable<UpstreamNetworkState> netStates, Iterable<Integer> preferredTypes,
             boolean isCellularUpstreamPermitted) {
         final TypeStatePair result = new TypeStatePair();
@@ -526,13 +526,22 @@ public class UpstreamNetworkMonitor {
             }
 
             for (UpstreamNetworkState value : netStates) {
-                if (!nc.satisfiedByNetworkCapabilities(value.networkCapabilities)) {
+                try {
+                    // Check for both default Network and capabilities match.
+                    // This avoids in picking the wrong interface(MOBILE) in
+                    // STA+SAP scenarios where WIFI is preferred Network.
+                    // In DUN tethering scenarios, check if the request type is
+                    // DUN and capabilities match.
+                    if ((type == TYPE_MOBILE_DUN || type == cm().getActiveNetworkInfo().getType())
+                            && (nc.satisfiedByNetworkCapabilities(value.networkCapabilities))) {
+                        result.type = type;
+                        result.ns = value;
+                        return result;
+                    }
+                } catch (NullPointerException npe) {
+                    Log.e(TAG, "Null pointer exception in getActiveNetworkInfo", npe);
                     continue;
                 }
-
-                result.type = type;
-                result.ns = value;
-                return result;
             }
         }
 

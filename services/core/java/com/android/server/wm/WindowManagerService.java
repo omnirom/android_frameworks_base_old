@@ -200,6 +200,7 @@ import android.sysprop.SurfaceFlingerProperties;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.BoostFramework;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -322,7 +323,8 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
 
     static final boolean PROFILE_ORIENTATION = false;
-
+    static WindowState mFocusingWindow;
+    String mFocusingActivity;
     /** How much to multiply the policy's type layer, to reserve room
      * for multiple windows of the same type and Z-ordering adjustment
      * with TYPE_LAYER_OFFSET. */
@@ -444,6 +446,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowTracing mWindowTracing;
 
     final DisplayAreaPolicy.Provider mDisplayAreaPolicyProvider;
+
+    private BoostFramework mPerf = null;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
     // TODO: eventually unify all keyguard state in a common place instead of having it spread over
@@ -3172,12 +3176,28 @@ public class WindowManagerService extends IWindowManager.Stub
         ValueAnimator.setDurationScale(scale);
     }
 
+    private float animationScalesCheck (int which) {
+        float value = -1.0f;
+        if (!mAnimationsDisabled) {
+            if (value == -1.0f) {
+                switch (which) {
+                    case WINDOW_ANIMATION_SCALE: value = mWindowAnimationScaleSetting; break;
+                    case TRANSITION_ANIMATION_SCALE: value = mTransitionAnimationScaleSetting; break;
+                    case ANIMATION_DURATION_SCALE: value = mAnimatorDurationScaleSetting; break;
+                }
+            }
+        } else {
+            value = 0;
+        }
+        return value;
+    }
+
     public float getWindowAnimationScaleLocked() {
-        return mAnimationsDisabled ? 0 : mWindowAnimationScaleSetting;
+        return animationScalesCheck(WINDOW_ANIMATION_SCALE);
     }
 
     public float getTransitionAnimationScaleLocked() {
-        return mAnimationsDisabled ? 0 : mTransitionAnimationScaleSetting;
+        return animationScalesCheck(TRANSITION_ANIMATION_SCALE);
     }
 
     @Override
@@ -5590,6 +5610,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
+        if (mPerf == null) {
+            mPerf = new BoostFramework();
+        }
+        if (mPerf != null) {
+            mPerf.perfHint(BoostFramework.VENDOR_HINT_ROTATION_LATENCY_BOOST, null);
+        }
         mExitAnimId = exitAnim;
         mEnterAnimId = enterAnim;
 
@@ -5713,6 +5739,9 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.sendNewConfiguration();
         }
         mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN);
+        if (mPerf != null) {
+            mPerf.perfLockRelease();
+        }
     }
 
     static int getPropertyInt(String[] tokens, int index, int defUnits, int defDps,

@@ -36,11 +36,81 @@ public class WifiIcons {
             R.drawable.ic_qs_wifi_4
     };
 
+    static final int[] WIFI_4_FULL_ICONS = {
+            com.android.internal.R.drawable.ic_wifi_4_signal_0,
+            com.android.internal.R.drawable.ic_wifi_4_signal_1,
+            com.android.internal.R.drawable.ic_wifi_4_signal_2,
+            com.android.internal.R.drawable.ic_wifi_4_signal_3,
+            com.android.internal.R.drawable.ic_wifi_4_signal_4
+    };
+
+    private static final int[] WIFI_4_NO_INTERNET_ICONS = {
+            R.drawable.ic_qs_wifi_4_0,
+            R.drawable.ic_qs_wifi_4_1,
+            R.drawable.ic_qs_wifi_4_2,
+            R.drawable.ic_qs_wifi_4_3,
+            R.drawable.ic_qs_wifi_4_4
+    };
+
+    static final int[] WIFI_5_FULL_ICONS = {
+            com.android.internal.R.drawable.ic_wifi_5_signal_0,
+            com.android.internal.R.drawable.ic_wifi_5_signal_1,
+            com.android.internal.R.drawable.ic_wifi_5_signal_2,
+            com.android.internal.R.drawable.ic_wifi_5_signal_3,
+            com.android.internal.R.drawable.ic_wifi_5_signal_4
+    };
+
+    private static final int[] WIFI_5_NO_INTERNET_ICONS = {
+            R.drawable.ic_qs_wifi_5_0,
+            R.drawable.ic_qs_wifi_5_1,
+            R.drawable.ic_qs_wifi_5_2,
+            R.drawable.ic_qs_wifi_5_3,
+            R.drawable.ic_qs_wifi_5_4
+    };
+
+    static final int[] WIFI_6_FULL_ICONS = {
+            com.android.internal.R.drawable.ic_wifi_6_signal_0,
+            com.android.internal.R.drawable.ic_wifi_6_signal_1,
+            com.android.internal.R.drawable.ic_wifi_6_signal_2,
+            com.android.internal.R.drawable.ic_wifi_6_signal_3,
+            com.android.internal.R.drawable.ic_wifi_6_signal_4
+    };
+
+    private static final int[] WIFI_6_NO_INTERNET_ICONS = {
+            R.drawable.ic_qs_wifi_6_0,
+            R.drawable.ic_qs_wifi_6_1,
+            R.drawable.ic_qs_wifi_6_2,
+            R.drawable.ic_qs_wifi_6_3,
+            R.drawable.ic_qs_wifi_6_4
+    };
+
     public static final int[][] QS_WIFI_SIGNAL_STRENGTH = {
             WIFI_NO_INTERNET_ICONS,
             WIFI_FULL_ICONS
     };
+
     static final int[][] WIFI_SIGNAL_STRENGTH = QS_WIFI_SIGNAL_STRENGTH;
+
+    public static final int[][] QS_WIFI_4_SIGNAL_STRENGTH = {
+            WIFI_4_NO_INTERNET_ICONS,
+            WIFI_4_FULL_ICONS
+    };
+
+    static final int[][] WIFI_4_SIGNAL_STRENGTH = QS_WIFI_4_SIGNAL_STRENGTH;
+
+    public static final int[][] QS_WIFI_5_SIGNAL_STRENGTH = {
+            WIFI_5_NO_INTERNET_ICONS,
+            WIFI_5_FULL_ICONS
+    };
+
+    static final int[][] WIFI_5_SIGNAL_STRENGTH = QS_WIFI_5_SIGNAL_STRENGTH;
+
+    public static final int[][] QS_WIFI_6_SIGNAL_STRENGTH = {
+            WIFI_6_NO_INTERNET_ICONS,
+            WIFI_6_FULL_ICONS
+    };
+
+    static final int[][] WIFI_6_SIGNAL_STRENGTH = QS_WIFI_6_SIGNAL_STRENGTH;
 
     public static final int QS_WIFI_DISABLED = com.android.internal.R.drawable.ic_wifi_signal_0;
     public static final int QS_WIFI_NO_NETWORK = com.android.internal.R.drawable.ic_wifi_signal_0;

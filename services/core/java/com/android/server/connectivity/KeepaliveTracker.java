@@ -134,6 +134,7 @@ public class KeepaliveTracker {
         private final NetworkAgentInfo mNai;
         private final int mType;
         private final FileDescriptor mFd;
+        private final FileDescriptor mOldFd;
 
         public static final int TYPE_NATT = 1;
         public static final int TYPE_TCP = 2;
@@ -173,9 +174,11 @@ public class KeepaliveTracker {
             // keepalives are sent cannot be reused by another app even if the fd gets closed by
             // the user. A null is acceptable here for backward compatibility of PacketKeepalive
             // API.
+            // TODO: don't accept null fd after legacy packetKeepalive API is removed.
             try {
                 if (fd != null) {
                     mFd = Os.dup(fd);
+                    mOldFd = fd;
                 }  else {
                     Log.d(TAG, toString() + " calls with null fd");
                     if (!mPrivileged) {
@@ -187,6 +190,7 @@ public class KeepaliveTracker {
                                 "null fd is not allowed for tcp socket keepalives.");
                     }
                     mFd = null;
+                    mOldFd = null;
                 }
             } catch (ErrnoException e) {
                 Log.e(TAG, "Cannot dup fd: ", e);
@@ -397,6 +401,9 @@ public class KeepaliveTracker {
             if (mFd != null) {
                 try {
                     Os.close(mFd);
+                    if ( mOldFd != null) {
+                        Os.close(mOldFd);
+                    }
                 } catch (ErrnoException e) {
                     // This should not happen since system server controls the lifecycle of fd when
                     // keepalive offload is running.

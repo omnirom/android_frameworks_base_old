@@ -23,6 +23,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.TetheringManager;
 import android.net.TetheringManager.TetheringRequest;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiClient;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -156,7 +157,8 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
                     // on the Main Handler. In order to always update the callback on added, we
                     // make this call when adding callbacks after the first.
                     mMainHandler.post(() ->
-                            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices));
+                            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices,
+                                                          getHotspotWifiStandard()));
                 }
             }
         }
@@ -177,6 +179,13 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     @Override
     public boolean isHotspotEnabled() {
         return mHotspotState == WifiManager.WIFI_AP_STATE_ENABLED;
+    }
+
+    public int getHotspotWifiStandard() {
+        if (mWifiManager != null) {
+            return mWifiManager.getSoftApWifiStandard();
+        }
+        return ScanResult.WIFI_STANDARD_LEGACY;
     }
 
     @Override
@@ -224,7 +233,8 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
             list = new ArrayList<>(mCallbacks);
         }
         for (Callback callback : list) {
-            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices);
+            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices,
+                                          getHotspotWifiStandard());
         }
     }
 

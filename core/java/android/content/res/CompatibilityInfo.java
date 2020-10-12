@@ -30,6 +30,7 @@ import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.util.Log;
 
 /**
  * CompatibilityInfo class keeps the information about the screen compatibility mode that the
@@ -42,6 +43,8 @@ public class CompatibilityInfo implements Parcelable {
     @UnsupportedAppUsage
     public static final CompatibilityInfo DEFAULT_COMPATIBILITY_INFO = new CompatibilityInfo() {
     };
+
+    static final String TAG = "CompatibilityInfo";
 
     /**
      * This is the number of pixels we would like to have along the
@@ -148,11 +151,18 @@ public class CompatibilityInfo implements Parcelable {
                 // Let the user decide.
                 compatFlags |= NEEDS_SCREEN_COMPAT;
             }
-
-            // Modern apps always support densities.
-            applicationDensity = DisplayMetrics.DENSITY_DEVICE;
-            applicationScale = 1.0f;
-            applicationInvertedScale = 1.0f;
+            int density = appInfo.getOverrideDensity();
+            if(density != 0) {
+                applicationDensity = density;
+                applicationScale = DisplayMetrics.DENSITY_DEVICE  / (float) applicationDensity;
+                applicationInvertedScale = 1.0f / applicationScale;
+                compatFlags |= SCALING_REQUIRED;
+            } else {
+                // Modern apps always support densities.
+                applicationDensity = DisplayMetrics.DENSITY_DEVICE;
+                applicationScale = 1.0f;
+                applicationInvertedScale = 1.0f;
+            }
 
         } else {
             /**
@@ -239,20 +249,30 @@ public class CompatibilityInfo implements Parcelable {
                 compatFlags |= NEVER_NEEDS_COMPAT;
             }
 
-            if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
-                applicationDensity = DisplayMetrics.DENSITY_DEVICE;
-                applicationScale = 1.0f;
-                applicationInvertedScale = 1.0f;
-            } else {
+            int density = appInfo.getOverrideDensity();
+            if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) == 0) {
                 applicationDensity = DisplayMetrics.DENSITY_DEFAULT;
                 applicationScale = DisplayMetrics.DENSITY_DEVICE
                         / (float) DisplayMetrics.DENSITY_DEFAULT;
                 applicationInvertedScale = 1.0f / applicationScale;
                 compatFlags |= SCALING_REQUIRED;
+            } else if(density != 0) {
+                applicationDensity = density;
+                applicationScale = DisplayMetrics.DENSITY_DEVICE / (float) applicationDensity;
+                applicationInvertedScale = 1.0f / applicationScale;
+                compatFlags |= SCALING_REQUIRED;
+            } else {
+                applicationDensity = DisplayMetrics.DENSITY_DEVICE;
+                applicationScale = 1.0f;
+                applicationInvertedScale = 1.0f;
             }
         }
 
         mCompatibilityFlags = compatFlags;
+
+        Log.d(TAG, "mCompatibilityFlags - " + Integer.toHexString(mCompatibilityFlags));
+        Log.d(TAG, "applicationDensity - " + applicationDensity);
+        Log.d(TAG, "applicationScale - " + applicationScale);
     }
 
     private CompatibilityInfo(int compFlags,

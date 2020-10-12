@@ -145,6 +145,7 @@ import android.view.DisplayInfo;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.ActivityTrigger;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.util.function.pooled.PooledConsumer;
@@ -153,6 +154,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
+import android.util.BoostFramework;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.uri.NeededUriGrants;
 
@@ -167,7 +169,7 @@ import java.util.function.Consumer;
 /**
  * State and management of a single stack of activities.
  */
-class ActivityStack extends Task {
+public class ActivityStack extends Task {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_ATM;
     static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_APP = TAG + POSTFIX_APP;
@@ -221,6 +223,8 @@ class ActivityStack extends Task {
         RESTARTING_PROCESS
     }
 
+    public BoostFramework mPerf = null;
+
     // The topmost Activity passed to convertToTranslucent(). When non-null it means we are
     // waiting for all Activities in mUndrawnActivitiesBelowTopTranslucent to be removed as they
     // are drawn. When the last member of mUndrawnActivitiesBelowTopTranslucent is removed the
@@ -269,8 +273,12 @@ class ActivityStack extends Task {
 
     private final Handler mHandler;
 
-    private class ActivityStackHandler extends Handler {
+    static final ActivityTrigger mActivityTrigger = new ActivityTrigger();
 
+    private static final ActivityPluginDelegate mActivityPluginDelegate =
+        new ActivityPluginDelegate();
+
+    private class ActivityStackHandler extends Handler {
         ActivityStackHandler(Looper looper) {
             super(looper);
         }
@@ -939,6 +947,7 @@ class ActivityStack extends Task {
     void minimalResumeActivityLocked(ActivityRecord r) {
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + r + " (starting new instance)"
                 + " callers=" + Debug.getCallers(5));
+        r.callServiceTrackeronActivityStatechange(RESUMED, true);
         r.setState(RESUMED, "minimalResumeActivityLocked");
         r.completeResumeLocked();
     }
@@ -1078,6 +1087,16 @@ class ActivityStack extends Task {
 
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to PAUSING: " + prev);
         else if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Start pausing: " + prev);
+
+        prev.callServiceTrackeronActivityStatechange(PAUSING, true);
+        if (mActivityTrigger != null) {
+            mActivityTrigger.activityPauseTrigger(prev.intent, prev.info, prev.info.applicationInfo);
+        }
+
+        if (mActivityPluginDelegate != null && getWindowingMode() != WINDOWING_MODE_UNDEFINED) {
+            mActivityPluginDelegate.activitySuspendNotification
+                (prev.info.applicationInfo.packageName, getWindowingMode() == WINDOWING_MODE_FULLSCREEN, true);
+        }
         mPausingActivity = prev;
         mLastPausedActivity = prev;
         mLastNoHistoryActivity = prev.isNoHistory() ? prev : null;
@@ -1169,6 +1188,7 @@ class ActivityStack extends Task {
         if (prev != null) {
             prev.setWillCloseOrEnterPip(false);
             final boolean wasStopping = prev.isState(STOPPING);
+            prev.callServiceTrackeronActivityStatechange(PAUSED, true);
             prev.setState(PAUSED, "completePausedLocked");
             if (prev.finishing) {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Executing finish of activity: " + prev);
@@ -1185,6 +1205,7 @@ class ActivityStack extends Task {
                     // We are also stopping, the stop request must have gone soon after the pause.
                     // We can't clobber it, because the stop confirmation will not be handled.
                     // We don't need to schedule another stop, we only need to let it happen.
+                    prev.callServiceTrackeronActivityStatechange(STOPPING, true);
                     prev.setState(STOPPING, "completePausedLocked");
                 } else if (!prev.mVisibleRequested || shouldSleepOrShutDownActivities()) {
                     // Clear out any deferred client hide we might currently have.
@@ -1631,8 +1652,20 @@ class ActivityStack extends Task {
         // appropriate for it.
         mStackSupervisor.mStoppingActivities.remove(next);
         next.setSleeping(false);
+        next.launching = true;
 
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
+
+        next.callServiceTrackeronActivityStatechange(RESUMED, true);
+        if (mActivityTrigger != null) {
+            mActivityTrigger.activityResumeTrigger(next.intent, next.info, next.info.applicationInfo,
+                    next.occludesParent());
+        }
+
+        if (mActivityPluginDelegate != null && getWindowingMode() != WINDOWING_MODE_UNDEFINED) {
+            mActivityPluginDelegate.activityInvokeNotification
+                (next.info.applicationInfo.packageName, getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
+        }
 
         // If we are currently pausing an activity, then don't do anything until that is done.
         if (!mRootWindowContainer.allPausedActivitiesComplete()) {
@@ -1751,6 +1784,9 @@ class ActivityStack extends Task {
         // to ignore it when computing the desired screen orientation.
         boolean anim = true;
         final DisplayContent dc = taskDisplayArea.mDisplayContent;
+        if (mPerf == null) {
+            mPerf = new BoostFramework();
+        }
         if (prev != null) {
             if (prev.finishing) {
                 if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
@@ -1759,6 +1795,12 @@ class ActivityStack extends Task {
                     anim = false;
                     dc.prepareAppTransition(TRANSIT_NONE, false);
                 } else {
+                    mWmService.prepareAppTransition(prev.getTask() == next.getTask()
+                            ? TRANSIT_ACTIVITY_CLOSE
+                            : TRANSIT_TASK_CLOSE, false);
+                    if(prev.getTask() != next.getTask() && mPerf != null) {
+                       mPerf.perfHint(BoostFramework.VENDOR_HINT_ANIM_BOOST, next.packageName);
+                    }
                     dc.prepareAppTransition(
                             prev.getTask() == next.getTask() ? TRANSIT_ACTIVITY_CLOSE
                                     : TRANSIT_TASK_CLOSE, false);
@@ -1771,6 +1813,14 @@ class ActivityStack extends Task {
                     anim = false;
                     dc.prepareAppTransition(TRANSIT_NONE, false);
                 } else {
+                    mWmService.prepareAppTransition(prev.getTask() == next.getTask()
+                            ? TRANSIT_ACTIVITY_OPEN
+                            : next.mLaunchTaskBehind
+                                    ? TRANSIT_TASK_OPEN_BEHIND
+                                    : TRANSIT_TASK_OPEN, false);
+                    if(prev.getTask() != next.getTask() && mPerf != null) {
+                       mPerf.perfHint(BoostFramework.VENDOR_HINT_ANIM_BOOST, next.packageName);
+                    }
                     dc.prepareAppTransition(
                             prev.getTask() == next.getTask() ? TRANSIT_ACTIVITY_OPEN
                                     : next.mLaunchTaskBehind ? TRANSIT_TASK_OPEN_BEHIND
@@ -1828,7 +1878,6 @@ class ActivityStack extends Task {
 
             if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + next
                     + " (in existing)");
-
             next.setState(RESUMED, "resumeTopActivityInnerLocked");
 
             next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
@@ -1916,10 +1965,12 @@ class ActivityStack extends Task {
                 // Whoops, need to restart this activity!
                 if (DEBUG_STATES) Slog.v(TAG_STATES, "Resume failed; resetting state to "
                         + lastState + ": " + next);
+                next.callServiceTrackeronActivityStatechange(lastState, true);
                 next.setState(lastState, "resumeTopActivityInnerLocked");
 
                 // lastResumedActivity being non-null implies there is a lastStack present.
                 if (lastResumedActivity != null) {
+                    lastResumedActivity.callServiceTrackeronActivityStatechange(RESUMED, true);
                     lastResumedActivity.setState(RESUMED, "resumeTopActivityInnerLocked");
                 }
 
@@ -2040,6 +2091,11 @@ class ActivityStack extends Task {
         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to stack to task " + task,
                 new RuntimeException("here").fillInStackTrace());
         task.positionChildAtTop(r);
+
+        if (mActivityPluginDelegate != null) {
+            mActivityPluginDelegate.activityInvokeNotification
+                (r.info.applicationInfo.packageName, r.occludesParent());
+        }
 
         // The transition animation and starting window are not needed if {@code allowMoveToFront}
         // is false, because the activity won't be visible.
@@ -2975,6 +3031,7 @@ class ActivityStack extends Task {
                         + " other stack to this stack mResumedActivity=" + mResumedActivity
                         + " other mResumedActivity=" + topRunningActivity);
             }
+            topRunningActivity.callServiceTrackeronActivityStatechange(RESUMED, true);
             topRunningActivity.setState(RESUMED, "positionChildAt");
         }
 
@@ -3010,6 +3067,7 @@ class ActivityStack extends Task {
         // so that we don't resume the same activity again in the new stack.
         // Apps may depend on onResume()/onPause() being called in pairs.
         if (setResume) {
+            r.callServiceTrackeronActivityStatechange(RESUMED, true);
             r.setState(RESUMED, "moveToFrontAndResumeStateIfNeeded");
         }
         // If the activity was previously pausing, then ensure we transfer that as well
@@ -3326,6 +3384,13 @@ class ActivityStack extends Task {
 
     AnimatingActivityRegistry getAnimatingActivityRegistry() {
         return mAnimatingActivityRegistry;
+    }
+
+    public void onARStopTriggered(ActivityRecord r) {
+        if (mActivityPluginDelegate != null && getWindowingMode() != WINDOWING_MODE_UNDEFINED) {
+                            mActivityPluginDelegate.activitySuspendNotification
+                                (r.info.applicationInfo.packageName, getWindowingMode() == WINDOWING_MODE_FULLSCREEN, false);
+                        }
     }
 
     void executeAppTransition(ActivityOptions options) {

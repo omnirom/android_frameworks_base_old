@@ -104,6 +104,7 @@ public class NetworkStatsSubscriptionsMonitor extends
             if (TextUtils.isEmpty(subscriberId)) {
                 Log.wtf(NetworkStatsService.TAG,
                         "Empty subscriberId for newly added sub: " + subId);
+                continue;
             }
             final RatTypeListener listener =
                     new RatTypeListener(mExecutor, this, subId, subscriberId);

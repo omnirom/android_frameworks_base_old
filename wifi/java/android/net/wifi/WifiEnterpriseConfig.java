@@ -95,6 +95,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String EAP_ERP             = "eap_erp";
     /** @hide */
     public static final String OCSP                = "ocsp";
+    /** @hide */
+    public static final String KEY_SIMNUM          = "sim_num";
 
     /**
      * String representing the keystore OpenSSL ENGINE's ID.
@@ -555,6 +557,16 @@ public class WifiEnterpriseConfig implements Parcelable {
             default:
                 throw new IllegalArgumentException("Unknown EAP method");
         }
+    }
+
+    /** @hide */
+    public void setSimNum(int SIMNum) {
+         setFieldValue(KEY_SIMNUM, Integer.toString(SIMNum));
+    }
+
+    /** @hide */
+    public @NonNull String getSimNum() {
+        return getFieldValue(KEY_SIMNUM);
     }
 
     /**

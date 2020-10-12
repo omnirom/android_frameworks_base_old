@@ -107,6 +107,8 @@
         <item>Disabled</item>
         <item>Enabled Filtered</item>
         <item>Enabled</item>
+        <item>Enabled Headers Filtered</item>
+        <item>Enabled Media Pkts Filtered</item>
     </string-array>
 
     <!-- Values for Bluetooth HCI Snoop Logging -->
@@ -114,6 +116,8 @@
         <item>disabled</item>
         <item>filtered</item>
         <item>full</item>
+        <item>snoopheadersfiltered</item>
+        <item>mediapktsfiltered</item>
     </string-array>
 
     <!-- Titles for Bluetooth AVRCP Versions -->
@@ -154,6 +158,8 @@
         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx">aptX™</xliff:g> audio</item>
         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_hd">aptX™ HD</xliff:g> audio</item>
         <item>LDAC</item>
+        <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_adaptive">aptX™ Adaptive</xliff:g> audio</item>
+        <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_twsp">aptX™ TWS+</xliff:g> audio</item>
     </string-array>
 
     <!-- Values for Bluetooth Audio Codec selection preference. -->
@@ -164,6 +170,8 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
+        <item>5</item>
+        <item>6</item>
     </string-array>
 
     <!-- Summaries for Bluetooth Audio Codec selection preference. [CHAR LIMIT=50]-->
@@ -174,6 +182,8 @@
         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx">aptX™</xliff:g> audio</item>
         <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_hd">aptX™ HD</xliff:g> audio</item>
         <item>LDAC</item>
+        <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_adaptive">aptX™ Adaptive</xliff:g> audio</item>
+        <item><xliff:g id="qualcomm">Qualcomm®</xliff:g> <xliff:g id="aptx_twsp">aptX™ TWS+</xliff:g> audio</item>
     </string-array>
 
     <!-- Titles for Bluetooth Audio Codec Sample Rate selection preference. [CHAR LIMIT=50] -->

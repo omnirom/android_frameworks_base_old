@@ -36,6 +36,8 @@
     <string name="wifi_security_short_eap_wpa" translatable="false">WPA-EAP</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 802.1x EAP security -->
     <string name="wifi_security_short_eap_wpa2_wpa3" translatable="false">RSN-EAP</string>
+    <!-- Do not translate.  Concise terminology for wifi with DPP security -->
+    <string name="wifi_security_short_dpp" translatable="false">DPP</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA3 security -->
     <string name="wifi_security_short_sae" translatable="false">WPA3</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA2/WPA3 transition security -->
@@ -68,6 +70,8 @@
     <string name="wifi_security_eap_wpa2_wpa3" translatable="false">WPA2/WPA3-Enterprise</string>
     <!-- Do not translate.  Concise terminology for Passpoint network -->
     <string name="wifi_security_passpoint" translatable="false">Passpoint</string>
+    <!-- Do not translate.  Concise terminology for DPP network -->
+    <string name="wifi_security_dpp" translatable="false">DPP</string>
     <!-- Do not translate.  Terminology for wifi with WPA3 security -->
     <string name="wifi_security_sae" translatable="false">WPA3-Personal</string>
     <!-- Do not translate.  Terminology for wifi with WPA2/WPA3 Transition mode security -->
@@ -241,6 +245,8 @@
     <string name="bluetooth_profile_map">Text Messages</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the SAP profile (sharing SIM card). -->
     <string name="bluetooth_profile_sap">SIM Access</string>
+    <!-- Bluetooth settings. The user-visible string that is used whenever referring to the dun profile. -->
+    <string name="bluetooth_profile_dun">Dial-up Network Access</string>
 
     <!-- Bluetooth settings. The user-visible string for the setting controlling whether to use a high-quality codec if the device supports it, along with the name of the codec (eg AAC, LDAC, aptX) -->
     <string name="bluetooth_profile_a2dp_high_quality">HD audio: <xliff:g id="codec_name">%1$s</xliff:g></string>
@@ -271,6 +277,8 @@
     <string name="bluetooth_pan_user_profile_summary_connected">Connected to device for internet access</string>
     <!-- Bluetooth settings. Connection options screen. The summary for the checkbox preference when PAN is connected (NAP role). [CHAR LIMIT=25]-->
     <string name="bluetooth_pan_nap_profile_summary_connected">Sharing local internet connection with device</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the DUN checkbox preference when DUN is connected. -->
+    <string name="bluetooth_dun_profile_summary_connected">Connected to Dun Server</string>
 
     <!-- Bluetooth settings. Connection options screen. The summary
          for the PAN checkbox preference that describes how checking it
@@ -292,6 +300,8 @@
     <string name="bluetooth_hid_profile_summary_use_for">Use for input</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference that describes how checking it will set the Hearing Aid profile as preferred. -->
     <string name="bluetooth_hearing_aid_profile_summary_use_for">Use for Hearing Aids</string>
+    <!-- Bluetooth settings. Connection options screen.  The summary for the dun checkbox preference that describes how checking it will set the dun profile as preferred. -->
+    <string name="bluetooth_dun_profile_summary_use_for">Use for Dial-up Network access</string>
 
     <!-- Button text for accepting an incoming pairing request. [CHAR LIMIT=20] -->
     <string name="bluetooth_pairing_accept">Pair</string>
@@ -642,12 +652,22 @@
 
     <!-- Setting Checkbox title whether to show options for wireless display certification -->
     <string name="wifi_display_certification">Wireless display certification</string>
+    <!-- Setting Checkbox title whether to enable WiFi coverage extending feature. -->
+    <string name="wifi_coverage_extend">Enable Wi\u2011Fi Coverage Extend Feature</string>
+    <!-- Setting Checkbox title whether to enable SoftAp OCV Feature. -->
+    <string name="softap_ocv">Enable SoftAp OCV</string>
+    <!-- Setting Checkbox title whether to enable SoftAp Beacon Protection. -->
+    <string name="softap_beacon_protection">Enable SoftAp Beacon Protection</string>
     <!-- Setting Checkbox title whether to enable WiFi Verbose Logging. [CHAR LIMIT=40] -->
     <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
     <!-- Setting Checkbox title whether to disable WiFi Scan Throttling. [CHAR LIMIT=40] -->
     <string name="wifi_scan_throttling">Wi\u2011Fi scan throttling</string>
     <!-- Setting Checkbox title whether to enable WiFi enhanced mac randomization. [CHAR LIMIT=40] -->
     <string name="wifi_enhanced_mac_randomization">Wi\u2011Fi\u2011enhanced MAC randomization</string>
+    <!-- Setting Checkbox title whether to enable WiFi whitelist roaming feature. -->
+    <string name="wifi_whitelist_roaming">SSID Bridging \u2011 Fast Handover</string>
+    <!-- Setting Checkbox title whether to enable WiFi unsaved network linking feature. -->
+    <string name="wifi_new_network_auto_connection">SSID Bridging \u2011 Auto Connection</string>
     <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
@@ -715,6 +735,13 @@
     <!-- setting Checkbox summary whether to show options for wireless display certification  -->
     <string name="wifi_display_certification_summary">Show options for wireless display certification</string>
     <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR_LIMIT=NONE] -->
+    <!-- Setting Checkbox summary whether to enable WiFi coverage extending feature. -->
+    <string name="wifi_coverage_extend_summary">Enable extending Wi\u2011Fi coverage using Hotspot</string>
+    <!-- Setting Checkbox summary whether to enable SoftAp OCV. -->
+    <string name="softap_ocv_summary">Enable SoftAp OCV using Hotspot</string>
+    <!-- Setting Checkbox summary whether to enable SoftAp Beacon Protection. -->
+    <string name="softap_beacon_protection_summary">Enable SoftAp beacon protection using Hotspot</string>
+    <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR LIMIT=80] -->
     <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
     <!-- Setting Checkbox summary whether to disable Wifi scan throttling [CHAR LIMIT=NONE] -->
     <string name="wifi_scan_throttling_summary">Reduces battery drain &amp; improves network performance</string>
@@ -724,6 +751,10 @@
     <string name="wifi_metered_label">Metered</string>
     <!-- Label indicating network has been manually marked as unmetered -->
     <string name="wifi_unmetered_label">Unmetered</string>
+    <!-- Setting Checkbox summary whether to enable WiFi whitelist network roaming feature. -->
+    <string name="wifi_whitelist_roaming_summary">Enable roaming between different SSID WPA/WPA2\u2011PSK APs with same gateway MAC address</string>
+    <!-- Setting Checkbox summary whether to enable WiFi unsaved network linking feature. -->
+    <string name="wifi_new_network_auto_connection_summary">Enable auto connection attempts to a new WPA/WPA2\u2011PSK 5GHz SSID with current connected WPA/WPA2\u2011PSK 2GHz SSID credentials on SSID and BSSID partial match</string>
     <!-- UI debug setting: limit size of Android logger buffers -->
     <string name="select_logd_size_title">Logger buffer sizes</string>
     <!-- UI debug setting: limit size of Android logger buffers [CHAR LIMIT=59] -->

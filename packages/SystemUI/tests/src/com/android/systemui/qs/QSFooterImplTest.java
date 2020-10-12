@@ -69,4 +69,5 @@ public class QSFooterImplTest extends LeakCheckedTest {
         // Verify Settings wasn't launched.
         verify(mActivityStarter, never()).startActivity(any(), anyBoolean());
     }
+
 }

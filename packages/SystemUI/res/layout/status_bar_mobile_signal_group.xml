@@ -22,15 +22,19 @@
     android:id="@+id/mobile_combo"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:gravity="center_vertical" >
-
+    android:gravity="center_vertical">
     <com.android.keyguard.AlphaOptimizedLinearLayout
         android:id="@+id/mobile_group"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:orientation="horizontal" >
-
+        <ImageView
+            android:id="@+id/mobile_volte"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:visibility="gone"
+            android:paddingEnd="2dp"/>
         <FrameLayout
             android:id="@+id/inout_container"
             android:layout_height="17dp"

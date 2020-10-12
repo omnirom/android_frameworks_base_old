@@ -448,6 +448,21 @@ void CanvasContext::setPresentTime() {
                 (frameIntervalNanos * (renderAhead + 1)) - DeviceInfo::get()->getAppOffset() +
                 (frameIntervalNanos / 2);
     }
+
+    // Add code to support pre-rendering feature
+    int mode = DEFAULT_MODE;
+    if (mNativeSurface) {
+        ANativeWindow* anw = mNativeSurface->getNativeWindow();
+        anw->query(anw, NATIVE_WINDOW_PRESENT_TIME_MODE, &mode);
+    }
+    // If pre-rendering is disable, the mode will be DEFAULT_MODE and
+    // we will not change the presentTime.
+    if (mode == AUTO_TIME_MODE) {
+        presentTime = NATIVE_WINDOW_TIMESTAMP_AUTO;
+    } else if (mode == SET_CURRENT_TIME_MODE) {
+        presentTime = systemTime(SYSTEM_TIME_MONOTONIC);
+    }
+
     native_window_set_buffers_timestamp(mNativeSurface->getNativeWindow(), presentTime);
 }
 

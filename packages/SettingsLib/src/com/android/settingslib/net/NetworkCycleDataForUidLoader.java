@@ -72,7 +72,10 @@ public class NetworkCycleDataForUidLoader extends
                     builder.setBackgroundUsage(totalUsage - totalForeground)
                         .setForegroundUsage(totalForeground);
                 }
-                mData.add(builder.build());
+                NetworkCycleDataForUid mObject = builder.build();
+                if (mObject.getBackgroudUsage() >= 0) {
+                    mData.add(mObject);
+                }
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception querying network detail.", e);

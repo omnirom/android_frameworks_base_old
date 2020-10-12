@@ -69,12 +69,22 @@ public final class SoftApCapability implements Parcelable {
      */
     public static final long SOFTAP_FEATURE_WPA3_SAE = 1 << 2;
 
+    /**
+     * Support for WPA3 Opportunistic Wireless Encryption (WPA3-OWE).
+     *
+     * flag when {@link config_wifi_softap_owe_supported)} is true.
+     * @hide
+     */
+    public static final long SOFTAP_FEATURE_WPA3_OWE = 1 << 3;
+
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @LongDef(flag = true, prefix = { "SOFTAP_FEATURE_" }, value = {
             SOFTAP_FEATURE_ACS_OFFLOAD,
             SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT,
             SOFTAP_FEATURE_WPA3_SAE,
+            SOFTAP_FEATURE_WPA3_OWE,
     })
     public @interface HotspotFeatures {}
 

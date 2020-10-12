@@ -139,8 +139,6 @@
     <integer name="quick_settings_brightness_dialog_short_timeout">2000</integer>
     <integer name="quick_settings_brightness_dialog_long_timeout">4000</integer>
 
-    <!-- Show indicator for Wifi on but not connected. -->
-    <bool name="config_showWifiIndicatorWhenEnabled">false</bool>
 
     <!-- The number of milliseconds before the heads up notification auto-dismisses. -->
     <integer name="heads_up_notification_decay">5000</integer>
@@ -351,7 +349,7 @@
     <bool name="config_enableNotificationShadeDrag">true</bool>
 
     <!-- Whether to show activity indicators in the status bar -->
-    <bool name="config_showActivity">false</bool>
+    <bool name="config_showActivity">true</bool>
 
     <!-- Whether or not the button to clear all notifications will be shown. -->
     <bool name="config_enableNotificationsClearAll">true</bool>
@@ -388,6 +386,7 @@
          applications. If this value is false, then only the first notification will be expanded;
          the other notifications need to be manually expanded by the user. -->
     <bool name="config_alwaysExpandNonGroupedNotifications">false</bool>
+
 
     <!-- Whether or not an expandable notification can be manually expanded or collapsed by the
          user. Grouped notifications are still expandable even if this value is false. -->
@@ -428,6 +427,9 @@
         <item>60</item>
         <item>120</item>
     </integer-array>
+
+
+
 
     <!-- Smart replies in notifications: Whether smart replies in notifications are enabled. -->
     <bool name="config_smart_replies_in_notifications_enabled">true</bool>

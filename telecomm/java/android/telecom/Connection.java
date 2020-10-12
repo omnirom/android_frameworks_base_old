@@ -404,8 +404,14 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int CAPABILITY_TRANSFER_CONSULTATIVE = 0x10000000;
 
+    /**
+     * Remote device supports RTT.
+     * @hide
+     */
+    public static final int CAPABILITY_SUPPORTS_RTT_REMOTE = 0x20000000;
+
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x20000000
+    // Next CAPABILITY value: 0x40000000
     //**********************************************************************************************
 
     /**
@@ -1015,6 +1021,9 @@ public abstract class Connection extends Conferenceable {
         if ((capabilities & CAPABILITY_TRANSFER_CONSULTATIVE)
                 == CAPABILITY_TRANSFER_CONSULTATIVE) {
             builder.append(isLong ? " CAPABILITY_TRANSFER_CONSULTATIVE" : " sup_cTrans");
+        }
+        if ((capabilities & CAPABILITY_SUPPORTS_RTT_REMOTE) == CAPABILITY_SUPPORTS_RTT_REMOTE) {
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_RTT_REMOTE" : " sup_rtt");
         }
         builder.append("]");
         return builder.toString();

@@ -264,6 +264,23 @@ public class CamcorderProfile
     private static final int QUALITY_HIGH_SPEED_LIST_START = QUALITY_HIGH_SPEED_LOW;
     private static final int QUALITY_HIGH_SPEED_LIST_END = QUALITY_HIGH_SPEED_4KDCI;
 
+
+    /**
+     * Quality level corresponding to the 8kuhd (7680 x 4320) resolution.
+     * @hide
+     */
+    public static final int QUALITY_8KUHD = 3001;
+
+    /**
+     * Time lapse quality level corresponding to the 8kuhd (7680 x 4320) resolution.
+     * @hide
+     */
+    public static final int QUALITY_TIME_LAPSE_8KUHD = 3002;
+
+    // Start and end of vendor quality list
+    private static final int QUALITY_VENDOR_LIST_START = QUALITY_8KUHD;
+    private static final int QUALITY_VENDOR_LIST_END = QUALITY_TIME_LAPSE_8KUHD;
+
     /**
      * Default recording duration in seconds before the session is terminated.
      * This is useful for applications like MMS has limited file size requirement.
@@ -449,7 +466,9 @@ public class CamcorderProfile
               (quality >= QUALITY_TIME_LAPSE_LIST_START &&
                quality <= QUALITY_TIME_LAPSE_LIST_END) ||
                (quality >= QUALITY_HIGH_SPEED_LIST_START &&
-               quality <= QUALITY_HIGH_SPEED_LIST_END))) {
+               quality <= QUALITY_HIGH_SPEED_LIST_END) ||
+               (quality >= QUALITY_VENDOR_LIST_START &&
+               quality <= QUALITY_VENDOR_LIST_END))) {
             String errMessage = "Unsupported quality level: " + quality;
             throw new IllegalArgumentException(errMessage);
         }

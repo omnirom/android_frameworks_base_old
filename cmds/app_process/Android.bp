@@ -18,6 +18,7 @@ cc_binary {
 
     shared_libs: [
         "libandroid_runtime",
+        "libbase",
         "libbinder",
         "libcutils",
         "libdl",

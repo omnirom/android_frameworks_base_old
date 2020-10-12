@@ -39,8 +39,21 @@ public class NetworkRanker {
         NetworkAgentInfo bestNetwork = null;
         int bestScore = Integer.MIN_VALUE;
         for (final NetworkAgentInfo nai : nais) {
-            if (!nai.satisfies(request)) continue;
-            if (nai.getCurrentScore() > bestScore) {
+            if (!nai.satisfies(request) ||
+                !(nai.connService() != null &&
+                  nai.connService().satisfiesMobileMultiNetworkDataCheck
+                                    (nai.networkCapabilities,
+                                     request.networkCapabilities))) {
+                continue;
+            }
+            if (nai.getCurrentScore() > bestScore ||
+                (bestNetwork != null && nai.connService() != null &&
+                 nai.connService().isBestMobileMultiNetwork(
+                         bestNetwork,
+                         bestNetwork.networkCapabilities,
+                         nai,
+                         nai.networkCapabilities,
+                         request.networkCapabilities))) {
                 bestNetwork = nai;
                 bestScore = nai.getCurrentScore();
             }

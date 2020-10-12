@@ -104,6 +104,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.BoostFramework;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
@@ -508,6 +509,11 @@ public final class ProcessList {
      * The buffer to be used to receive the SIGCHLD data, it includes pid/uid/status.
      */
     private final int[] mZygoteSigChldMessage = new int[3];
+
+    /**
+     * BoostFramework Object
+     */
+    public static BoostFramework mPerfServiceStartHint = new BoostFramework();
 
     final class IsolatedUidRange {
         @VisibleForTesting
@@ -2300,6 +2306,13 @@ public final class ProcessList {
                         isTopApp, app.mDisabledCompatChanges, pkgDataInfoMap,
                         whitelistedAppDataInfoMap, bindMountAppsData, bindMountAppStorageDirs,
                         new String[]{PROC_START_SEQ_IDENT + app.startSeq});
+            }
+            if (mPerfServiceStartHint != null) {
+                if ((hostingRecord.getType() != null) && (hostingRecord.getType().equals("activity"))) {
+                    if (startResult != null) {
+                        mPerfServiceStartHint.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, app.processName, startResult.pid, BoostFramework.Launch.TYPE_START_PROC);
+                    }
+                }
             }
             checkSlow(startTime, "startProcess: returned from zygote!");
             return startResult;

@@ -1771,6 +1771,13 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    public static boolean isPsTech(int radioTechnology) {
+        return radioTechnology == RIL_RADIO_TECHNOLOGY_LTE ||
+                radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA ||
+                radioTechnology == RIL_RADIO_TECHNOLOGY_NR;
+    }
+
+    /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static boolean bearerBitmapHasCdma(int networkTypeBitmask) {
         return (RIL_RADIO_CDMA_TECHNOLOGY_BITMASK

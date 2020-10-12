@@ -72,6 +72,15 @@ android_library {
         "jsr330"
     ],
     manifest: "AndroidManifest.xml",
+    defaults: [
+       "framework-wifi-vendor-hide-access-defaults",
+    ],
+    libs: [
+        "android.car",
+        "android.car.userlib",
+        "telephony-ext",
+        "ims-common",
+    ],
 
     kotlincflags: ["-Xjvm-default=enable"],
 
@@ -95,6 +104,9 @@ android_library {
     manifest: "tests/AndroidManifest-base.xml",
     additional_manifests: ["tests/AndroidManifest.xml"],
 
+    defaults: [
+       "framework-wifi-vendor-hide-access-defaults",
+    ],
     resource_dirs: [
         "tests/res",
         "res-product",
@@ -145,6 +157,8 @@ android_library {
     libs: [
         "android.test.runner",
         "android.test.base",
+        "telephony-ext",
+        "ims-common",
     ],
     kotlincflags: ["-Xjvm-default=enable"],
     aaptflags: [
@@ -169,6 +183,13 @@ android_app {
     optimize: {
         proguard_flags_files: ["proguard.flags"],
     },
+
+    libs: [
+        "android.car",
+        "android.car.userlib",
+        "ims-common",
+        "telephony-ext",
+    ],
 
     kotlincflags: ["-Xjvm-default=enable"],
 

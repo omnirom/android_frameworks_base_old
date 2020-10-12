@@ -242,7 +242,17 @@ public class ZoneGetter {
         final TimeZoneNames.NameType nameType =
                 tz.inDaylightTime(now) ? TimeZoneNames.NameType.LONG_DAYLIGHT
                         : TimeZoneNames.NameType.LONG_STANDARD;
-        return names.getDisplayName(tz.getID(), nameType, now.getTime());
+        // Canonicalize the zone ID for ICU. It will only return valid strings for zone IDs
+        // that match ICUs zone IDs (which are similar but not guaranteed the same as those
+        // in timezones.xml). timezones.xml and related files uses the IANA IDs. ICU IDs are
+        // stable and IANA IDs have changed over time so they have drifted.
+        // See http://bugs.icu-project.org/trac/ticket/13070 / http://b/36469833.
+        String canonicalZoneId = android.icu.util.TimeZone.getCanonicalID(tz.getID());
+        if (canonicalZoneId == null) {
+            canonicalZoneId = tz.getID();
+        }
+
+        return names.getDisplayName(canonicalZoneId, nameType, now.getTime());
     }
 
     private static void appendWithTtsSpan(SpannableStringBuilder builder, CharSequence content,

@@ -169,7 +169,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /** Root {@link WindowContainer} for the device. */
-class RootWindowContainer extends WindowContainer<DisplayContent>
+public class RootWindowContainer extends WindowContainer<DisplayContent>
         implements DisplayManager.DisplayListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RootWindowContainer" : TAG_WM;
 
@@ -1851,7 +1851,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return topActivityTokens;
     }
 
-    ActivityStack getTopDisplayFocusedStack() {
+    public ActivityStack getTopDisplayFocusedStack() {
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final ActivityStack focusedStack = getChildAt(i).getFocusedStack();
             if (focusedStack != null) {

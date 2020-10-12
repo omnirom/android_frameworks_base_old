@@ -134,6 +134,8 @@
     <bool name="def_dtmf_tones_enabled">true</bool>
     <!-- Default for UI touch sounds enabled -->
     <bool name="def_sound_effects_enabled">true</bool>
+    <!-- Default for connected mo call tones enabled -->
+    <bool name="def_call_connected_tones_enabled">false</bool>
 
     <!-- Development settings -->
     <bool name="def_stay_on_while_plugged_in">false</bool>
@@ -217,6 +219,9 @@
     <!-- Default for Settings.Global.APPLY_RAMPING_RINGER -->
     <bool name="def_apply_ramping_ringer">false</bool>
 
+    <!-- Default for Settings.Global.NTP_SERVER_2's property name -->
+    <string name="def_ntp_server_2" translatable="false">persist.vendor.ntp.svr_2</string>
+
     <!-- Default for Settings.Secure.CHARGING_VIBRATION_ENABLED -->
     <bool name="def_charging_vibration_enabled">true</bool>
 
@@ -240,4 +245,7 @@
 
     <!-- Default for setting for Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED -->
     <bool name="def_hdmiControlAutoDeviceOff">false</bool>
+
+    <!-- Default for Settings.System.TIME_12_24 -->
+    <string name="def_time_format" translatable="false">12</string>
 </resources>

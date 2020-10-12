@@ -62,6 +62,8 @@
     <item msgid="695678520785580527">"사용 중지됨"</item>
     <item msgid="6336372935919715515">"필터링 사용 설정됨"</item>
     <item msgid="2779123106632690576">"사용 설정됨"</item>
+    <item>"헤더 필터링 사용 설정됨"</item>
+    <item>"미디어 패킷 필터링 사용 설정됨"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="8036025277512210160">"AVRCP 1.4(기본)"</item>
@@ -92,6 +94,8 @@
     <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> 오디오"</item>
     <item msgid="2908219194098827570">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> 오디오"</item>
     <item msgid="3825367753087348007">"LDAC"</item>
+    <item msgid="8711430979086781450">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_ADAPTIVE">aptX™ Adaptive</xliff:g> 오디오"</item>
+    <item msgid="6486050771049225">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_TWSP">aptX™ TWS+</xliff:g> 오디오"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="8868109554557331312">"시스템 설정 사용(기본)"</item>
@@ -100,6 +104,8 @@
     <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> 오디오"</item>
     <item msgid="3517061573669307965">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> 오디오"</item>
     <item msgid="2553206901068987657">"LDAC"</item>
+    <item msgid="102988075927343894">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_ADAPTIVE">aptX™ Adaptive</xliff:g> 오디오"</item>
+    <item msgid="6486050771049481">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_TWSP">aptX™ TWS+</xliff:g> 오디오"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="926809261293414607">"시스템 설정 사용(기본)"</item>

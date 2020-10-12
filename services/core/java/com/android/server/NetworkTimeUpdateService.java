@@ -157,7 +157,7 @@ public class NetworkTimeUpdateService extends Binder {
         NtpTrustedTime.TimeResult cachedNtpResult = mTime.getCachedTimeResult();
         if (cachedNtpResult == null || cachedNtpResult.getAgeMillis() >= mPollingIntervalMs) {
             if (DBG) Log.d(TAG, "Stale NTP fix; forcing refresh");
-            mTime.forceRefresh();
+            mTime.forceSync();
             cachedNtpResult = mTime.getCachedTimeResult();
         }
 

@@ -21,7 +21,10 @@
 #include <cutils/properties.h>
 #include <cutils/trace.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android-base/properties.h>
 #include <private/android_filesystem_config.h>  // for AID_SYSTEM
+
+using android::base::GetProperty;
 
 namespace android {
 
@@ -172,6 +175,13 @@ static const char ZYGOTE_NICE_NAME[] = "zygote";
 
 int main(int argc, char* const argv[])
 {
+    std::string bootmode = GetProperty("ro.bootmode", "");
+
+    if ((strncmp(bootmode.c_str(), "ffbm-00", 7) == 0)
+            || (strncmp(bootmode.c_str(), "ffbm-01", 7) == 0)) {
+            return 0;
+    }
+
     if (!LOG_NDEBUG) {
       String8 argv_String;
       for (int i = 0; i < argc; ++i) {

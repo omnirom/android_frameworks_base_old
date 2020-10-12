@@ -26,6 +26,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.ContextThemeWrapper;
 import android.view.View;
+import android.os.SystemProperties;
 
 import com.android.settingslib.Utils;
 
@@ -42,6 +43,8 @@ public class CornerHandleView extends View {
     private static final int MAX_ARC_DEGREES = 90;
     // Arc length along the phone's perimeter used to measure the desired angle.
     private static final float ARC_LENGTH_DP = 31f;
+    private static int mDisableRoundedCorner =
+            SystemProperties.getInt("vendor.display.disable_rounded_corner", 0);
 
     private Paint mPaint;
     private int mLightColor;
@@ -169,7 +172,7 @@ public class CornerHandleView extends View {
         // values. If none are available, use the FALLBACK_RADIUS_DP.
         int radius = getResources().getDimensionPixelSize(
                 com.android.systemui.R.dimen.config_rounded_mask_size_bottom);
-        if (radius == 0) {
+        if (radius == 0 && mDisableRoundedCorner == 0) {
             radius = getResources().getDimensionPixelSize(
                     com.android.systemui.R.dimen.config_rounded_mask_size);
         }

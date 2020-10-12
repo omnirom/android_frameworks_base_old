@@ -87,6 +87,12 @@ public final class SoftApConfiguration implements Parcelable {
     public static final int BAND_6GHZ = 1 << 2;
 
     /**
+     * 2GHz + 5GHz or 2GHz + 6GHz concurrent Dual band.
+     * @hide
+     */
+    public static final int BAND_DUAL = 1 << 3;
+
+    /**
      * Device is allowed to choose the optimal band (2Ghz, 5Ghz, 6Ghz) based on device capability,
      * operating country code and current radio conditions.
      * @hide
@@ -100,13 +106,15 @@ public final class SoftApConfiguration implements Parcelable {
             BAND_2GHZ,
             BAND_5GHZ,
             BAND_6GHZ,
+            BAND_DUAL,
     })
     public @interface BandType {}
 
     private static boolean isBandValid(@BandType int band) {
-        return ((band != 0) && ((band & ~BAND_ANY) == 0));
+        return ((band != 0) && (((band & ~BAND_ANY) == 0) || (band == BAND_DUAL)));
     }
 
+    private static final int MAX_CH_ACS = 0;
     private static final int MIN_CH_2G_BAND = 1;
     private static final int MAX_CH_2G_BAND = 14;
     private static final int MIN_CH_5G_BAND = 34;
@@ -132,6 +140,11 @@ public final class SoftApConfiguration implements Parcelable {
 
             case BAND_6GHZ:
                 if (channel < MIN_CH_6G_BAND || channel >  MAX_CH_6G_BAND) {
+                    return false;
+                }
+                break;
+            case BAND_DUAL:
+                if (channel !=  MAX_CH_ACS) {
                     return false;
                 }
                 break;
@@ -238,21 +251,31 @@ public final class SoftApConfiguration implements Parcelable {
     public static final int SECURITY_TYPE_WPA3_SAE = 3;
 
     /** @hide */
+    public static final int SECURITY_TYPE_OWE = 4;
+
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "SECURITY_TYPE_" }, value = {
         SECURITY_TYPE_OPEN,
         SECURITY_TYPE_WPA2_PSK,
         SECURITY_TYPE_WPA3_SAE_TRANSITION,
         SECURITY_TYPE_WPA3_SAE,
+        SECURITY_TYPE_OWE,
     })
     public @interface SecurityType {}
+
+    /**
+     * Iface name for OWE transition mode.
+     */
+    private final @Nullable String mOweTransIfaceName;
 
     /** Private constructor for Builder and Parcelable implementation. */
     private SoftApConfiguration(@Nullable String ssid, @Nullable MacAddress bssid,
             @Nullable String passphrase, boolean hiddenSsid, @BandType int band, int channel,
             @SecurityType int securityType, int maxNumberOfClients, boolean shutdownTimeoutEnabled,
             long shutdownTimeoutMillis, boolean clientControlByUser,
-            @NonNull List<MacAddress> blockedList, @NonNull List<MacAddress> allowedList) {
+            @NonNull List<MacAddress> blockedList, @NonNull List<MacAddress> allowedList,
+            @Nullable String oweTransIfaceName) {
         mSsid = ssid;
         mBssid = bssid;
         mPassphrase = passphrase;
@@ -266,6 +289,7 @@ public final class SoftApConfiguration implements Parcelable {
         mClientControlByUser = clientControlByUser;
         mBlockedClientList = new ArrayList<>(blockedList);
         mAllowedClientList = new ArrayList<>(allowedList);
+        mOweTransIfaceName = oweTransIfaceName;
     }
 
     @Override
@@ -289,7 +313,8 @@ public final class SoftApConfiguration implements Parcelable {
                 && mShutdownTimeoutMillis == other.mShutdownTimeoutMillis
                 && mClientControlByUser == other.mClientControlByUser
                 && Objects.equals(mBlockedClientList, other.mBlockedClientList)
-                && Objects.equals(mAllowedClientList, other.mAllowedClientList);
+                && Objects.equals(mAllowedClientList, other.mAllowedClientList)
+                && mOweTransIfaceName == other.mOweTransIfaceName;
     }
 
     @Override
@@ -297,7 +322,7 @@ public final class SoftApConfiguration implements Parcelable {
         return Objects.hash(mSsid, mBssid, mPassphrase, mHiddenSsid,
                 mBand, mChannel, mSecurityType, mMaxNumberOfClients, mAutoShutdownEnabled,
                 mShutdownTimeoutMillis, mClientControlByUser, mBlockedClientList,
-                mAllowedClientList);
+                mAllowedClientList, mOweTransIfaceName);
     }
 
     @Override
@@ -317,6 +342,7 @@ public final class SoftApConfiguration implements Parcelable {
         sbuf.append(" \n ClientControlByUser=").append(mClientControlByUser);
         sbuf.append(" \n BlockedClientList=").append(mBlockedClientList);
         sbuf.append(" \n AllowedClientList=").append(mAllowedClientList);
+        sbuf.append(" \n OWE Transition mode Iface =").append(mOweTransIfaceName);
         return sbuf.toString();
     }
 
@@ -335,6 +361,7 @@ public final class SoftApConfiguration implements Parcelable {
         dest.writeBoolean(mClientControlByUser);
         dest.writeTypedList(mBlockedClientList);
         dest.writeTypedList(mAllowedClientList);
+        dest.writeString(mOweTransIfaceName);
     }
 
     @Override
@@ -352,7 +379,7 @@ public final class SoftApConfiguration implements Parcelable {
                     in.readString(), in.readBoolean(), in.readInt(), in.readInt(), in.readInt(),
                     in.readInt(), in.readBoolean(), in.readLong(), in.readBoolean(),
                     in.createTypedArrayList(MacAddress.CREATOR),
-                    in.createTypedArrayList(MacAddress.CREATOR));
+                    in.createTypedArrayList(MacAddress.CREATOR), in.readString());
         }
 
         @Override
@@ -431,6 +458,7 @@ public final class SoftApConfiguration implements Parcelable {
      * {@link #SECURITY_TYPE_WPA2_PSK},
      * {@link #SECURITY_TYPE_WPA3_SAE_TRANSITION},
      * {@link #SECURITY_TYPE_WPA3_SAE}
+     * {@link #SECURITY_TYPE_OWE},
      */
     public @SecurityType int getSecurityType() {
         return mSecurityType;
@@ -533,7 +561,11 @@ public final class SoftApConfiguration implements Parcelable {
                 wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
                 break;
             case SECURITY_TYPE_WPA2_PSK:
+            case SECURITY_TYPE_WPA3_SAE_TRANSITION:
                 wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA2_PSK);
+                break;
+            case SECURITY_TYPE_OWE:
+                wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
                 break;
             default:
                 Log.e(TAG, "Convert fail, unsupported security type :" + mSecurityType);
@@ -550,14 +582,31 @@ public final class SoftApConfiguration implements Parcelable {
             case BAND_2GHZ | BAND_5GHZ:
                 wifiConfig.apBand  = WifiConfiguration.AP_BAND_ANY;
                 break;
+            case BAND_2GHZ | BAND_6GHZ:
+                wifiConfig.apBand  = WifiConfiguration.AP_BAND_ANY;
+                break;
             case BAND_ANY:
                 wifiConfig.apBand  = WifiConfiguration.AP_BAND_ANY;
+                break;
+            case BAND_DUAL:
+                wifiConfig.apBand  = WifiConfiguration.AP_BAND_DUAL;
                 break;
             default:
                 Log.e(TAG, "Convert fail, unsupported band setting :" + mBand);
                 return null;
         }
         return wifiConfig;
+    }
+
+    /**
+     * Return the iface name for OWE transition mode for the AP.
+     * {@link #setOweTransIfaceName(String)}.
+     *
+     * @hide
+     */
+    @Nullable
+    public String getOweTransIfaceName() {
+      return mOweTransIfaceName;
     }
 
     /**
@@ -584,6 +633,7 @@ public final class SoftApConfiguration implements Parcelable {
         private boolean mClientControlByUser;
         private List<MacAddress> mBlockedClientList;
         private List<MacAddress> mAllowedClientList;
+        private String mOweTransIfaceName;
 
         /**
          * Constructs a Builder with default values (see {@link Builder}).
@@ -602,6 +652,7 @@ public final class SoftApConfiguration implements Parcelable {
             mClientControlByUser = false;
             mBlockedClientList = new ArrayList<>();
             mAllowedClientList = new ArrayList<>();
+            mOweTransIfaceName = null;
         }
 
         /**
@@ -623,6 +674,7 @@ public final class SoftApConfiguration implements Parcelable {
             mClientControlByUser = other.mClientControlByUser;
             mBlockedClientList = new ArrayList<>(other.mBlockedClientList);
             mAllowedClientList = new ArrayList<>(other.mAllowedClientList);
+            mOweTransIfaceName = other.mOweTransIfaceName;
         }
 
         /**
@@ -640,7 +692,7 @@ public final class SoftApConfiguration implements Parcelable {
             return new SoftApConfiguration(mSsid, mBssid, mPassphrase,
                     mHiddenSsid, mBand, mChannel, mSecurityType, mMaxNumberOfClients,
                     mAutoShutdownEnabled, mShutdownTimeoutMillis, mClientControlByUser,
-                    mBlockedClientList, mAllowedClientList);
+                    mBlockedClientList, mAllowedClientList, mOweTransIfaceName);
         }
 
         /**
@@ -704,10 +756,13 @@ public final class SoftApConfiguration implements Parcelable {
          */
         @NonNull
         public Builder setPassphrase(@Nullable String passphrase, @SecurityType int securityType) {
-            if (securityType == SECURITY_TYPE_OPEN) {
-                if (passphrase != null) {
+            if (securityType == SECURITY_TYPE_OPEN
+                || securityType == SECURITY_TYPE_OWE) {
+                if (!TextUtils.isEmpty(passphrase)) {
                     throw new IllegalArgumentException(
                             "passphrase should be null when security type is open");
+                } else {
+                    passphrase = null;
                 }
             } else {
                 Preconditions.checkStringNotEmpty(passphrase);
@@ -966,6 +1021,22 @@ public final class SoftApConfiguration implements Parcelable {
         @NonNull
         public Builder setBlockedClientList(@NonNull List<MacAddress> blockedClientList) {
             mBlockedClientList = new ArrayList<>(blockedClientList);
+            return this;
+        }
+
+        /**
+         * Specifies an iface name for OWE transition mode for the AP.
+         * <p>
+         * <li>If not set, defaults to null.</li>
+         *
+         * @param oweTransIfaceName iface name for OWE transition mode.
+         * @return Builder for chaining.
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setOweTransIfaceName(@Nullable String oweTransIfaceName) {
+            mOweTransIfaceName = oweTransIfaceName;
             return this;
         }
     }

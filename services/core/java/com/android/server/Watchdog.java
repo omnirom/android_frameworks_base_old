@@ -25,6 +25,7 @@ import android.hidl.manager.V1_0.IServiceManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Debug;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.Looper;
@@ -32,6 +33,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -49,7 +51,9 @@ import com.android.server.wm.SurfaceAnimationThread;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.BufferedReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -60,6 +64,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 /** This class calls its monitor every minute. Killing this process if they don't return **/
 public class Watchdog extends Thread {
@@ -139,6 +145,7 @@ public class Watchdog extends Thread {
 
     private IActivityController mController;
     private boolean mAllowRestart = true;
+    SimpleDateFormat mTraceDateFormat = new SimpleDateFormat("dd_MM_HH_mm_ss.SSS");
     private final OpenFdMonitor mOpenFdMonitor;
     private final List<Integer> mInterestingJavaPids = new ArrayList<>();
 
@@ -536,7 +543,7 @@ public class Watchdog extends Thread {
         }
     }
 
-    static ArrayList<Integer> getInterestingNativePids() {
+    public static ArrayList<Integer> getInterestingNativePids() {
         ArrayList<Integer> pids = getInterestingHalPids();
 
         int[] nativePids = Process.getPidsForCommands(NATIVE_STACKS_OF_INTEREST);
@@ -553,6 +560,7 @@ public class Watchdog extends Thread {
     @Override
     public void run() {
         boolean waitedHalf = false;
+        File initialStack = null;
         while (true) {
             final List<HandlerChecker> blockedCheckers;
             final String subject;
@@ -612,8 +620,8 @@ public class Watchdog extends Thread {
                             // We've waited half the deadlock-detection interval.  Pull a stack
                             // trace and wait another half.
                             ArrayList<Integer> pids = new ArrayList<>(mInterestingJavaPids);
-                            ActivityManagerService.dumpStackTraces(pids, null, null,
-                                    getInterestingNativePids(), null);
+                            initialStack = ActivityManagerService.dumpStackTraces(pids,
+                                    null, null, getInterestingNativePids(), null);
                             waitedHalf = true;
                         }
                         continue;
@@ -641,9 +649,14 @@ public class Watchdog extends Thread {
             report.append(MemoryPressureUtil.currentPsiState());
             ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(false);
             StringWriter tracesFileException = new StringWriter();
-            final File stack = ActivityManagerService.dumpStackTraces(
+            final File finalStack = ActivityManagerService.dumpStackTraces(
                     pids, processCpuTracker, new SparseArray<>(), getInterestingNativePids(),
                     tracesFileException);
+
+            //Collect Binder State logs to get status of all the transactions
+            if (Build.IS_DEBUGGABLE) {
+                binderStateRead();
+            }
 
             // Give some extra time to make sure the stack traces get written.
             // The system's been hanging for a minute, another second or two won't hurt much.
@@ -653,9 +666,54 @@ public class Watchdog extends Thread {
             report.append(processCpuTracker.printCurrentState(anrTime));
             report.append(tracesFileException.getBuffer());
 
-            // Trigger the kernel to dump all blocked threads, and backtraces on all CPUs to the kernel log
-            doSysRq('w');
-            doSysRq('l');
+            File watchdogTraces;
+            String newTracesPath = "traces_SystemServer_WDT"
+                    + mTraceDateFormat.format(new Date()) + "_pid"
+                    + String.valueOf(Process.myPid());
+            File tracesDir = new File(ActivityManagerService.ANR_TRACE_DIR);
+            watchdogTraces = new File(tracesDir, newTracesPath);
+            try {
+                if (watchdogTraces.createNewFile()) {
+                    FileUtils.setPermissions(watchdogTraces.getAbsolutePath(),
+                            0600, -1, -1); // -rw------- permissions
+
+                    // Append both traces from the first and second half
+                    // to a new file, making it easier to debug Watchdog timeouts
+                    // dumpStackTraces() can return a null instance, so check the same
+                    if (initialStack != null) {
+                        // check the last-modified time of this file.
+                        // we are interested in this only it was written to in the
+                        // last 5 minutes or so
+                        final long age = System.currentTimeMillis()
+                                - initialStack.lastModified();
+                        final long FIVE_MINUTES_IN_MILLIS = 1000 * 60 * 5;
+                        if (age < FIVE_MINUTES_IN_MILLIS) {
+                            Slog.e(TAG, "First set of traces taken from "
+                                    + initialStack.getAbsolutePath());
+                            appendFile(watchdogTraces, initialStack);
+                        } else {
+                            Slog.e(TAG, "First set of traces were collected more than "
+                                    + "5 minutes ago, ignoring ...");
+                        }
+                    } else {
+                        Slog.e(TAG, "First set of traces are empty!");
+                    }
+
+                    if (finalStack != null) {
+                        Slog.e(TAG, "Second set of traces taken from "
+                                + finalStack.getAbsolutePath());
+                        appendFile(watchdogTraces, finalStack);
+                    } else {
+                        Slog.e(TAG, "Second set of traces are empty!");
+                    }
+                } else {
+                    Slog.w(TAG, "Unable to create Watchdog dump file: createNewFile failed");
+                }
+            } catch (Exception e) {
+                // catch any exception that happens here;
+                // why kill the system when it is going to die anyways?
+                Slog.e(TAG, "Exception creating Watchdog dump file:", e);
+            }
 
             // Try to add the error to the dropbox, but assuming that the ActivityManager
             // itself may be deadlocked.  (which has happened, causing this statement to
@@ -667,16 +725,34 @@ public class Watchdog extends Thread {
                         if (mActivity != null) {
                             mActivity.addErrorToDropBox(
                                     "watchdog", null, "system_server", null, null, null,
-                                    subject, report.toString(), stack, null);
+                                    subject, report.toString(), finalStack, null);
                         }
                         FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED,
                                 subject);
                     }
-                };
+            };
             dropboxThread.start();
             try {
                 dropboxThread.join(2000);  // wait up to 2 seconds for it to return.
             } catch (InterruptedException ignored) {}
+
+            // At times, when user space watchdog traces don't give an indication on
+            // which component held a lock, because of which other threads are blocked,
+            // (thereby causing Watchdog), trigger kernel panic
+            boolean crashOnWatchdog = SystemProperties
+                                        .getBoolean("persist.sys.crashOnWatchdog", false);
+            if (crashOnWatchdog) {
+                // Trigger the kernel to dump all blocked threads, and backtraces
+                // on all CPUs to the kernel log
+                Slog.e(TAG, "Triggering SysRq for system_server watchdog");
+                doSysRq('w');
+                doSysRq('l');
+
+                // wait until the above blocked threads be dumped into kernel log
+                SystemClock.sleep(3000);
+
+                doSysRq('c');
+            }
 
             IActivityController controller;
             synchronized (this) {
@@ -726,6 +802,46 @@ public class Watchdog extends Thread {
             sysrq_trigger.close();
         } catch (IOException e) {
             Slog.w(TAG, "Failed to write to /proc/sysrq-trigger", e);
+        }
+    }
+
+    private void appendFile (File writeTo, File copyFrom) {
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(copyFrom));
+            FileWriter out = new FileWriter(writeTo, true);
+            String line = null;
+
+            // Write line-by-line from "copyFrom" to "writeTo"
+            while ((line = in.readLine()) != null) {
+                out.write(line);
+                out.write('\n');
+            }
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            Slog.e(TAG, "Exception while writing watchdog traces to new file!");
+            e.printStackTrace();
+        }
+    }
+
+    private void binderStateRead() {
+        try {
+            Slog.i(TAG,"Collecting Binder Transaction Status Information");
+            BufferedReader in =
+                    new BufferedReader(new FileReader("/sys/kernel/debug/binder/state"));
+            FileWriter out = new FileWriter("/data/anr/BinderTraces_pid" +
+                    String.valueOf(Process.myPid()) + ".txt");
+            String line = null;
+
+            // Write line-by-line
+            while ((line = in.readLine()) != null) {
+                out.write(line);
+                out.write('\n');
+            }
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed to collect state file", e);
         }
     }
 

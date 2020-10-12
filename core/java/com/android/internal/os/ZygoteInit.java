@@ -181,11 +181,16 @@ public class ZygoteInit {
         System.loadLibrary("android");
         System.loadLibrary("compiler_rt");
         System.loadLibrary("jnigraphics");
-
         try {
             System.loadLibrary("sfplugin_ccodec");
         } catch (Error | RuntimeException e) {
             // tolerate missing sfplugin_ccodec which is only present on Codec 2 devices
+        }
+
+        try {
+            System.loadLibrary("qti_performance");
+        } catch (UnsatisfiedLinkError e) {
+            Log.e(TAG, "Couldn't load qti_performance");
         }
     }
 

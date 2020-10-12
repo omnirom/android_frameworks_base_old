@@ -86,6 +86,7 @@ import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.BoostFramework;
 import android.util.EventLog;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -110,7 +111,9 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.uri.NeededUriGrants;
+import com.android.server.wm.ActivityRecord;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
+import com.android.server.wm.ActivityStack;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -121,6 +124,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+
+import vendor.qti.hardware.servicetracker.V1_0.IServicetracker;
+import vendor.qti.hardware.servicetracker.V1_0.ServiceData;
+import vendor.qti.hardware.servicetracker.V1_0.ClientData;
 
 public final class ActiveServices {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActiveServices" : TAG_AM;
@@ -154,6 +161,12 @@ public final class ActiveServices {
     // Maximum number of services that we allow to start in the background
     // at the same time.
     final int mMaxStartingBackground;
+
+   //mPerf Object
+   public static BoostFramework mPerf = new BoostFramework();
+
+    // Flag to reschedule the services during app launch. Disable by default.
+    private static boolean SERVICE_RESCHEDULE = false;
 
     final SparseArray<ServiceMap> mServiceMap = new SparseArray<>();
 
@@ -195,6 +208,8 @@ public final class ActiveServices {
 
     /** Amount of time to allow a last ANR message to exist before freeing the memory. */
     static final int LAST_ANR_LIFETIME_DURATION_MSECS = 2 * 60 * 60 * 1000; // Two hours
+
+    private IServicetracker mServicetracker;
 
     String mLastAnrDump;
 
@@ -399,6 +414,9 @@ public final class ActiveServices {
         }
         mMaxStartingBackground = maxBg > 0
                 ? maxBg : ActivityManager.isLowRamDeviceStatic() ? 1 : 8;
+
+        if(mPerf != null)
+            SERVICE_RESCHEDULE = Boolean.parseBoolean(mPerf.perfGetProp("ro.vendor.qti.am.reschedule_service", "false"));
     }
 
     void systemServicesReady() {
@@ -419,6 +437,24 @@ public final class ActiveServices {
         if (!TextUtils.isEmpty(systemCaptionsServicePackageName)) {
             mWhiteListAllowWhileInUsePermissionInFgs.add(systemCaptionsServicePackageName);
         }
+    }
+
+    private boolean getServicetrackerInstance() {
+        if (mServicetracker == null ) {
+            try {
+                mServicetracker = IServicetracker.getService(false);
+            } catch (java.util.NoSuchElementException e) {
+                // Service doesn't exist or cannot be opened logged below
+            } catch (RemoteException e) {
+                if (DEBUG_SERVICE) Slog.e(TAG, "Failed to get servicetracker interface", e);
+                return false;
+            }
+            if (mServicetracker == null) {
+                if (DEBUG_SERVICE) Slog.w(TAG, "servicetracker HIDL not available");
+                return false;
+            }
+        }
+        return true;
     }
 
     ServiceRecord getServiceByNameLocked(ComponentName name, int callingUser) {
@@ -2057,6 +2093,30 @@ public final class ActiveServices {
             }
             clist.add(c);
 
+            ServiceData sData = new ServiceData();
+            sData.packageName = s.packageName;
+            sData.processName = s.shortInstanceName;
+            sData.lastActivity = s.lastActivity;
+            if (s.app != null) {
+                sData.pid = s.app.pid;
+                sData.serviceB = s.app.serviceb;
+            } else {
+                 sData.pid = -1;
+                 sData.serviceB = false;
+            }
+
+            ClientData cData = new ClientData();
+            cData.processName = callerApp.processName;
+            cData.pid = callerApp.pid;
+            try {
+                if (getServicetrackerInstance()) {
+                   mServicetracker.bindService(sData, cData);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to send bind details to servicetracker HAL", e);
+                mServicetracker = null;
+            }
+
             if ((flags&Context.BIND_AUTO_CREATE) != 0) {
                 s.lastActivity = SystemClock.uptimeMillis();
                 if (bringUpServiceLocked(s, service.getFlags(), callerFg, false,
@@ -2235,6 +2295,29 @@ public final class ActiveServices {
         try {
             while (clist.size() > 0) {
                 ConnectionRecord r = clist.get(0);
+                ServiceData sData = new ServiceData();
+                sData.packageName = r.binding.service.packageName;
+                sData.processName = r.binding.service.shortInstanceName;
+                sData.lastActivity = r.binding.service.lastActivity;
+                if(r.binding.service.app != null) {
+                    sData.pid = r.binding.service.app.pid;
+                    sData.serviceB = r.binding.service.app.serviceb;
+                } else {
+                    sData.pid = -1;
+                    sData.serviceB = false;
+                }
+
+                ClientData cData = new ClientData();
+                cData.processName = r.binding.client.processName;
+                cData.pid = r.binding.client.pid;
+                try {
+                    if (getServicetrackerInstance()) {
+                        mServicetracker.unbindService(sData, cData);
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to send unbind details to servicetracker HAL", e);
+                    mServicetracker = null;
+                }
                 removeConnectionLocked(r, null, null);
                 if (clist.size() > 0 && clist.get(0) == r) {
                     // In case it didn't get removed above, do it now.
@@ -2692,6 +2775,14 @@ public final class ActiveServices {
                         r.pendingStarts.add(0, si);
                         long dur = SystemClock.uptimeMillis() - si.deliveredTime;
                         dur *= 2;
+                        if (SERVICE_RESCHEDULE && DEBUG_DELAYED_SERVICE) {
+                            Slog.w(TAG,"Can add more delay !!!"
+                               +" si.deliveredTime "+si.deliveredTime
+                               +" dur "+dur
+                               +" si.deliveryCount "+si.deliveryCount
+                               +" si.doneExecutingCount "+si.doneExecutingCount
+                               +" allowCancel "+allowCancel);
+                        }
                         if (minDuration < dur) minDuration = dur;
                         if (resetTime < dur) resetTime = dur;
                     } else {
@@ -2715,6 +2806,13 @@ public final class ActiveServices {
             }
 
             r.totalRestartCount++;
+            if (SERVICE_RESCHEDULE && DEBUG_DELAYED_SERVICE) {
+                Slog.w(TAG,"r.name "+r.name+" N "+N+" minDuration "+minDuration
+                       +" resetTime "+resetTime+" now "+now
+                       +" r.restartDelay "+r.restartDelay
+                       +" r.restartTime+resetTime "+(r.restartTime+resetTime)
+                       +" allowCancel "+allowCancel);
+            }
             if (r.restartDelay == 0) {
                 r.restartCount++;
                 r.restartDelay = minDuration;
@@ -2739,6 +2837,14 @@ public final class ActiveServices {
             }
 
             r.nextRestartTime = now + r.restartDelay;
+            if (SERVICE_RESCHEDULE && DEBUG_DELAYED_SERVICE) {
+                Slog.w(TAG,"r.name "+r.name+" N "+N+" minDuration "+minDuration
+                       +" resetTime "+resetTime+" now "+now
+                       +" r.restartDelay "+r.restartDelay
+                       +" r.restartTime+resetTime "+(r.restartTime+resetTime)
+                       +" r.nextRestartTime "+r.nextRestartTime
+                       +" allowCancel "+allowCancel);
+            }
 
             // Make sure that we don't end up restarting a bunch of services
             // all at the same time.
@@ -2781,6 +2887,15 @@ public final class ActiveServices {
         r.nextRestartTime = SystemClock.uptimeMillis() + r.restartDelay;
         Slog.w(TAG, "Scheduling restart of crashed service "
                 + r.shortInstanceName + " in " + r.restartDelay + "ms for " + reason);
+
+        if (SERVICE_RESCHEDULE && DEBUG_DELAYED_SERVICE) {
+            for (int i=mRestartingServices.size()-1; i>=0; i--) {
+                ServiceRecord r2 = mRestartingServices.get(i);
+                Slog.w(TAG,"Restarting list - i "+i+" r2.nextRestartTime "
+                           +r2.nextRestartTime+" r2.name "+r2.name);
+            }
+        }
+
         EventLog.writeEvent(EventLogTags.AM_SCHEDULE_SERVICE_RESTART,
                 r.userId, r.shortInstanceName, r.restartDelay);
 
@@ -2801,7 +2916,31 @@ public final class ActiveServices {
             return;
         }
         try {
-            bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true, false);
+            if(SERVICE_RESCHEDULE) {
+                boolean shouldDelay = false;
+                ActivityRecord top_rc = mAm.mStackSupervisor.getTopResumedActivity();
+
+                boolean isPersistent
+                        = !((r.serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0);
+                if(top_rc != null) {
+                    if(top_rc.launching && !r.shortInstanceName.contains(top_rc.packageName)
+                            && !isPersistent) {
+                        shouldDelay = true;
+                    }
+                }
+                if(!shouldDelay) {
+                    bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true, false);
+                } else {
+                    if (DEBUG_DELAYED_SERVICE) {
+                        Slog.v(TAG, "Reschedule service restart due to app launch"
+                              +" r.shortInstanceName "+r.shortInstanceName+" r.app = "+r.app);
+                    }
+                    r.resetRestartCounter();
+                    scheduleServiceRestartLocked(r, true);
+                }
+            } else {
+                bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true, false);
+            }
         } catch (TransactionTooLargeException e) {
             // Ignore, it's been logged and nothing upstack cares.
         }
@@ -3039,6 +3178,22 @@ public final class ActiveServices {
                     app.getReportedProcState());
             r.postNotification();
             created = true;
+
+            ServiceData sData = new ServiceData();
+            sData.packageName = r.packageName;
+            sData.processName = r.shortInstanceName;
+            sData.pid = r.app.pid;
+            sData.lastActivity = r.lastActivity;
+            sData.serviceB = r.app.serviceb;
+
+            try {
+                if (getServicetrackerInstance()) {
+                    mServicetracker.startService(sData);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to send start details to servicetracker HAL", e);
+                mServicetracker = null;
+            }
         } catch (DeadObjectException e) {
             Slog.w(TAG, "Application dead when creating service " + r);
             mAm.appDiedLocked(app, "Died when creating service");
@@ -3052,7 +3207,12 @@ public final class ActiveServices {
                 // Cleanup.
                 if (newService) {
                     app.stopService(r);
-                    r.setProcess(null);
+                    r.app = null;
+                    if (SERVICE_RESCHEDULE && DEBUG_DELAYED_SERVICE) {
+                    Slog.w(TAG, " Failed to create Service !!!! ."
+                           +"This will introduce huge delay...  "
+                           +r.shortInstanceName + " in " + r.restartDelay + "ms");
+                    }
                 }
 
                 // Retry.
@@ -3231,7 +3391,25 @@ public final class ActiveServices {
     private final void bringDownServiceLocked(ServiceRecord r) {
         //Slog.i(TAG, "Bring down service:");
         //r.dump("  ");
+        ServiceData sData = new ServiceData();
+        sData.packageName = r.packageName;
+        sData.processName = r.shortInstanceName;
+        sData.lastActivity = r.lastActivity;
+        if (r.app != null) {
+            sData.pid = r.app.pid;
+        } else {
+            sData.pid = -1;
+            sData.serviceB = false;
+        }
 
+        try {
+            if (getServicetrackerInstance()) {
+                mServicetracker.destroyService(sData);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to send destroy details to servicetracker HAL", e);
+            mServicetracker = null;
+        }
         // Report to all of the connections that the service is no longer
         // available.
         ArrayMap<IBinder, ArrayList<ConnectionRecord>> connections = r.getConnections();
@@ -3897,6 +4075,15 @@ public final class ActiveServices {
                     }
                 }
             }
+        }
+
+        try {
+            if (getServicetrackerInstance()) {
+                mServicetracker.killProcess(app.pid);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to send kill process details to servicetracker HAL", e);
+            mServicetracker = null;
         }
 
         // Clean up any connections this application has to other services.

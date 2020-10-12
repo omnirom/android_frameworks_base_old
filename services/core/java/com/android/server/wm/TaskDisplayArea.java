@@ -32,7 +32,9 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
+import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
@@ -52,6 +54,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.os.UserHandle;
+import android.util.BoostFramework;
 import android.util.IntArray;
 import android.util.Slog;
 import android.view.SurfaceControl;
@@ -148,6 +151,12 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
      * on it to be finished before removing this object.
      */
     private boolean mRemoved;
+
+    public static boolean mPerfSendTapHint = false;
+    public static boolean mIsPerfBoostAcquired = false;
+    public static int mPerfHandle = -1;
+    public BoostFramework mPerfBoost = null;
+    public BoostFramework mUxPerf = null;
 
     TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
             int displayAreaFeature) {
@@ -1204,6 +1213,39 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         return someActivityPaused;
     }
 
+    void acquireAppLaunchPerfLock(ActivityRecord r) {
+       /* Acquire perf lock during new app launch */
+       if (mPerfBoost == null) {
+           mPerfBoost = new BoostFramework();
+       }
+       if (mPerfBoost != null) {
+           mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, r.packageName, -1, BoostFramework.Launch.BOOST_V1);
+           mPerfSendTapHint = true;
+           mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, r.packageName, -1, BoostFramework.Launch.BOOST_V2);
+
+           if(mPerfBoost.perfGetFeedback(BoostFramework.VENDOR_FEEDBACK_WORKLOAD_TYPE, r.packageName) == BoostFramework.WorkloadType.GAME)
+           {
+               mPerfHandle = mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, r.packageName, -1, BoostFramework.Launch.BOOST_GAME);
+           } else {
+               mPerfHandle = mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, r.packageName, -1, BoostFramework.Launch.BOOST_V3);
+           }
+           if (mPerfHandle > 0)
+               mIsPerfBoostAcquired = true;
+           // Start IOP
+           if(r.info.applicationInfo != null && r.info.applicationInfo.sourceDir != null) {
+               mPerfBoost.perfIOPrefetchStart(-1,r.packageName,
+                   r.info.applicationInfo.sourceDir.substring(0, r.info.applicationInfo.sourceDir.lastIndexOf('/')));
+           }
+       }
+   }
+
+   void acquireUxPerfLock(int opcode, String packageName) {
+        mUxPerf = new BoostFramework();
+        if (mUxPerf != null) {
+            mUxPerf.perfUXEngine_events(opcode, 0, packageName, 0);
+        }
+    }
+
     /**
      * Find task for putting the Activity in.
      */
@@ -1227,6 +1269,15 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             // matches not on the specified display.
             if (mTmpFindTaskResult.mRecord != null) {
                 if (mTmpFindTaskResult.mIdealMatch) {
+                    if(mTmpFindTaskResult.mRecord.getState() == DESTROYED) {
+                        /*It's a new app launch */
+                        acquireAppLaunchPerfLock(r);
+                    }
+
+                    if(mTmpFindTaskResult.mRecord.getState() == STOPPED) {
+                        /*Warm launch */
+                        acquireUxPerfLock(BoostFramework.UXE_EVENT_SUB_LAUNCH, r.packageName);
+                    }
                     result.setTo(mTmpFindTaskResult);
                     return;
                 } else if (isPreferredDisplayArea) {
@@ -1236,6 +1287,11 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
                     result.setTo(mTmpFindTaskResult);
                 }
             }
+        }
+
+        /* Acquire perf lock *only* during new app launch */
+        if ((mTmpFindTaskResult.mRecord == null) || (mTmpFindTaskResult.mRecord.getState() == DESTROYED)) {
+            acquireAppLaunchPerfLock(r);
         }
     }
 

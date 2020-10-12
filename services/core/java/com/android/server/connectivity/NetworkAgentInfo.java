@@ -17,6 +17,8 @@
 package com.android.server.connectivity;
 
 import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
 import static android.net.NetworkCapabilities.transportNamesOf;
 
 import android.annotation.NonNull;
@@ -551,6 +553,15 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             Log.wtf(TAG, toShortString() + ": request " + request.requestId + " already lingered");
         }
         final long expiryMs = now + duration;
+        final long oldExpiryMs = mLingerTimers.isEmpty() ? 0 : mLingerTimers.last().expiryMs;
+
+        if(!mConnService.satisfiesMobileNetworkDataCheck(networkCapabilities) &&
+                oldExpiryMs > expiryMs) {
+            if (VDBG) Log.d(TAG, "Network on non DDS should not linger for more than 5 sec."
+                    + "Removing the existing linger timers.");
+            mLingerTimers.clear();
+        }
+
         LingerTimer timer = new LingerTimer(request, expiryMs);
         if (VDBG) Log.d(TAG, "Adding LingerTimer " + timer + " to " + toShortString());
         mLingerTimers.add(timer);

@@ -35,6 +35,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.proto.ProtoOutputStream;
@@ -715,7 +716,11 @@ public final class DisplayCutout {
         if (TextUtils.isEmpty(spec) && waterfallInsets.equals(Insets.NONE)) {
             return NULL_PAIR;
         }
-
+        int disableRoundedCorner =
+            SystemProperties.getInt("vendor.display.disable_rounded_corner", 0);
+        if (disableRoundedCorner == 1) {
+            return NULL_PAIR;
+        }
         synchronized (CACHE_LOCK) {
             if (spec.equals(sCachedSpec) && sCachedDisplayWidth == displayWidth
                     && sCachedDisplayHeight == displayHeight

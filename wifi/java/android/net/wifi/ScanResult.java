@@ -163,7 +163,7 @@ public final class ScanResult implements Parcelable {
      */
     @SystemApi
     public static final int KEY_MGMT_OSEN = 7;
-     /**
+    /**
      * @hide
      * Security key management scheme: SAE.
      */
@@ -216,6 +216,11 @@ public final class ScanResult implements Parcelable {
      * Security key management scheme: FILS_SHA384.
      */
     public static final int KEY_MGMT_FILS_SHA384 = 16;
+    /**
+     * @hide
+     * Security key management scheme: DPP.
+     */
+    public static final int KEY_MGMT_DPP = 17;
     /**
      * @hide
      * No cipher suite.
@@ -555,7 +560,7 @@ public final class ScanResult implements Parcelable {
      * 5 GHz band last channel number
      * @hide
      */
-    public static final int BAND_5_GHZ_LAST_CH_NUM = 173;
+    public static final int BAND_5_GHZ_LAST_CH_NUM = 177;
     /**
      * 5 GHz band frequency of first channel in MHz
      * @hide
@@ -565,7 +570,7 @@ public final class ScanResult implements Parcelable {
      * 5 GHz band frequency of last channel in MHz
      * @hide
      */
-    public static final int BAND_5_GHZ_END_FREQ_MHZ = 5865;
+    public static final int BAND_5_GHZ_END_FREQ_MHZ = 5885;
 
     /**
      * 6 GHz band first channel number
@@ -698,6 +703,21 @@ public final class ScanResult implements Parcelable {
      */
     public boolean is6GHz() {
         return ScanResult.is6GHz(frequency);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean is60GHz() {
+        return ScanResult.is60GHz(frequency);
+    }
+
+    /**
+     * @hide
+     * TODO: makes real freq boundaries
+     */
+    public static boolean is60GHz(int freq) {
+        return freq >= 58320 && freq <= 70200;
     }
 
     /**

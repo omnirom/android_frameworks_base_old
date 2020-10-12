@@ -116,6 +116,26 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     public static final int HIGHER_FREQ_5GHZ = 5900;
 
+    /**
+     * Lower bound on the 60 GHz (802.11ad) WIGIG channels
+     */
+    public static final int LOWER_FREQ_60GHZ = 58320;
+
+    /**
+     * Upper bound on the 60 GHz (802.11ad) WIGIG channels
+     */
+    public static final int HIGHER_FREQ_60GHZ = 70200;
+
+    /**
+     * Lower bound on the 6.0 GHz (802.11ax) WLAN channels
+     */
+    public static final int LOWER_FREQ_6GHZ = 5935;
+
+    /**
+     * Upper bound on the 6.0 GHz (802.11ax) WLAN channels
+     */
+    public static final int HIGHER_FREQ_6GHZ = 7115;
+
     /** The key which identifies this AccessPoint grouping. */
     private String mKey;
 
@@ -213,7 +233,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public static final int SECURITY_OWE = 4;
     public static final int SECURITY_SAE = 5;
     public static final int SECURITY_EAP_SUITE_B = 6;
-    public static final int SECURITY_MAX_VAL = 7; // Has to be the last
+    public static final int SECURITY_DPP = 7;
+    public static final int SECURITY_MAX_VAL = 8; // Has to be the last
 
     private static final int PSK_UNKNOWN = 0;
     private static final int PSK_WPA = 1;
@@ -246,6 +267,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private WifiConfiguration mConfig;
 
     private int mRssi = UNREACHABLE_RSSI;
+
+    private int mDeviceWifiStandard;
+    private int mWifiStandard = ScanResult.WIFI_STANDARD_LEGACY;
+    private boolean mHe8ssCapableAp;
+    private boolean mVhtMax8SpatialStreamsSupport;
 
     private WifiInfo mInfo;
     private NetworkInfo mNetworkInfo;
@@ -347,6 +373,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
         // Calculate required fields
         updateKey();
         updateBestRssiInfo();
+        updateDeviceWifiGenerationInfo();
+        updateWifiGeneration();
     }
 
     /**
@@ -357,6 +385,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mContext = context;
         loadConfig(config);
         updateKey();
+        updateDeviceWifiGenerationInfo();
     }
 
     /**
@@ -375,6 +404,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             mPasspointConfigurationVersion = PasspointConfigurationVersion.NO_OSU_PROVISIONED;
         }
         updateKey();
+        updateDeviceWifiGenerationInfo();
     }
 
     /**
@@ -388,6 +418,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mConfig = config;
         mPasspointUniqueId = config.getKey();
         mFqdn = config.FQDN;
+        updateDeviceWifiGenerationInfo();
         setScanResultsPasspoint(homeScans, roamingScans);
         updateKey();
     }
@@ -399,12 +430,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
             @NonNull Collection<ScanResult> results) {
         mContext = context;
         mOsuProvider = provider;
+        updateDeviceWifiGenerationInfo();
         setScanResults(results);
         updateKey();
     }
 
     AccessPoint(Context context, Collection<ScanResult> results) {
         mContext = context;
+        updateDeviceWifiGenerationInfo();
         setScanResults(results);
         updateKey();
     }
@@ -877,6 +910,22 @@ public class AccessPoint implements Comparable<AccessPoint> {
         networkId = WifiConfiguration.INVALID_NETWORK_ID;
     }
 
+    public boolean isSuiteBSupported() {
+            WifiManager wifiManager = mContext.getSystemService(WifiManager.class);
+            String capability = wifiManager.getCapabilities("key_mgmt");
+
+            if (!capability.contains("WPA-EAP-SUITE-B-192")) {
+                  return false;
+            }
+
+            for (ScanResult result : mScanResults) {
+                if (result.capabilities.contains("EAP_SUITE_B_192")) {
+                    return true;
+                }
+            }
+        return false;
+    }
+
     public WifiInfo getInfo() {
         return mInfo;
     }
@@ -1036,6 +1085,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
             case SECURITY_WEP:
                 return concise ? context.getString(R.string.wifi_security_short_wep) :
                     context.getString(R.string.wifi_security_wep);
+            case SECURITY_DPP:
+                return concise ? context.getString(R.string.wifi_security_short_dpp) :
+                    context.getString(R.string.wifi_security_dpp);
             case SECURITY_SAE:
                 return concise ? context.getString(R.string.wifi_security_short_sae) :
                         context.getString(R.string.wifi_security_sae);
@@ -1448,6 +1500,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             mScanResults.addAll(scanResults);
         }
         updateBestRssiInfo();
+        updateWifiGeneration();
         int newLevel = getLevel();
 
         // If newLevel is 0, there will be no displayed Preference since the AP is unreachable
@@ -1515,6 +1568,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 // are still seen, we will investigate further.
                 update(config); // Notifies the AccessPointListener of the change
             }
+            if (getWifiStandard() != info.getWifiStandard() ||
+                isHe8ssCapableAp() != info.isHe8ssCapableAp() ||
+                isVhtMax8SpatialStreamsSupported() != info.isVhtMax8SpatialStreamsSupported()) {
+                updated = true;
+            }
             if (mRssi != info.getRssi() && info.getRssi() != WifiInfo.INVALID_RSSI) {
                 mRssi = info.getRssi();
                 updated = true;
@@ -1528,6 +1586,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             updated = true;
             mInfo = null;
             mNetworkInfo = null;
+            updateWifiGeneration();
         }
         if (updated && mAccessPointListener != null) {
             ThreadUtils.postOnMainThread(() -> {
@@ -1746,6 +1805,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         final boolean isEap = result.capabilities.contains("EAP");
         final boolean isOwe = result.capabilities.contains("OWE");
         final boolean isOweTransition = result.capabilities.contains("OWE_TRANSITION");
+        final boolean isDpp = result.capabilities.contains("DPP");
 
         if (isSae && isPsk) {
             final WifiManager wifiManager = (WifiManager)
@@ -1758,7 +1818,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return wifiManager.isEnhancedOpenSupported() ? SECURITY_OWE : SECURITY_NONE;
         }
 
-        if (isWep) {
+        if (isDpp) {
+            return SECURITY_DPP;
+        } else if (isWep) {
             return SECURITY_WEP;
         } else if (isSae) {
             return SECURITY_SAE;
@@ -1788,6 +1850,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 config.allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
             return SECURITY_EAP;
         }
+        if (config.allowedKeyManagement.get(KeyMgmt.DPP)) {
+            return SECURITY_DPP;
+        }
         if (config.allowedKeyManagement.get(KeyMgmt.OWE)) {
             return SECURITY_OWE;
         }
@@ -1811,6 +1876,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return "PSK";
         } else if (security == SECURITY_EAP) {
             return "EAP";
+        } else if (security == SECURITY_DPP) {
+            return "DPP";
         } else if (security == SECURITY_SAE) {
             return "SAE";
         } else if (security == SECURITY_EAP_SUITE_B) {
@@ -2049,5 +2116,69 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return true;
         }
         return false;
+    }
+
+    private void updateDeviceWifiGenerationInfo() {
+        final WifiManager wifiManager = getWifiManager();
+
+        if (wifiManager.isWifiStandardSupported(ScanResult.WIFI_STANDARD_11AX))
+            mDeviceWifiStandard = ScanResult.WIFI_STANDARD_11AX;
+        else if (wifiManager.isWifiStandardSupported(ScanResult.WIFI_STANDARD_11AC))
+            mDeviceWifiStandard = ScanResult.WIFI_STANDARD_11AC;
+        else if (wifiManager.isWifiStandardSupported(ScanResult.WIFI_STANDARD_11N))
+            mDeviceWifiStandard = ScanResult.WIFI_STANDARD_11N;
+        else
+            mDeviceWifiStandard = ScanResult.WIFI_STANDARD_LEGACY;
+
+        mVhtMax8SpatialStreamsSupport = wifiManager.isVht8ssCapableDevice();
+    }
+
+    /**
+     * Updates {@link #mWifiStandard, mHe8ssCapableAp}.
+     *
+     * <p>If the given connection is active, the existing values are valid.
+     * If the given AccessPoint is not connected, a value will be calculated from previous scan
+     * results, based on minimum capability for all BSSIDs and capability of device.
+     */
+    private void updateWifiGeneration() {
+        int currResultWifiStandard;
+        int minConnectionCapability = mDeviceWifiStandard;
+
+        // Capture minimum possible connection capability
+        mHe8ssCapableAp = true;
+        for (ScanResult result : mScanResults) {
+            currResultWifiStandard = result.getWifiStandard();
+
+            // Check if atleast one bssid present without HE and 8SS support
+            if (!result.capabilities.contains("WFA-HE-READY") && mHe8ssCapableAp)
+                mHe8ssCapableAp = false;
+
+            if (currResultWifiStandard < minConnectionCapability) {
+                minConnectionCapability = currResultWifiStandard;
+            }
+        }
+
+        mWifiStandard = minConnectionCapability;
+    }
+
+    public int getWifiStandard() {
+        if (this.isActive() && mInfo != null)
+            return mInfo.getWifiStandard();
+
+        return mWifiStandard;
+    }
+
+    public boolean isHe8ssCapableAp() {
+        if (this.isActive() && mInfo != null)
+            return mInfo.isHe8ssCapableAp();
+
+        return mHe8ssCapableAp;
+    }
+
+    public boolean isVhtMax8SpatialStreamsSupported() {
+        if (this.isActive() && mInfo != null)
+            return mInfo.isVhtMax8SpatialStreamsSupported();
+
+        return mVhtMax8SpatialStreamsSupport;
     }
 }

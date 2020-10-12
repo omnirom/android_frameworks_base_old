@@ -538,6 +538,17 @@ void BootAnimation::findBootAnimationFile() {
         }
     }
 
+    std::string custAnimProp = !mShuttingDown ?
+        android::base::GetProperty("persist.sys.customanim.boot", ""):
+        android::base::GetProperty("persist.sys.customanim.shutdown", "");
+    const char *custAnim = custAnimProp.c_str();
+    ALOGD("Animation customzation path: %s", custAnim);
+    if (access(custAnim, R_OK) == 0) {
+        mZipFileName = custAnim;
+        ALOGD("%sAnimation customzation path: %s", mShuttingDown ? "Shutdown" : "Boot", mZipFileName.c_str());
+        return;
+    }
+
     const bool playDarkAnim = android::base::GetIntProperty("ro.boot.theme", 0) == 1;
     static const std::vector<std::string> bootFiles = {
         APEX_BOOTANIMATION_FILE, playDarkAnim ? PRODUCT_BOOTANIMATION_DARK_FILE : PRODUCT_BOOTANIMATION_FILE,

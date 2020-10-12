@@ -90,6 +90,10 @@
       <item quantity="other">SIM 卡的 PIN 碼不正確，您還有 <xliff:g id="NUMBER_1">%d</xliff:g> 次輸入機會。</item>
       <item quantity="one">SIM 卡的 PIN 碼不正確，您還有 <xliff:g id="NUMBER_0">%d</xliff:g> 次輸入機會。如果仍然輸入錯誤，您必須聯絡流動網絡供應商為您的裝置解鎖。</item>
     </plurals>
+    <plurals name="kg_password_wrong_pin_code_multi_sim" formatted="false">
+        <item quantity="other">SIM 卡<xliff:g id="slotid">%d</xliff:g>的 PIN 碼不正確，您還有 <xliff:g id="NUMBER_1">%d</xliff:g> 次輸入機會。</item>
+        <item quantity="one">SIM 卡<xliff:g id="slotid">%d</xliff:g>的 PIN 碼不正確，您還有 <xliff:g id="NUMBER_0">%d</xliff:g> 次輸入機會。如果仍然輸入錯誤，您必須聯絡流動網絡供應商為您的裝置解鎖。</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM 卡無法使用，請聯絡您的流動網絡供應商。"</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
       <item quantity="other">SIM 卡的 PUK 碼不正確，您還有 <xliff:g id="NUMBER_1">%d</xliff:g> 次輸入機會。如果仍然輸入錯誤，SIM 卡將永久無法使用。</item>
@@ -129,6 +133,10 @@
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">輸入 SIM 卡的 PIN，您還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
       <item quantity="one">輸入 SIM 卡的 PIN，您還可以再試 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍然輸入錯誤，您必須聯絡流動網絡供應商解鎖您的裝置。</item>
+    </plurals>
+    <plurals name="kg_password_default_pin_message_multi_sim" formatted="false">
+        <item quantity="other">輸入 SIM 卡<xliff:g id="slotid">%d</xliff:g>的 PIN，您還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
+        <item quantity="one">輸入 SIM 卡<xliff:g id="slotid">%d</xliff:g>的 PIN，您還可以再試 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍然輸入錯誤，您必須聯絡流動網絡供應商解鎖您的裝置。</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
       <item quantity="other">SIM 卡已停用。請輸入 PUK 碼以繼續進行。您還可以再試 <xliff:g id="_NUMBER_1">%d</xliff:g> 次。如果仍然輸入錯誤，SIM 卡將永久無法使用。詳情請與流動網絡供應商聯絡。</item>

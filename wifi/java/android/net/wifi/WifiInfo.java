@@ -295,6 +295,10 @@ public class WifiInfo implements Parcelable {
      */
     private String mPasspointUniqueId;
 
+    private boolean mVhtMax8SpatialStreamsSupport;
+
+    private boolean mHe8ssCapableAp;
+
     /** @hide */
     @UnsupportedAppUsage
     public WifiInfo() {
@@ -327,6 +331,8 @@ public class WifiInfo implements Parcelable {
         setFQDN(null);
         setProviderFriendlyName(null);
         setPasspointUniqueId(null);
+        setHe8ssCapableAp(false);
+        setVhtMax8SpatialStreamsSupport(false);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
@@ -363,6 +369,8 @@ public class WifiInfo implements Parcelable {
             mOsuAp = source.mOsuAp;
             mFqdn = source.mFqdn;
             mProviderFriendlyName = source.mProviderFriendlyName;
+            mVhtMax8SpatialStreamsSupport = source.mVhtMax8SpatialStreamsSupport;
+            mHe8ssCapableAp = source.mHe8ssCapableAp;
             txBad = source.txBad;
             txRetries = source.txRetries;
             txSuccess = source.txSuccess;
@@ -879,6 +887,26 @@ public class WifiInfo implements Parcelable {
         }
     }
 
+    /** @hide */
+    public void setVhtMax8SpatialStreamsSupport(boolean vhtMax8SpatialStreamsSupport) {
+        mVhtMax8SpatialStreamsSupport = vhtMax8SpatialStreamsSupport;
+    }
+
+    /** @hide */
+    public boolean isVhtMax8SpatialStreamsSupported() {
+        return mVhtMax8SpatialStreamsSupport;
+    }
+
+    /** @hide */
+    public void setHe8ssCapableAp(boolean he8ssCapableAp) {
+        mHe8ssCapableAp = he8ssCapableAp;
+    }
+
+    /** @hide */
+    public boolean isHe8ssCapableAp() {
+        return mHe8ssCapableAp;
+    }
+
     /**
      * Remove double quotes (") surrounding a SSID string, if present. Otherwise, return the
      * string unmodified. Return null if the input string was null.
@@ -912,6 +940,8 @@ public class WifiInfo implements Parcelable {
                 .append(", MAC: ").append(mMacAddress == null ? none : mMacAddress)
                 .append(", Supplicant state: ")
                 .append(mSupplicantState == null ? none : mSupplicantState)
+                .append(", HE Eight Max VHT Spatial Streams Supported AP: ").append(mHe8ssCapableAp)
+                .append(", Eight Max VHT Spatial streams support: ").append(mVhtMax8SpatialStreamsSupport)
                 .append(", Wi-Fi standard: ").append(mWifiStandard)
                 .append(", RSSI: ").append(mRssi)
                 .append(", Link speed: ").append(mLinkSpeed).append(LINK_SPEED_UNITS)
@@ -972,6 +1002,8 @@ public class WifiInfo implements Parcelable {
         dest.writeString(mRequestingPackageName);
         dest.writeString(mFqdn);
         dest.writeString(mProviderFriendlyName);
+        dest.writeInt(mVhtMax8SpatialStreamsSupport ? 1 : 0);
+        dest.writeInt(mHe8ssCapableAp ? 1 : 0);
         dest.writeInt(mWifiStandard);
         dest.writeInt(mMaxSupportedTxLinkSpeed);
         dest.writeInt(mMaxSupportedRxLinkSpeed);
@@ -1017,6 +1049,8 @@ public class WifiInfo implements Parcelable {
                 info.mRequestingPackageName = in.readString();
                 info.mFqdn = in.readString();
                 info.mProviderFriendlyName = in.readString();
+                info.mVhtMax8SpatialStreamsSupport = in.readInt() != 0;
+                info.mHe8ssCapableAp = in.readInt() != 0;
                 info.mWifiStandard = in.readInt();
                 info.mMaxSupportedTxLinkSpeed = in.readInt();
                 info.mMaxSupportedRxLinkSpeed = in.readInt();

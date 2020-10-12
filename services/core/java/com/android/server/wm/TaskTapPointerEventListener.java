@@ -29,6 +29,10 @@ import android.view.MotionEvent;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.server.wm.WindowManagerService.H;
+import com.android.server.am.ActivityManagerService;
+import com.android.server.wm.ActivityStackSupervisor;
+import com.android.server.wm.DisplayContent;
+import android.util.BoostFramework;
 
 /**
  * 1. Adjust the top most focus display if touch down on some display.
@@ -41,11 +45,15 @@ public class TaskTapPointerEventListener implements PointerEventListener {
     private final DisplayContent mDisplayContent;
     private final Rect mTmpRect = new Rect();
     private int mPointerIconType = TYPE_NOT_SPECIFIED;
+    public BoostFramework mPerfObj = null;
 
     public TaskTapPointerEventListener(WindowManagerService service,
             DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
+        if (mPerfObj == null) {
+            mPerfObj = new BoostFramework();
+        }
     }
 
     private void restorePointerIcon(int x, int y) {
@@ -120,6 +128,28 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                 restorePointerIcon(x, y);
             }
             break;
+        }
+        if (ActivityStackSupervisor.mIsPerfBoostAcquired && (mPerfObj != null)) {
+            if (ActivityStackSupervisor.mPerfHandle > 0) {
+                mPerfObj.perfLockReleaseHandler(ActivityStackSupervisor.mPerfHandle);
+                ActivityStackSupervisor.mPerfHandle = -1;
+            }
+            ActivityStackSupervisor.mIsPerfBoostAcquired = false;
+        }
+        if (ActivityStackSupervisor.mPerfSendTapHint && (mPerfObj != null)) {
+            mPerfObj.perfHint(BoostFramework.VENDOR_HINT_TAP_EVENT, null);
+            ActivityStackSupervisor.mPerfSendTapHint = false;
+        }
+        if (TaskDisplayArea.mIsPerfBoostAcquired && (mPerfObj != null)) {
+            if (TaskDisplayArea.mPerfHandle > 0) {
+                mPerfObj.perfLockReleaseHandler(TaskDisplayArea.mPerfHandle);
+                TaskDisplayArea.mPerfHandle = -1;
+            }
+            TaskDisplayArea.mIsPerfBoostAcquired = false;
+        }
+        if (TaskDisplayArea.mPerfSendTapHint && (mPerfObj != null)) {
+            mPerfObj.perfHint(BoostFramework.VENDOR_HINT_TAP_EVENT, null);
+            TaskDisplayArea.mPerfSendTapHint = false;
         }
     }
 

@@ -3191,6 +3191,7 @@ public final class Settings {
         @UnsupportedAppUsage
         public static String getStringForUser(ContentResolver resolver, String name,
                 int userHandle) {
+            android.util.SeempLog.record(android.util.SeempLog.getSeempGetApiIdFromValue(name));
             if (MOVED_TO_SECURE.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
                         + " to android.provider.Settings.Secure, returning read-only value.");
@@ -3245,6 +3246,7 @@ public final class Settings {
 
         private static boolean putStringForUser(ContentResolver resolver, String name, String value,
                 int userHandle, boolean overrideableByRestore) {
+            android.util.SeempLog.record(android.util.SeempLog.getSeempPutApiIdFromValue(name));
             if (MOVED_TO_SECURE.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
                         + " to android.provider.Settings.Secure, value is unchanged.");
@@ -3944,6 +3946,13 @@ public final class Settings {
          * @hide
          */
         public static final String DISPLAY_COLOR_MODE = "display_color_mode";
+
+        /**
+         * Whether to play tone while outgoing call is accepted.
+         * The value 1 - vibrate, 0 - not
+         * @hide
+         */
+        public static final String CALL_CONNECTED_TONE_ENABLED = "call_connected_tone_enabled";
 
         /**
          * The user selected min refresh rate in frames per second.
@@ -4903,6 +4912,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
+            PRIVATE_SETTINGS.add(CALL_CONNECTED_TONE_ENABLED);
         }
 
         /**
@@ -5329,6 +5339,7 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.NITZ_UPDATE_SPACING);
             MOVED_TO_GLOBAL.add(Settings.Global.NTP_SERVER);
             MOVED_TO_GLOBAL.add(Settings.Global.NTP_TIMEOUT);
+            MOVED_TO_GLOBAL.add(Settings.Global.NTP_SERVER_2);
             MOVED_TO_GLOBAL.add(Settings.Global.PDP_WATCHDOG_ERROR_POLL_COUNT);
             MOVED_TO_GLOBAL.add(Settings.Global.PDP_WATCHDOG_LONG_POLL_INTERVAL_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT);
@@ -9942,6 +9953,8 @@ public final class Settings {
        public static final String NTP_SERVER = "ntp_server";
        /** Timeout in milliseconds to wait for NTP server. {@hide} */
        public static final String NTP_TIMEOUT = "ntp_timeout";
+       /** Secondary NTP server. {@hide} */
+       public static final String NTP_SERVER_2 = "ntp_server_2";
 
        /** {@hide} */
        public static final String STORAGE_BENCHMARK_INTERVAL = "storage_benchmark_interval";
@@ -13946,6 +13959,14 @@ public final class Settings {
          * @hide
          */
         public static final String CELL_ON = "cell_on";
+
+        /**
+         * Whether to vibrate while outgoing call is accepted
+         * The value 1 - vibrate, 0 - not
+         * @hide
+         */
+        public static final String VIBRATING_FOR_OUTGOING_CALL_ACCEPTED =
+                "vibrating_for_outgoing_call_accepted";
 
         /**
          * Global settings which can be accessed by instant apps.

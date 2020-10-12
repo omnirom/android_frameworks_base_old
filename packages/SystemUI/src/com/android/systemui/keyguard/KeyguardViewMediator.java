@@ -82,6 +82,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
@@ -293,6 +294,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
      * Index is the slotId - in case of multiple SIM cards.
      */
     private final SparseIntArray mLastSimStates = new SparseIntArray();
+    private static SparseIntArray mUnlockTrackSimStates = new SparseIntArray();
 
     private boolean mDeviceInteractive;
     private boolean mGoingToSleep;
@@ -471,6 +473,19 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
                 simWasLocked = (lastState == TelephonyManager.SIM_STATE_PIN_REQUIRED
                         || lastState == TelephonyManager.SIM_STATE_PUK_REQUIRED);
                 mLastSimStates.append(slotId, simState);
+
+                if(simState == TelephonyManager.SIM_STATE_READY){
+                    mUnlockTrackSimStates.put(slotId, simState);
+                }
+                int currentState = mUnlockTrackSimStates.get(slotId);
+                if(currentState == TelephonyManager.SIM_STATE_READY){
+                    if(simState != TelephonyManager.SIM_STATE_PIN_REQUIRED) {
+                        mUnlockTrackSimStates.put(slotId, simState);
+                    }else{
+                        if (DEBUG) Log.e(TAG, "ship the unnecessary SIM_STATE_PIN_REQUIRED state");
+                        return;
+                    }
+                }
             }
 
             switch (simState) {
@@ -1276,6 +1291,9 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         Trace.endSection();
     }
 
+    public static int getUnlockTrackSimState(int slotId) {
+        return mUnlockTrackSimStates.get(slotId);
+    }
     public boolean isHiding() {
         return mHiding;
     }
@@ -1295,7 +1313,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
                 mUpdateMonitor.setKeyguardOccluded(isOccluded);
-                mKeyguardViewControllerLazy.get().setOccluded(isOccluded, animate
+                mKeyguardViewControllerLazy.get().setOccluded(isOccluded,
+                        (Dependency.get(KeyguardUpdateMonitor.class).isSimPinSecure()?false:animate)
                         && mDeviceInteractive);
                 adjustStatusBarLocked();
             }

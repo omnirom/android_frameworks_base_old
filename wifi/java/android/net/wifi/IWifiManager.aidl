@@ -32,6 +32,7 @@ import android.net.wifi.IOnWifiActivityEnergyInfoListener;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.IScanResultsCallback;
 import android.net.wifi.ISoftApCallback;
+import android.net.wifi.IWifiNotificationCallback;
 import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.IWifiConnectedNetworkScorer;
@@ -39,6 +40,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.SoftApConfiguration;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiDppConfig;
 import android.net.wifi.WifiNetworkSuggestion;
 
 import android.os.Messenger;
@@ -214,6 +216,46 @@ interface IWifiManager
 
     void unregisterTrafficStateCallback(int callbackIdentifier);
 
+    String getCapabilities(String capaType);
+
+    int dppAddBootstrapQrCode(String uri);
+
+    int dppBootstrapGenerate(in WifiDppConfig config);
+
+    String dppGetUri(int bootstrap_id);
+
+    int dppBootstrapRemove(int bootstrap_id);
+
+    int dppListen(String frequency, int dpp_role, boolean qr_mutual, boolean netrole_ap);
+
+    void dppStopListen();
+
+    int dppConfiguratorAdd(String curve, String key, int expiry);
+
+    int dppConfiguratorRemove(int config_id);
+
+    int  dppStartAuth(in WifiDppConfig config);
+
+    String dppConfiguratorGetKey(int id);
+
+    boolean isExtendingWifi();
+
+    boolean isWifiCoverageExtendFeatureEnabled();
+
+    boolean isSoftApOcvFeatureEnabled();
+
+    boolean isSoftApBeaconProtFeatureEnabled();
+
+    boolean isSoftApOcvFeatureSupported();
+
+    boolean isSoftApBeaconProtFeatureSupported();
+
+    void enableSoftApOcvFeature(boolean enable);
+
+    void enableSoftApBeaconProtFeature(boolean enable);
+
+    void enableWifiCoverageExtendFeature(boolean enable);
+
     void registerNetworkRequestMatchCallback(in IBinder binder, in INetworkRequestMatchCallback callback, int callbackIdentifier);
 
     void unregisterNetworkRequestMatchCallback(int callbackIdentifier);
@@ -275,4 +317,30 @@ interface IWifiManager
     void setAutoWakeupEnabled(boolean enable);
 
     boolean isAutoWakeupEnabled();
+
+    int getSoftApWifiStandard();
+
+    boolean isVht8ssCapableDevice();
+
+    String doDriverCmd(String command);
+
+    boolean setWifiEnabled2(String packageName, int staId, boolean enable);
+
+    boolean disconnect2(int staId, String packageName);
+
+    WifiInfo getConnectionInfo2(int staId, String callingPackage, String featureId);
+
+    ParceledListSlice getConfiguredNetworks2(int staId, String packageName, String featureId);
+
+    void registerForWifiNotification(int staId, in IBinder binder, in IWifiNotificationCallback callback, int callbackIdentifier);
+
+    void unregisterForWifiNotification(int staId, int callbackIdentifier);
+
+    boolean isWhitelistNetworkRoamingEnabled();
+
+    void enableWhitelistNetworkRoaming(boolean enable);
+
+    boolean isNewNetworkAutoConnectionEnabled();
+
+    void enableNewNetworkAutoConnection(boolean enable);
 }

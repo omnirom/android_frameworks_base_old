@@ -235,6 +235,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private final PassiveLocationProviderManager mPassiveManager;
 
+    private String mComboNlpPackageName;
+    private String mComboNlpReadyMarker;
+    private String mComboNlpScreenMarker;
     private PowerManager mPowerManager;
 
     private GeofenceManager mGeofenceManager;
@@ -575,6 +578,13 @@ public class LocationManagerService extends ILocationManager.Stub {
         mGeocodeProvider = GeocoderProxy.createAndRegister(mContext);
         if (mGeocodeProvider == null) {
             Log.e(TAG, "no geocoder provider found");
+        }
+
+        mComboNlpPackageName = mContext.getResources().getString(
+            com.android.internal.R.string.config_comboNetworkLocationProvider);
+        if (mComboNlpPackageName != null) {
+            mComboNlpReadyMarker = mComboNlpPackageName + ".nlp:ready";
+            mComboNlpScreenMarker = mComboNlpPackageName + ".nlp:screen";
         }
 
         // bind to hardware activity recognition

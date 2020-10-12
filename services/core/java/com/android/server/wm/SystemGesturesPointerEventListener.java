@@ -70,6 +70,7 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
     private boolean mDebugFireable;
     private boolean mMouseHoveringAtEdge;
     private long mLastFlingTime;
+    private boolean mScrollFired;
 
     SystemGesturesPointerEventListener(Context context, Handler handler, Callbacks callbacks) {
         mContext = checkNull("context", context);
@@ -140,6 +141,7 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
             case MotionEvent.ACTION_DOWN:
                 mSwipeFireable = true;
                 mDebugFireable = true;
+                mScrollFired = false;
                 mDownPointers = 0;
                 captureDown(event, 0);
                 if (mMouseHoveringAtEdge) {
@@ -196,6 +198,9 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
             case MotionEvent.ACTION_CANCEL:
                 mSwipeFireable = false;
                 mDebugFireable = false;
+                if (mScrollFired)
+                    mCallbacks.onScroll(false);
+                mScrollFired = false;
                 mCallbacks.onUpOrCancel();
                 break;
             default:
@@ -318,9 +323,24 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
             if (duration > MAX_FLING_TIME_MILLIS) {
                 duration = MAX_FLING_TIME_MILLIS;
             }
+            if(Math.abs(velocityY) >= Math.abs(velocityX))
+                mCallbacks.onVerticalFling(duration);
+            else
+                mCallbacks.onHorizontalFling(duration);
+
             mLastFlingTime = now;
             mCallbacks.onFling(duration);
             return true;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2,
+                                   float distanceX, float distanceY) {
+           if (!mScrollFired) {
+               mCallbacks.onScroll(true);
+               mScrollFired = true;
+           }
+           return true;
         }
     }
 
@@ -330,6 +350,9 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
         void onSwipeFromRight();
         void onSwipeFromLeft();
         void onFling(int durationMs);
+        void onVerticalFling(int durationMs);
+        void onHorizontalFling(int durationMs);
+        void onScroll(boolean started);
         void onDown();
         void onUpOrCancel();
         void onMouseHoverAtTop();

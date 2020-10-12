@@ -29,6 +29,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.media.AudioManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -255,11 +257,6 @@ public class PhoneStatusBarPolicy
         // cast
         mIconController.setIcon(mSlotCast, R.drawable.stat_sys_cast, null);
         mIconController.setIconVisibility(mSlotCast, false);
-
-        // hotspot
-        mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_hotspot,
-                mResources.getString(R.string.accessibility_status_bar_hotspot));
-        mIconController.setIconVisibility(mSlotHotspot, mHotspot.isHotspotEnabled());
 
         // managed profile
         mIconController.setIcon(mSlotManagedProfile, R.drawable.stat_sys_managed_profile_status,
@@ -521,6 +518,11 @@ public class PhoneStatusBarPolicy
         public void onHotspotChanged(boolean enabled, int numDevices) {
             mIconController.setIconVisibility(mSlotHotspot, enabled);
         }
+        @Override
+        public void onHotspotChanged(boolean enabled, int numDevices, int standard) {
+            updateHotspotIcon(standard);
+            mIconController.setIconVisibility(mSlotHotspot, enabled);
+        }
     };
 
     private final CastController.Callback mCastCallback = new CastController.Callback() {
@@ -706,5 +708,21 @@ public class PhoneStatusBarPolicy
         // Ensure this is on the main thread
         if (DEBUG) Log.d(TAG, "screenrecord: hiding icon");
         mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
+    }
+
+    private void updateHotspotIcon(int standard) {
+        if (standard == ScanResult.WIFI_STANDARD_11AX) {
+            mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_wifi_6_hotspot,
+                mResources.getString(R.string.accessibility_status_bar_hotspot));
+        } else if (standard == ScanResult.WIFI_STANDARD_11AC) {
+            mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_wifi_5_hotspot,
+                mResources.getString(R.string.accessibility_status_bar_hotspot));
+        } else if (standard == ScanResult.WIFI_STANDARD_11N) {
+            mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_wifi_4_hotspot,
+                mResources.getString(R.string.accessibility_status_bar_hotspot));
+        } else {
+            mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_hotspot,
+                mResources.getString(R.string.accessibility_status_bar_hotspot));
+        }
     }
 }

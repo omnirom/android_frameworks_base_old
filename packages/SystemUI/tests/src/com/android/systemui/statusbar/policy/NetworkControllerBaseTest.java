@@ -401,6 +401,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                     iconArg.capture(),
                     anyInt(),
                     typeIconArg.capture(), dataInArg.capture(), dataOutArg.capture(),
+                    ArgumentCaptor.forClass(Integer.class).capture(),
                     any(CharSequence.class), any(CharSequence.class), any(CharSequence.class),
                     anyBoolean(), anyInt(), anyBoolean());
         IconState iconState = iconArg.getValue();
@@ -435,6 +436,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 any(),
                 typeIconArg.capture(),
                 anyInt(), anyBoolean(), anyBoolean(),
+                ArgumentCaptor.forClass(Integer.class).capture(),
                 any(CharSequence.class), any(CharSequence.class), any(CharSequence.class),
                 anyBoolean(), anyInt(), eq(roaming));
         IconState iconState = iconArg.getValue();
@@ -483,6 +485,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 qsTypeIconArg.capture(),
                 dataInArg.capture(),
                 dataOutArg.capture(),
+                ArgumentCaptor.forClass(Integer.class).capture(),
                 typeContentDescriptionArg.capture(),
                 typeContentDescriptionHtmlArg.capture(),
                 anyString(), anyBoolean(), anyInt(), anyBoolean());

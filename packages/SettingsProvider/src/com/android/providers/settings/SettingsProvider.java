@@ -4410,6 +4410,16 @@ public class SettingsProvider extends ContentProvider {
                                 null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
 
+                    // Update the settings for NTP_SERVER_2
+                    final Setting currentSetting = globalSettings.getSettingLocked(
+                            Global.NTP_SERVER_2);
+                    if (currentSetting.isNull()) {
+                        globalSettings.insertSettingLocked(
+                                Global.NTP_SERVER_2,
+                                getContext().getResources().getString(
+                                        R.string.def_ntp_server_2),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
                     currentVersion = 170;
                 }
 

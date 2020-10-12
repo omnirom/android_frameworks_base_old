@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Surface;
+import android.os.SystemProperties;
 
 /**
  * Utility class for determining screen and corner dimensions.
@@ -117,6 +118,11 @@ public class DisplayUtils {
 
     private static int getCornerRadiusDefault(Context context) {
         int radius = 0;
+        int disableRoundedCorner = SystemProperties.getInt("vendor.display.disable_rounded_corner",
+                0);
+        if (disableRoundedCorner == 1) {
+           return radius;
+        }
 
         int resourceId = context.getResources().getIdentifier("config_rounded_mask_size",
                 "dimen", "com.android.systemui");

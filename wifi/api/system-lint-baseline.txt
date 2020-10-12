@@ -1,6 +1,19 @@
 // Baseline format: 1.0
-MissingGetterMatchingBuilder: android.net.wifi.rtt.RangingRequest.Builder#addResponder(android.net.wifi.rtt.ResponderConfig):
-    android.net.wifi.rtt.RangingRequest does not declare a `getResponders()` method matching method android.net.wifi.rtt.RangingRequest.Builder.addResponder(android.net.wifi.rtt.ResponderConfig)
+AcronymName: android.net.wifi.p2p.WifiP2pManager#setWFDR2Info(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pWfdInfo, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    Acronyms should not be capitalized in method names: was `setWFDR2Info`, should this be `setWfdR2Info`?
+
+
+ActionValue: android.net.wifi.WifiManager#EXTRA_WIFI_AP_FAILURE_DESCRIPTION:
+    Inconsistent extra value; expected `android.net.wifi.extra.WIFI_AP_FAILURE_DESCRIPTION`, was `wifi_ap_error_description`
+
+
+IntentName: android.net.wifi.WifiManager#WIFI_COUNTRY_CODE_CHANGED_ACTION:
+    Intent action constant name must be ACTION_FOO: WIFI_COUNTRY_CODE_CHANGED_ACTION
+
 
 MissingNullability: android.net.wifi.rtt.RangingRequest.Builder#addResponder(android.net.wifi.rtt.ResponderConfig):
+    
 
+
+MutableBareField: android.net.wifi.WifiConfiguration#shareThisAp:
+    Bare field shareThisAp must be marked final, or moved behind accessors if mutable

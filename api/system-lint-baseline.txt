@@ -3,10 +3,16 @@ AcronymName: android.net.NetworkCapabilities#setSSID(String):
     Acronyms should not be capitalized in method names: was `setSSID`, should this be `setSsid`?
 
 
+AcronymName: android.telephony.ims.stub.ImsUtImplBase#queryCFForServiceClass(int, String, int):
+    Acronyms should not be capitalized in method names: was `queryCFForServiceClass`, should this be `queryCfForServiceClass`?
+
+
 ActionValue: android.location.Location#EXTRA_NO_GPS_LOCATION:
     
 ActionValue: android.net.wifi.WifiManager#ACTION_LINK_CONFIGURATION_CHANGED:
     
+ActionValue: android.net.wifi.WifiManager#EXTRA_WIFI_AP_FAILURE_DESCRIPTION:
+    Inconsistent extra value; expected `android.net.wifi.extra.WIFI_AP_FAILURE_DESCRIPTION`, was `wifi_ap_error_description`
 
 // Tethering broadcast action / extras cannot change name for backwards compatibility
 ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
@@ -66,6 +72,10 @@ GenericException: android.service.autofill.augmented.FillWindow#finalize():
 
 IntentBuilderName: android.content.Context#registerReceiverForAllUsers(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler):
     Methods creating an Intent should be named `create<Foo>Intent()`, was `registerReceiverForAllUsers`
+
+
+IntentName: android.net.wifi.WifiManager#WIFI_COUNTRY_CODE_CHANGED_ACTION:
+    Intent action constant name must be ACTION_FOO: WIFI_COUNTRY_CODE_CHANGED_ACTION
 
 
 KotlinKeyword: android.app.Notification#when:
@@ -180,6 +190,8 @@ MissingNullability: android.telephony.ims.stub.ImsSmsImplBase#onSmsStatusReportR
     
 MissingNullability: android.telephony.ims.stub.ImsSmsImplBase#onSmsStatusReportReceived(int, String, byte[]) parameter #2:
     
+MissingNullability: android.telephony.ims.stub.ImsUtImplBase#queryCFForServiceClass(int, String, int) parameter #1:
+    Missing nullability on parameter `number` in method `queryCFForServiceClass`
 MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
     
 MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String) parameter #0:
@@ -210,10 +222,28 @@ MutableBareField: android.net.wifi.WifiConfiguration#requirePmf:
     
 MutableBareField: android.net.wifi.WifiConfiguration#saePasswordId:
     
+MutableBareField: android.net.wifi.WifiConfiguration#shareThisAp:
+    
 MutableBareField: android.net.wifi.WifiConfiguration#shared:
     
 MutableBareField: android.net.wifi.WifiScanner.ScanSettings#type:
     
+MutableBareField: android.net.wifi.wificond.WifiNl80211Manager.WifiGenerationCapabilities#htSupport2g:
+    Bare field htSupport2g must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.wificond.WifiNl80211Manager.WifiGenerationCapabilities#htSupport5g:
+    Bare field htSupport5g must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.wificond.WifiNl80211Manager.WifiGenerationCapabilities#sapHeSupport2g:
+    Bare field sapHeSupport2g must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.wificond.WifiNl80211Manager.WifiGenerationCapabilities#sapHeSupport5g:
+    Bare field sapHeSupport5g must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.wificond.WifiNl80211Manager.WifiGenerationCapabilities#staHeSupport2g:
+    Bare field staHeSupport2g must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.wificond.WifiNl80211Manager.WifiGenerationCapabilities#staHeSupport5g:
+    Bare field staHeSupport5g must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.wificond.WifiNl80211Manager.WifiGenerationCapabilities#vhtSupport2g:
+    Bare field vhtSupport2g must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.wificond.WifiNl80211Manager.WifiGenerationCapabilities#vhtSupport5g:
+    Bare field vhtSupport5g must be marked final, or moved behind accessors if mutable
 
 
 NoClone: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:

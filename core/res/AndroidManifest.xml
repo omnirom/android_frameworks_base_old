@@ -50,6 +50,7 @@
     <protected-broadcast android:name="android.intent.action.PACKAGE_FIRST_LAUNCH" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_NEEDS_VERIFICATION" />
+    <protected-broadcast android:name="com.qualcomm.qti.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_VERIFIED" />
     <protected-broadcast android:name="android.intent.action.PACKAGES_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.PACKAGES_UNSUSPENDED" />
@@ -160,8 +161,10 @@
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REQUEST" />
     <protected-broadcast android:name="android.bluetooth.device.action.SDP_RECORD" />
     <protected-broadcast android:name="android.bluetooth.device.action.BATTERY_LEVEL_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.TWS_PLUS_DEVICE_PAIR" />
     <protected-broadcast android:name="android.bluetooth.devicepicker.action.LAUNCH" />
     <protected-broadcast android:name="android.bluetooth.devicepicker.action.DEVICE_SELECTED" />
+    <protected-broadcast android:name="org.codeaurora.intent.bluetooth.action.REMOTE_ISSUE_OCCURRED" />
     <protected-broadcast
         android:name="android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
@@ -172,6 +175,8 @@
         android:name="android.bluetooth.headset.action.HF_INDICATORS_VALUE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.headset.profile.action.ACTIVE_DEVICE_CHANGED" />
+    <protected-broadcast
+        android:name="android.bluetooth.headset.action.HF_TWSP_BATTERY_STATE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.headsetclient.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
@@ -361,7 +366,28 @@
     <protected-broadcast android:name="com.android.server.wifi.wakeup.OPEN_WIFI_PREFERENCES" />
     <protected-broadcast android:name="com.android.server.wifi.wakeup.OPEN_WIFI_SETTINGS" />
     <protected-broadcast android:name="com.android.server.wifi.wakeup.TURN_OFF_WIFI_WAKE" />
+
+    <protected-broadcast android:name="com.qualcomm.qti.wigig.WIGIG_CREDENTIAL_CHANGED" />
+    <protected-broadcast android:name="com.qualcomm.qti.wigig.WIGIG_STATE_CHANGED" />
+    <protected-broadcast android:name="com.qualcomm.qti.wigig.WIGIG_AP_STATE_CHANGED" />
+    <protected-broadcast android:name="com.qualcomm.qti.wigig.supplicant.CONNECTION_CHANGE" />
+    <protected-broadcast android:name="com.qualcomm.qti.wigig.STATE_CHANGE" />
+    <protected-broadcast android:name="com.qualcomm.qti.wigig.CONFIGURED_NETWORKS_CHANGE" />
+    <protected-broadcast android:name="com.qualcomm.qti.wigig.SCAN_RESULTS" />
+    <protected-broadcast android:name="com.qualcomm.qti.wigig.LINK_CONFIGURATION_CHANGED" />
+    <protected-broadcast android:name="com.qualcomm.qti.wigig.WIGIG_RATE_UPGRADE_STATE_CHANGED" />
+    <protected-broadcast android:name="com.qualcomm.qti.wigig.RSSI_CHANGED" />
+    <protected-broadcast android:name="wigig_scan_available" />
+    <protected-broadcast android:name="android.net.wigig.p2p.STATE_CHANGED" />
+    <protected-broadcast android:name="android.net.wigig.p2p.CONNECTION_STATE_CHANGE" />
+    <protected-broadcast android:name="android.net.wigig.p2p.PEERS_CHANGED" />
+    <protected-broadcast android:name="android.net.wigig.p2p.DISCOVERY_STATE_CHANGE" />
+    <protected-broadcast android:name="android.net.wigig.p2p.THIS_DEVICE_CHANGED" />
+    <protected-broadcast android:name="android.net.wigig.p2p.PERSISTENT_GROUPS_CHANGED" />
+
     <protected-broadcast android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+    <protected-broadcast android:name="com.qualcomm.qti.net.wifi.WIFI_ALERT" />
+    <protected-broadcast android:name="com.qualcomm.qti.net.wifi.WIFI_NETWORK_DISCONNECTION" />
     <protected-broadcast android:name="android.net.wifi.WIFI_AP_STATE_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.WIFI_CREDENTIAL_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.aware.action.WIFI_AWARE_STATE_CHANGED" />
@@ -387,6 +413,8 @@
     <protected-broadcast android:name="android.net.wifi.p2p.PEERS_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.p2p.CONNECTION_STATE_CHANGE" />
     <protected-broadcast android:name="android.net.wifi.p2p.action.WIFI_P2P_PERSISTENT_GROUPS_CHANGED" />
+    <protected-broadcast android:name="com.qualcomm.qti.net.wifi.DPP_EVENT" />
+    <protected-broadcast android:name="android.net.wifi.COUNTRY_CODE_CHANGED" />
     <protected-broadcast android:name="android.net.conn.TETHER_STATE_CHANGED" />
     <protected-broadcast android:name="android.net.conn.INET_CONDITION_ACTION" />
     <protected-broadcast android:name="android.net.conn.NETWORK_CONDITIONS_MEASURED" />
@@ -583,6 +611,11 @@
 
     <protected-broadcast android:name="android.bluetooth.input.profile.action.HANDSHAKE" />
     <protected-broadcast android:name="android.bluetooth.input.profile.action.REPORT" />
+
+    <protected-broadcast android:name="android.bluetooth.bat.profile.action.BA_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.bat.profile.action.BA_ENC_KEY_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.bat.profile.action.BA_DIV_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.bat.profile.action.BA_STR_ID_CHANGED" />
 
     <protected-broadcast android:name="android.intent.action.TWILIGHT_CHANGED" />
 
@@ -1496,6 +1529,11 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MODIFY_CELL_BROADCASTS"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to authorize outgoing SMS messages.
+         @hide -->
+    <permission android:name="com.qti.permission.AUTHORIZE_OUTGOING_SMS"
+                android:protectionLevel="signature" />
 
     <!-- =============================================================== -->
     <!-- Permissions for setting the device alarm                        -->

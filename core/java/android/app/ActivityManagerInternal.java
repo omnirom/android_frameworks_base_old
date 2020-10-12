@@ -440,4 +440,7 @@ public abstract class ActivityManagerInternal {
      * @return true if exists, false otherwise.
      */
     public abstract boolean isPendingTopUid(int uid);
+
+    // Starts a process as empty.
+    public abstract int startActivityAsUserEmpty(Bundle options);
 }

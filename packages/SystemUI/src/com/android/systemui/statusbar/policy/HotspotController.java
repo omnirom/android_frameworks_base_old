@@ -30,6 +30,10 @@ public interface HotspotController extends CallbackController<Callback>, Dumpabl
 
     interface Callback {
         void onHotspotChanged(boolean enabled, int numDevices);
+        default void onHotspotChanged(boolean enabled, int numDevices,
+                                      int standard) {
+            onHotspotChanged(enabled, numDevices);
+        }
         default void onHotspotAvailabilityChanged(boolean available) {}
     }
 }

@@ -74,6 +74,12 @@ public final class ShutdownThread extends Thread {
     private static final int PACKAGE_MANAGER_STOP_PERCENT = 6;
     private static final int RADIO_STOP_PERCENT = 18;
     private static final int MOUNT_SERVICE_STOP_PERCENT = 20;
+    // Time we should wait for vendor subsystem shutdown
+    // Sleep times(ms) between checks of the vendor subsystem state
+    private static final int VENDOR_SUBSYS_STATE_CHECK_INTERVAL_MS = 100;
+    // Max time we wait for vendor subsystems to shut down before resuming
+    // with full system shutdown
+    private static final int VENDOR_SUBSYS_MAX_WAIT_MS = 10000;
 
     // length of vibration before shutting down
     private static final int SHUTDOWN_VIBRATE_MS = 500;
@@ -658,6 +664,59 @@ public final class ShutdownThread extends Thread {
      * @param reason reason for reboot/shutdown
      */
     public static void rebootOrShutdown(final Context context, boolean reboot, String reason) {
+        String subsysProp;
+        subsysProp = SystemProperties.get("vendor.peripheral.shutdown_critical_list",
+                        "ERROR");
+        //If we don't have the shutdown critical subsystem list we can't
+        //really do anything. Proceed with full system shutdown.
+        if (!subsysProp.equals("ERROR")) {
+                Log.i(TAG, "Shutdown critical subsyslist is :"+subsysProp+": ");
+                Log.i(TAG, "Waiting for a maximum of " +
+                           (VENDOR_SUBSYS_MAX_WAIT_MS) + "ms");
+                String[] subsysList = subsysProp.split(" ");
+                int wait_count = 0;
+                boolean okToShutdown = true;
+                String subsysState;
+                int subsysListLength = subsysList.length;
+                do {
+                        okToShutdown = true;
+                        for (int i = 0; i < subsysListLength; i++) {
+                                subsysState =
+                                        SystemProperties.get(
+                                                        "vendor.peripheral." +
+                                                        subsysList[i] +
+                                                        ".state",
+                                                        "ERROR");
+                                if(subsysState.equals("ONLINE"))  {
+                                        //We only want to delay shutdown while
+                                        //one of the shutdown critical
+                                        //subsystems still shows as 'ONLINE'.
+                                        okToShutdown = false;
+                                }
+                        }
+                        if (okToShutdown == false) {
+                                SystemClock.sleep(VENDOR_SUBSYS_STATE_CHECK_INTERVAL_MS);
+                                wait_count++;
+                        }
+                } while (okToShutdown != true &&
+                                wait_count < (VENDOR_SUBSYS_MAX_WAIT_MS/VENDOR_SUBSYS_STATE_CHECK_INTERVAL_MS));
+                if (okToShutdown != true) {
+                        for (int i = 0; i < subsysList.length; i++) {
+                                subsysState =
+                                        SystemProperties.get(
+                                                        "vendor.peripheral." +
+                                                        subsysList[i] +
+                                                        ".state",
+                                                        "ERROR");
+                                if(subsysState.equals("ONLINE"))  {
+                                        Log.w(TAG, "Subsystem " + subsysList[i]+
+                                                   "did not shut down within timeout");
+                                }
+                        }
+                } else {
+                        Log.i(TAG, "Vendor subsystem(s) shutdown successful");
+                }
+        }
         if (reboot) {
             Log.i(TAG, "Rebooting, reason: " + reason);
             PowerManagerService.lowLevelReboot(reason);

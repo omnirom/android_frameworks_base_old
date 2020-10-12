@@ -114,6 +114,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.sysprop.DisplayProperties;
 import android.util.AndroidRuntimeException;
+import android.util.BoostFramework.ScrollOptimizer;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.LongArray;
@@ -712,6 +713,7 @@ public final class ViewRootImpl implements ViewParent,
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
 
     private String mTag = TAG;
+    boolean mHaveMoveEvent = false;
 
     public ViewRootImpl(Context context, Display display) {
         this(context, display, WindowManagerGlobal.getWindowSession(),
@@ -6014,6 +6016,12 @@ public final class ViewRootImpl implements ViewParent,
             mAttachInfo.mUnbufferedDispatchRequested = false;
             mAttachInfo.mHandlingPointerEvent = true;
             boolean handled = mView.dispatchPointerEvent(event);
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_MOVE) {
+                mHaveMoveEvent = true;
+            } else if (action == MotionEvent.ACTION_UP) {
+                mHaveMoveEvent = false;
+            }
             maybeUpdatePointerIcon(event);
             maybeUpdateTooltip(event);
             mAttachInfo.mHandlingPointerEvent = false;
@@ -8021,6 +8029,7 @@ public final class ViewRootImpl implements ViewParent,
             long eventTime = q.mEvent.getEventTimeNano();
             long oldestEventTime = eventTime;
             if (q.mEvent instanceof MotionEvent) {
+                ScrollOptimizer.setSurface(mSurface);
                 MotionEvent me = (MotionEvent)q.mEvent;
                 if (me.getHistorySize() > 0) {
                     oldestEventTime = me.getHistoricalEventTimeNano(0);

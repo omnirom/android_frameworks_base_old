@@ -25,12 +25,15 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Process;
+import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.BoostFramework;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
@@ -89,7 +92,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_TOP_TO_FGS_GRACE_DURATION = "top_to_fgs_grace_duration";
     static final String KEY_PENDINGINTENT_WARNING_THRESHOLD = "pendingintent_warning_threshold";
 
-    private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
+    private static int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
@@ -308,6 +311,15 @@ final class ActivityManagerConstants extends ContentObserver {
     // process limit.
     public int CUR_MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
 
+    public static BoostFramework mPerf = new BoostFramework();
+
+    static boolean USE_TRIM_SETTINGS = true;
+    static int EMPTY_APP_PERCENT = 50;
+    static int TRIM_EMPTY_PERCENT = 100;
+    static int TRIM_CACHE_PERCENT = 100;
+    static long TRIM_ENABLE_MEMORY = 1073741824;
+    public static boolean allowTrim() { return Process.getTotalMemory() < TRIM_ENABLE_MEMORY ; }
+
     // The maximum number of empty app processes we will let sit around.
     public int CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
 
@@ -444,6 +456,28 @@ final class ActivityManagerConstants extends ContentObserver {
         IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES.addAll(mDefaultImperceptibleKillExemptProcStates);
     }
 
+    private void updatePerfConfigConstants() {
+        if (mPerf != null) {
+          // Maximum number of cached processes we will allow.
+            DEFAULT_MAX_CACHED_PROCESSES = MAX_CACHED_PROCESSES = CUR_MAX_CACHED_PROCESSES = Integer.valueOf(
+                                                 mPerf.perfGetProp("ro.vendor.qti.sys.fw.bg_apps_limit", "32"));
+
+            //Trim Settings
+            USE_TRIM_SETTINGS = Boolean.parseBoolean(mPerf.perfGetProp("ro.vendor.qti.sys.fw.use_trim_settings", "true"));
+            EMPTY_APP_PERCENT = Integer.valueOf(mPerf.perfGetProp("ro.vendor.qti.sys.fw.empty_app_percent", "50"));
+            TRIM_EMPTY_PERCENT = Integer.valueOf(mPerf.perfGetProp("ro.vendor.qti.sys.fw.trim_empty_percent", "100"));
+            TRIM_CACHE_PERCENT = Integer.valueOf(mPerf.perfGetProp("ro.vendor.qti.sys.fw.trim_cache_percent", "100"));
+            TRIM_ENABLE_MEMORY = Long.valueOf(mPerf.perfGetProp("ro.vendor.qti.sys.fw.trim_enable_memory", "1073741824"));
+
+            // The maximum number of empty app processes we will let sit around.
+            CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
+
+            final int rawEmptyProcesses = computeEmptyProcessLimit(MAX_CACHED_PROCESSES);
+            CUR_TRIM_EMPTY_PROCESSES = computeTrimEmptyApps(rawEmptyProcesses);
+            CUR_TRIM_CACHED_PROCESSES = computeTrimCachedApps(rawEmptyProcesses, MAX_CACHED_PROCESSES);
+        }
+    }
+
     public void start(ContentResolver resolver) {
         mResolver = resolver;
         mResolver.registerContentObserver(ACTIVITY_MANAGER_CONSTANTS_URI, false, this);
@@ -455,6 +489,8 @@ final class ActivityManagerConstants extends ContentObserver {
                     false, this);
         }
         updateConstants();
+        updatePerfConfigConstants();
+
         if (mSystemServerAutomaticHeapDumpEnabled) {
             updateEnableAutomaticSystemServerHeapDumps();
         }
@@ -482,7 +518,27 @@ final class ActivityManagerConstants extends ContentObserver {
     }
 
     public static int computeEmptyProcessLimit(int totalProcessLimit) {
-        return totalProcessLimit/2;
+        if(USE_TRIM_SETTINGS && allowTrim()) {
+            return totalProcessLimit*EMPTY_APP_PERCENT/100;
+        } else {
+            return totalProcessLimit/2;
+        }
+    }
+
+    public static int computeTrimEmptyApps(int rawMaxEmptyProcesses) {
+        if (USE_TRIM_SETTINGS && allowTrim()) {
+            return rawMaxEmptyProcesses*TRIM_EMPTY_PERCENT/100;
+        } else {
+            return rawMaxEmptyProcesses/2;
+        }
+    }
+
+    public static int computeTrimCachedApps(int rawMaxEmptyProcesses, int totalProcessLimit) {
+        if (USE_TRIM_SETTINGS && allowTrim()) {
+            return totalProcessLimit*TRIM_CACHE_PERCENT/100;
+        } else {
+            return (totalProcessLimit-rawMaxEmptyProcesses)/3;
+        }
     }
 
     @Override
@@ -677,8 +733,9 @@ final class ActivityManagerConstants extends ContentObserver {
         // to consider the same level the point where we do trimming regardless of any
         // additional enforced limit.
         final int rawMaxEmptyProcesses = computeEmptyProcessLimit(MAX_CACHED_PROCESSES);
-        CUR_TRIM_EMPTY_PROCESSES = rawMaxEmptyProcesses/2;
-        CUR_TRIM_CACHED_PROCESSES = (MAX_CACHED_PROCESSES-rawMaxEmptyProcesses)/3;
+        CUR_TRIM_EMPTY_PROCESSES = computeTrimEmptyApps(rawMaxEmptyProcesses);
+        CUR_TRIM_CACHED_PROCESSES =
+                computeTrimCachedApps(rawMaxEmptyProcesses, MAX_CACHED_PROCESSES);
     }
 
     private void updateMinAssocLogDuration() {

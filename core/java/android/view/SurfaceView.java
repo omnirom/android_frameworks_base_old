@@ -841,6 +841,26 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
+    /**
+     * Control whether the surface view's content should flow through
+     * protected hardware path to display disallowing access from non-secure
+     * execution environments.
+     *
+     * <p>Note that this must be set before the surface view's containing
+     * window is attached to the window manager.
+     *
+     * @param isProtected True if the surface view is protected.
+     *
+     * @hide
+     */
+    public void setProtected(boolean isProtected) {
+        if (isProtected) {
+            mSurfaceFlags |= SurfaceControl.PROTECTED_APP;
+        } else {
+            mSurfaceFlags &= ~SurfaceControl.PROTECTED_APP;
+        }
+    }
+
     private void updateOpaqueFlag() {
         if (!PixelFormat.formatHasAlpha(mRequestedFormat)) {
             mSurfaceFlags |= SurfaceControl.OPAQUE;

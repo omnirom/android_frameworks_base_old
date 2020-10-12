@@ -30,6 +30,7 @@ import android.bluetooth.BluetoothMapClient;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothPbap;
 import android.bluetooth.BluetoothPbapClient;
+import android.bluetooth.BluetoothDun;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSap;
 import android.bluetooth.BluetoothUuid;
@@ -49,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import android.os.SystemProperties;
 
 
 /**
@@ -99,6 +101,7 @@ public class LocalBluetoothProfileManager {
     private PanProfile mPanProfile;
     private PbapClientProfile mPbapClientProfile;
     private PbapServerProfile mPbapProfile;
+    private DunServerProfile mDunProfile;
     private HearingAidProfile mHearingAidProfile;
     private SapProfile mSapProfile;
 
@@ -220,6 +223,12 @@ public class LocalBluetoothProfileManager {
             mSapProfile = new SapProfile(mContext, mDeviceManager, this);
             addProfile(mSapProfile, SapProfile.NAME, BluetoothSap.ACTION_CONNECTION_STATE_CHANGED);
         }
+        if (mDunProfile == null && supportedList.contains(BluetoothProfile.DUN)) {
+            if(DEBUG) Log.d(TAG, "Adding local DUN profile");
+            mDunProfile = new DunServerProfile(mContext);
+            addProfile(mDunProfile, DunServerProfile.NAME,
+                    BluetoothDun.ACTION_CONNECTION_STATE_CHANGED);
+        }
         mEventManager.registerProfileIntentReceiver();
     }
 
@@ -269,6 +278,11 @@ public class LocalBluetoothProfileManager {
         }
 
         public void onReceive(Context context, Intent intent, BluetoothDevice device) {
+            if (device == null) {
+                Log.w(TAG, "StateChangedHandler receives state-change for invalid device");
+                return;
+            }
+
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
                 Log.w(TAG, "StateChangedHandler found new device: " + device);
@@ -480,7 +494,8 @@ public class LocalBluetoothProfileManager {
             if ((ArrayUtils.contains(localUuids, BluetoothUuid.HSP_AG)
                     && ArrayUtils.contains(uuids, BluetoothUuid.HSP))
                     || (ArrayUtils.contains(localUuids, BluetoothUuid.HFP_AG)
-                    && ArrayUtils.contains(uuids, BluetoothUuid.HFP))) {
+                    && ArrayUtils.contains(uuids, BluetoothUuid.HFP))
+                    || (mHeadsetProfile.getConnectionStatus(device) == BluetoothProfile.STATE_CONNECTED)) {
                 profiles.add(mHeadsetProfile);
                 removedProfiles.remove(mHeadsetProfile);
             }
@@ -493,7 +508,9 @@ public class LocalBluetoothProfileManager {
             removedProfiles.remove(mHfpClientProfile);
         }
 
-        if (BluetoothUuid.containsAnyUuid(uuids, A2dpProfile.SINK_UUIDS) && mA2dpProfile != null) {
+        if ((mA2dpProfile != null)
+                && (BluetoothUuid.containsAnyUuid(uuids, A2dpProfile.SINK_UUIDS)
+                || (mA2dpProfile.getConnectionStatus(device) == BluetoothProfile.STATE_CONNECTED))) {
             profiles.add(mA2dpProfile);
             removedProfiles.remove(mA2dpProfile);
         }

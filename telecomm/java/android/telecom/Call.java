@@ -485,8 +485,15 @@ public final class Call {
          */
         public static final int CAPABILITY_TRANSFER_CONSULTATIVE = 0x08000000;
 
+        /**
+         * Remote device supports RTT.
+         * @hide
+         */
+        public static final int CAPABILITY_SUPPORTS_RTT_REMOTE = 0x10000000;
+
+
         //******************************************************************************************
-        // Next CAPABILITY value: 0x10000000
+        // Next CAPABILITY value: 0x20000000
         //******************************************************************************************
 
         /**
@@ -724,6 +731,9 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_TRANSFER_CONSULTATIVE)) {
                 builder.append(" CAPABILITY_TRANSFER_CONSULTATIVE");
+            }
+            if (can(capabilities, CAPABILITY_SUPPORTS_RTT_REMOTE)) {
+                builder.append(" CAPABILITY_SUPPORTS_RTT_REMOTE");
             }
             builder.append("]");
             return builder.toString();

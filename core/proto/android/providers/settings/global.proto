@@ -706,6 +706,8 @@ message GlobalSettingsProto {
         optional SettingProto server = 1;
         // Timeout in milliseconds to wait for NTP server.
         optional SettingProto timeout_ms = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Secondary NTP server.
+        optional SettingProto server_2 = 3;
     }
     optional Ntp ntp = 84;
 

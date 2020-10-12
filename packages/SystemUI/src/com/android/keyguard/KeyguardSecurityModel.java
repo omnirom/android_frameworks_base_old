@@ -24,7 +24,7 @@ import android.telephony.TelephonyManager;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
-
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -70,8 +70,8 @@ public class KeyguardSecurityModel {
             return SecurityMode.SimPuk;
         }
 
-        if (SubscriptionManager.isValidSubscriptionId(
-                monitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PIN_REQUIRED))) {
+        int subId = monitor.getUnlockedSubIdForState(TelephonyManager.SIM_STATE_PIN_REQUIRED);
+        if (SubscriptionManager.isValidSubscriptionId((subId))){
             return SecurityMode.SimPin;
         }
 

@@ -157,6 +157,20 @@ public class MediaFile {
                 "application/vnd.ms-powerpoint");
         addFileType(MtpConstants.FORMAT_MS_POWERPOINT_PRESENTATION,
                 "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+
+        // addFileType(MtpConstants.FORMAT_DIVX, "video/divx");
+        // addFileType(MtpConstants.FORMAT_FLV, "video/flv");
+        // addFileType(MtpConstants.FORMAT_QCP, "audio/qcelp");
+        // addFileType(MtpConstants.FORMAT_AC3, "audio/ac3");
+        // addFileType(MtpConstants.FORMAT_EC3, "audio/eac3");
+        // addFileType(MtpConstants.FORMAT_AIFF, "audio/x-aiff");
+        // addFileType(MtpConstants.FORMAT_APE, "audio/x-ape");
+        // addFileType(MtpConstants.FORMAT_DSD, "audio/x-dsf");
+        // addFileType(MtpConstants.FORMAT_DSD, "audio/x-dff");
+        // addFileType(MtpConstants.FORMAT_DSD, "audio/dsd");
+        // addFileType(MtpConstants.FORMAT_MHAS, "audio/mhas");
+        // addFileType(MtpConstants.FORMAT_MP4, "audio/mhas");
+
     }
 
     /** @deprecated file types no longer exist */

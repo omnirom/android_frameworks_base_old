@@ -29,6 +29,7 @@ import android.net.NetworkInfo;
 import android.net.RouteInfo;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.ServiceSpecificException;
 import android.util.Slog;
 
@@ -117,6 +118,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
     @VisibleForTesting
     protected static boolean requiresClat(NetworkAgentInfo nai) {
         // TODO: migrate to NetworkCapabilities.TRANSPORT_*.
+        final int netType = nai.networkInfo.getType();
         final boolean supported = ArrayUtils.contains(NETWORK_TYPES, nai.networkInfo.getType());
         final boolean connected = ArrayUtils.contains(NETWORK_STATES, nai.networkInfo.getState());
 
@@ -130,7 +132,13 @@ public class Nat464Xlat extends BaseNetworkObserver {
         final boolean skip464xlat = (nai.netAgentConfig() != null)
                 && nai.netAgentConfig().skip464xlat;
 
-        return supported && connected && isIpv6OnlyNetwork && !skip464xlat;
+        boolean doXlat = SystemProperties.getBoolean("persist.vendor.net.doxlat", true);
+        if(!doXlat) {
+            Slog.i(TAG, "Android Xlat is disabled");
+        }
+
+        return supported && connected && isIpv6OnlyNetwork && !skip464xlat
+            && ((netType == ConnectivityManager.TYPE_MOBILE) ? doXlat : true);
     }
 
     /**

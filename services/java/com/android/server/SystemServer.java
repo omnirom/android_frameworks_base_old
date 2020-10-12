@@ -58,6 +58,7 @@ import android.os.FactoryTest;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.IIncidentManager;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -181,6 +182,9 @@ import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
+import dalvik.system.PathClassLoader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 import com.google.android.startop.iorap.IorapForwardingService;
 
@@ -1028,6 +1032,8 @@ public final class SystemServer {
         ConsumerIrService consumerIr = null;
         MmsServiceBroker mmsService = null;
         HardwarePropertiesManagerService hardwarePropertiesService = null;
+        Object wigigP2pService = null;
+        Object wigigService = null;
 
         boolean disableSystemTextClassifier = SystemProperties.getBoolean(
                 "config.disable_systemtextclassifier", false);
@@ -1039,6 +1045,7 @@ public final class SystemServer {
         boolean enableLeftyService = SystemProperties.getBoolean("config.enable_lefty", false);
 
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
+        boolean enableWigig = SystemProperties.getBoolean("persist.vendor.wigig.enable", false);
 
         boolean isWatch = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_WATCH);
@@ -1222,6 +1229,8 @@ public final class SystemServer {
             t.traceBegin("IorapForwardingService");
             mSystemServiceManager.startService(IorapForwardingService.class);
             t.traceEnd();
+
+            mSystemServiceManager.startService(ActivityTriggerService.class);
 
             t.traceBegin("SignedConfigService");
             SignedConfigService.registerUpdateReceiver(mSystemContext);
@@ -1539,6 +1548,34 @@ public final class SystemServer {
                 reportWtf("starting Connectivity Service", e);
             }
             t.traceEnd();
+
+            if (enableWigig) {
+                try {
+                    Slog.i(TAG, "Wigig Service");
+                    String wigigClassPath =
+                        "/system/system_ext/framework/wigig-service.jar" + ":" +
+                        "/system/system_ext/framework/vendor.qti.hardware.wigig.supptunnel-V1.0-java.jar" + ":" +
+                        "/system/system_ext/framework/vendor.qti.hardware.wigig.netperftuner-V1.0-java.jar" + ":" +
+                        "/system/system_ext/framework/vendor.qti.hardware.capabilityconfigstore-V1.0-java.jar";
+                    PathClassLoader wigigClassLoader =
+                            new PathClassLoader(wigigClassPath, getClass().getClassLoader());
+                    Class wigigP2pClass = wigigClassLoader.loadClass(
+                        "com.qualcomm.qti.server.wigig.p2p.WigigP2pServiceImpl");
+                    Constructor<Class> ctor = wigigP2pClass.getConstructor(Context.class);
+                    wigigP2pService = ctor.newInstance(context);
+                    Slog.i(TAG, "Successfully loaded WigigP2pServiceImpl class");
+                    ServiceManager.addService("wigigp2p", (IBinder) wigigP2pService);
+
+                    Class wigigClass = wigigClassLoader.loadClass(
+                        "com.qualcomm.qti.server.wigig.WigigService");
+                    ctor = wigigClass.getConstructor(Context.class);
+                    wigigService = ctor.newInstance(context);
+                    Slog.i(TAG, "Successfully loaded WigigService class");
+                    ServiceManager.addService("wigig", (IBinder) wigigService);
+                } catch (Throwable e) {
+                    reportWtf("starting WigigService", e);
+                }
+            }
 
             t.traceBegin("StartNsdService");
             try {
@@ -2124,6 +2161,25 @@ public final class SystemServer {
         t.traceBegin("StartBootPhaseSystemServicesReady");
         mSystemServiceManager.startBootPhase(t, SystemService.PHASE_SYSTEM_SERVICES_READY);
         t.traceEnd();
+
+        // Wigig services are not registered as system services because of class loader
+        // limitations, send boot phase notification separately
+        if (enableWigig) {
+            try {
+                Slog.i(TAG, "calling onBootPhase for Wigig Services");
+                Class wigigP2pClass = wigigP2pService.getClass();
+                Method m = wigigP2pClass.getMethod("onBootPhase", int.class);
+                m.invoke(wigigP2pService, new Integer(
+                    SystemService.PHASE_SYSTEM_SERVICES_READY));
+
+                Class wigigClass = wigigService.getClass();
+                m = wigigClass.getMethod("onBootPhase", int.class);
+                m.invoke(wigigService, new Integer(
+                    SystemService.PHASE_SYSTEM_SERVICES_READY));
+            } catch (Throwable e) {
+                reportWtf("Wigig services ready", e);
+            }
+        }
 
         t.traceBegin("MakeWindowManagerServiceReady");
         try {

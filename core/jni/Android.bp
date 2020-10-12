@@ -30,9 +30,11 @@ cc_library_shared {
         "android_text_AndroidCharacter.cpp",
         "android_util_EventLog.cpp",
         "android_util_Log.cpp",
+	"android_util_SeempLog.cpp",
         "android_util_StringBlock.cpp",
         "android_util_XmlBlock.cpp",
         "android_util_jar_StrictJarFile.cpp",
+	"com_android_internal_app_ActivityTrigger.cpp",
         "com_android_internal_util_VirtualRefBasePtr.cpp",
     ],
 
