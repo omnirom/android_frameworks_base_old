@@ -71,6 +71,7 @@ public class NotificationChannels extends SystemUI {
                 isTv(context)
                         ? NotificationManager.IMPORTANCE_DEFAULT
                         : NotificationManager.IMPORTANCE_LOW);
+        storage.setBlockable(true);
 
         final NotificationChannel hint = new NotificationChannel(
                 HINTS,
