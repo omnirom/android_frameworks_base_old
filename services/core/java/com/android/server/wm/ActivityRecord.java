@@ -262,6 +262,7 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
@@ -682,6 +683,8 @@ public final class ActivityRecord extends WindowToken implements WindowManagerSe
     ArrayDeque<Configuration> mFrozenMergedConfig = new ArrayDeque<>();
 
     private AppSaturationInfo mLastAppSaturationInfo;
+
+    private static final boolean sDisableServiceTracker = SystemProperties.getBoolean("ro.vendor.qti.servicetracker.disable", false);
 
     private final ColorDisplayService.ColorTransformController mColorTransformController =
             (matrix, translation) -> mWmService.mH.post(() -> {
@@ -4454,6 +4457,9 @@ public final class ActivityRecord extends WindowToken implements WindowManagerSe
     }
 
     void callServiceTrackeronActivityStatechange(ActivityState state, boolean early_notify) {
+        if (sDisableServiceTracker) {
+            return;
+        }
         IServicetracker mServicetracker;
         ActivityDetails aDetails = new ActivityDetails();
         ActivityStats aStats = new ActivityStats();
