@@ -5254,6 +5254,11 @@ public final class Settings {
          */
         public static final String OMNI_QS_TILE_TITLE_VISIBILITY = "qs_tile_title_visibility";
 
+        /**
+         * @hide
+         */
+        public static final String OMNI_QS_MEDIA_PLAYER_LESS_ROWS = "qs_less_rows";
+
          /**
          * @hide
          */
@@ -5539,7 +5544,8 @@ public final class Settings {
             OMNI_BATTERY_LIGHT_MEDIUM_COLOR,
             OMNI_BATTERY_LIGHT_FULL_COLOR,
             OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR,
-            OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED
+            OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED,
+            OMNI_QS_MEDIA_PLAYER_LESS_ROWS
         };
 
         /**
@@ -5596,6 +5602,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_FAST_BATTERY_LIGHT_COLOR, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_FAST_CHARGING_LED_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_MEDIA_PLAYER_LESS_ROWS, 0);
         }
     }
 

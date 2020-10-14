@@ -61,7 +61,8 @@ public class QSCustomizerSettings extends LinearLayout {
         mSettingsPager = findViewById(R.id.qs_settings_pager);
         layouts = new int[]{
                 R.layout.qs_customize_settings_tiles,
-                R.layout.qs_customize_settings_tuner};
+                R.layout.qs_customize_settings_tuner,
+                R.layout.qs_customize_settings_tuner_more};
 
         mAdapter = new ViewsSliderAdapter();
         mSettingsPager.setAdapter(mAdapter);

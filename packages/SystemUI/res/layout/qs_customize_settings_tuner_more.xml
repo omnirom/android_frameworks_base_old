@@ -25,7 +25,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginTop="5dp"
         android:orientation="horizontal">
 
             <TextView
@@ -34,34 +33,10 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:text="@string/tuner_show_brightness_new"/>
-
-            <org.omnirom.omnilib.widget.SecureSettingsSwitch
-                android:id="@+id/qs_show_brightness"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                systemui:initialValue="1"
-                android:layout_gravity="center_vertical"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginTop="5dp"
-        android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:text="@string/tuner_show_drag_handle" />
+                android:text="@string/tuner_qs_media_player" />
 
             <org.omnirom.omnilib.widget.SystemSettingsSwitch
-                android:id="@+id/qs_show_drag_handle"
+                android:id="@+id/qs_media_player"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 systemui:initialValue="1"
@@ -81,13 +56,14 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:text="@string/tuner_show_secure_title" />
+                android:text="@string/tuner_qs_less_rows"/>
 
             <org.omnirom.omnilib.widget.SystemSettingsSwitch
-                android:id="@+id/qs_show_secure"
+                android:id="@+id/qs_less_rows"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 systemui:initialValue="1"
                 android:layout_gravity="center_vertical"/>
+
     </LinearLayout>
 </com.android.systemui.qs.customize.QSCustomizerSettingsTuner>

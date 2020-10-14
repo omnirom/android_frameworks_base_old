@@ -449,6 +449,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE);
         Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_QS_QUICKBAR_COLUMNS);
         Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_QS_TILE_TITLE_VISIBILITY);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_QS_MEDIA_PLAYER_LESS_ROWS);
     }
 
     @Override
