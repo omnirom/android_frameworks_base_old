@@ -239,6 +239,15 @@ public class OmniJawsClient {
         return null;
     }
 
+    public Intent getServiceSettingsIntent() {
+        if (isOmniJawsServiceInstalled()) {
+            Intent settings = new Intent(Intent.ACTION_MAIN)
+                    .setClassName("org.omnirom.omnijaws", "org.omnirom.omnijaws.SettingsActivityService");
+            return settings;
+        }
+        return null;
+    }
+
     public WeatherInfo getWeatherInfo() {
         return mCachedInfo;
     }
