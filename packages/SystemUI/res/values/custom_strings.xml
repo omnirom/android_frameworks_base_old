@@ -25,4 +25,10 @@
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <string name="global_action_reboot_fastboot">Fastboot</string>
+
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
+
+     <!-- Screenshot Tile -->
+    <string name="screenshot_long_press">Long press for an selected region</string>
 </resources>
