@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8dd0acd_17427250",
+        "filename": "packages/SystemUI/res/values/custom_strings.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002555
+      },
+      "writtenOn": "2020-10-14T17:48:29Z",
+      "side": 1,
+      "message": "What about just \"Heads-up\" ?",
+      "revId": "348e7c043a21cb94eb7485abbf7e7d7c2a90245b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
