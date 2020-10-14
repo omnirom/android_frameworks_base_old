@@ -35,4 +35,18 @@
     <string name="omnijaws_current_text">Now</string>
     <string name="omnijaws_package_not_available">OmniJaws not available</string>
     <string name="omnijaws_service_last_update">Last update:</string>
+
+    <!-- Power Tile -->
+    <string name="qs_power_button_title">Power button</string>
+        
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">Heads-up notifications</string>
+    <string name="accessibility_quick_settings_heads_up_off">Heads-up notifications disabled.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Heads-up notifications allowed.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Heads-up notifications turned off.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Heads-up notifications turned on.</string>
+
+     <!-- Screenshot Tile -->
+    <string name="screenshot_error_title">Screenshot invalid</string>
+
 </resources>
