@@ -35,12 +35,15 @@ import com.android.systemui.qs.tiles.ColorInversionTile;
 import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
+import com.android.systemui.qs.tiles.HeadsUpTile;
 import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
+import com.android.systemui.qs.tiles.PowerButtonTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.ScreenRecordTile;
+import com.android.systemui.qs.tiles.ScreenshotTile;
 import com.android.systemui.qs.tiles.UiModeNightTile;
 import com.android.systemui.qs.tiles.UserTile;
 import com.android.systemui.qs.tiles.WeatherTile;
@@ -81,6 +84,9 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<ScreenRecordTile> mScreenRecordTileProvider;
     //Omni
     private final Provider<WeatherTile> mWeatherTileProvider;
+    private final Provider<HeadsUpTile> mHeadsUpTileProvider;
+    private final Provider<ScreenshotTile> mScreenshotTileProvider;
+    private final Provider<PowerButtonTile> mPowerButtonTileProvider;
 
     private final Lazy<QSHost> mQsHostLazy;
 
@@ -106,7 +112,10 @@ public class QSFactoryImpl implements QSFactory {
             Provider<GarbageMonitor.MemoryTile> memoryTileProvider,
             Provider<UiModeNightTile> uiModeNightTileProvider,
             Provider<ScreenRecordTile> screenRecordTileProvider,
-            Provider<WeatherTile> weatherTileProvider) {
+            Provider<WeatherTile> weatherTileProvider,
+            Provider<HeadsUpTile> headsupTileProvider,
+            Provider<ScreenshotTile> screenshotTileProvider,
+            Provider<PowerButtonTile> powerButtonTileProvider) {
         mQsHostLazy = qsHostLazy;
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
@@ -130,6 +139,9 @@ public class QSFactoryImpl implements QSFactory {
         mScreenRecordTileProvider = screenRecordTileProvider;
         //Omni
         mWeatherTileProvider = weatherTileProvider;
+        mHeadsUpTileProvider = headsupTileProvider;
+        mScreenshotTileProvider = screenshotTileProvider;
+        mPowerButtonTileProvider = powerButtonTileProvider;
     }
 
     public QSTile createTile(String tileSpec) {
@@ -184,6 +196,12 @@ public class QSFactoryImpl implements QSFactory {
             // Omni tiles
             case "weather":
                 return mWeatherTileProvider.get();
+            case "heads_up":
+                return mHeadsUpTileProvider.get();
+            case "screenshot":
+                return mScreenshotTileProvider.get();
+            case "power":
+                return mPowerButtonTileProvider.get();
         }
 
         // Custom tiles

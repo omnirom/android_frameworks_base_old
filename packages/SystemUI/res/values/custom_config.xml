@@ -23,11 +23,11 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_extra" translatable="false">
-        weather
+        heads_up,nfc,power,screenshot,weather
     </string>
 
     <!--<string name="quick_settings_tiles_extra" translatable="false">
-        aod,caffeine,nfc,heads_up,immersive,screenshot,dataswitch,power
+        aod,caffeine,immersive,dataswitch
     </string>-->
 
     <!-- absolute maximum for qs columns 
