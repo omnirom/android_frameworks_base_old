@@ -5655,12 +5655,41 @@ public final class Settings {
         */
 
         /**
+         * @hide
+         */
+        public static final String OMNI_SYSTEM_PROXI_CHECK_ENABLED = "system_proxi_check_enabled";
+
+        /**
+         * Enable proxi check for wake keys - must be implemented in a device
+         * KeyHandler
+         * @hide
+         */
+        public static final String OMNI_DEVICE_PROXI_CHECK_ENABLED = "device_proxi_check_enabled";
+
+        /**
+         * some devices have a extra hw button e.g. n3 on the back on the
+         * fingerprint sensor. allow mapping button to key
+         *
+         * @hide
+         */
+        public static final String OMNI_BUTTON_EXTRA_KEY_MAPPING = "button_extra_mapping";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_DEVICE_FEATURE_SETTINGS = "device_feature_settings";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
          */
         public static final String[] OMNI_SETTINGS_TO_BACKUP = {
             // OMNI_FOO_BAR_BALABALA
+            OMNI_SYSTEM_PROXI_CHECK_ENABLED,
+            OMNI_DEVICE_PROXI_CHECK_ENABLED,
+            OMNI_BUTTON_EXTRA_KEY_MAPPING,
+            OMNI_DEVICE_FEATURE_SETTINGS
         };
 
         /**
@@ -5675,6 +5704,10 @@ public final class Settings {
         public static final Map<String, Integer> OMNI_SETTINGS_VALIDATORS = new ArrayMap<>();
         static {
             //OMNI_SETTINGS_VALIDATORS.put(OMNI_FOO_BAR_BALABALA, 1);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_SYSTEM_PROXI_CHECK_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_PROXI_CHECK_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_BUTTON_EXTRA_KEY_MAPPING, 2);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS, 2);
         }
     }
 
