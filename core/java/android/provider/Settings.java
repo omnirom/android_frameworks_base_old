@@ -5254,6 +5254,45 @@ public final class Settings {
          */
         public static final String OMNI_QS_TILE_TITLE_VISIBILITY = "qs_tile_title_visibility";
 
+         /**
+         * @hide
+         */
+        public static final String OMNI_SYSTEM_PROXI_CHECK_ENABLED = "system_proxi_check_enabled";
+
+        /**
+         * Enable proxi check for wake keys - must be implemented in a device
+         * KeyHandler
+         * @hide
+         */
+        public static final String OMNI_DEVICE_PROXI_CHECK_ENABLED = "device_proxi_check_enabled";
+
+        /**
+         * Enable Gesture Haptic feedback
+         * KeyHandler
+         * @hide
+         */
+        public static final String OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED =
+                "device_gesture_feedback_enabled";
+
+        /**
+         * some devices have a extra hw button e.g. n3 on the back on the
+         * fingerprint sensor. allow mapping button to key
+         *
+         * @hide
+         */
+        public static final String OMNI_BUTTON_EXTRA_KEY_MAPPING = "button_extra_mapping";
+
+        /**
+         * Disable hw buttons - actions, brightness, haptic feedback, overflow menu
+         * @hide
+         */
+        public static final String OMNI_HARDWARE_KEYS_DISABLE = "hardware_keys_disable";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_DEVICE_FEATURE_SETTINGS = "device_feature_settings";
+
         /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
@@ -5265,6 +5304,12 @@ public final class Settings {
             OMNI_QS_LAYOUT_COLUMNS,
             OMNI_QS_QUICKBAR_COLUMNS,
             OMNI_QS_TILE_TITLE_VISIBILITY,
+            OMNI_SYSTEM_PROXI_CHECK_ENABLED,
+            OMNI_DEVICE_PROXI_CHECK_ENABLED,
+            OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED,
+            OMNI_BUTTON_EXTRA_KEY_MAPPING,
+            OMNI_HARDWARE_KEYS_DISABLE,
+            OMNI_DEVICE_FEATURE_SETTINGS,
         };
 
         /**
@@ -5284,6 +5329,12 @@ public final class Settings {
                     1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_TILE_TITLE_VISIBILITY, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_SYSTEM_PROXI_CHECK_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_PROXI_CHECK_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_BUTTON_EXTRA_KEY_MAPPING, 2);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_HARDWARE_KEYS_DISABLE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS, 2);
         }
     }
 
