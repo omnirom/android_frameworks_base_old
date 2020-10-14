@@ -38,6 +38,7 @@
     <string name="tuner_battery_location_bar">Show battery in status bar</string>
     <string name="tuner_status_bar_bg_transparency">Transparent status bar background</string>
     <string name="tuner_qs_media_player">Inline media player - reboot required</string>
+    <string name="tuner_qs_media_player_rows">Adjust rows for media player</string>
 
     <string name="tuner_keyguard_fod_unlock_enabled_title">Allow secondary FOD unlock</string>
     <string name="tuner_keyguard_fod_unlock_enabled_summary">For devices with FOD allow using on secondary unlock screens</string>

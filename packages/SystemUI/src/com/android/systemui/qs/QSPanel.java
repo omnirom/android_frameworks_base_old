@@ -220,6 +220,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     protected void onMediaVisibilityChanged(Boolean visible) {
+        if (mRegularTileLayout instanceof PagedTileLayout) {
+            mRegularTileLayout.setMediaPlayerShowing(visible);
+        }
         switchTileLayout();
         if (mMediaVisibilityChangedListener != null) {
             mMediaVisibilityChangedListener.accept(visible);
@@ -1283,5 +1286,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         default int getSettingsColumns() {
             return getNumColumns();
         }
+
+        default void setMediaPlayerShowing(boolean showing) {}
     }
 }
