@@ -72,6 +72,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mMaxColumns = TileLayout.NO_MAX_COLUMNS;
     private int mColumns = -1;
     private int mLastWidth= -1;
+    private boolean mQsMediaPlayerShowing;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -414,7 +415,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             // Only change the pages if the number of rows or columns (from updateResources) has
             // changed or the tiles have changed
             int availableHeight = mLastMaxHeight - mExcessHeight;
-            if (mPages.get(0).updateMaxRows(availableHeight, nTiles) || mDistributeTiles) {
+            if (mPages.get(0).updateMaxRows(availableHeight, nTiles, mQsMediaPlayerShowing) || mDistributeTiles) {
                 mDistributeTiles = false;
                 distributeTiles();
             }
@@ -640,5 +641,13 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             changed = true;
         }
         return changed;
+    }
+
+    @Override
+    public void setMediaPlayerShowing(boolean showing) {
+        if (DEBUG) Log.d(TAG, "mMediaPlayerShowing = " + showing);
+        mQsMediaPlayerShowing = showing;
+        mDistributeTiles = true;
+        requestLayout();
     }
 }
