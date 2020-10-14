@@ -25,4 +25,13 @@
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <string name="global_action_reboot_fastboot">Fastboot</string>
+
+    <!-- Power Tile -->
+    <string name="qs_power_button_title">Power button</string>
+
+     <!-- Screenshot Tile -->
+    <string name="screenshot_long_press">Long press for an selected region</string>
+
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
 </resources>
