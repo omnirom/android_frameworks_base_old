@@ -36,9 +36,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private int mCellMarginTop;
     protected boolean mListening;
     protected int mMaxAllowedRows = 3;
-
-    // Prototyping with less rows
-    private final boolean mLessRows;
     private int mMinRows = 1;
     private int mMaxColumns = NO_MAX_COLUMNS;
     private int mResourceColumns;
@@ -52,8 +49,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     public TileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         setFocusableInTouchMode(true);
-        mLessRows = (Settings.System.getInt(context.getContentResolver(), "qs_less_rows", 0) != 0)
-                || useQsMediaPlayer(context);
         updateResources();
 
     }
@@ -122,7 +117,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
         mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);
         mMaxAllowedRows = Math.max(1, getResources().getInteger(R.integer.quick_settings_max_rows));
-        if (mLessRows) mMaxAllowedRows = Math.max(mMinRows, mMaxAllowedRows - 1);
         updateSettings();
         return true;
     }
@@ -172,16 +166,26 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
      * @param allowedHeight The height this view has visually available
      * @param tilesCount Upper limit on the number of tiles to show. to prevent empty rows.
      */
-    public boolean updateMaxRows(int allowedHeight, int tilesCount) {
+    public boolean updateMaxRows(int allowedHeight, int tilesCount, boolean mediaPlayerShowing) {
         final int availableHeight =  allowedHeight - mCellMarginTop
                 // Add the cell margin in order to divide easily by the height + the margin below
                 + mCellMarginVertical;
         final int previousRows = mRows;
+        int maxAllowedRows = mMaxAllowedRows;
+        boolean lessRows = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.OMNI_QS_MEDIA_PLAYER_LESS_ROWS, 1) == 1;
+        if (mediaPlayerShowing || lessRows) {
+            maxAllowedRows = Math.max(mMinRows, maxAllowedRows - 1);
+        } else {
+            maxAllowedRows = Math.max(mMinRows, maxAllowedRows);
+        }
+
+        Log.d(TAG, "lessRows = "  + lessRows + " maxAllowedRows = " + maxAllowedRows + " mediaPlayerShowing = " + mediaPlayerShowing);
         mRows = availableHeight / (mCellHeight + mCellMarginVertical);
         if (mRows < mMinRows) {
             mRows = mMinRows;
-        } else if (mRows >= mMaxAllowedRows) {
-            mRows = mMaxAllowedRows;
+        } else if (mRows >= maxAllowedRows) {
+            mRows = maxAllowedRows;
         }
         if (mRows > (tilesCount + mColumns - 1) / mColumns) {
             mRows = (tilesCount + mColumns - 1) / mColumns;
