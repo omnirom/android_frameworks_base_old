@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d3527b1_f859dfd1",
+        "filename": "proto/src/metrics_constants/metrics_constants.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 7434,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-10-14T21:32:47Z",
+      "side": 1,
+      "message": "we dont need those anymore",
+      "revId": "6fbde3ea9a7b64fff08475f500270a5a1754eb5d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
