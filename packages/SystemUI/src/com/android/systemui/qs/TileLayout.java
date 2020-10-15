@@ -292,6 +292,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
      * retuns how many columns of tiles would fit into measuredWidth
      */
     protected int getMaxVisibleColumns(int columns, int measuredWidth) {
+        if (measuredWidth == 0) {
+            return mResourceColumns;
+        }
         int maxColumns = 0;
 
         final int cellWidth = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size) + mCellMarginHorizontal;
@@ -305,7 +308,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             maxColumns = Math.min(columns, availableWidth / cellWidth );
         }
 
-        return maxColumns;
+        return Math.max(mResourceColumns, maxColumns);
     }
 
     protected boolean updateVisibleColumns(int measuredWidth) {
