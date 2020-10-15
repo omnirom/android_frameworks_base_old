@@ -99,7 +99,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private int mResourceColumns;
     private int mSettingsColumns;
     private int mCellMarginHorizontal;
-    private int mColumns = 3;
+    private int mColumns;
     private boolean mShowLabels = true;
     private boolean mSettingsShown;
     private int mOrientation = -1;
@@ -140,6 +140,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mRecyclerView.setAdapter(mTileAdapter);
         mTileAdapter.getItemTouchHelper().attachToRecyclerView(mRecyclerView);
         mResourceColumns = Math.max(1, mContext.getResources().getInteger(R.integer.quick_settings_num_columns));
+        mColumns = mResourceColumns;
         mCellMarginHorizontal = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
 
         GridLayoutManager layout = new GridLayoutManager(getContext(), getSettingsColumns()) {
@@ -435,6 +436,10 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     }
 
     private void updateGridLayoud() {
+        if (mColumns == 0) {
+            // should not happen
+            return;
+        }
         if (DEBUG) Log.d(TAG, "updateGridLayoud " + mColumns);
         GridLayoutManager manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
         manager.setSpanCount(mColumns);
@@ -479,6 +484,9 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
      * retuns how many columns of tiles would fit into measuredWidth
      */
     private int getMaxVisibleColumns(int columns, int measuredWidth) {
+        if (measuredWidth == 0) {
+            return mResourceColumns;
+        }
         int maxColumns = 0;
 
         final int cellWidth = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size) + mCellMarginHorizontal;
@@ -492,10 +500,6 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             maxColumns = Math.min(columns, availableWidth / cellWidth );
         }
 
-        return maxColumns;
-    }
-
-    private int getMaxPossibleColumns() {
-        return getMaxVisibleColumns(42, getMeasuredWidth());
+        return Math.max(1, maxColumns);
     }
 }
