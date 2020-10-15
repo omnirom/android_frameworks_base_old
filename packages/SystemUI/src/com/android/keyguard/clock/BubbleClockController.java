@@ -207,4 +207,9 @@ public class BubbleClockController implements ClockPlugin {
     public boolean shouldShowStatusArea() {
         return true;
     }
+
+    @Override
+    public boolean shouldShowInBigContainer() {
+        return true;
+    }
 }
