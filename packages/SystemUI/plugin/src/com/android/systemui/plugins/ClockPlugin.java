@@ -133,4 +133,8 @@ public interface ClockPlugin extends Plugin {
     default boolean shouldShowStatusArea() {
         return true;
     }
+
+    default boolean shouldShowInBigContainer() {
+        return false;
+    }
 }
