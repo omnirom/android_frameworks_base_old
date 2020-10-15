@@ -99,10 +99,11 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private int mResourceColumns;
     private int mSettingsColumns;
     private int mCellMarginHorizontal;
-    private int mColumns = 3;
+    private int mColumns;
     private boolean mShowLabels = true;
     private boolean mSettingsShown;
     private int mOrientation = -1;
+    private int mLastWidth = -1;
 
     @Inject
     public QSCustomizer(Context context, AttributeSet attrs,
@@ -140,6 +141,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mRecyclerView.setAdapter(mTileAdapter);
         mTileAdapter.getItemTouchHelper().attachToRecyclerView(mRecyclerView);
         mResourceColumns = Math.max(1, mContext.getResources().getInteger(R.integer.quick_settings_num_columns));
+        mColumns = mResourceColumns;
         mCellMarginHorizontal = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
 
         GridLayoutManager layout = new GridLayoutManager(getContext(), getSettingsColumns()) {
@@ -436,6 +438,10 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     private void updateGridLayoud() {
         if (DEBUG) Log.d(TAG, "updateGridLayoud " + mColumns);
+        if (mColumns == 0) {
+            // should not happen
+            return;
+        }
         GridLayoutManager manager = (GridLayoutManager) mRecyclerView.getLayoutManager();
         manager.setSpanCount(mColumns);
         mTileAdapter.setColumns(mColumns);
@@ -465,12 +471,18 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         // if we detect that the size has changed and we can show more/less
         // columns trigger an update and post a relayout
-        int columns = getMaxVisibleColumns(mSettingsColumns, getMeasuredWidth());
-        if (columns != mColumns) {
-            mColumns = columns;
-            post(() -> {
-                updateGridLayoud();
-            });
+        if (mLastWidth != getMeasuredWidth()) {
+            mLastWidth = getMeasuredWidth();
+
+            if (DEBUG) Log.d(TAG, "onLayout " + getMeasuredWidth());
+
+            int columns = getMaxVisibleColumns(mSettingsColumns, getMeasuredWidth());
+            if (columns != mColumns) {
+                mColumns = columns;
+                post(() -> {
+                    updateGridLayoud();
+                });
+            }
         }
         super.onLayout(changed, l, t, r, b);
     }
@@ -479,6 +491,10 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
      * retuns how many columns of tiles would fit into measuredWidth
      */
     private int getMaxVisibleColumns(int columns, int measuredWidth) {
+        if (DEBUG) Log.d(TAG, "getMaxVisibleColumns " + columns + " " +measuredWidth);
+        if (measuredWidth == 0) {
+            return mResourceColumns;
+        }
         int maxColumns = 0;
 
         final int cellWidth = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size) + mCellMarginHorizontal;
@@ -492,10 +508,6 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             maxColumns = Math.min(columns, availableWidth / cellWidth );
         }
 
-        return maxColumns;
-    }
-
-    private int getMaxPossibleColumns() {
-        return getMaxVisibleColumns(42, getMeasuredWidth());
+        return Math.max(mResourceColumns, maxColumns);
     }
 }

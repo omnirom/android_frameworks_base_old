@@ -71,6 +71,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mMinRows = 1;
     private int mMaxColumns = TileLayout.NO_MAX_COLUMNS;
     private int mColumns = -1;
+    private int mLastWidth= -1;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -342,19 +343,22 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        // if we detect that the size has changed and we can show more/less
-        // columns trigger an update and post a relayout
-        if (updateVisibleColumns(getMeasuredWidth())) {
-            Log.d(TAG, "onLayout " + getNumColumns());
-            // will update all current pages
-            updateColumns(getNumColumns());
-            post(() -> {
-                // make sure any new pages created in distributeTiles get correct
-                // num of columns
-                mColumns = getNumColumns();
-                distributeTiles();
-                mColumns = -1;
-            });
+         if (mLastWidth != getMeasuredWidth()) {
+            mLastWidth = getMeasuredWidth();
+            // if we detect that the size has changed and we can show more/less
+            // columns trigger an update and post a relayout
+            if (updateVisibleColumns(getMeasuredWidth())) {
+                if (DEBUG) Log.d(TAG, "onLayout " + getNumColumns());
+                // will update all current pages
+                updateColumns(getNumColumns());
+                post(() -> {
+                    // make sure any new pages created in distributeTiles get correct
+                    // num of columns
+                    mColumns = getNumColumns();
+                    distributeTiles();
+                    mColumns = -1;
+                });
+            }
         }
 
         super.onLayout(changed, l, t, r, b);
