@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/assets/res/any/strings.xml
 **
-** Copyright 2006, The Android Open Source Project
+** Copyright 2012, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License");
+** Licensed under the Apache License, Version 2.0 (the "License")
 ** you may not use this file except in compliance with the License.
 ** You may obtain a copy of the License at
 **
@@ -17,10 +16,11 @@
 ** limitations under the License.
 */
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="clock_title_binary" translatable="false">Binary</string>
-    <string name="clock_title_two_line_digital" translatable="false">Vertical</string>
-    <string name="clock_title_one_line_digital" translatable="false">Digital</string>
+<resources>
+
+    <style name="widget_big_thin" parent="widget_big" >
+        <item name="android:fontFamily">sans-serif-thin</item>
+    </style>
 
 </resources>

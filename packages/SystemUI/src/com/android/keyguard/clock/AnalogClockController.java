@@ -135,6 +135,7 @@ public class AnalogClockController implements ClockPlugin {
 
         // Use the big clock view for the preview
         View view = getBigClockView();
+        mBigClockView.setBurnInProtection(false);
 
         // Initialize state of plugin before generating preview.
         setDarkAmount(1f);
@@ -143,7 +144,9 @@ public class AnalogClockController implements ClockPlugin {
         setColorPalette(colors.supportsDarkText(), colors.getColorPalette());
         onTimeTick();
 
-        return mRenderer.createPreview(view, width, height);
+        Bitmap b = mRenderer.createPreview(view, width, height);
+        mBigClockView.setBurnInProtection(true);
+        return b;
     }
 
     @Override
