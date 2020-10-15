@@ -25,6 +25,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextClock;
 
+import androidx.core.graphics.ColorUtils;
+
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -68,6 +70,10 @@ public class AnalogClockController implements ClockPlugin {
     private ClockLayout mBigClockView;
     private ImageClock mAnalogClock;
 
+    private int mHourColor;
+    private int mMinuteColor;
+    private int mBackgroundColor;
+
     /**
      * Small clock shown on lock screen above stack scroller.
      */
@@ -97,6 +103,10 @@ public class AnalogClockController implements ClockPlugin {
     private void createViews() {
         mBigClockView = (ClockLayout) mLayoutInflater.inflate(R.layout.analog_clock, null);
         mAnalogClock = mBigClockView.findViewById(R.id.analog_clock);
+        mHourColor = mResources.getColor(R.color.analog_clock_hour_color);
+        mMinuteColor = mResources.getColor(R.color.analog_clock_minute_color);
+        mBackgroundColor = mResources.getColor(R.color.analog_clock_bg_color);
+        mAnalogClock.setClockColors(mHourColor, mMinuteColor);
 
         mView = mLayoutInflater.inflate(R.layout.digital_clock, null);
         mLockClock = mView.findViewById(R.id.lock_screen_clock);
@@ -144,10 +154,11 @@ public class AnalogClockController implements ClockPlugin {
 
     @Override
     public View getView() {
-        if (mView == null) {
+        /*if (mView == null) {
             createViews();
         }
-        return mView;
+        return mView;*/
+        return null;
     }
 
     @Override
@@ -160,7 +171,8 @@ public class AnalogClockController implements ClockPlugin {
 
     @Override
     public int getPreferredY(int totalHeight) {
-        return mClockPosition.getPreferredY();
+        //return mClockPosition.getPreferredY();
+        return totalHeight / 2;
     }
 
     @Override
@@ -181,7 +193,7 @@ public class AnalogClockController implements ClockPlugin {
         final int primary = mPalette.getPrimaryColor();
         final int secondary = mPalette.getSecondaryColor();
         mLockClock.setTextColor(secondary);
-        mAnalogClock.setClockColors(primary, secondary);
+        //mAnalogClock.setClockColors(primary, secondary);
     }
 
     @Override
@@ -195,6 +207,16 @@ public class AnalogClockController implements ClockPlugin {
     public void setDarkAmount(float darkAmount) {
         mPalette.setDarkAmount(darkAmount);
         mClockPosition.setDarkAmount(darkAmount);
+
+        int hourColor = ColorUtils.blendARGB(mHourColor, Color.WHITE, darkAmount);
+        int minuteColor = ColorUtils.blendARGB(mMinuteColor, Color.WHITE, darkAmount);
+        if (darkAmount == 1f) {
+            mAnalogClock.setBackgroundResource(R.drawable.analog_clock_background_dark);
+        } else {
+            mAnalogClock.setBackgroundResource(R.drawable.analog_clock_background);
+        }
+
+        mAnalogClock.setClockColors(hourColor, minuteColor);
         mBigClockView.setDarkAmount(darkAmount);
     }
 

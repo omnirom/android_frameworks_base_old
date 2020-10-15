@@ -92,7 +92,7 @@ public class BinaryClockController implements ClockPlugin {
 
     private void createViews() {
         mBigClockView = (ClockLayout) mLayoutInflater.inflate(R.layout.binary_clock, null);
-        mBinaryClock = mBigClockView.findViewById(R.id.analog_clock);
+        mBinaryClock = mBigClockView.findViewById(R.id.binary_clock);
 
         mView = mLayoutInflater.inflate(R.layout.digital_clock, null);
         mLockClock = mView.findViewById(R.id.lock_screen_clock);
@@ -139,10 +139,11 @@ public class BinaryClockController implements ClockPlugin {
 
     @Override
     public View getView() {
-        if (mView == null) {
+        /*if (mView == null) {
             createViews();
         }
-        return mView;
+        return mView;*/
+        return null;
     }
 
     @Override
@@ -155,7 +156,8 @@ public class BinaryClockController implements ClockPlugin {
 
     @Override
     public int getPreferredY(int totalHeight) {
-        return mClockPosition.getPreferredY();
+        //return mClockPosition.getPreferredY();
+        return totalHeight / 2;
     }
 
     @Override

@@ -658,6 +658,10 @@ public class NotificationPanelViewController extends PanelViewController {
         return mKeyguardStatusView.hasCustomClock();
     }
 
+    public boolean hasCustomClockInBigContainer() {
+        return mKeyguardStatusView.hasCustomClockInBigContainer();
+    }
+
     private void setStatusBar(StatusBar bar) {
         // TODO: this can be injected.
         mStatusBar = bar;
@@ -813,7 +817,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mClockPositionAlgorithm.setup(mStatusBarMinHeight, totalHeight - bottomPadding,
                     mNotificationStackScroller.getIntrinsicContentHeight(), getExpandedFraction(),
                     totalHeight, (int) (mKeyguardStatusView.getHeight() - mShelfHeight / 2.0f
-                            - mDarkIconSize / 2.0f), clockPreferredY, hasCustomClock(),
+                            - mDarkIconSize / 2.0f), clockPreferredY, hasCustomClockInBigContainer(),
                     hasVisibleNotifications, mInterpolatedDarkAmount, mEmptyDragAmount,
                     bypassEnabled, getUnlockedStackScrollerPadding());
             mClockPositionAlgorithm.run(mClockPositionResult);
