@@ -19,28 +19,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.android.keyguard.clock.ImageClock
-        android:id="@+id/analog_clock"
-        android:layout_width="@dimen/analog_clock_width"
-        android:layout_height="@dimen/analog_clock_height"
-        android:background="@drawable/analog_clock_background"
-        android:layout_marginBottom="@dimen/clock_bottom_margin"
+    <com.android.keyguard.clock.DigitalClock
+        android:id="@+id/digital_clock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center" >
 
-        <ImageView
-            android:id="@+id/hour_hand"
-            android:layout_width="wrap_content"
+        <TextClock
+            android:id="@+id/time"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@drawable/analog_hour_hand" />
-        <ImageView
-            android:id="@+id/minute_hand"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/analog_minute_hand" />
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/analog_frame"/>
-
-    </com.android.keyguard.clock.ImageClock>
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:textColor="?attr/wallpaperTextColor"
+            android:singleLine="true"
+            style="@style/widget_big_thin"
+            android:textSize="@dimen/widget_big_font_size"
+            android:format12Hour="@string/keyguard_widget_12_hours_format"
+            android:format24Hour="@string/keyguard_widget_24_hours_format"
+            android:elegantTextHeight="false"
+        />
+    </com.android.keyguard.clock.DigitalClock>
 </com.android.keyguard.clock.ClockLayout>
+
