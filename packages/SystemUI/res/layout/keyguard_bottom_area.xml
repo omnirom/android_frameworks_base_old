@@ -59,7 +59,7 @@
         android:id="@+id/keyguard_selector_fade_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="70dp"
+        android:layout_marginBottom="@dimen/keyguard_eca_bottom_margin"
         android:orientation="vertical"
         android:layout_gravity="bottom|center_horizontal"
         android:gravity="center_horizontal" />
