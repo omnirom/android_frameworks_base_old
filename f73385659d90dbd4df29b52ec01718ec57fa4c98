@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3f84ac13_5212851f",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 5274,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-10-16T22:18:03Z",
+      "side": 1,
+      "message": "not related to this change - think this is even obsolete and can be removed",
+      "revId": "f73385659d90dbd4df29b52ec01718ec57fa4c98",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09c1c011_05d2aebb",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 5289,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-10-16T22:18:03Z",
+      "side": 1,
+      "message": "also not really related",
+      "revId": "f73385659d90dbd4df29b52ec01718ec57fa4c98",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a0cd460_b8cdb40f",
+        "filename": "core/res/res/values/custom_symbols.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2020-10-16T22:18:03Z",
+      "side": 1,
+      "message": "not related to this change",
+      "revId": "f73385659d90dbd4df29b52ec01718ec57fa4c98",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
+    }
+  ]
+}
