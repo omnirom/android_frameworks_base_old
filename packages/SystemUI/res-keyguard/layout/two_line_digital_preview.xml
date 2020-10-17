@@ -28,7 +28,7 @@
         android:layout_centerInParent="true"
         android:layout_above="@id/date"
         android:scaleType="center"
-        android:src="@drawable/one_line_digital_preview"/>
+        android:src="@drawable/two_line_digital_preview"/>
 
     <TextClock
         android:id="@+id/date"

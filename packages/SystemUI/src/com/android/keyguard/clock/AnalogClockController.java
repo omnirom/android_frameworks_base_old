@@ -57,7 +57,7 @@ public class AnalogClockController implements ClockPlugin {
     /**
      * Computes preferred position of clock.
      */
-    private final SmallClockPosition mClockPosition;
+    //private final SmallClockPosition mClockPosition;
 
     /**
      * Renders preview from clock view.
@@ -77,8 +77,8 @@ public class AnalogClockController implements ClockPlugin {
     /**
      * Small clock shown on lock screen above stack scroller.
      */
-    private View mView;
-    private TextClock mLockClock;
+    //private View mView;
+    //private TextClock mLockClock;
 
     /**
      * Create a AnalogClockController instance.
@@ -92,7 +92,7 @@ public class AnalogClockController implements ClockPlugin {
         mResources = res;
         mLayoutInflater = inflater;
         mColorExtractor = colorExtractor;
-        mClockPosition = new SmallClockPosition(res);
+        //mClockPosition = new SmallClockPosition(res);
     }
 
     private void createViews() {
@@ -103,16 +103,16 @@ public class AnalogClockController implements ClockPlugin {
         mBackgroundColor = mResources.getColor(R.color.analog_clock_bg_color);
         mAnalogClock.setClockColors(mHourColor, mMinuteColor);
 
-        mView = mLayoutInflater.inflate(R.layout.digital_clock, null);
-        mLockClock = mView.findViewById(R.id.lock_screen_clock);
+        //mView = mLayoutInflater.inflate(R.layout.digital_clock, null);
+        //mLockClock = mView.findViewById(R.id.lock_screen_clock);
     }
 
     @Override
     public void onDestroyView() {
         mBigClockView = null;
         mAnalogClock = null;
-        mView = null;
-        mLockClock = null;
+        //mView = null;
+        //mLockClock = null;
     }
 
     @Override
@@ -132,21 +132,14 @@ public class AnalogClockController implements ClockPlugin {
 
     @Override
     public Bitmap getPreview(int width, int height) {
-
-        // Use the big clock view for the preview
-        View view = getBigClockView();
-        mBigClockView.setBurnInProtection(false);
-
-        // Initialize state of plugin before generating preview.
-        setDarkAmount(1f);
-        ColorExtractor.GradientColors colors = mColorExtractor.getColors(
-                WallpaperManager.FLAG_LOCK);
-        setColorPalette(colors.supportsDarkText(), colors.getColorPalette());
-        onTimeTick();
-
-        Bitmap b = mRenderer.createPreview(view, width, height);
-        mBigClockView.setBurnInProtection(true);
-        return b;
+        View previewClock = mLayoutInflater.inflate(R.layout.analog_clock_preview, null);
+        ImageClock analogClock = previewClock.findViewById(R.id.analog_clock);
+        analogClock.setClockColors(Color.WHITE, Color.WHITE);
+        analogClock.setBackgroundResource(R.drawable.analog_clock_background_dark);
+        analogClock.onTimeChanged();
+        TextClock textDate = previewClock.findViewById(R.id.date);
+        textDate.setTextColor(Color.WHITE);
+        return mRenderer.createPreview(previewClock, width, height);
     }
 
     @Override
@@ -186,7 +179,7 @@ public class AnalogClockController implements ClockPlugin {
     public void onTimeTick() {
         mAnalogClock.onTimeChanged();
         mBigClockView.onTimeChanged();
-        mLockClock.refreshTime();
+        //mLockClock.refreshTime();
     }
 
     @Override

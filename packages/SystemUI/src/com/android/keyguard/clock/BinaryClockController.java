@@ -56,7 +56,7 @@ public class BinaryClockController implements ClockPlugin {
     /**
      * Computes preferred position of clock.
      */
-    private final SmallClockPosition mClockPosition;
+   // private final SmallClockPosition mClockPosition;
 
     /**
      * Renders preview from clock view.
@@ -72,8 +72,8 @@ public class BinaryClockController implements ClockPlugin {
     /**
      * Small clock shown on lock screen above stack scroller.
      */
-    private View mView;
-    private TextClock mLockClock;
+    //private View mView;
+    //private TextClock mLockClock;
 
     /**
      * Create a BinaryClockController instance.
@@ -87,23 +87,23 @@ public class BinaryClockController implements ClockPlugin {
         mResources = res;
         mLayoutInflater = inflater;
         mColorExtractor = colorExtractor;
-        mClockPosition = new SmallClockPosition(res);
+        //mClockPosition = new SmallClockPosition(res);
     }
 
     private void createViews() {
         mBigClockView = (ClockLayout) mLayoutInflater.inflate(R.layout.binary_clock, null);
         mBinaryClock = mBigClockView.findViewById(R.id.binary_clock);
 
-        mView = mLayoutInflater.inflate(R.layout.digital_clock, null);
-        mLockClock = mView.findViewById(R.id.lock_screen_clock);
+        //mView = mLayoutInflater.inflate(R.layout.digital_clock, null);
+        //mLockClock = mView.findViewById(R.id.lock_screen_clock);
     }
 
     @Override
     public void onDestroyView() {
         mBigClockView = null;
         mBinaryClock = null;
-        mView = null;
-        mLockClock = null;
+        //mView = null;
+        //mLockClock = null;
     }
 
     @Override
@@ -123,21 +123,13 @@ public class BinaryClockController implements ClockPlugin {
 
     @Override
     public Bitmap getPreview(int width, int height) {
-        // Use the big clock view for the preview
-        View view = getBigClockView();
-        mBigClockView.setBurnInProtection(false);
-
-        // Initialize state of plugin before generating preview.
-        setDarkAmount(1f);
-        setTextColor(Color.WHITE);
-        ColorExtractor.GradientColors colors = mColorExtractor.getColors(
-                WallpaperManager.FLAG_LOCK);
-        setColorPalette(colors.supportsDarkText(), colors.getColorPalette());
-        onTimeTick();
-
-        Bitmap b = mRenderer.createPreview(view, width, height);
-        mBigClockView.setBurnInProtection(true);
-        return b;
+        View previewClock = mLayoutInflater.inflate(R.layout.binary_clock_preview, null);
+        BinaryClock binaryClock = previewClock.findViewById(R.id.binary_clock);
+        binaryClock.setDark(true);
+        binaryClock.onTimeChanged();
+        TextClock textDate = previewClock.findViewById(R.id.date);
+        textDate.setTextColor(Color.WHITE);
+        return mRenderer.createPreview(previewClock, width, height);
     }
 
     @Override
@@ -178,12 +170,12 @@ public class BinaryClockController implements ClockPlugin {
     public void onTimeTick() {
         mBinaryClock.onTimeChanged();
         mBigClockView.onTimeChanged();
-        mLockClock.refreshTime();
+        //mLockClock.refreshTime();
     }
 
     @Override
     public void setDarkAmount(float darkAmount) {
-        mClockPosition.setDarkAmount(darkAmount);
+        //mClockPosition.setDarkAmount(darkAmount);
         mBigClockView.setDarkAmount(darkAmount);
         boolean dark = darkAmount == 1;
         mBinaryClock.setDark(dark);
