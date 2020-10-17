@@ -50,4 +50,14 @@ public class TwoLineDigitalClockController extends DigitalClockController {
     public Bitmap getThumbnail() {
         return BitmapFactory.decodeResource(mResources, R.drawable.two_line_digital_thumbnail);
     }
+
+    @Override
+    public Bitmap getPreview(int width, int height) {
+        // TODO FAKE!!!!
+        ViewPreviewer renderer = new ViewPreviewer();
+        View previewClock = mLayoutInflater.inflate(R.layout.two_line_digital_preview, null);
+        TextClock textDate = previewClock.findViewById(R.id.date);
+        textDate.setTextColor(Color.WHITE);
+        return renderer.createPreview(previewClock, width, height);
+    }
 }

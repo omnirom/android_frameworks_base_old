@@ -55,7 +55,9 @@ public class OneLineDigitalClockController extends DigitalClockController {
     public Bitmap getPreview(int width, int height) {
         // TODO FAKE!!!!
         ViewPreviewer renderer = new ViewPreviewer();
-        View view = mLayoutInflater.inflate(R.layout.one_line_digital_preview, null);
-        return renderer.createPreview(view, width, height);
+        View previewClock = mLayoutInflater.inflate(R.layout.one_line_digital_preview, null);
+        TextClock textDate = previewClock.findViewById(R.id.date);
+        textDate.setTextColor(Color.WHITE);
+        return renderer.createPreview(previewClock, width, height);
     }
 }

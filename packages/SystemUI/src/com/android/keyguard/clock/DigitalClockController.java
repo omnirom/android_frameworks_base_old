@@ -63,8 +63,8 @@ public abstract class DigitalClockController implements ClockPlugin {
     /**
      * Small clock shown on lock screen above stack scroller.
      */
-    private boolean mTwoLine;
-    private boolean mBoldHours;
+    protected boolean mTwoLine;
+    protected boolean mBoldHours;
 
     /**
      * Create a DigitalClockController instance.
@@ -145,17 +145,14 @@ public abstract class DigitalClockController implements ClockPlugin {
     @Override
     public Bitmap getPreview(int width, int height) {
         ViewPreviewer renderer = new ViewPreviewer();
-        // Use the big clock view for the preview
-        View view = getBigClockView();
-        mBigClockView.setBurnInProtection(false);
-
-        setTextColor(Color.WHITE);
-        setDarkAmount(1f);
-        onTimeTick();
-
-        Bitmap b = renderer.createPreview(view, width, height);
-        mBigClockView.setBurnInProtection(true);
-        return b;
+        View previewClock = mLayoutInflater.inflate(R.layout.custom_digital_clock_preview, null);
+        DigitalClock digitalClock = previewClock.findViewById(R.id.digital_clock);
+        digitalClock.setMode(mTwoLine, mBoldHours);
+        digitalClock.setTextColor(Color.WHITE);
+        digitalClock.onTimeChanged();
+        TextClock textDate = previewClock.findViewById(R.id.date);
+        textDate.setTextColor(Color.WHITE);
+        return renderer.createPreview(previewClock, width, height);
     }
 
     @Override
