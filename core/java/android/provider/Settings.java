@@ -5318,7 +5318,6 @@ public final class Settings {
          */
         public static final String OMNI_AOD_NOTIFICATION_PULSE = "ambient_notification_light_enabled";
 
-
          /**
          * Whether hide everything on aod when  ambient lights are enabled
          * @hide
@@ -5351,6 +5350,12 @@ public final class Settings {
         public static final String OMNI_PULSE_TRIGGER_REASON = "pulse_trigger_reason";
 
         /**
+         * Timeout for ambient pulse in seconds - 0 is no timeout
+         * @hide
+         */
+        public static final String OMNI_AOD_NOTIFICATION_PULSE_TIMEOUT = "ambient_notification_light_timeout";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5372,6 +5377,7 @@ public final class Settings {
             OMNI_NOTIFICATION_PULSE,
             OMNI_AOD_NOTIFICATION_PULSE,
             OMNI_AOD_NOTIFICATION_PULSE_CLEAR,
+            OMNI_AOD_NOTIFICATION_PULSE_TIMEOUT,
             OMNI_NOTIFICATION_PULSE_ACCENT,
         };
 
@@ -5403,6 +5409,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NOTIFICATION_PULSE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_AOD_NOTIFICATION_PULSE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_AOD_NOTIFICATION_PULSE_CLEAR, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_AOD_NOTIFICATION_PULSE_TIMEOUT, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NOTIFICATION_PULSE_ACCENT, 0);
         }
     }
