@@ -14,26 +14,42 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
 
-    <ImageView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <com.android.keyguard.clock.ImageClock
+        android:id="@+id/analog_clock"
+        android:layout_width="@dimen/analog_clock_width"
+        android:layout_height="@dimen/analog_clock_height"
+        android:background="@drawable/analog_clock_background"
+        android:layout_marginBottom="@dimen/clock_bottom_margin"
         android:layout_centerInParent="true"
-        android:layout_above="@id/date"
-        android:scaleType="center"
-        android:src="@drawable/one_line_digital_preview"/>
+        android:layout_above="@id/date" >
+
+        <ImageView
+            android:id="@+id/hour_hand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/analog_hour_hand" />
+        <ImageView
+            android:id="@+id/minute_hand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/analog_minute_hand" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/analog_frame"/>
+
+    </com.android.keyguard.clock.ImageClock>
 
     <TextClock
         android:id="@+id/date"
         style="@stype/widget_big"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/analog_clock_width"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:letterSpacing="0.03"

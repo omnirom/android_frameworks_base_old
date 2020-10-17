@@ -14,28 +14,39 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
 
-    <ImageView
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <com.android.keyguard.clock.DigitalClock
+        android:id="@+id/digital_clock"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_above="@id/date"
-        android:scaleType="center"
-        android:src="@drawable/one_line_digital_preview"/>
+        android:layout_above="@id/date" >
 
+        <TextClock
+            android:id="@+id/time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:textColor="?attr/wallpaperTextColor"
+            android:singleLine="true"
+            style="@style/widget_big_thin"
+            android:textSize="@dimen/widget_big_font_size"
+            android:format12Hour="@string/keyguard_widget_12_hours_format"
+            android:format24Hour="@string/keyguard_widget_24_hours_format"
+            android:elegantTextHeight="false"
+        />
+    </com.android.keyguard.clock.DigitalClock>
     <TextClock
         android:id="@+id/date"
         style="@stype/widget_big"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
         android:letterSpacing="0.03"
         android:gravity="center_horizontal"
         android:format12Hour="EEE, MMM d"

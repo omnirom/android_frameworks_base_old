@@ -14,22 +14,29 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
 
-    <ImageView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="@dimen/binary_clock_width"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_above="@id/date"
-        android:scaleType="center"
-        android:src="@drawable/one_line_digital_preview"/>
+        android:orientation="vertical" >
 
+        <com.android.keyguard.clock.BinaryClock
+            android:id="@+id/binary_clock"
+            android:layout_width="@dimen/binary_clock_width"
+            android:layout_height="@dimen/binary_clock_height"
+            android:layout_gravity="top" />
+        <View
+            android:layout_width="@dimen/binary_clock_width"
+            android:layout_height="@dimen/clock_bottom_margin" />
+
+    </LinearLayout>
     <TextClock
         android:id="@+id/date"
         style="@stype/widget_big"
