@@ -5410,6 +5410,11 @@ public final class Settings {
         public static final String OMNI_SHOW_CPU_OVERLAY = "show_cpu_overlay";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5442,7 +5447,8 @@ public final class Settings {
             OMNI_VIBRATE_ON_CALLWAITING,
             OMNI_VIBRATE_ON_DISCONNECT,
             OMNI_FINGERPRINT_SUCCESS_VIB,
-            OMNI_SHOW_CPU_OVERLAY
+            OMNI_SHOW_CPU_OVERLAY,
+            OMNI_LOCKSCREEN_WEATHER_ENABLED
         };
 
         /**
@@ -5485,6 +5491,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_DISCONNECT, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_CPU_OVERLAY, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
         }
     }
 
