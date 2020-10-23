@@ -21,4 +21,5 @@
     <dimen name="qs_tile_height_wo_label">48dp</dimen>
     <dimen name="keyguard_eca_bottom_margin">70dp</dimen>
     <dimen name="cpu_info_text_height">12dp</dimen>
+    <dimen name="current_weather_image_size">42dp</dimen>
 </resources>
