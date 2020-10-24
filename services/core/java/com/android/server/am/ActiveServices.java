@@ -218,7 +218,7 @@ public final class ActiveServices {
     // white listed packageName.
     ArraySet<String> mWhiteListAllowWhileInUsePermissionInFgs = new ArraySet<>();
 
-    private static final boolean sDisableServiceTracker = SystemProperties.getBoolean("ro.vendor.qti.servicetracker.disable", false);
+    private static final boolean sDisableServiceTracker = SystemProperties.getBoolean("sys.vendor.qti.servicetracker.disable", false);
 
     final Runnable mLastAnrDumpClearer = new Runnable() {
         @Override public void run() {
