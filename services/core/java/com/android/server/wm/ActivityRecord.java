@@ -684,7 +684,7 @@ public final class ActivityRecord extends WindowToken implements WindowManagerSe
 
     private AppSaturationInfo mLastAppSaturationInfo;
 
-    private static final boolean sDisableServiceTracker = SystemProperties.getBoolean("ro.vendor.qti.servicetracker.disable", false);
+    private static final boolean sDisableServiceTracker = SystemProperties.getBoolean("sys.vendor.qti.servicetracker.disable", false);
 
     private final ColorDisplayService.ColorTransformController mColorTransformController =
             (matrix, translation) -> mWmService.mH.post(() -> {
