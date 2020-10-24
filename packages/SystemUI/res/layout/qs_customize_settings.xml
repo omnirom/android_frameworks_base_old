@@ -79,7 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="5dp"
                 android:gravity="center_vertical"
                 android:text="@integer/quick_settings_num_columns" />
 
@@ -104,7 +104,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="10dp"
             android:layout_weight="1"
             android:orientation="horizontal">
 
@@ -119,7 +119,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="5dp"
                 android:gravity="center_vertical"
                 android:text="@integer/quick_settings_num_columns" />
 
@@ -168,7 +168,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="5dp"
                 android:gravity="center_vertical"
                 android:text="@integer/quick_qs_panel_max_columns" />
 
@@ -195,7 +195,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="10dp"
             android:orientation="horizontal">
 
             <TextView
@@ -211,7 +211,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp" />
+                android:layout_marginStart="5dp" />
 
             <Space
                 android:layout_width="0dp"
@@ -231,7 +231,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp" />
+                android:layout_marginStart="5dp" />
 
         </LinearLayout>
     </LinearLayout>
