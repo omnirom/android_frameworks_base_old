@@ -36,7 +36,7 @@ public class GlobalActionsPowerDialog {
      */
     public static Dialog create(@NonNull Context context, ListAdapter adapter) {
         ViewGroup listView = (ViewGroup) LayoutInflater.from(context).inflate(
-                com.android.systemui.R.layout.global_actions_power_dialog, null);
+                com.android.systemui.R.layout.global_actions_power_dialog_omni, null);
 
         for (int i = 0; i < adapter.getCount(); i++) {
             View action = adapter.getView(i, null, listView);
