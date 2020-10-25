@@ -31,4 +31,6 @@
 
   <!-- Ambient notification light color -->
   <java-symbol type="integer" name="config_ambientNotificationDefaultColor" />
+
+  <java-symbol type="array" name="config_vendorPlatformSignatures" />
 </resources>
