@@ -1542,10 +1542,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         @Override
         public void onClickItem(int position) {
             Action item = mAdapter.getItem(position);
-            if (!(item instanceof SilentModeTriStateAction) && !(item instanceof RestartAction)) {
+            if (!(item instanceof SilentModeTriStateAction)) {
                 if (mDialog != null) {
                     // don't dismiss the dialog if we're opening the power options menu
-                    if (!(item instanceof PowerOptionsAction)) {
+                    if (!(item instanceof PowerOptionsAction) && !(item instanceof RestartAction)) {
                         mDialog.dismiss();
                     }
                 } else {
