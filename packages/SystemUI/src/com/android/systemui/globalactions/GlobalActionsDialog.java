@@ -141,6 +141,7 @@ import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -260,10 +261,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     boolean mShowLockScreenCardsAndControls = false;
 
     // omni additions start
-    private String[] mRootMenuActions;
     private String[] mRebootMenuActions;
-    private String[] mCurrentMenuActions;
-    private boolean mRebootMenu;
 
     @VisibleForTesting
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
@@ -430,8 +428,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     }
                 });
 
-        mRootMenuActions = mContext.getResources().getStringArray(
-                R.array.config_globalActionsList);
         mRebootMenuActions = mContext.getResources().getStringArray(
                 R.array.config_rebootActionsList);
     }
@@ -505,8 +501,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = isDeviceProvisioned;
         mWalletPlugin = walletPlugin;
-        mRebootMenu = false;
-        mCurrentMenuActions = mRootMenuActions;
         if (mDialog != null && mDialog.isShowing()) {
             // In order to force global actions to hide on the same affordance press, we must
             // register a call to onGlobalActionsShown() first to prevent the default actions
@@ -613,6 +607,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mItems.clear();
         mOverflowItems.clear();
         mPowerItems.clear();
+        String[] defaultActions = getDefaultActions();
 
         ShutDownAction shutdownAction = new ShutDownAction();
         RestartAction restartAction = new RestartAction();
@@ -625,13 +620,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         CurrentUserProvider currentUser = new CurrentUserProvider();
 
         // make sure emergency affordance action is first, if needed
-        if (mEmergencyAffordanceManager.needsEmergencyAffordance() && !mRebootMenu) {
+        if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
             addIfShouldShowAction(tempActions, new EmergencyAffordanceAction());
             addedKeys.add(GLOBAL_ACTION_KEY_EMERGENCY);
         }
 
-        for (int i = 0; i < mCurrentMenuActions.length; i++) {
-            String actionKey = mCurrentMenuActions[i];
+        for (int i = 0; i < defaultActions.length; i++) {
+            String actionKey = defaultActions[i];
             if (addedKeys.contains(actionKey)) {
                 // If we already have added this, don't add it again.
                 continue;
@@ -674,12 +669,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 }
             } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
                 addIfShouldShowAction(tempActions, new EmergencyDialerAction());
-            } else if (GLOBAL_ACTION_KEY_REBOOT_RECOVERY.equals(actionKey)) {
-                addIfShouldShowAction(tempActions, rebootRecoveryAction);
-            } else if (GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER.equals(actionKey)) {
-                addIfShouldShowAction(tempActions, rebootBootloaderAction);
-            } else if (GLOBAL_ACTION_KEY_REBOOT_FASTBOOT.equals(actionKey)) {
-                addIfShouldShowAction(tempActions, rebootFastbootAction);
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
@@ -691,27 +680,56 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         if (tempActions.contains(shutdownAction) && tempActions.contains(restartAction)
                 && tempActions.size() > getMaxShownPowerItems()) {
             // transfer shutdown and restart to their own list of power actions
-            int powerOptionsIndex = Math.min(tempActions.indexOf(restartAction),
-                    tempActions.indexOf(shutdownAction));
+            /*int powerOptionsIndex = Math.min(tempActions.indexOf(restartAction),
+                    tempActions.indexOf(shutdownAction));*/
             tempActions.remove(shutdownAction);
             tempActions.remove(restartAction);
-            mPowerItems.add(shutdownAction);
-            mPowerItems.add(restartAction);
-
+            //mPowerItems.add(shutdownAction);
+            //mPowerItems.add(restartAction);
+            mOverflowItems.add(shutdownAction);
+            mOverflowItems.add(restartAction);
             // add the PowerOptionsAction after Emergency, if present
-            tempActions.add(powerOptionsIndex, new PowerOptionsAction());
+            //tempActions.add(powerOptionsIndex, new PowerOptionsAction());
         }
-        if (advancedRebootEnabled(mContext)) {
-            tempActions.remove(rebootRecoveryAction);
-            tempActions.remove(rebootBootloaderAction);
-            tempActions.remove(rebootFastbootAction);
-            mOverflowItems.add(rebootRecoveryAction);
-            mOverflowItems.add(rebootBootloaderAction);
-            mOverflowItems.add(rebootFastbootAction);
-        }
+
         for (Action action : tempActions) {
             addActionItem(action);
         }
+
+        if (advancedRebootEnabled(mContext)) {
+            addedKeys.clear();
+            tempActions.clear();
+
+            for (int i = 0; i < mRebootMenuActions.length; i++) {
+                String actionKey = mRebootMenuActions[i];
+                if (addedKeys.contains(actionKey)) {
+                    // If we already have added this, don't add it again.
+                    continue;
+                }
+                if (GLOBAL_ACTION_KEY_REBOOT_RECOVERY.equals(actionKey)) {
+                    addIfShouldShowAction(tempActions, rebootRecoveryAction);
+                } else if (GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER.equals(actionKey)) {
+                    addIfShouldShowAction(tempActions, rebootBootloaderAction);
+                } else if (GLOBAL_ACTION_KEY_REBOOT_FASTBOOT.equals(actionKey)) {
+                    addIfShouldShowAction(tempActions, rebootFastbootAction);
+                } else {
+                    Log.e(TAG, "Invalid global action key " + actionKey);
+                }
+                // Add here so we don't add more than one.
+                addedKeys.add(actionKey);
+            }
+
+            if (tempActions.contains(rebootRecoveryAction)) {
+                mOverflowItems.add(rebootRecoveryAction);
+            }
+            if (tempActions.contains(rebootBootloaderAction)) {
+                mOverflowItems.add(rebootBootloaderAction);
+            }
+            if (tempActions.contains(rebootFastbootAction)) {
+                mOverflowItems.add(rebootFastbootAction);
+            }
+        }
+
     }
 
     private void onRotate() {
@@ -978,12 +996,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     @VisibleForTesting
     final class RestartAction extends SinglePressAction implements LongPressAction {
         private RestartAction() {
-            super(R.drawable.ic_restart, com.android.systemui.R.string.global_action_reboot);
-            if (mRebootMenu) {
-                mMessageResId = com.android.systemui.R.string.global_action_reboot_sub;
-            } else if (advancedRebootEnabled(mContext)) {
-                mMessageResId = R.string.reboot_system_title;
-            }
+            super(R.drawable.ic_restart, R.string.global_action_restart);
         }
 
         @Override
@@ -1007,19 +1020,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public void onPress() {
-            if (!mRebootMenu && advancedRebootEnabled(mContext) && !isSecureLocked()) {
-                mRebootMenu = true;
-                mCurrentMenuActions = mRebootMenuActions;
-                createActionItems();
-                mDialog.updateList();
-            } else {
-                mDialog.dismiss();
-                doReboot();
-            }
-        }
-
-        private void doReboot() {
-            mHandler.sendEmptyMessageDelayed(MESSAGE_DISMISS, DIALOG_DISMISS_DELAY);
             mWindowManagerFuncs.reboot(false, null);
         }
     }
@@ -1439,14 +1439,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mUiEventLogger.log(GlobalActionsEvent.GA_POWER_MENU_OPEN);
     }
 
-    public void onClick(DialogInterface dialog, int which) {
-        Action item = mAdapter.getItem(which);
-        if (!(item instanceof SilentModeTriStateAction) && !(item instanceof RestartAction)) {
-            dialog.dismiss();
-        }
-        item.onPress();
-    }
-
     /**
      * The adapter used for power menu items shown in the global actions dialog.
      */
@@ -1545,7 +1537,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             if (!(item instanceof SilentModeTriStateAction)) {
                 if (mDialog != null) {
                     // don't dismiss the dialog if we're opening the power options menu
-                    if (!(item instanceof PowerOptionsAction) && !(item instanceof RestartAction)) {
+                    if (!(item instanceof PowerOptionsAction)) {
                         mDialog.dismiss();
                     }
                 } else {
@@ -2738,10 +2730,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mOnRotateCallback.run();
                 refreshDialog();
             }
-        }
-
-        public void updateList() {
-            mGlobalActionsLayout.updateList();
         }
 
         void hideLockMessage() {
