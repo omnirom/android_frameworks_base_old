@@ -20,7 +20,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="drag_or_touch_to_rearrange_tiles">Touch to remove or drag to rearrange tiles</string>
     <string name="drag_or_touch_to_add_tiles">Touch or drag to add tiles</string>
-    <string name="customize_settings_info_text"><b>Note:</b> columns will be limited automatically for available space.</string>
+    <string name="customize_settings_info_text"><b>Note:</b> columns will be limited automatically for available space. Swipe for more settings.</string>
     <string name="customize_show_labels">Labels</string>
     <string name="customize_quickbar_sync">Sync</string>
     <string name="customize_quickbar_label">Quickbar</string>
