@@ -295,8 +295,12 @@ public class BatteryMeterView extends LinearLayout implements
                     getContext(), newValue);
             if (icons.contains(mSlotBattery)) {
                 setVisibility(View.GONE);
-            } else if ((mPresentVisibility && mPresent) || true) {
-                setVisibility(View.VISIBLE);
+            } else {
+                if (mPresentVisibility) {
+                    setVisibility(mPresent ? View.VISIBLE : View.GONE);
+                } else {
+                    setVisibility(View.VISIBLE);
+                }
             }
         }
     }
