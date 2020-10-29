@@ -27,8 +27,6 @@ import com.android.systemui.R;
 
 public class QSCustomizerSettingsTuner extends LinearLayout {
 
-    private static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
-
     public QSCustomizerSettingsTuner(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
     }
