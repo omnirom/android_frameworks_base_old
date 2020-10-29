@@ -216,5 +216,6 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="10dp"
             systemui:initialValue="1" />
+
     </LinearLayout>
 </com.android.systemui.qs.customize.QSCustomizerSettingsTiles>
