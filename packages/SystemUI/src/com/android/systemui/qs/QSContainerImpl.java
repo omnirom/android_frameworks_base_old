@@ -30,13 +30,16 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
+import com.android.systemui.Dependency;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.util.animation.PhysicsAnimator;
 
 /**
  * Wrapper view with background which contains {@link QSPanel} and {@link BaseStatusBarHeader}
  */
-public class QSContainerImpl extends FrameLayout {
+public class QSContainerImpl extends FrameLayout implements OmniSettingsService.OmniSettingsObserver {
+    public static final String QS_SHOW_DRAG_HANDLE = "qs_show_drag_handle";
 
     private final Point mSizePoint = new Point();
     private static final FloatPropertyCompat<QSContainerImpl> BACKGROUND_BOTTOM =
@@ -310,5 +313,28 @@ public class QSContainerImpl extends FrameLayout {
             getDisplay().getRealSize(mSizePoint);
         }
         return mSizePoint.y;
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, QS_SHOW_DRAG_HANDLE);
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        Dependency.get(OmniSettingsService.class).removeObserver(this);
+        super.onDetachedFromWindow();
+    }
+
+    private void setHideDragHandle(boolean hide) {
+        mDragHandle.setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        if (QS_SHOW_DRAG_HANDLE.equals(key)) {
+            setHideDragHandle(newValue != null && newValue == 0);
+        }
     }
 }
