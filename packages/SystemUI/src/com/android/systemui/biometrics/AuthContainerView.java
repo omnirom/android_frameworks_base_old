@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -93,6 +94,7 @@ public class AuthContainerView extends LinearLayout
     private final View mPanelView;
 
     private final float mTranslationY;
+    private boolean mHasFod;
 
     @VisibleForTesting final WakefulnessLifecycle mWakefulnessLifecycle;
 
@@ -275,11 +277,18 @@ public class AuthContainerView extends LinearLayout
         mPanelView = mInjector.getPanelView(mFrameLayout);
         mPanelController = mInjector.getPanelController(mContext, mPanelView);
 
+        mHasFod = mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FOD);
+
         // Inflate biometric view only if necessary.
         if (Utils.isBiometricAllowed(mConfig.mBiometricPromptBundle)) {
             if (config.mModalityMask == BiometricAuthenticator.TYPE_FINGERPRINT) {
-                mBiometricView = (AuthBiometricFingerprintView)
-                        factory.inflate(R.layout.auth_biometric_fingerprint_view, null, false);
+                if (!mHasFod) {
+                    mBiometricView = (AuthBiometricFingerprintView)
+                            factory.inflate(R.layout.auth_biometric_fingerprint_view, null, false);
+                } else {
+                    mBiometricView = (AuthBiometricFODView)
+                            factory.inflate(R.layout.auth_biometric_fod_view, null, false);
+                }
             } else if (config.mModalityMask == BiometricAuthenticator.TYPE_FACE) {
                 mBiometricView = (AuthBiometricFaceView)
                         factory.inflate(R.layout.auth_biometric_face_view, null, false);
