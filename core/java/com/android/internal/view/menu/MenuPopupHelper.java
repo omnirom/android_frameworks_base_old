@@ -43,6 +43,7 @@ public class MenuPopupHelper implements MenuHelper {
     private final boolean mOverflowOnly;
     private final int mPopupStyleAttr;
     private final int mPopupStyleRes;
+    private int mDropDownWindowLayoutType = WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 
     // Mutable cached popup menu properties.
     private View mAnchorView;
@@ -248,6 +249,7 @@ public class MenuPopupHelper implements MenuHelper {
         popup.setCallback(mPresenterCallback);
         popup.setForceShowIcon(mForceShowIcon);
         popup.setGravity(mDropDownGravity);
+        popup.setWindowLayoutType(mDropDownWindowLayoutType);
 
         return popup;
     }
@@ -331,4 +333,9 @@ public class MenuPopupHelper implements MenuHelper {
             MenuPopupHelper.this.onDismiss();
         }
     };
+
+    /** @hide */
+    public void setWindowLayoutType(int layoutType) {
+        mDropDownWindowLayoutType = layoutType;
+    }
 }

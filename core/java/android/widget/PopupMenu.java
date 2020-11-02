@@ -26,6 +26,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
@@ -50,6 +51,7 @@ public class PopupMenu {
     private OnMenuItemClickListener mMenuItemClickListener;
     private OnDismissListener mOnDismissListener;
     private OnTouchListener mDragListener;
+    private int mDropDownWindowLayoutType = WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 
     /**
      * Constructor to create a new popup menu with an anchor view.
@@ -125,6 +127,7 @@ public class PopupMenu {
                 }
             }
         });
+        mPopup.setWindowLayoutType(mDropDownWindowLayoutType);
     }
 
     /**
@@ -312,5 +315,10 @@ public class PopupMenu {
             return null;
         }
         return mPopup.getPopup().getListView();
+    }
+
+    /** @hide */
+    public void setWindowLayoutType(int layoutType) {
+        mDropDownWindowLayoutType = layoutType;
     }
 }
