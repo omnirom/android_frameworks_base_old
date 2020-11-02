@@ -61,6 +61,9 @@ public abstract class MenuPopup implements ShowableListMenu, MenuPresenter,
 
     public abstract void setVerticalOffset(int y);
 
+    /** @hide */
+    public abstract void setWindowLayoutType(int layoutType);
+
     /**
      * Specifies the anchor-relative bounds of the popup's transition
      * epicenter.

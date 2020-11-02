@@ -358,4 +358,9 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
     public void setShowTitle(boolean showTitle) {
         mShowTitle = showTitle;
     }
+
+    /** @hide */
+    public void setWindowLayoutType(int layoutType) {
+        mPopup.setWindowLayoutType(layoutType);
+    }
 }

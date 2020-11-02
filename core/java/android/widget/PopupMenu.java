@@ -26,6 +26,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
@@ -312,5 +313,10 @@ public class PopupMenu {
             return null;
         }
         return mPopup.getPopup().getListView();
+    }
+
+    /** @hide */
+    public void setWindowLayoutType(int layoutType) {
+        mPopup.setWindowLayoutType(layoutType);
     }
 }
