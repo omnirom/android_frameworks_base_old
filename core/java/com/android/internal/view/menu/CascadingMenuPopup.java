@@ -26,6 +26,7 @@ import android.view.ViewTreeObserver;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.HeaderViewListAdapter;
@@ -191,6 +192,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     private Callback mPresenterCallback;
     private ViewTreeObserver mTreeObserver;
     private PopupWindow.OnDismissListener mOnDismissListener;
+    private int mDropDownWindowLayoutType = WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 
     /** Whether popup menus should disable exit animations when closing. */
     private boolean mShouldCloseImmediately;
@@ -233,6 +235,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
         popupWindow.setDropDownGravity(mDropDownGravity);
         popupWindow.setModal(true);
         popupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+        popupWindow.setWindowLayoutType(mDropDownWindowLayoutType);
         return popupWindow;
     }
 
@@ -726,6 +729,11 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
     @Override
     public void setShowTitle(boolean showTitle) {
         mShowTitle = showTitle;
+    }
+
+    /** @hide */
+    public void setWindowLayoutType(int layoutType) {
+        mDropDownWindowLayoutType = layoutType;
     }
 
     private static class CascadingMenuInfo {
