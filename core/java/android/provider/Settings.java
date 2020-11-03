@@ -5372,6 +5372,11 @@ public final class Settings {
         public static final String OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC = "ambient_notification_light_color_automatic";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_NAVIGATION_BAR_RECENTS = "navigation_bar_recents";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5398,6 +5403,7 @@ public final class Settings {
             OMNI_NOTIFICATION_PULSE_ACCENT,
             OMNI_NOTIFICATION_PULSE_COLOR,
             OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC,
+            OMNI_NAVIGATION_BAR_RECENTS,
         };
 
         /**
@@ -5433,6 +5439,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NOTIFICATION_PULSE_ACCENT, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NOTIFICATION_PULSE_COLOR, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC, 1);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_RECENTS, 0);
         }
     }
 
