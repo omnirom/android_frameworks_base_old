@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-**
-** Copyright 2015 The Android Open Source Project
+** Copyright 2009, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -17,7 +16,9 @@
 ** limitations under the License.
 */
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="status_deep_sleep">(Deep sleep: %1$d%2$s)</string>
-    <string name="battery_info_status_charging_dash">Dash charging</string>
+
+<!-- These resources are around just to allow their values to be customized
+     for different hardware and product builds. -->
+<resources>
+  <java-symbol type="string" name="keyguard_indication_charging_time_dash" />
 </resources>
