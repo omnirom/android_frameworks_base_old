@@ -202,8 +202,10 @@ import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.omni.DeviceKeyHandler;
-import com.android.internal.util.omni.OmniSwitchConstants;
 import com.android.internal.util.omni.OmniUtils;
+import com.android.internal.util.omni.OmniSwitchConstants;
+import com.android.internal.util.omni.TaskUtils;
+import com.android.internal.util.omni.SystemKeyEventHandler;
 import com.android.server.ExtconStateObserver;
 import com.android.server.ExtconUEventObserver;
 import com.android.server.GestureLauncherService;
@@ -650,6 +652,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private Sensor mProximitySensor;
     private boolean mProxiWakeupCheckEnabled;
     private boolean mProxiListenerEnabled;
+    private SystemKeyEventHandler mAppSwitchKeyHandler = new SystemKeyEventHandler(
+            () -> toggleRecentApps(),
+            () -> TaskUtils.toggleLastApp(mContext, UserHandle.myUserId()),
+            null);
 
     private class PolicyHandler extends Handler {
         @Override
@@ -795,6 +801,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_NAVIGATION_BAR_RECENTS), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -2123,6 +2132,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mProxiWakeupCheckEnabled = Settings.System.getIntForUser(resolver,
                     Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED, 0,
                     UserHandle.USER_CURRENT) != 0;
+            mOmniSwitchRecents = Settings.System.getIntForUser(resolver,
+                    Settings.System.OMNI_NAVIGATION_BAR_RECENTS, 0,
+                    UserHandle.USER_CURRENT) == 1;
         }
         if (updateRotation) {
             updateRotation(true);
@@ -2754,10 +2766,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 0;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
             if (!keyguardOn) {
-                if (down && repeatCount == 0) {
-                    preloadRecentApps();
-                } else if (!down) {
-                    toggleRecentApps();
+                if (mOmniSwitchRecents) {
+                    return mAppSwitchKeyHandler.handleKeyEvent(mHandler, event);
+                } else {
+                    if (down && repeatCount == 0) {
+                        preloadRecentApps();
+                    } else if (!down) {
+                        toggleRecentApps();
+                    }
                 }
             }
             return -1;
