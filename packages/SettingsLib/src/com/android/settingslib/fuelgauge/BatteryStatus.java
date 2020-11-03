@@ -40,17 +40,20 @@ import com.android.settingslib.R;
 public class BatteryStatus {
     private static final int LOW_BATTERY_THRESHOLD = 20;
     private static final int DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT = 5000000;
+    private static final boolean DEBUG = false;
+    private static final String TAG = "BatteryStatus";
 
     public static final int CHARGING_UNKNOWN = -1;
     public static final int CHARGING_SLOWLY = 0;
     public static final int CHARGING_REGULAR = 1;
     public static final int CHARGING_FAST = 2;
+    public static final int CHARGING_DASH = 3;
 
     public final int status;
     public final int level;
     public final int plugged;
     public final int health;
-    public final int maxChargingWattage;
+    public int maxChargingWattage;
     public final boolean mPresent;
 
     public BatteryStatus(int status, int level, int plugged, int health,
@@ -68,7 +71,6 @@ public class BatteryStatus {
         plugged = batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, 0);
         level = batteryChangedIntent.getIntExtra(EXTRA_LEVEL, 0);
         health = batteryChangedIntent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
-
         final int maxChargingMicroAmp = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT,
                 -1);
         int maxChargingMicroVolt = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
@@ -84,6 +86,9 @@ public class BatteryStatus {
         } else {
             maxChargingWattage = -1;
         }
+        if (DEBUG) Log.d(TAG, "maxChargingMicroVolt = " + maxChargingMicroVolt
+                + " maxChargingMicroAmp = " + maxChargingMicroAmp
+                + " maxChargingWattage = " + maxChargingWattage);
         mPresent = batteryChangedIntent.getBooleanExtra(EXTRA_PRESENT, true);
     }
 
@@ -136,12 +141,32 @@ public class BatteryStatus {
     public final int getChargingSpeed(Context context) {
         final int slowThreshold = context.getResources().getInteger(
                 R.integer.config_chargingSlowlyThreshold);
+        // 7500000
         final int fastThreshold = context.getResources().getInteger(
                 R.integer.config_chargingFastThreshold);
-        return maxChargingWattage <= 0 ? CHARGING_UNKNOWN :
-                maxChargingWattage < slowThreshold ? CHARGING_SLOWLY :
-                        maxChargingWattage > fastThreshold ? CHARGING_FAST :
-                                CHARGING_REGULAR;
+        // e.g. 18000001
+        final int dashThreshold = context.getResources().getInteger(
+                R.integer.config_chargingDashThreshold);
+        if (dashThreshold > 0 && maxChargingWattage == 250000) {
+            maxChargingWattage = maxChargingWattage * 100;
+            if (DEBUG) Log.d(TAG, "adjust maxChargingWattage = " + maxChargingWattage);
+        }
+
+        if (maxChargingWattage <= 0) {
+            return CHARGING_UNKNOWN;
+        } else if (maxChargingWattage < slowThreshold) {
+            return CHARGING_SLOWLY;
+        } else if (maxChargingWattage > fastThreshold) {
+            if (dashThreshold > 0) {
+                if (maxChargingWattage > dashThreshold) {
+                    if (DEBUG) Log.d(TAG, "dash charging = " + maxChargingWattage
+                            + " dashThreshold = " + dashThreshold);
+                    return CHARGING_DASH;
+                }
+            }
+            return CHARGING_FAST;
+        }
+        return CHARGING_REGULAR;
     }
 
     @Override
@@ -153,4 +178,5 @@ public class BatteryStatus {
     public boolean isBatteryPresent() {
         return mPresent;
     }
+
 }
