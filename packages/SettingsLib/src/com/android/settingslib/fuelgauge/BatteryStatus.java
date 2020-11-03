@@ -45,12 +45,13 @@ public class BatteryStatus {
     public static final int CHARGING_SLOWLY = 0;
     public static final int CHARGING_REGULAR = 1;
     public static final int CHARGING_FAST = 2;
+    public static final int CHARGING_DASH = 3;
 
     public final int status;
     public final int level;
     public final int plugged;
     public final int health;
-    public final int maxChargingWattage;
+    public int maxChargingWattage;
     public final boolean mPresent;
 
     public BatteryStatus(int status, int level, int plugged, int health,
@@ -68,7 +69,6 @@ public class BatteryStatus {
         plugged = batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, 0);
         level = batteryChangedIntent.getIntExtra(EXTRA_LEVEL, 0);
         health = batteryChangedIntent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
-
         final int maxChargingMicroAmp = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT,
                 -1);
         int maxChargingMicroVolt = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
@@ -138,9 +138,18 @@ public class BatteryStatus {
                 R.integer.config_chargingSlowlyThreshold);
         final int fastThreshold = context.getResources().getInteger(
                 R.integer.config_chargingFastThreshold);
+        final int dashThreshold = context.getResources().getInteger(
+                R.integer.config_chargingDashThreshold);
+        if ((dashThreshold > 0) && (maxChargingWattage == 250000)) {
+            maxChargingWattage = maxChargingWattage * 100;
+        }
+//        int dash = maxChargingWattage < dashThreshold ? CHARGING_FAST :
+ //                               CHARGING_DASH;
+        //Log.e("BAT", "BatteryStatus charge " + dash + " watt: " + maxChargingWattage);
+        Log.e("BAT", "BatteryStatus charge watt: " + maxChargingWattage);
         return maxChargingWattage <= 0 ? CHARGING_UNKNOWN :
                 maxChargingWattage < slowThreshold ? CHARGING_SLOWLY :
-                        maxChargingWattage > fastThreshold ? CHARGING_FAST :
+                        maxChargingWattage > fastThreshold ? maxChargingWattage > dashThreshold ? CHARGING_DASH : CHARGING_FAST :
                                 CHARGING_REGULAR;
     }
 
@@ -153,4 +162,5 @@ public class BatteryStatus {
     public boolean isBatteryPresent() {
         return mPresent;
     }
+
 }
