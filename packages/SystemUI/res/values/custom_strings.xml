@@ -63,4 +63,6 @@
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <string name="global_action_reboot_fastboot">Fastboot</string>
+
+    <string name="keyguard_plugged_in_charging_dash"><xliff:g id="percentage">%s</xliff:g> • Dash charging</string>
 </resources>
