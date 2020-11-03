@@ -114,33 +114,4 @@ public class TaskUtils {
         }
         return null;
     }
-
-    public static boolean isTaskDocked(Context context) {
-        if (ActivityTaskManager.supportsMultiWindow(context)) {
-            try {
-                return WindowManagerGlobal.getWindowManagerService().getDockedStackSide() != WindowManager.DOCKED_INVALID;
-            } catch (RemoteException e) {
-            }
-        }
-        return false;
-    }
-
-    /**
-     *
-     */
-    public static void dockTopTask(Context context) {
-        if (ActivityTaskManager.supportsMultiWindow(context) && !isTaskDocked(context)) {
-            try {
-                int taskId = getRunningTask(context);
-                if (taskId != -1) {
-                    final ActivityOptions options = ActivityOptions.makeBasic();
-                    options.setLaunchWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-                    options.setSplitScreenCreateMode(SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT);
-                    ActivityManagerNative.getDefault().startActivityFromRecents(
-                            taskId,  options.toBundle());
-                }
-            } catch (RemoteException e) {
-            }
-        }
-    }
 }
