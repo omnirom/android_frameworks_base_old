@@ -55,7 +55,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginStart="10dp" >
 
             <TextView
                 android:layout_width="0dp"
@@ -99,6 +100,31 @@
 
             <org.omnirom.omnilib.widget.SystemSettingsSwitch
                 android:id="@+id/qs_show_drag_handle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                systemui:initialValue="1"
+                android:layout_gravity="center_vertical"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_marginStart="10dp" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="@string/tuner_show_secure_title" />
+
+            <org.omnirom.omnilib.widget.SystemSettingsSwitch
+                android:id="@+id/qs_show_secure"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 systemui:initialValue="1"

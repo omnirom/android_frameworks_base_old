@@ -72,6 +72,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     private CharSequence mFooterTextContent = null;
     private int mFooterTextId;
     private int mFooterIconId;
+    private boolean mForceHideFooter;
 
     public QSSecurityFooter(QSPanel qsPanel, Context context) {
         mRootView = LayoutInflater.from(context)
@@ -156,6 +157,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         mIsVisible = (isDeviceManaged && !isDemoDevice) || hasCACerts || hasCACertsInWorkProfile
                 || vpnName != null || vpnNameWorkProfile != null
                 || isProfileOwnerOfOrganizationOwnedDevice;
+        mIsVisible = mIsVisible && !mForceHideFooter;
         // Update the string
         mFooterTextContent = getFooterText(isDeviceManaged, hasWorkProfile,
                 hasCACerts, hasCACertsInWorkProfile, isNetworkLoggingEnabled, vpnName,
@@ -464,6 +466,11 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         } else {
             return R.string.monitoring_title;
         }
+    }
+
+    public void setForceHide(boolean value) {
+        mForceHideFooter = value;
+        handleRefreshState();
     }
 
     private final Runnable mUpdateIcon = new Runnable() {

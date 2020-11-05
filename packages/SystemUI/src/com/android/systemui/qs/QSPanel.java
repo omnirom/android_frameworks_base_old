@@ -49,6 +49,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -76,10 +77,11 @@ import javax.inject.Named;
 
 /** View that represents the quick settings tile panel (when expanded/pulled down). **/
 public class QSPanel extends LinearLayout implements Tunable, Callback, BrightnessMirrorListener,
-        Dumpable {
+        Dumpable, OmniSettingsService.OmniSettingsObserver {
 
     public static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
     public static final String QS_SHOW_HEADER = "qs_show_header";
+    public static final String QS_SHOW_SECURITY = "qs_show_secure";
 
     private static final String TAG = "QSPanel";
 
@@ -343,6 +345,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         super.onAttachedToWindow();
         final TunerService tunerService = Dependency.get(TunerService.class);
         tunerService.addTunable(this, QS_SHOW_BRIGHTNESS);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, QS_SHOW_SECURITY);
 
         if (mHost != null) {
             setTiles(mHost.getTiles());
@@ -356,6 +359,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     @Override
     protected void onDetachedFromWindow() {
         Dependency.get(TunerService.class).removeTunable(this);
+        Dependency.get(OmniSettingsService.class).removeObserver(this);
         if (mHost != null) {
             mHost.removeCallback(this);
         }
@@ -1157,6 +1161,15 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     public void setMediaVisibilityChangedListener(Consumer<Boolean> visibilityChangedListener) {
         mMediaVisibilityChangedListener = visibilityChangedListener;
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        if (QS_SHOW_SECURITY.equals(key)) {
+            if (mSecurityFooter != null) {
+                mSecurityFooter.setForceHide(newValue != null && newValue == 0);
+            }
+       }
     }
 
     private class H extends Handler {
