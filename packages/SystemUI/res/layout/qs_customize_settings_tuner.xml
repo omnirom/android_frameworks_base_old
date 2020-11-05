@@ -89,4 +89,27 @@
                 systemui:initialValue="1"
                 android:layout_gravity="center_vertical"/>
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="@string/tuner_show_secure_title" />
+
+            <org.omnirom.omnilib.widget.SystemSettingsSwitch
+                android:id="@+id/qs_show_secure"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                systemui:initialValue="1"
+                android:layout_gravity="center_vertical"/>
+    </LinearLayout>
 </com.android.systemui.qs.customize.QSCustomizerSettingsTuner>
