@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents;
 
+import static android.provider.Settings.System.OMNI_NAVIGATION_BAR_RECENTS;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -25,7 +27,9 @@ import android.provider.Settings;
 
 import com.android.internal.util.omni.OmniSwitchConstants;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.statusbar.CommandQueue;
 
 import java.io.FileDescriptor;
@@ -34,10 +38,12 @@ import java.io.PrintWriter;
 /**
  * A proxy to a Recents implementation.
  */
-public class Recents extends SystemUI implements CommandQueue.Callbacks {
+public class Recents extends SystemUI implements CommandQueue.Callbacks,
+        OmniSettingsService.OmniSettingsObserver {
 
     private final RecentsImplementation mImpl;
     private final CommandQueue mCommandQueue;
+    private boolean mOmniSwitchRecents;
 
     public Recents(Context context, RecentsImplementation impl, CommandQueue commandQueue) {
         super(context);
@@ -49,6 +55,9 @@ public class Recents extends SystemUI implements CommandQueue.Callbacks {
     public void start() {
         mCommandQueue.addCallback(this);
         mImpl.onStart(mContext);
+        // there is no stop - so no removeObserver
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                OMNI_NAVIGATION_BAR_RECENTS);
     }
 
     @Override
@@ -175,8 +184,13 @@ public class Recents extends SystemUI implements CommandQueue.Callbacks {
     }
 
     private boolean isOmniSwitchRecents() {
-        return Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.OMNI_NAVIGATION_BAR_RECENTS, 0,
-                    UserHandle.USER_CURRENT) == 1;
+        return mOmniSwitchRecents;
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        if (OMNI_NAVIGATION_BAR_RECENTS.equals(key)) {
+            mOmniSwitchRecents = newValue != null && Integer.valueOf(newValue) == 1;
+       }
     }
 }
