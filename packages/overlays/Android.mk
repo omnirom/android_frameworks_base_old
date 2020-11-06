@@ -46,7 +46,6 @@ LOCAL_REQUIRED_MODULES := \
 	IconPackRoundedSystemUIOverlay \
 	IconPackRoundedThemePickerOverlay \
 	IconShapePebbleOverlay \
-	IconShapeRoundedRectOverlay \
 	IconShapeSquircleOverlay \
 	IconShapeTaperedRectOverlay \
 	IconShapeTeardropOverlay \
@@ -59,6 +58,9 @@ LOCAL_REQUIRED_MODULES := \
 	NavigationBarModeGesturalOverlayWideBack \
 	NavigationBarModeGesturalOverlayExtraWideBack \
 	preinstalled-packages-platform-overlays.xml
+
+#LOCAL_REQUIRED_MODULES += \
+	IconShapeRoundedRectOverlay
 
 include $(BUILD_PHONY_PACKAGE)
 include $(CLEAR_VARS)
