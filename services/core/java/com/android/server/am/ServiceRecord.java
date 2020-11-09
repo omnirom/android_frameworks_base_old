@@ -832,6 +832,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             final int localForegroundId = foregroundId;
             final Notification _foregroundNoti = foregroundNoti;
             final ServiceRecord record = this;
+            if (localPackageName == "com.quicinc.voice.activation") {
+                return;
+            }
             ams.mHandler.post(new Runnable() {
                 public void run() {
                     NotificationManagerInternal nm = LocalServices.getService(
