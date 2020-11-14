@@ -290,4 +290,23 @@ public class ScreenshotNotificationsController {
                 (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         nm.cancel(SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT);
     }
+
+    public void peekScreenshotNotification(GlobalScreenshot.SavedImageData actionData) {
+         // Create the intent to show the screenshot in gallery
+        Intent launchIntent = new Intent(Intent.ACTION_VIEW);
+        launchIntent.setDataAndType(actionData.uri, "image/png");
+        launchIntent.setFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        Notification.Builder b = new Notification.Builder(mContext, NotificationChannels.SCREENSHOTS_HEADSUP)
+                .setContentTitle(mResources.getString(R.string.screenshot_saved_title))
+                .setContentText(mResources.getString(R.string.screenshot_saved_text))
+                 .setContentIntent(PendingIntent
+                        .getActivity(mContext, 0, launchIntent, PendingIntent.FLAG_IMMUTABLE))
+                .setSmallIcon(R.drawable.stat_notify_image)
+                .setAutoCancel(true)
+                .setColor(mResources.getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
+        mNotificationManager.notify(SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT, b.build());
+    }
 }
