@@ -221,7 +221,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private float mCornerSizeX;
     private float mDismissDeltaY;
 
-    private MediaActionSound mCameraSound;
+    //private MediaActionSound mCameraSound;
 
     private int mNavMode;
     private int mLeftInset;
@@ -289,8 +289,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 AnimationUtils.loadInterpolator(mContext, android.R.interpolator.fast_out_slow_in);
 
         // Setup the Camera shutter sound
-        mCameraSound = new MediaActionSound();
-        mCameraSound.load(MediaActionSound.SHUTTER_CLICK);
+        //mCameraSound = new MediaActionSound();
+        //mCameraSound.load(MediaActionSound.SHUTTER_CLICK);
     }
 
     @Override // ViewTreeObserver.OnComputeInternalInsetsListener
@@ -646,9 +646,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
      */
     private void saveScreenshotAndToast(Consumer<Uri> finisher) {
         // Play the shutter sound to notify that we've taken a screenshot
-        mScreenshotHandler.post(() -> {
+        /*mScreenshotHandler.post(() -> {
             mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
-        });
+        });*/
 
         saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
             @Override
@@ -805,11 +805,17 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                     @Override
                     void onActionsReady(SavedImageData imageData) {
                         showUiOnActionsReady(imageData);
+                        if (imageData.uri != null) {
+                            mScreenshotHandler.postDelayed(() -> {
+                                mNotificationsController.cancelScreenshotNotification();
+                            }, 1000);
+                        }
                     }
                 });
 
                 // Play the shutter sound to notify that we've taken a screenshot
-                mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+                //mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+                mNotificationsController.peekScreenshotNotification();
 
                 mScreenshotPreview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
                 mScreenshotPreview.buildLayer();
