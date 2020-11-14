@@ -117,8 +117,11 @@ public class NotificationChannels extends SystemUI {
         NotificationChannel screenshotChannel = new NotificationChannel(SCREENSHOTS_HEADSUP,
                 name, NotificationManager.IMPORTANCE_HIGH); // pop on screen
 
-        screenshotChannel.setSound(null, // silent
-                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
+        // we removed the explicit SHUTTER_CLICK usage in GlobalScreenshot.java
+        // so now it really only relies on the notification settings
+        // so dont set to silent by default now here
+        /*screenshotChannel.setSound(null, // silent
+                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());*/
         screenshotChannel.setBlockable(true);
 
         if (legacySS != null) {
