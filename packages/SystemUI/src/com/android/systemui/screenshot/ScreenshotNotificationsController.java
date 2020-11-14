@@ -290,4 +290,18 @@ public class ScreenshotNotificationsController {
                 (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         nm.cancel(SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT);
     }
+
+    public void peekScreenshotNotification() {
+        Notification.Builder b = new Notification.Builder(mContext, NotificationChannels.SCREENSHOTS_HEADSUP)
+                .setContentTitle(mResources.getString(R.string.screenshot_saving_title))
+                .setSmallIcon(R.drawable.stat_notify_image)
+                .setAutoCancel(true)
+                .setColor(mResources.getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
+        mNotificationManager.notify(SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT, b.build());
+    }
+
+    public void cancelScreenshotNotification() {
+        mNotificationManager.cancel(SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT);
+    }
 }
