@@ -5398,6 +5398,13 @@ public final class Settings {
         public static final String OMNI_VIBRATE_ON_DISCONNECT = "vibrate_on_disconnect";
 
         /**
+         * whether to enable or disable vibration on succesful fingerprint auth
+         *
+         * @hide
+         */
+        public static final String OMNI_FINGERPRINT_SUCCESS_VIB = "fingerprint_success_vib";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5428,7 +5435,8 @@ public final class Settings {
             OMNI_BACK_GESTURE_HEIGHT,
             OMNI_VIBRATE_ON_CONNECT,
             OMNI_VIBRATE_ON_CALLWAITING,
-            OMNI_VIBRATE_ON_DISCONNECT
+            OMNI_VIBRATE_ON_DISCONNECT,
+            OMNI_FINGERPRINT_SUCCESS_VIB
         };
 
         /**
@@ -5469,6 +5477,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_CONNECT, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_CALLWAITING, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_DISCONNECT, 1);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB, 0);
         }
     }
 
