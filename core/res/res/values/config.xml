@@ -2777,7 +2777,6 @@
         <item>power</item>
         <item>restart</item>
         <item>logout</item>
-        <item>screenshot</item>
         <item>bugreport</item>
     </string-array>
 
