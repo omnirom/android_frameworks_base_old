@@ -6599,7 +6599,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
             return !mNotifPipeline.getShadeList().isEmpty();
         } else {
-            return mEntryManager.hasActiveNotifications();
+            return mEntryManager.hasVisibleNotifications();
         }
     }
 

@@ -195,10 +195,12 @@ public class WifiStatusTracker {
                 }
             }
             updateStatusLabel();
+            mCallback.run();
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
             // Default to -200 as its below WifiManager.MIN_RSSI.
             updateRssi(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200));
             updateStatusLabel();
+            mCallback.run();
         }
     }
 
@@ -221,13 +223,15 @@ public class WifiStatusTracker {
 
     private void updateStatusLabel() {
         NetworkCapabilities networkCapabilities;
-        final Network currentWifiNetwork = mWifiManager.getCurrentNetwork();
-        if (currentWifiNetwork != null && currentWifiNetwork.equals(mDefaultNetwork)) {
+        isDefaultNetwork = false;
+        if (mDefaultNetworkCapabilities != null) {
+            isDefaultNetwork = mDefaultNetworkCapabilities.hasTransport(
+                    NetworkCapabilities.TRANSPORT_WIFI);
+        }
+        if (isDefaultNetwork) {
             // Wifi is connected and the default network.
-            isDefaultNetwork = true;
             networkCapabilities = mDefaultNetworkCapabilities;
         } else {
-            isDefaultNetwork = false;
             networkCapabilities = mConnectivityManager.getNetworkCapabilities(
                     mWifiManager.getCurrentNetwork());
         }

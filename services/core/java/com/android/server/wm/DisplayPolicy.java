@@ -246,6 +246,9 @@ public class DisplayPolicy {
                     | View.STATUS_BAR_TRANSPARENT
                     | View.NAVIGATION_BAR_TRANSPARENT;
 
+    private static final int[] SHOW_TYPES_FOR_SWIPE = {ITYPE_NAVIGATION_BAR, ITYPE_STATUS_BAR};
+    private static final int[] SHOW_TYPES_FOR_PANIC = {ITYPE_NAVIGATION_BAR};
+
     private final WindowManagerService mService;
     private final Context mContext;
     private final Context mUiContext;
@@ -3361,8 +3364,15 @@ public class DisplayPolicy {
                 return;
             }
 
+            final InsetsState requestedState = controlTarget.getRequestedInsetsState();
+            final @InsetsType int restorePositionTypes =
+                    (requestedState.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR)
+                            ? Type.navigationBars() : 0)
+                    | (requestedState.getSourceOrDefaultVisibility(ITYPE_STATUS_BAR)
+                            ? Type.statusBars() : 0);
+
             if (swipeTarget == mNavigationBar
-                    && !getInsetsPolicy().isHidden(ITYPE_NAVIGATION_BAR)) {
+                    && (restorePositionTypes & Type.navigationBars()) != 0) {
                 // Don't show status bar when swiping on already visible navigation bar.
                 // But restore the position of navigation bar if it has been moved by the control
                 // target.
@@ -3370,14 +3380,13 @@ public class DisplayPolicy {
                 return;
             }
 
-            int insetsTypesToShow = Type.systemBars();
-
             if (controlTarget.canShowTransient()) {
-                insetsTypesToShow &= ~mDisplayContent.getInsetsPolicy().showTransient(IntArray.wrap(
-                        new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
-            }
-            if (insetsTypesToShow != 0) {
-                controlTarget.showInsets(insetsTypesToShow, false);
+                // Show transient bars if they are hidden; restore position if they are visible.
+                mDisplayContent.getInsetsPolicy().showTransient(SHOW_TYPES_FOR_SWIPE);
+                controlTarget.showInsets(restorePositionTypes, false);
+            } else {
+                // Restore visibilities and positions of system bars.
+                controlTarget.showInsets(Type.statusBars() | Type.navigationBars(), false);
             }
         } else {
             boolean sb = mStatusBarController.checkShowTransientBarLw();
@@ -3955,8 +3964,7 @@ public class DisplayPolicy {
                 mPendingPanicGestureUptime = SystemClock.uptimeMillis();
                 if (!isNavBarEmpty(mLastSystemUiFlags)) {
                     mNavigationBarController.showTransient();
-                    mDisplayContent.getInsetsPolicy().showTransient(IntArray.wrap(
-                            new int[] {ITYPE_NAVIGATION_BAR}));
+                    mDisplayContent.getInsetsPolicy().showTransient(SHOW_TYPES_FOR_PANIC);
                 }
             }
         }

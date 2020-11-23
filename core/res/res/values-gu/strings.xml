@@ -982,7 +982,7 @@
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ડિલીટ કરો"</string>
     <string name="search_go" msgid="2141477624421347086">"શોધો"</string>
     <string name="search_hint" msgid="455364685740251925">"શોધો…"</string>
-    <string name="searchview_description_search" msgid="1045552007537359343">"શોધ"</string>
+    <string name="searchview_description_search" msgid="1045552007537359343">"શોધો"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"શોધ ક્વેરી"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"ક્વેરી સાફ કરો"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"ક્વેરી સબમિટ કરો"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n•ઘેરી થીમ ચાલુ કરે છે\n•બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “ઓકે Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n•ઘેરી થીમ ચાલુ કરે છે\n•બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “ઓકે Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n• ઘેરી થીમ ચાલુ કરે છે\n• બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “ઓકે Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n\n• ઘેરી થીમ ચાલુ કરે છે\n• બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “ઓકે Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપને બૅકગ્રાઉન્ડમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ચાલુ કરો"</string>

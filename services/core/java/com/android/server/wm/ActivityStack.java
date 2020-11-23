@@ -1737,8 +1737,9 @@ public class ActivityStack extends Task {
         // If the most recent activity was noHistory but was only stopped rather
         // than stopped+finished because the device went to sleep, we need to make
         // sure to finish it as we're making a new activity topmost.
-        if (shouldSleepActivities() && mLastNoHistoryActivity != null &&
-                !mLastNoHistoryActivity.finishing) {
+        if (shouldSleepActivities() && mLastNoHistoryActivity != null
+                && !mLastNoHistoryActivity.finishing
+                && mLastNoHistoryActivity != next) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "no-history finish of " + mLastNoHistoryActivity + " on new resume");
             mLastNoHistoryActivity.finishIfPossible("resume-no-history", false /* oomAdj */);
@@ -2782,13 +2783,15 @@ public class ActivityStack extends Task {
     /**
      * Reset local parameters because an app's activity died.
      * @param app The app of the activity that died.
-     * @return result from removeHistoryRecordsForAppLocked.
+     * @return {@code true} if the process has any visible activity.
      */
     boolean handleAppDied(WindowProcessController app) {
+        boolean isPausingDied = false;
         if (mPausingActivity != null && mPausingActivity.app == app) {
             if (DEBUG_PAUSE || DEBUG_CLEANUP) Slog.v(TAG_PAUSE,
                     "App died while pausing: " + mPausingActivity);
             mPausingActivity = null;
+            isPausingDied = true;
         }
         if (mLastPausedActivity != null && mLastPausedActivity.app == app) {
             mLastPausedActivity = null;
@@ -2796,7 +2799,8 @@ public class ActivityStack extends Task {
         }
 
         mStackSupervisor.removeHistoryRecords(app);
-        return mRemoveHistoryRecordsForApp.process(app);
+        final boolean hadVisibleActivities = mRemoveHistoryRecordsForApp.process(app);
+        return hadVisibleActivities || isPausingDied;
     }
 
     boolean dump(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,

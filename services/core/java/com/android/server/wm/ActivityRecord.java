@@ -4677,15 +4677,6 @@ public final class ActivityRecord extends WindowToken implements WindowManagerSe
             return false;
         }
 
-        // Check if the activity is on a sleeping display, and if it can turn it ON.
-        if (getDisplay().isSleeping()) {
-            final boolean canTurnScreenOn = !mSetToSleep || canTurnScreenOn()
-                    || canShowWhenLocked() || containsDismissKeyguardWindow();
-            if (!canTurnScreenOn) {
-                return false;
-            }
-        }
-
         // Now check whether it's really visible depending on Keyguard state, and update
         // {@link ActivityStack} internal states.
         // Inform the method if this activity is the top activity of this stack, but exclude the
@@ -4695,6 +4686,12 @@ public final class ActivityRecord extends WindowToken implements WindowManagerSe
                 && stack.getDisplayArea().isTopNotPinnedStack(stack);
         final boolean visibleIgnoringDisplayStatus = stack.checkKeyguardVisibility(this,
                 visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
+
+        // Check if the activity is on a sleeping display, and if it can turn it ON.
+        // TODO(b/163993448): Do not make activity visible before display awake.
+        if (visibleIgnoringDisplayStatus && getDisplay().isSleeping()) {
+            return !mSetToSleep || canTurnScreenOn();
+        }
 
         return visibleIgnoringDisplayStatus;
     }
