@@ -3835,7 +3835,7 @@ public class TelephonyManager {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    public static String getSimCountryIso(int subId) {
+    public String getSimCountryIso(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getSimCountryIsoForPhone(phoneId);
     }
@@ -3846,7 +3846,7 @@ public class TelephonyManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public static String getSimCountryIsoForPhone(int phoneId) {
+    public String getSimCountryIsoForPhone(int phoneId) {
         return getTelephonyProperty(phoneId, TelephonyProperties.icc_operator_iso_country(), "");
     }
 
