@@ -531,6 +531,9 @@ public interface RILConstants {
     int RIL_REQUEST_ENABLE_VONR = 225;
     int RIL_REQUEST_IS_VONR_ENABLED = 225;
 
+    /* RIL Request to get newly supported radio
+       capabilities include 5G SA*/
+    int RIL_REQUEST_GET_ENHANCED_RADIO_CAPABILITY = 600;
     /* Responses begin */
     int RIL_RESPONSE_ACKNOWLEDGEMENT = 800;
 
