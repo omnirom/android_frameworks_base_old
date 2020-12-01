@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
+         when the user asks to reboot. [CHAR LIMIT=NONE] -->
+    <string name="reboot_confirm">您想要重新启动吗？</string>
+    <string name="reboot_title">重新启动</string>
+    <!-- advanced reboot to bootloader. -->
+    <string name="reboot_to_bootloader_title">重启到引导模式</string>
+    <string name="reboot_to_bootloader_message">正在重启到引导模式\u2026</string>
+    <!-- advanced reboot to recovery. -->
+    <string name="reboot_to_recovery_title">重启到恢复模式</string>
+    <string name="reboot_to_recovery_message">重启到恢复模式\u2026</string>
+    <!-- advanced reboot system -->
+    <string name="reboot_system_title">重新启动</string>
+    <string name="reboot_system_message">正在重启\u2026</string>
+    <!-- advanced reboot to fastboot. -->
+    <string name="reboot_to_fastboot_title">重启到引导模式</string>
+    <string name="reboot_to_fastboot_message">正在重启到引导模式\u2026</string>
+    <!-- MicroG -->
+    <string name="permlab_fakePackageSignature">伪装软件包签名</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+         they want to allow the application to do this. -->
+    <string name="permdesc_fakePackageSignature">允许应用假装成为一个不同的应用。恶意应用可能能够使用它来访问私人应用数据。 合法的使用包括假装仿真的仿真器。只是谨慎地授予此权限！</string>
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
+</resources>
