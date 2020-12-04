@@ -5405,6 +5405,11 @@ public final class Settings {
         public static final String OMNI_FINGERPRINT_SUCCESS_VIB = "fingerprint_success_vib";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_SHOW_CPU_OVERLAY = "show_cpu_overlay";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5436,7 +5441,8 @@ public final class Settings {
             OMNI_VIBRATE_ON_CONNECT,
             OMNI_VIBRATE_ON_CALLWAITING,
             OMNI_VIBRATE_ON_DISCONNECT,
-            OMNI_FINGERPRINT_SUCCESS_VIB
+            OMNI_FINGERPRINT_SUCCESS_VIB,
+            OMNI_SHOW_CPU_OVERLAY
         };
 
         /**
@@ -5478,6 +5484,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_CALLWAITING, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_DISCONNECT, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_CPU_OVERLAY, 0);
         }
     }
 
