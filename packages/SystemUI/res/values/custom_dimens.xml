@@ -20,4 +20,5 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <dimen name="qs_tile_height_wo_label">48dp</dimen>
     <dimen name="keyguard_eca_bottom_margin">70dp</dimen>
+    <dimen name="cpu_info_text_height">12dp</dimen>
 </resources>
