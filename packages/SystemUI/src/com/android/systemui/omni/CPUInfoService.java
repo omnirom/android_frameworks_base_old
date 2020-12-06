@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.omni;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -38,6 +38,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.util.Log;
+
+import com.android.systemui.R;
 
 import java.io.BufferedReader;
 import java.io.File;
