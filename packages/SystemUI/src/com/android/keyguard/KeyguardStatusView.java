@@ -217,6 +217,7 @@ public class KeyguardStatusView extends GridLayout implements
         updateOwnerInfo();
         updateLogoutView();
         updateDark();
+        updateSettings();
     }
 
     /**
