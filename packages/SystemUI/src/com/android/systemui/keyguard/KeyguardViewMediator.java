@@ -757,7 +757,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         mShowHomeOverLockscreen = mDeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN,
-                /* defaultValue = */ true);
+                /* defaultValue = */ false);
         mDeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 mHandler::post,
