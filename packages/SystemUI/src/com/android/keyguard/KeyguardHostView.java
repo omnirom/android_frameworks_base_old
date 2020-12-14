@@ -316,6 +316,13 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
      */
     @Override
     public void finish(boolean strongAuth, int targetUserId) {
+        // we can assume that we succeed if we used fod at this point
+        // make sure we dont do unneeded stuff anymore cause weired
+        // animation flicker
+        if (mHasFod) {
+            mFpcAuth = true;
+        }
+
         // If there's a pending runnable because the user interacted with a widget
         // and we're leaving keyguard, then run it.
         boolean deferKeyguardDone = false;
