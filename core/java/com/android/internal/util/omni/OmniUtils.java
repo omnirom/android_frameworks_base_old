@@ -20,6 +20,9 @@ package com.android.internal.util.omni;
 import android.content.Context;
 import android.content.Intent;
 import android.os.UserHandle;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.RectF;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,6 +30,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -127,5 +131,31 @@ public class OmniUtils {
         if (DeviceUtils.deviceSupportsVibrator(context)) {
             ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(pattern, -1);
         }
+    }
+
+    public static Bitmap scaleCenterInside(final Bitmap source, final int newWidth, final int newHeight) {
+        int sourceWidth = source.getWidth();
+        int sourceHeight = source.getHeight();
+
+        float widthRatio = (float) newWidth / sourceWidth;
+        float heightRatio = (float) newHeight / sourceHeight;
+        float ratio = Math.max(widthRatio, heightRatio);
+        float scaledWidth = sourceWidth * ratio;
+        float scaledHeight = sourceHeight * ratio;
+    
+        //Bitmap scaled = Bitmap.createScaledBitmap(source, (int)scaledWidth, (int)scaledHeight, true);
+
+        RectF targetRect = null;
+        if (newWidth > newHeight) {
+            float inset = (scaledHeight - newHeight) / 2;
+            targetRect = new RectF(0, -inset, newWidth, newHeight + inset);
+        } else {
+            float inset = (scaledWidth - newWidth) / 2;
+            targetRect = new RectF(-inset, 0, newWidth + inset, newHeight);
+        }
+        Bitmap dest = Bitmap.createBitmap(newWidth, newHeight, source.getConfig());
+        Canvas canvas = new Canvas(dest);
+        canvas.drawBitmap(source, null, targetRect, null);
+        return dest;
     }
 }
