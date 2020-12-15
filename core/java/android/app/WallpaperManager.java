@@ -46,6 +46,7 @@ import android.graphics.ImageDecoder;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -67,9 +68,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
+import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.R;
+import com.android.internal.util.omni.OmniUtils;
 
 import libcore.io.IoUtils;
 
@@ -105,6 +108,7 @@ public class WallpaperManager {
     private static boolean DEBUG = false;
     private float mWallpaperXStep = -1;
     private float mWallpaperYStep = -1;
+    private static boolean FORCE_DEFAULT_WALLPAPER_SIZE = true;
 
     /** {@hide} */
     private static final String PROP_WALLPAPER = "ro.config.wallpaper";
@@ -520,7 +524,18 @@ public class WallpaperManager {
             if (is != null) {
                 try {
                     BitmapFactory.Options options = new BitmapFactory.Options();
-                    return BitmapFactory.decodeStream(is, null, options);
+                    Bitmap b = BitmapFactory.decodeStream(is, null, options);
+                    try {
+                        if (FORCE_DEFAULT_WALLPAPER_SIZE) {
+                            Point size = new Point();
+                            WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                            Display d = wm.getDefaultDisplay();
+                            d.getRealSize(size);
+                            return OmniUtils.scaleCenterInside(b, size.x, size.y);
+                        }
+                    } catch (Exception e) {
+                    }
+                    return b;
                 } catch (OutOfMemoryError e) {
                     Log.w(TAG, "Can't decode stream", e);
                 } finally {
