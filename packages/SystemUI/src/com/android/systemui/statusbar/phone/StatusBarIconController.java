@@ -97,6 +97,11 @@ public interface StatusBarIconController {
      */
     void setIcon(String slot, int resourceId, CharSequence contentDescription);
 
+    /**
+     * @hide
+     */
+    void setCustomIcon(String slot, StatusBarIcon icon);
+
     /** */
     void setWifiIcon(String slot, WifiIconState state);
 
