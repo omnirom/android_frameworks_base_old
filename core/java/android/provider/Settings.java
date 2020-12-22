@@ -5787,6 +5787,11 @@ public final class Settings {
         public static final String OMNI_FAST_CHARGING_LED_ENABLED = "fast_charging_led_enabled";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_BT_BATTERY = "status_bar_bt_battery";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5812,6 +5817,7 @@ public final class Settings {
             OMNI_BATTERY_LIGHT_FULL_COLOR,
             OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR,
             OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED,
+            OMNI_STATUS_BAR_BT_BATTERY,
         };
 
         /**
@@ -5847,6 +5853,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_FAST_BATTERY_LIGHT_COLOR, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_FAST_CHARGING_LED_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_STATUS_BAR_BT_BATTERY, 0);
         }
     }
 
