@@ -6093,6 +6093,10 @@ public final class Settings {
          */
         public static final String OMNI_QS_TILE_LABEL_HIDE = "qs_tile_label_hide";
 
+        /**
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_BT_BATTERY = "status_bar_bt_battery";
 
         /**
          * SettingsBackupAgent will combine its list with this so we dont need
@@ -6126,6 +6130,7 @@ public final class Settings {
             OMNI_QS_LAYOUT_COLUMNS,
             OMNI_QS_TILE_VERTICAL_LAYOUT,
             OMNI_QS_TILE_LABEL_HIDE,
+            OMNI_STATUS_BAR_BT_BATTERY,
         };
 
         /**
@@ -6167,6 +6172,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_TILE_VERTICAL_LAYOUT, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_TILE_LABEL_HIDE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_STATUS_BAR_BT_BATTERY, 0);
         }
     }
 
