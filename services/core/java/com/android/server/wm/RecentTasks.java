@@ -57,12 +57,14 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -229,6 +231,20 @@ class RecentTasks {
     private final Runnable mResetFreezeTaskListOnTimeoutRunnable =
             this::resetFreezeTaskListReorderingOnTimeout;
 
+    // omni additions start
+    private boolean mDisableVisibleLimits;
+
+    private class SettingsObserver extends ContentObserver {
+        public SettingsObserver() {
+            super(null);
+        }
+        @Override
+        public void onChange(boolean selfChange) {
+            mDisableVisibleLimits = Settings.System.getIntForUser(mService.mContext.getContentResolver(),
+                    Settings.System.OMNI_RECENT_TASKS_VISIBLE_DISABLE, 0, UserHandle.USER_CURRENT) != 0;
+        }
+    }
+
     @VisibleForTesting
     RecentTasks(ActivityTaskManagerService service, TaskPersister taskPersister) {
         mService = service;
@@ -388,6 +404,13 @@ class RecentTasks {
                 Slog.w(TAG, "Could not load application info for recents component: " + cn);
             }
         }
+
+        mDisableVisibleLimits = Settings.System.getIntForUser(mService.mContext.getContentResolver(),
+                Settings.System.OMNI_RECENT_TASKS_VISIBLE_DISABLE, 0, UserHandle.USER_CURRENT) != 0;
+
+        mService.mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.OMNI_RECENT_TASKS_VISIBLE_DISABLE),
+                false, new SettingsObserver(), UserHandle.USER_ALL);
     }
 
     /**
@@ -1387,6 +1410,10 @@ class RecentTasks {
                 if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\texcludeFromRecents=true");
                 return taskIndex == 0;
             }
+        }
+
+        if (mDisableVisibleLimits) {
+            return true;
         }
 
         if (mMinNumVisibleTasks >= 0 && numVisibleTasks <= mMinNumVisibleTasks) {
