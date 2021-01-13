@@ -5500,6 +5500,12 @@ public final class Settings {
         public static final String OMNI_FAST_CHARGING_LED_ENABLED = "fast_charging_led_enabled";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_RECENT_TASKS_VISIBLE_DISABLE =
+                "recents_tasks_visible_disable";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5545,7 +5551,8 @@ public final class Settings {
             OMNI_BATTERY_LIGHT_FULL_COLOR,
             OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR,
             OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED,
-            OMNI_QS_MEDIA_PLAYER_ROWS
+            OMNI_QS_MEDIA_PLAYER_ROWS,
+            OMNI_RECENT_TASKS_VISIBLE_DISABLE
         };
 
         /**
@@ -5603,6 +5610,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_FAST_CHARGING_LED_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_MEDIA_PLAYER_ROWS, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_RECENT_TASKS_VISIBLE_DISABLE, 0);
         }
     }
 
