@@ -112,17 +112,21 @@ class MediaHost @Inject constructor(
     }
 
     private fun updateViewVisibility() {
-        visible = if (showsOnlyActiveMedia) {
-            mediaDataFilter.hasActiveMedia()
-        } else {
-            mediaDataFilter.hasAnyMedia()
-        }
+        visible = getViewVisibility()
         val newVisibility = if (visible) View.VISIBLE else View.GONE
         if (newVisibility != hostView.visibility) {
             hostView.visibility = newVisibility
             visibleChangedListeners.forEach {
                 it.invoke(visible)
             }
+        }
+    }
+
+    fun getViewVisibility() : Boolean {
+        return if (showsOnlyActiveMedia) {
+            mediaDataFilter.hasActiveMedia()
+        } else {
+            mediaDataFilter.hasAnyMedia()
         }
     }
 

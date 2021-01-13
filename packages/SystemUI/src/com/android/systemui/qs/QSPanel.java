@@ -154,6 +154,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     // omni
     private View mBrightnessPlaceholder;
     private int mFooterMargin;
+    private boolean mQsMediaPlayerShowing;
 
     @Inject
     public QSPanel(
@@ -174,6 +175,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             onMediaVisibilityChanged(visible);
             return null;
         });
+        initMediaHostState();
+
         mContext = context;
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
@@ -207,8 +210,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
             lp = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1);
             addView(mHorizontalLinearLayout, lp);
-
-            initMediaHostState();
         }
         addSecurityFooter();
         if (mRegularTileLayout instanceof PagedTileLayout) {
@@ -220,6 +221,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     protected void onMediaVisibilityChanged(Boolean visible) {
+        mQsMediaPlayerShowing = visible;
         if (mRegularTileLayout instanceof PagedTileLayout) {
             mRegularTileLayout.setMediaPlayerShowing(visible);
         }
@@ -248,6 +250,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mRegularTileLayout == null) {
             mRegularTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
                     R.layout.qs_paged_tile_layout, this, false);
+            mRegularTileLayout.setMediaPlayerShowing(mQsMediaPlayerShowing);
         }
         return mRegularTileLayout;
     }
@@ -262,6 +265,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mMediaHost.setShowsOnlyActiveMedia(false);
         updateMediaDisappearParameters();
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
+        mQsMediaPlayerShowing = mMediaHost.getViewVisibility();
     }
 
     /**
