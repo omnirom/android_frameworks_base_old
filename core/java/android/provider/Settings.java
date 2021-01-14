@@ -5969,6 +5969,34 @@ public final class Settings {
         public static final String OMNI_LONG_PRESS_POWER_TORCH = "long_press_power_torch";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_ADVANCED_REBOOT = "advanced_reboot";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
+
+        /**
+         * Whether to enable DOZE only when charging
+         * @hide
+         */
+        public static final String OMNI_DOZE_ON_CHARGE = "doze_on_charge";
+
+        /**
+         * hidden stting of the current atate of DOZE only when charging
+         * @hide
+         */
+        public static final String OMNI_DOZE_ON_CHARGE_NOW = "doze_on_charge_now";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_SHOW_BATTERY_IMAGE =
+                "show_battery_image";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5980,6 +6008,10 @@ public final class Settings {
             OMNI_BUTTON_EXTRA_KEY_MAPPING,
             OMNI_DEVICE_FEATURE_SETTINGS,
             OMNI_LONG_PRESS_POWER_TORCH,
+            OMNI_ADVANCED_REBOOT,
+            OMNI_LOCKSCREEN_WEATHER_ENABLED,
+            OMNI_DOZE_ON_CHARGE,
+            OMNI_SHOW_BATTERY_IMAGE,
         };
 
         /**
@@ -5999,6 +6031,10 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BUTTON_EXTRA_KEY_MAPPING, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LONG_PRESS_POWER_TORCH, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_ADVANCED_REBOOT, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_DOZE_ON_CHARGE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
         }
     }
 
