@@ -5979,6 +5979,12 @@ public final class Settings {
         public static final String OMNI_MONET_DISABLE = "monet_disable";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_SHOW_BATTERY_IMAGE =
+                "show_battery_image";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5992,6 +5998,7 @@ public final class Settings {
             OMNI_LONG_PRESS_POWER_TORCH,
             OMNI_ADVANCED_REBOOT,
             OMNI_MONET_DISABLE,
+            OMNI_SHOW_BATTERY_IMAGE,
         };
 
         /**
@@ -6013,6 +6020,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LONG_PRESS_POWER_TORCH, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_ADVANCED_REBOOT, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_MONET_DISABLE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
         }
     }
 
