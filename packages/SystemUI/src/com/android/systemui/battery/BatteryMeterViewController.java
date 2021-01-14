@@ -16,6 +16,7 @@
 package com.android.systemui.battery;
 
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
+import static android.provider.Settings.System.OMNI_SHOW_BATTERY_IMAGE;
 
 import android.app.ActivityManager;
 import android.content.ContentResolver;
@@ -115,6 +116,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
                 contentResolver.unregisterContentObserver(mSettingObserver);
                 registerShowBatteryPercentObserver(newUserId);
                 mView.updateShowPercent();
+                mView.updateShowImage();
             }
         };
     }
@@ -130,6 +132,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
         mCurrentUserTracker.startTracking();
 
         mView.updateShowPercent();
+        mView.updateShowImage();
     }
 
     @Override
@@ -175,6 +178,11 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
                 false,
                 mSettingObserver,
                 user);
+        mContentResolver.registerContentObserver(
+                Settings.System.getUriFor(OMNI_SHOW_BATTERY_IMAGE),
+                false,
+                mSettingObserver,
+                user);
     }
 
     private void registerGlobalBatteryUpdateObserver() {
@@ -193,6 +201,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);
             mView.updateShowPercent();
+            mView.updateShowImage();
             if (TextUtils.equals(uri.getLastPathSegment(),
                     Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME)) {
                 // update the text for sure if the estimate in the cache was updated
