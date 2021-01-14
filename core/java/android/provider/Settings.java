@@ -5660,6 +5660,12 @@ public final class Settings {
         public static final String OMNI_DOZE_ON_CHARGE_NOW = "doze_on_charge_now";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_SHOW_BATTERY_IMAGE =
+                "show_battery_image";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5674,6 +5680,7 @@ public final class Settings {
             OMNI_ADVANCED_REBOOT,
             OMNI_LOCKSCREEN_WEATHER_ENABLED,
             OMNI_DOZE_ON_CHARGE,
+            OMNI_SHOW_BATTERY_IMAGE,
         };
 
         /**
@@ -5696,6 +5703,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_ADVANCED_REBOOT, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DOZE_ON_CHARGE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
         }
     }
 

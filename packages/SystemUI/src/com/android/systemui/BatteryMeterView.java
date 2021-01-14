@@ -16,6 +16,7 @@
 package com.android.systemui;
 
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
+import static android.provider.Settings.System.OMNI_SHOW_BATTERY_IMAGE;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.util.SysuiLifecycle.viewAttachLifecycle;
@@ -161,7 +162,11 @@ public class BatteryMeterView extends LinearLayout implements
                 getContext().getContentResolver().registerContentObserver(
                         Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver,
                         newUserId);
+                getContext().getContentResolver().registerContentObserver(
+                        Settings.System.getUriFor(OMNI_SHOW_BATTERY_IMAGE), false, mSettingObserver,
+                        newUserId);
                 updateShowPercent();
+                updateShowImage();
             }
         };
 
@@ -272,9 +277,12 @@ public class BatteryMeterView extends LinearLayout implements
         getContext().getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver, mUser);
         getContext().getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(OMNI_SHOW_BATTERY_IMAGE), false, mSettingObserver, mUser);
+        getContext().getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME),
                 false, mSettingObserver);
         updateShowPercent();
+        updateShowImage();
         subscribeForTunerUpdates();
         mUserTracker.startTracking();
     }
@@ -397,6 +405,16 @@ public class BatteryMeterView extends LinearLayout implements
         }
     }
 
+    private void updateShowImage() {
+        final boolean hideImage = Settings.System.getIntForUser(getContext().getContentResolver(),
+                OMNI_SHOW_BATTERY_IMAGE, 1, mUser) == 0;
+        mBatteryIconView.setVisibility(hideImage ? View.GONE : View.VISIBLE);
+        int padding = getResources().getDimensionPixelSize(R.dimen.signal_cluster_battery_padding);
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) getLayoutParams();
+        lp.setMargins(hideImage ? -padding : 0, 0, 0, 0);
+        setLayoutParams(lp);
+    }
+
     @Override
     public void onDensityOrFontScaleChanged() {
         scaleBatteryMeterViews();
@@ -505,6 +523,7 @@ public class BatteryMeterView extends LinearLayout implements
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);
             updateShowPercent();
+            updateShowImage();
             if (TextUtils.equals(uri.getLastPathSegment(),
                     Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME)) {
                 // update the text for sure if the estimate in the cache was updated
