@@ -5506,6 +5506,12 @@ public final class Settings {
                 "recents_tasks_visible_disable";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_SHOW_BATTERY_IMAGE =
+                "show_battery_image";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5552,7 +5558,8 @@ public final class Settings {
             OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR,
             OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED,
             OMNI_QS_MEDIA_PLAYER_ROWS,
-            OMNI_RECENT_TASKS_VISIBLE_DISABLE
+            OMNI_RECENT_TASKS_VISIBLE_DISABLE,
+            OMNI_SHOW_BATTERY_IMAGE
         };
 
         /**
@@ -5611,6 +5618,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_MEDIA_PLAYER_ROWS, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_RECENT_TASKS_VISIBLE_DISABLE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
         }
     }
 
