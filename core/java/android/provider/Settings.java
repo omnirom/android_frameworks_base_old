@@ -5292,6 +5292,11 @@ public final class Settings {
         /**
          * @hide
          */
+        public static final String OMNI_QS_SHOW_MEDIA_DIVIDER = "qs_show_media_divider";
+
+        /**
+         * @hide
+         */
         public static final String OMNIJAWS_WEATHER_ICON_PACK = "omnijaws_weather_icon_pack";
 
         /**
@@ -5558,6 +5563,7 @@ public final class Settings {
             OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR,
             OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED,
             OMNI_QS_MEDIA_PLAYER_ROWS,
+            OMNI_QS_SHOW_MEDIA_DIVIDER,
             OMNI_RECENT_TASKS_VISIBLE_DISABLE,
             OMNI_SHOW_BATTERY_IMAGE
         };
@@ -5617,6 +5623,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_FAST_CHARGING_LED_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_MEDIA_PLAYER_ROWS, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_SHOW_MEDIA_DIVIDER, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_RECENT_TASKS_VISIBLE_DISABLE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
         }

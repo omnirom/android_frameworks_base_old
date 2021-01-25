@@ -39,6 +39,7 @@
     <string name="tuner_status_bar_bg_transparency">Transparent status bar background</string>
     <string name="tuner_qs_media_player">Media player - reboot required</string>
     <string name="tuner_qs_media_player_rows">Expand rows on hidden media player</string>
+    <string name="tuner_qs_show_media_divider">Show media player divider</string>
 
     <string name="tuner_keyguard_fod_unlock_enabled_title">Allow secondary FOD unlock</string>
     <string name="tuner_keyguard_fod_unlock_enabled_summary">For devices with FOD allow using on secondary unlock screens</string>
