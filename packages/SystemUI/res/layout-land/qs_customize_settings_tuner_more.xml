@@ -49,6 +49,30 @@
                 systemui:initialValue="1"
                 android:layout_gravity="center_vertical"/>
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="@string/tuner_qs_media_player_rows"/>
+
+            <org.omnirom.omnilib.widget.SystemSettingsSwitch
+                android:id="@+id/qs_media_player_rows"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                systemui:initialValue="0"
+                android:layout_gravity="center_vertical"/>
+
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -71,13 +95,13 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:text="@string/tuner_qs_media_player_rows"/>
+                android:text="@string/tuner_qs_show_media_divider"/>
 
             <org.omnirom.omnilib.widget.SystemSettingsSwitch
-                android:id="@+id/qs_media_player_rows"
+                android:id="@+id/qs_show_media_divider"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                systemui:initialValue="0"
+                systemui:initialValue="1"
                 android:layout_gravity="center_vertical"/>
 
         </LinearLayout>
