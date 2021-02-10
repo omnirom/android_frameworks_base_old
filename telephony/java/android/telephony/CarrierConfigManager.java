@@ -3915,8 +3915,6 @@ public class CarrierConfigManager {
     public static final String KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY =
             "missed_incoming_call_sms_pattern_string_array";
 
-<<<<<<< HEAD
-=======
     /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
@@ -3949,7 +3947,6 @@ public class CarrierConfigManager {
     public static final String KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED =
             "use_lower_mtu_value_if_both_received";
 
->>>>>>> eb66c014bcac98bf1f772e36ea17c0f190f10096
      /**
      * Flag indicating whether carrier supports multianchor conference.
      * In multianchor conference, a participant of a conference can add
@@ -3969,7 +3966,6 @@ public class CarrierConfigManager {
             "default_rtt_mode_int";
 
     /**
-<<<<<<< HEAD
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -3977,7 +3973,8 @@ public class CarrierConfigManager {
      */
     public static final String KEY_DISABLE_DUN_APN_WHILE_ROAMING =
             "disable_dun_apn_while_roaming";
-=======
+
+    /**
      * String array of Apn configurations of same mvno type GID.
      * The entries should be of form "GID data:all supported apn types:devicecapability:apnname".
      * example: 52FF:default,mms:SA:nrphone
@@ -3993,8 +3990,6 @@ public class CarrierConfigManager {
      */
     public static final String KEY_REQUIRE_APN_FILTERING_WITH_RADIO_CAPABILITY =
             "require_apn_filtering_with_radio_capability_bool";
-
->>>>>>> eb66c014bcac98bf1f772e36ea17c0f190f10096
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -4536,11 +4531,9 @@ public class CarrierConfigManager {
                 "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
         });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
-<<<<<<< HEAD
         sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_MULTIANCHOR_CONFERENCE, false);
         sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING, false);
-=======
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
@@ -4565,7 +4558,6 @@ public class CarrierConfigManager {
                 "53FF:mms,supl,hipri,default,fota:1xRTT:nxtgenphone",
         });
         sDefaults.putBoolean(KEY_REQUIRE_APN_FILTERING_WITH_RADIO_CAPABILITY, false);
->>>>>>> eb66c014bcac98bf1f772e36ea17c0f190f10096
     }
 
     /**

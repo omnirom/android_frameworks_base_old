@@ -124,9 +124,9 @@ class MediaHost @Inject constructor(
 
     fun getViewVisibility() : Boolean {
         return if (showsOnlyActiveMedia) {
-            mediaDataFilter.hasActiveMedia()
+            mediaDataManager.hasActiveMedia()
         } else {
-            mediaDataFilter.hasAnyMedia()
+            mediaDataManager.hasAnyMedia()
         }
     }
 

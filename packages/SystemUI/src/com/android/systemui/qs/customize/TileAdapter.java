@@ -97,15 +97,12 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private int mAccessibilityFromIndex;
     private QSTileHost mHost;
     private final UiEventLogger mUiEventLogger;
-
     private int mColumns = 3;
     private boolean mShowLabels = true;
     private boolean mShowSettings;
     private View mSettingsCOntainer;
-
     private final AccessibilityDelegateCompat mAccessibilityDelegate;
     private RecyclerView mRecyclerView;
-
 
     public TileAdapter(Context context, UiEventLogger uiEventLogger) {
         mContext = context;
@@ -353,16 +350,19 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         holder.mTileView.handleStateChanged(info.state);
         holder.mTileView.setShowAppLabel(position > mEditIndex && !info.isSystem);
         holder.mTileView.setHideLabel(!mShowLabels);
+        holder.mTileView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        holder.mTileView.setClickable(true);
+        holder.mTileView.setFocusable(true);
+        holder.mTileView.setFocusableInTouchMode(true);
 
         if (!mAccessibilityManager.isTouchExplorationEnabled()) {
             holder.mTileView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int position = holder.getAdapterPosition();
-                    final TileInfo info = mTiles.get(position);
                     if (position < mEditIndex) {
                         if (canRemoveTiles()) {
-                            move(position, info.isSystem ? mEditIndex : mTileDividerIndex, holder.mTileView);
+                            move(position, mEditIndex, holder.mTileView);
                         } else {
                             // TODO
                         }
@@ -372,8 +372,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 }
             });
         }
-        if (mAccessibilityManager.isTouchExplorationEnabled()) {
-            final boolean selectable = mAccessibilityAction == ACTION_NONE || position < mEditIndex;
+        if (mAccessibilityAction != ACTION_NONE) {
             holder.mTileView.setClickable(selectable);
             holder.mTileView.setFocusable(selectable);
             holder.mTileView.setFocusableInTouchMode(selectable);
@@ -771,7 +770,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             if (to > mEditIndex && !info.isSystem) {
                 to = mTileDividerIndex;
             }
-            return move(from, to, target.itemView);
+            return move(from, to);
         }
 
         @Override

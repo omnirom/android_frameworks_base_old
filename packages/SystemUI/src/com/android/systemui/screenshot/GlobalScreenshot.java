@@ -658,9 +658,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                     }
                 });
 
-                // Play the shutter sound to notify that we've taken a screenshot
-                mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
-
                 mScreenshotPreview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
                 mScreenshotPreview.buildLayer();
                 mScreenshotAnimation.start();
@@ -737,54 +734,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         } else {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
         }
-    }
-
-    /**
-     * Starts the animation after taking the screenshot
-     */
-    private void startAnimation(final Consumer<Uri> finisher, Rect screenRect, Insets screenInsets,
-            boolean showFlash) {
-
-        // If power save is on, show a toast so there is some visual indication that a
-        // screenshot has been taken.
-        PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        if (powerManager.isPowerSaveMode()) {
-            Toast.makeText(mContext, R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show();
-        }
-
-        mScreenshotHandler.post(() -> {
-            if (!mScreenshotLayout.isAttachedToWindow()) {
-                mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
-            }
-            mScreenshotAnimatedView.setImageDrawable(
-                    createScreenDrawable(mScreenBitmap, screenInsets));
-            setAnimatedViewSize(screenRect.width(), screenRect.height());
-            // Show when the animation starts
-            mScreenshotAnimatedView.setVisibility(View.GONE);
-
-            mScreenshotPreview.setImageDrawable(createScreenDrawable(mScreenBitmap, screenInsets));
-            // make static preview invisible (from gone) so we can query its location on screen
-            mScreenshotPreview.setVisibility(View.INVISIBLE);
-
-            mScreenshotHandler.post(() -> {
-                mScreenshotLayout.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
-
-                mScreenshotAnimation =
-                        createScreenshotDropInAnimation(screenRect, showFlash);
-
-                saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
-                    @Override
-                    void onActionsReady(SavedImageData imageData) {
-                        showUiOnActionsReady(imageData);
-                        mNotificationsController.peekScreenshotNotification(imageData);
-                    }
-                });
-
-                mScreenshotPreview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-                mScreenshotPreview.buildLayer();
-                mScreenshotAnimation.start();
-            });
-        });
     }
 
     private AnimatorSet createScreenshotDropInAnimation(Rect bounds, boolean showFlash) {

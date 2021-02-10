@@ -979,23 +979,16 @@ public class NavigationBarView extends FrameLayout implements
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
 
-        mActiveRegion.setEmpty();
-        updateButtonLocation(getBackButton(), mBackButtonBounds, true);
-        updateButtonLocation(getHomeButton(), mHomeButtonBounds, false);
-        updateButtonLocation(getRecentsButton(), mRecentsButtonBounds, false);
-        updateButtonLocation(getRotateSuggestionButton(), mRotationButtonBounds, true);
         if (getPowerButton() != null) {
-            updateButtonLocation(getPowerButton(), mPowerButtonBounds, false);
+            updateButtonLocation(getPowerButton(), false);
         }
         if (getVolumeMinusButton() != null) {
-            updateButtonLocation(getVolumeMinusButton(), mVolumeMinusButtonBounds, false);
+            updateButtonLocation(getVolumeMinusButton(), false);
         }
         if (getVolumePlusButton() != null) {
-            updateButtonLocation(getVolumePlusButton(), mVolumePlusButtonBounds, false);
+            updateButtonLocation(getVolumePlusButton(), false);
         }
 
-        // TODO: Handle button visibility changes
-        mOverviewProxyService.onActiveNavBarRegionChanges(mActiveRegion);
         notifyActiveTouchRegions();
         mRecentsOnboarding.setNavBarHeight(getMeasuredHeight());
     }

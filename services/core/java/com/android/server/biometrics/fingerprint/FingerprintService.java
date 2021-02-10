@@ -713,16 +713,6 @@ public class FingerprintService extends BiometricServiceBase {
         public void onAuthenticated(final long deviceId, final int fingerId, final int groupId,
                 ArrayList<Byte> token) {
             mHandler.post(() -> {
-                Fingerprint fp = new Fingerprint("", groupId, fingerId, deviceId);
-                FingerprintService.super.handleAuthenticated(fp, token);
-                if (mHasFod && fp.getBiometricId() != 0) {
-                    try {
-                        mStatusBarService.hideInDisplayFingerprintView();
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "hideInDisplayFingerprintView failed", e);
-                    }
-                }
-
                 boolean authenticated = fingerId != 0;
                 final ClientMonitor client = getCurrentClient();
                 if (client instanceof FingerprintAuthClient) {
@@ -732,8 +722,15 @@ public class FingerprintService extends BiometricServiceBase {
                     }
                 }
 
-                final Fingerprint fp = new Fingerprint("", groupId, fingerId, deviceId);
+                Fingerprint fp = new Fingerprint("", groupId, fingerId, deviceId);
                 FingerprintService.super.handleAuthenticated(authenticated, fp, token);
+                if (mHasFod && fp.getBiometricId() != 0) {
+                    try {
+                        mStatusBarService.hideInDisplayFingerprintView();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "hideInDisplayFingerprintView failed", e);
+                    }
+                }
             });
         }
 

@@ -195,7 +195,7 @@ public class PhoneStatusBarPolicy
             RecordingController recordingController,
             @Nullable TelecomManager telecomManager, @DisplayId int displayId,
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
-            RingerModeTracker ringerModeTracker, Context context) {
+            RingerModeTracker ringerModeTracker, Context context,
             PrivacyItemController privacyItemController) {
         mIconController = iconController;
         mCommandQueue = commandQueue;
