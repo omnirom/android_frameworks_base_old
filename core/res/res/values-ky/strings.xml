@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Кулпусун ачып же Шашылыш чалуу аткаруу үчүн менюну басыңыз."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Бөгөттөн чыгаруу үчүн Менюну басыңыз."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Кулпуну ачуу үчүн, үлгүнү тартыңыз"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Шашылыш чалуу"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Шашылыш чалуу"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Чалууга кайтуу"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Туура!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Дагы аракет кылыңыз"</string>
@@ -1317,7 +1317,7 @@
     <string name="console_running_notification_title" msgid="6087888939261635904">"Сериялык консоль иштетилди"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Майнаптуулугуна таасири тиет. Аны өчүрүү үчүн операциялык тутумду жүктөгүчтү текшериңиз."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB портунда суюктук же урандылар бар"</string>
-    <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB порт автоматтык түрдө өчүрүлдү. Кененирээк маалымат алуу үчүн, таптап коюңуз."</string>
+    <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB порт автоматтык түрдө өчтү. Кененирээк маалымат алуу үчүн, таптап коюңуз."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB портун колдонууга болот"</string>
     <string name="usb_contaminant_not_detected_message" msgid="892863190942660462">"Телефон суюктук менен урандыларды аныктаган жок."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"Мүчүлүштүк тууралуу кабар алынууда…"</string>

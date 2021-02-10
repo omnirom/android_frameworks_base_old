@@ -3863,6 +3863,23 @@ message LmkStateChanged {
  *      system/core/lmkd/lmkd.c
  */
 message LmkKillOccurred {
+    enum Reason {
+        UNKNOWN = 0;
+        PRESSURE_AFTER_KILL = 1;
+        CRITICAL_KILL = 2;
+        NOT_RESPONDING = 3;
+        LOW_SWAP_AND_THRASHING = 4;
+        LOW_MEM_AND_SWAP = 5;
+        LOW_MEM_AND_THRASHING = 6;
+        DIRECT_RECL_AND_THRASHING = 7;
+        DIRECT_RECL_AND_THROT = 8;
+        DIRECT_RECL_AND_LOW_MEM = 9;
+        COMPACTION = 10;
+        LOW_MEM_AND_SWAP_UTIL = 11;
+        KILL_REASON_COUNT = 12;
+
+    }
+
     // The uid if available. -1 means not available.
     optional int32 uid = 1 [(is_uid) = true];
 
@@ -3892,6 +3909,15 @@ message LmkKillOccurred {
 
     // Min oom adj score considered by lmkd.
     optional int32 min_oom_score = 10;
+
+    // Free physical memory on device at LMK time.
+    optional int32 free_mem_kb = 11;
+
+    // Free swap on device at LMK time.
+    optional int32 free_swap_kb = 12;
+
+    // What triggered the LMK event.
+    optional Reason reason = 13;
 }
 
 /*
@@ -4420,15 +4446,12 @@ message PrivacyIndicatorsInteracted {
         UNKNOWN = 0;
         CHIP_VIEWED = 1;
         CHIP_CLICKED = 2;
-        DIALOG_PRIVACY_SETTINGS = 3;
+        reserved 3; // Used only in beta builds, never shipped 
         DIALOG_DISMISS = 4;
         DIALOG_LINE_ITEM = 5;
     }
 
     optional Type type = 1 [(state_field_option).exclusive_state = true];
-
-    // Used if the type is LINE_ITEM
-    optional string package_name = 2;
 }
 
 /**

@@ -1714,8 +1714,9 @@ class ActivityStarter {
         mRootWindowContainer.sendPowerHintForLaunchStartIfNeeded(
                 false /* forceSend */, mStartActivity);
 
-        mTargetStack.startActivityLocked(mStartActivity, topStack.getTopNonFinishingActivity(),
-                newTask, mKeepCurTransition, mOptions);
+        mTargetStack.startActivityLocked(mStartActivity,
+                topStack != null ? topStack.getTopNonFinishingActivity() : null, newTask,
+                mKeepCurTransition, mOptions);
         if (mDoResume) {
             final ActivityRecord topTaskActivity =
                     mStartActivity.getTask().topRunningActivityLocked();
@@ -2026,8 +2027,6 @@ class ActivityStarter {
             // of history or if it is finished immediately), thus disassociating the task. Also note
             // that mReuseTask is reset as a result of {@link Task#performClearTaskLocked}
             // launching another activity.
-            // TODO(b/36119896):  We shouldn't trigger activity launches in this path since we are
-            // already launching one.
             targetTask.performClearTaskLocked();
             targetTask.setIntent(mStartActivity);
             mAddingToTask = true;

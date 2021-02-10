@@ -287,11 +287,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final Executor mBackgroundExecutor;
 
     /**
-     * Short delay before restarting biometric authentication after a successful try
-     * This should be slightly longer than the time between on<biometric>Authenticated
-     * (e.g. onFingerprintAuthenticated) and setKeyguardGoingAway(true).
+     * Short delay before restarting fingerprint authentication after a successful try. This should
+     * be slightly longer than the time between onFingerprintAuthenticated and
+     * setKeyguardGoingAway(true).
      */
-    private static final int BIOMETRIC_CONTINUE_DELAY_MS = 500;
+    private static final int FINGERPRINT_CONTINUE_DELAY_MS = 500;
 
     // If the HAL dies or is unable to authenticate, keyguard should retry after a short delay
     private int mHardwareFingerprintUnavailableRetryCount = 0;
@@ -434,7 +434,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         }
         for (int i = 0; i < changedSubscriptions.size(); i++) {
-            SimData data = mSimDatas.get(changedSubscriptions.get(i).getSubscriptionId());
+            SimData data = mSimDatas.get(changedSubscriptions.get(i).getSimSlotIndex());
             for (int j = 0; j < mCallbacks.size(); j++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
                 if (cb != null) {
@@ -599,7 +599,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATION_CONTINUE),
-                BIOMETRIC_CONTINUE_DELAY_MS);
+                FINGERPRINT_CONTINUE_DELAY_MS);
 
         // Only authenticate fingerprint once when assistant is visible
         mAssistantVisible = false;
@@ -780,9 +780,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         isStrongBiometric);
             }
         }
-
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATION_CONTINUE),
-                BIOMETRIC_CONTINUE_DELAY_MS);
 
         // Only authenticate face once when assistant is visible
         mAssistantVisible = false;
@@ -1073,6 +1070,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
     }
 
+    private boolean isEncryptedOrLockdown(int userId) {
+        final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(userId);
+        final boolean isLockDown =
+                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
+                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+        final boolean isEncrypted = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT);
+        return isEncrypted || isLockDown;
+    }
+
     public boolean userNeedsStrongAuth() {
         return mStrongAuthTracker.getStrongAuthForUser(getCurrentUser())
                 != LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
@@ -1248,6 +1254,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             handleFaceLockoutReset();
         }
     };
+
+    // Trigger the fingerprint success path so the bouncer can be shown
+    private final FingerprintManager.FingerprintDetectionCallback mFingerprintDetectionCallback
+            = this::handleFingerprintAuthenticated;
 
     private FingerprintManager.AuthenticationCallback mFingerprintAuthenticationCallback
             = new AuthenticationCallback() {
@@ -2051,8 +2061,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mFingerprintCancelSignal.cancel();
             }
             mFingerprintCancelSignal = new CancellationSignal();
-            mFpm.authenticate(null, mFingerprintCancelSignal, 0, mFingerprintAuthenticationCallback,
-                    null, userId);
+
+            if (isEncryptedOrLockdown(userId)) {
+                mFpm.detectFingerprint(mFingerprintCancelSignal, mFingerprintDetectionCallback,
+                        userId);
+            } else {
+                mFpm.authenticate(null, mFingerprintCancelSignal, 0,
+                        mFingerprintAuthenticationCallback, null, userId);
+            }
+
             setFingerprintRunningState(BIOMETRIC_STATE_RUNNING);
             mFingerprintLockedOut = false;
         }
@@ -2089,7 +2106,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private boolean isUnlockWithFingerprintPossible(int userId) {
         return mFpm != null && mFpm.isHardwareDetected() && !isFingerprintDisabled(userId)
-                && mFpm.getEnrolledFingerprints(userId).size() > 0;
+                && mFpm.hasEnrolledTemplates(userId);
     }
 
     private boolean isUnlockWithFacePossible(int userId) {
@@ -2387,7 +2404,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 // Even though the subscription is not valid anymore, we need to notify that the
                 // SIM card was removed so we can update the UI.
                 becameAbsent = true;
-                mSimDatas.clear();
+                for (SimData data : mSimDatas.values()) {
+                    // Set the SIM state of all SimData associated with that slot to ABSENT se we
+                    // do not move back into PIN/PUK locked and not detect the change below.
+                    if (data.slotId == slotId) {
+                        data.simState = TelephonyManager.SIM_STATE_ABSENT;
+                    }
+                }
             } else if (state == TelephonyManager.SIM_STATE_CARD_IO_ERROR) {
                 updateTelephonyCapable(true);
             } else {
@@ -2395,11 +2418,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         }
 
-        SimData data = mSimDatas.get(subId);
+        SimData data = mSimDatas.get(slotId);
         final boolean changed;
         if (data == null) {
             data = new SimData(state, slotId, subId);
-            mSimDatas.put(subId, data);
+            mSimDatas.put(slotId, data);
             changed = true; // no data yet; force update
         } else {
             changed = (data.simState != state || data.subId != subId || data.slotId != slotId);
@@ -2742,18 +2765,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     public int getSimState(int subId) {
-        if (mSimDatas.containsKey(subId)) {
-            return mSimDatas.get(subId).simState;
+        int slotId = SubscriptionManager.getSlotIndex(subId);
+        if (mSimDatas.containsKey(slotId)) {
+            return mSimDatas.get(slotId).simState;
         } else {
             return TelephonyManager.SIM_STATE_UNKNOWN;
         }
     }
 
     private int getSlotId(int subId) {
-        if (!mSimDatas.containsKey(subId)) {
-            refreshSimState(subId, SubscriptionManager.getSlotIndex(subId));
+        int slotId = SubscriptionManager.getSlotIndex(subId);
+        if (!mSimDatas.containsKey(slotId)) {
+            refreshSimState(subId, slotId);
         }
-        return mSimDatas.get(subId).slotId;
+        return mSimDatas.get(slotId).slotId;
     }
 
     private final TaskStackChangeListener
@@ -2812,11 +2837,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         int state = (tele != null) ?
                 tele.getSimState(slotId) : TelephonyManager.SIM_STATE_UNKNOWN;
-        SimData data = mSimDatas.get(subId);
+        SimData data = mSimDatas.get(slotId);
         final boolean changed;
         if (data == null) {
             data = new SimData(state, slotId, subId);
-            mSimDatas.put(subId, data);
+            mSimDatas.put(slotId, data);
             changed = true; // no data yet; force update
         } else {
             changed = (data.simState != state) || (data.slotId != slotId);

@@ -539,9 +539,18 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_IS_ADHOC_CONFERENCE = 1 << 12;
 
+    /**
+     * Set by the framework to indicate that a Connection is participant host, which
+     * means the conference participant's handle is the same as the conference host's handle.
+     * <p>
+     * This property is specific to IMS conference calls originating in Telephony.
+     * @hide
+     */
+    public static final int PROPERTY_IS_PARTICIPANT_HOST = 1 << 13;
+
 
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<13
+    // Next PROPERTY value: 1<<14
     //**********************************************************************************************
 
     /**

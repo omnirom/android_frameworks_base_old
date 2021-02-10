@@ -2355,6 +2355,48 @@ public final class BluetoothDevice implements Parcelable {
     public BluetoothGatt connectGatt(Context context, boolean autoConnect,
             BluetoothGattCallback callback, int transport,
             boolean opportunistic, int phy, Handler handler) {
+        return connectGatt(context, autoConnect, callback, transport, opportunistic,
+                phy, handler, false);
+    }
+
+    /**
+     * Connect to GATT Server hosted by this device. Caller acts as GATT client.
+     * The callback is used to deliver results to Caller, such as connection status as well
+     * as any further GATT client operations.
+     * The method returns a BluetoothGatt instance. You can use BluetoothGatt to conduct
+     * GATT client operations.
+     *
+     * @param callback GATT callback handler that will receive asynchronous callbacks.
+     * @param autoConnect Whether to directly connect to the remote device (false) or to
+     * automatically connect as soon as the remote device becomes available (true).
+     * @param transport preferred transport for GATT connections to remote dual-mode devices {@link
+     * BluetoothDevice#TRANSPORT_AUTO} or {@link BluetoothDevice#TRANSPORT_BREDR} or {@link
+     * BluetoothDevice#TRANSPORT_LE}
+     * @param opportunistic Whether this GATT client is opportunistic. An opportunistic GATT client
+     * does not hold a GATT connection. It automatically disconnects when no other GATT connections
+     * are active for the remote device.
+     * @param phy preferred PHY for connections to remote LE device. Bitwise OR of any of {@link
+     * BluetoothDevice#PHY_LE_1M_MASK}, {@link BluetoothDevice#PHY_LE_2M_MASK}, an d{@link
+     * BluetoothDevice#PHY_LE_CODED_MASK}. This option does not take effect if {@code autoConnect}
+     * is set to true.
+     * @param handler The handler to use for the callback. If {@code null}, callbacks will happen on
+     * an un-specified background thread.
+     * @param eattSupport specifies whether client app needs EATT channel for client operations.
+     * If both local and remote devices support EATT and local app asks for EATT, GATT client
+     * operations will be performed using EATT channel.
+     * If either local or remote device doesn't support EATT but local App asks for EATT, GATT
+     * client operations will be performed using unenhanced ATT channel.
+     *
+     * @return A BluetoothGatt instance. You can use BluetoothGatt to conduct GATT client
+     * operations.
+     *
+     * @throws NullPointerException if callback is null
+     *
+     * @hide
+     */
+    public BluetoothGatt connectGatt(Context context, boolean autoConnect,
+            BluetoothGattCallback callback, int transport, boolean opportunistic,
+            int phy, Handler handler, boolean eattSupport) {
         if (callback == null) {
             throw new NullPointerException("callback is null");
         }
@@ -2370,7 +2412,7 @@ public final class BluetoothDevice implements Parcelable {
                 return null;
             }
             BluetoothGatt gatt = new BluetoothGatt(iGatt, this, transport, opportunistic, phy);
-            gatt.connect(autoConnect, callback, handler);
+            gatt.connect(autoConnect, callback, handler, eattSupport);
             return gatt;
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -2494,4 +2536,41 @@ public final class BluetoothDevice implements Parcelable {
             return null;
         }
     }
+
+    /**
+     * Returns Device type.
+     *
+     * @return device type.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public int getDeviceType() {
+        if (sService == null) {
+            Log.e(TAG, "getDeviceType query remote device info failed");
+            return -1;
+        }
+        try {
+            return sService.getDeviceType(this);
+        } catch (RemoteException e) {
+            Log.e(TAG, "getDeviceType fail ", e);
+        }
+        return -1;
+    }
+
+    /**
+     * Used as a String extra field in {@link #ACTION_BOND_STATE_CHANGED} intents.
+     * It contains the Group ID of IOT device.
+     * @hide
+     */
+    public static final String EXTRA_GROUP_ID = "android.bluetooth.qti.extra.GROUP_ID";
+
+    /**
+     * Used as a String extra field in {@link #ACTION_BOND_STATE_CHANGED} intents.
+     * It contains the IGNORE DEVICE flag of IOT device.
+     * @hide
+     */
+    public static final String EXTRA_IS_PRIVATE_ADDRESS =
+            "android.bluetooth.qti.extra.IS_PRIVATE_ADDRESS";
+
+
 }

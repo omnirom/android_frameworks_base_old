@@ -303,7 +303,7 @@
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"itume na iangalie SMS"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"Faili na maudhui"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"ifikie picha, maudhui na faili kwenye kifaa chako"</string>
-    <string name="permgrouplab_microphone" msgid="2480597427667420076">"Kipokea sauti"</string>
+    <string name="permgrouplab_microphone" msgid="2480597427667420076">"Maikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"irekodi sauti"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Shughuli za kimwili"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ifikie shughuli zako za kimwili"</string>
@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Bonyeza Menyu ili kufungua au kupiga simu ya dharura."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Bonyeza Menyu ili kufungua."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Chora ruwaza ili kufungua"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Dharura"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Simu ya dharura"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Rudi kwa kupiga simu"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Sahihi!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Jaribu tena"</string>

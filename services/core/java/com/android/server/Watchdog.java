@@ -106,6 +106,7 @@ public class Watchdog extends Thread {
         "media.metrics", // system/bin/mediametrics
         "media.codec", // vendor/bin/hw/android.hardware.media.omx@1.0-service
         "media.swcodec", // /apex/com.android.media.swcodec/bin/mediaswcodec
+        "media.hwcodec", // vendor/bin/hw/vendor.qti.media.c2@1.0-service
         "com.android.bluetooth",  // Bluetooth service
         "/apex/com.android.os.statsd/bin/statsd",  // Stats daemon
     };

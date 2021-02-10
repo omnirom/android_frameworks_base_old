@@ -139,6 +139,8 @@
     <integer name="quick_settings_brightness_dialog_short_timeout">2000</integer>
     <integer name="quick_settings_brightness_dialog_long_timeout">4000</integer>
 
+    <!-- Show indicator for Wifi on but not connected. -->
+    <bool name="config_showWifiIndicatorWhenEnabled">false</bool>
 
     <!-- The number of milliseconds before the heads up notification auto-dismisses. -->
     <integer name="heads_up_notification_decay">5000</integer>
@@ -513,6 +515,8 @@
     <string-array name="config_pluginWhitelist" translatable="false">
         <item>com.android.systemui</item>
     </string-array>
+
+    <integer name="ongoing_appops_dialog_max_apps">5</integer>
 
     <!-- Launcher package name for overlaying icons. -->
     <string name="launcher_overlayable_package" translatable="false">com.android.launcher3</string>

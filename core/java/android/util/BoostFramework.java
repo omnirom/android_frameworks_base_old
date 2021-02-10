@@ -466,6 +466,7 @@ public class BoostFramework {
                 "/system/framework/QXPerformance.jar";
         private static final String SCROLL_OPT_CLASS =
                 "com.qualcomm.qti.QXPerformance.ScrollOptimizer";
+        private static boolean sScrollOptProp = false;
         private static boolean sScrollOptEnable = false;
         private static boolean sQXIsLoaded = false;
         private static Class<?> sQXPerfClass = null;
@@ -483,8 +484,9 @@ public class BoostFramework {
             if (sQXIsLoaded) return;
 
             try {
-                sScrollOptEnable = SystemProperties.getBoolean(SCROLL_OPT_PROP, false);
-                if (!sScrollOptEnable) {
+                sScrollOptProp = SystemProperties.getBoolean(SCROLL_OPT_PROP, false);
+                if (!sScrollOptProp) {
+                    sScrollOptEnable = false;
                     sQXIsLoaded = true;
                     return;
                 }
@@ -529,14 +531,22 @@ public class BoostFramework {
 
         /** @hide */
         public static void setFrameInterval(long frameIntervalNanos) {
-            initQXPerfFuncs();
-            if (sScrollOptEnable && sSetFrameInterval != null) {
-                try {
-                    sSetFrameInterval.invoke(null, frameIntervalNanos);
-                } catch (Exception e) {
-                    e.printStackTrace();
+            Thread initThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        initQXPerfFuncs();
+                        if (sScrollOptProp && sSetFrameInterval != null) {
+                            sSetFrameInterval.invoke(null, frameIntervalNanos);
+                            sScrollOptEnable = true;
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to run initThread.");
+                        e.printStackTrace();
+                    }
                 }
-            }
+            });
+            initThread.start();
         }
 
         /** @hide */

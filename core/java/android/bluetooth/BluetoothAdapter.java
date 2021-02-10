@@ -2865,6 +2865,9 @@ public final class BluetoothAdapter {
                 return true;
             }
             return false;
+        } else if (profile == BluetoothProfile.GROUP_CLIENT) {
+            BluetoothDeviceGroup groupClient = new BluetoothDeviceGroup(context, listener);
+            return true;
         } else {
             return false;
         }
@@ -2953,6 +2956,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.HEARING_AID:
                 BluetoothHearingAid hearingAid = (BluetoothHearingAid) proxy;
                 hearingAid.close();
+                break;
+            case BluetoothProfile.GROUP_CLIENT:
+                BluetoothDeviceGroup groupClient = (BluetoothDeviceGroup) proxy;
+                groupClient.close();
                 break;
         }
     }

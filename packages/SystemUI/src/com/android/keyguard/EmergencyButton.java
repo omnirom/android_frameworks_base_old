@@ -80,6 +80,7 @@ public class EmergencyButton extends Button {
 
         @Override
         public void onServiceStateChanged(int subId, ServiceState state) {
+            mServiceState = state;
             requestCellInfoUpdate();
             updateEmergencyCallButton();
         }
@@ -96,7 +97,8 @@ public class EmergencyButton extends Button {
 
     private final boolean mIsVoiceCapable;
     private final boolean mEnableEmergencyCallWhileSimLocked;
-    private boolean mIsEmergencyCapable;
+    private boolean mIsCellAvailable;
+    private ServiceState mServiceState;
 
     public EmergencyButton(Context context) {
         this(context, null);
@@ -241,8 +243,7 @@ public class EmergencyButton extends Button {
                 }
 
                 if (mContext.getResources().getBoolean(R.bool.kg_hide_emgcy_btn_when_oos)) {
-                    KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
-                    visible = visible && (!monitor.isOOS() || mIsEmergencyCapable);
+                    visible = visible && isEmergencyCapable();
                 }
             }
         }
@@ -292,12 +293,19 @@ public class EmergencyButton extends Button {
             public void onCellInfo(List<CellInfo> cellInfos) {
                 if ( cellInfos == null || cellInfos.isEmpty()) {
                     Log.d(LOG_TAG, "requestCellInfoUpdate.onCellInfo is null or empty");
-                    mIsEmergencyCapable = false;
+                    mIsCellAvailable = false;
                 }else{
-                    mIsEmergencyCapable = true;
+                    mIsCellAvailable = true;
                 }
                 updateEmergencyCallButton();
             }
         });
+    }
+
+    private boolean isEmergencyCapable() {
+        KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
+        return (!monitor.isOOS()
+                || mIsCellAvailable
+                || (mServiceState !=null && mServiceState.isEmergencyOnly()));
     }
 }

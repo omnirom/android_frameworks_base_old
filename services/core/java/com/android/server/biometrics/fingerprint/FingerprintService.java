@@ -56,6 +56,7 @@ import android.os.SELinux;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -64,6 +65,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
@@ -72,6 +74,7 @@ import com.android.server.biometrics.ClientMonitor;
 import com.android.server.biometrics.Constants;
 import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.RemovalClient;
+import com.android.server.biometrics.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -130,6 +133,8 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     private final class FingerprintAuthClient extends AuthenticationClientImpl {
+        private final boolean mDetectOnly;
+
         @Override
         protected boolean isFingerprint() {
             return true;
@@ -139,9 +144,10 @@ public class FingerprintService extends BiometricServiceBase {
                 DaemonWrapper daemon, long halDeviceId, IBinder token,
                 ServiceListener listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, int cookie,
-                boolean requireConfirmation) {
+                boolean requireConfirmation, boolean detectOnly) {
             super(context, daemon, halDeviceId, token, listener, targetUserId, groupId, opId,
                     restricted, owner, cookie, requireConfirmation);
+            mDetectOnly = detectOnly;
         }
 
         @Override
@@ -182,6 +188,10 @@ public class FingerprintService extends BiometricServiceBase {
             }
 
             return super.handleFailedAttempt();
+        }
+
+        boolean isDetectOnly() {
+            return mDetectOnly;
         }
     }
 
@@ -240,16 +250,62 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void authenticate(final IBinder token, final long opId, final int groupId,
+        public void authenticate(final IBinder token, final long opId, final int userId,
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName) {
-            updateActiveGroup(groupId, opPackageName);
+            // Keyguard check must be done on the caller's binder identity, since it also checks
+            // permission.
+            final boolean isKeyguard = Utils.isKeyguard(getContext(), opPackageName);
+
+            // Clear calling identity when checking LockPatternUtils for StrongAuth flags.
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (isKeyguard && Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
+                    // If this happens, something in KeyguardUpdateMonitor is wrong.
+                    // SafetyNet for b/79776455
+                    EventLog.writeEvent(0x534e4554, "79776455");
+                    Slog.e(TAG, "Authenticate invoked when user is encrypted or lockdown");
+                    return;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+
+            updateActiveGroup(userId, opPackageName);
             final boolean restricted = isRestricted();
             final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
-                    mCurrentUserId, groupId, opId, restricted, opPackageName,
-                    0 /* cookie */, false /* requireConfirmation */);
+                    mCurrentUserId, userId, opId, restricted, opPackageName,
+                    0 /* cookie */, false /* requireConfirmation */, false /* detectOnly */);
             authenticateInternal(client, opId, opPackageName);
+        }
+
+        @Override
+        public void detectFingerprint(final IBinder token, final int userId,
+                final IFingerprintServiceReceiver receiver, final String opPackageName) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            if (!Utils.isKeyguard(getContext(), opPackageName)) {
+                Slog.w(TAG, "detectFingerprint called from non-sysui package: " + opPackageName);
+                return;
+            }
+
+            if (!Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
+                // If this happens, something in KeyguardUpdateMonitor is wrong. This should only
+                // ever be invoked when the user is encrypted or lockdown.
+                Slog.e(TAG, "detectFingerprint invoked when user is not encrypted or lockdown");
+                return;
+            }
+
+            Slog.d(TAG, "detectFingerprint, owner: " + opPackageName + ", user: " + userId);
+
+            updateActiveGroup(userId, opPackageName);
+            final boolean restricted = isRestricted();
+            final int operationId = 0;
+            final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
+                    mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
+                    mCurrentUserId, userId, operationId, restricted, opPackageName,
+                    0 /* cookie */, false /* requireConfirmation */, true /* detectOnly */);
+            authenticateInternal(client, operationId, opPackageName);
         }
 
         @Override // Binder call
@@ -263,7 +319,7 @@ public class FingerprintService extends BiometricServiceBase {
                     mDaemonWrapper, mHalDeviceId, token,
                     new BiometricPromptServiceListenerImpl(wrapperReceiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, cookie,
-                    false /* requireConfirmation */);
+                    false /* requireConfirmation */, false /* detectOnly */);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
@@ -277,6 +333,17 @@ public class FingerprintService extends BiometricServiceBase {
 
         @Override // Binder call
         public void cancelAuthentication(final IBinder token, final String opPackageName) {
+            cancelAuthenticationInternal(token, opPackageName);
+        }
+
+        @Override // Binder call
+        public void cancelFingerprintDetect(final IBinder token, final String opPackageName) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            if (!Utils.isKeyguard(getContext(), opPackageName)) {
+                Slog.w(TAG, "cancelFingerprintDetect called from non-sysui package: "
+                        + opPackageName);
+                return;
+            }
             cancelAuthenticationInternal(token, opPackageName);
         }
 
@@ -524,7 +591,12 @@ public class FingerprintService extends BiometricServiceBase {
                 BiometricAuthenticator.Identifier biometric, int userId)
                 throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
-                if (biometric == null || biometric instanceof Fingerprint) {
+                final ClientMonitor client = getCurrentClient();
+                if (client instanceof FingerprintAuthClient
+                        && ((FingerprintAuthClient) client).isDetectOnly()) {
+                    mFingerprintServiceReceiver
+                            .onFingerprintDetected(deviceId, userId, isStrongBiometric());
+                } else if (biometric == null || biometric instanceof Fingerprint) {
                     mFingerprintServiceReceiver.onAuthenticationSucceeded(deviceId,
                             (Fingerprint) biometric, userId, isStrongBiometric());
                 } else {
@@ -582,6 +654,7 @@ public class FingerprintService extends BiometricServiceBase {
     private final LockoutReceiver mLockoutReceiver = new LockoutReceiver();
     protected final ResetFailedAttemptsForUserRunnable mResetFailedAttemptsForCurrentUserRunnable =
             new ResetFailedAttemptsForUserRunnable();
+    private final LockPatternUtils mLockPatternUtils;
 
     /**
      * Receives callbacks from the HAL.
@@ -649,6 +722,18 @@ public class FingerprintService extends BiometricServiceBase {
                         Slog.e(TAG, "hideInDisplayFingerprintView failed", e);
                     }
                 }
+
+                boolean authenticated = fingerId != 0;
+                final ClientMonitor client = getCurrentClient();
+                if (client instanceof FingerprintAuthClient) {
+                    if (((FingerprintAuthClient) client).isDetectOnly()) {
+                        Slog.w(TAG, "Detect-only. Device is encrypted or locked down");
+                        authenticated = true;
+                    }
+                }
+
+                final Fingerprint fp = new Fingerprint("", groupId, fingerId, deviceId);
+                FingerprintService.super.handleAuthenticated(authenticated, fp, token);
             });
         }
 
@@ -810,6 +895,7 @@ public class FingerprintService extends BiometricServiceBase {
                 getLockoutBroadcastPermission(), null /* handler */);
 
         mHasFod = context.getResources().getBoolean(com.android.internal.R.bool.config_usesFOD);
+        mLockPatternUtils = new LockPatternUtils(context);
     }
 
     @Override

@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Tekan Menu untuk membuka atau melakukan panggilan darurat."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Tekan Menu untuk membuka."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Buat pola untuk membuka"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Darurat"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Panggilan darurat"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Kembali ke panggilan"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Perbaiki!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Coba lagi"</string>
@@ -1231,7 +1231,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume pemberitahuan"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Nada dering default"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Default (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Tidak Ada"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Tidak ada"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Nada dering"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Suara alarm"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Suara notifikasi"</string>
@@ -2034,7 +2034,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Aplikasi ini tidak diberi izin merekam, tetapi dapat merekam audio melalui perangkat USB ini."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Beranda"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Kembali"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Aplikasi yang Baru Dipakai"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Aplikasi Terbaru"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Notifikasi"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Setelan Cepat"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialog Daya"</string>

@@ -163,7 +163,7 @@ public class OverScroller {
      */
     public final void forceFinished(boolean finished) {
         mScrollerX.mFinished = mScrollerY.mFinished = finished;
-        if (finished) {
+        if (finished && mMode == FLING_MODE) {
             ScrollOptimizer.setFlingFlag(ScrollOptimizer.FLING_END);
         }
     }
@@ -308,7 +308,9 @@ public class OverScroller {
      */
     public boolean computeScrollOffset() {
         if (isFinished()) {
-            ScrollOptimizer.setFlingFlag(ScrollOptimizer.FLING_END);
+            if (mMode == FLING_MODE) {
+                ScrollOptimizer.setFlingFlag(ScrollOptimizer.FLING_END);
+            }
             return false;
         }
 
@@ -346,12 +348,12 @@ public class OverScroller {
                     }
                 }
 
+                if (isFinished()) {
+                    ScrollOptimizer.setFlingFlag(ScrollOptimizer.FLING_END);
+                }
                 break;
         }
 
-        if (isFinished()) {
-            ScrollOptimizer.setFlingFlag(ScrollOptimizer.FLING_END);
-        }
         return true;
     }
 
@@ -527,7 +529,9 @@ public class OverScroller {
      * @see #forceFinished(boolean)
      */
     public void abortAnimation() {
-        ScrollOptimizer.setFlingFlag(ScrollOptimizer.FLING_END);
+        if (mMode == FLING_MODE) {
+            ScrollOptimizer.setFlingFlag(ScrollOptimizer.FLING_END);
+        }
         mScrollerX.finish();
         mScrollerY.finish();
     }
@@ -929,7 +933,7 @@ public class OverScroller {
             final long time = AnimationUtils.currentAnimationTimeMillis();
             final long currentTime = time - mStartTime;
 
-            if (currentTime == 0) {
+            if (currentTime <= 0) {
                 // Skip work but report that we're still going if we have a nonzero duration.
                 return mDuration > 0;
             }

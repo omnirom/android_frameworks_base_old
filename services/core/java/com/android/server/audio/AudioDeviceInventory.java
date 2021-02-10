@@ -435,20 +435,26 @@ public class AudioDeviceInventory {
                     + " event=" + BtHelper.a2dpDeviceEventToString(event)));
 
         synchronized (mDevicesLock) {
-            if (mDeviceBroker.hasScheduledA2dpSinkConnectionState(btDevice)) {
-                AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
-                        "A2dp config change ignored (scheduled connection change)")
-                        .printLog(TAG));
-                mmi.set(MediaMetrics.Property.EARLY_RETURN, "A2dp config change ignored")
-                        .record();
-                return;
-            }
             final String key = DeviceInfo.makeDeviceListKey(
                     AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address);
             final DeviceInfo di = mConnectedDevices.get(key);
             if (di == null) {
                 Log.e(TAG, "invalid null DeviceInfo in onBluetoothA2dpActiveDeviceChange");
                 mmi.set(MediaMetrics.Property.EARLY_RETURN, "null DeviceInfo").record();
+                return;
+            }
+
+            if (mDeviceBroker.hasScheduledA2dpSinkConnectionState(btDevice)) {
+                //Incase of Active device change, mConnectedDevices might have already
+                //updated in handleBluetoothA2dpActiveDeviceChangeExt
+                //Now if we are ignoring active device change,update mApmConnected ,
+                //so that next connection events are handled
+                mApmConnectedDevices.replace(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, key);
+                AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                        "A2dp config change ignored (scheduled connection change)")
+                        .printLog(TAG));
+                mmi.set(MediaMetrics.Property.EARLY_RETURN, "A2dp config change ignored")
+                        .record();
                 return;
             }
 
@@ -496,11 +502,6 @@ public class AudioDeviceInventory {
                         "APM handleDeviceConfigChange success for A2DP device addr=" + address
                                 + " codec=" + AudioSystem.audioFormatToString(a2dpCodec))
                         .printLog(TAG));
-            }
-
-            if (event == BtHelper.EVENT_ACTIVE_DEVICE_CHANGE) {
-                Log.i(TAG, "Unmute the stream after reconfigure");
-                mDeviceBroker.postAccessoryPlugMediaUnmute(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
             }
         }
         mmi.record();

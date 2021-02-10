@@ -147,7 +147,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ActivityTrigger;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -936,12 +935,9 @@ public class ActivityStack extends Task {
         mCurrentUser = userId;
 
         super.switchUser(userId);
-        forAllLeafTasks((t) -> {
-            if (t.showToCurrentUser() && t != this) {
-                mChildren.remove(t);
-                mChildren.add(t);
-            }
-        }, true /* traverseTopToBottom */);
+        if (isLeafTask() && showToCurrentUser()) {
+            getParent().positionChildAt(POSITION_TOP, this, false /*includeParents*/);
+        }
     }
 
     void minimalResumeActivityLocked(ActivityRecord r) {
@@ -1652,7 +1648,8 @@ public class ActivityStack extends Task {
         // appropriate for it.
         mStackSupervisor.mStoppingActivities.remove(next);
         next.setSleeping(false);
-        next.launching = true;
+        if (!next.translucentWindowLaunch)
+            next.launching = true;
 
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
 
@@ -2046,7 +2043,7 @@ public class ActivityStack extends Task {
         return mRootWindowContainer.resumeHomeActivity(prev, reason, getDisplayArea());
     }
 
-    void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
+    void startActivityLocked(ActivityRecord r, @Nullable ActivityRecord focusedTopActivity,
             boolean newTask, boolean keepCurTransition, ActivityOptions options) {
         Task rTask = r.getTask();
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
@@ -3105,8 +3102,6 @@ public class ActivityStack extends Task {
             getDisplayArea().positionStackAtTop(this, false /* includingParents */);
 
             mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, this);
-            MetricsLoggerWrapper.logPictureInPictureFullScreen(mAtmService.mContext,
-                    task.effectiveUid, task.realActivity.flattenToString());
         });
     }
 
@@ -3408,7 +3403,11 @@ public class ActivityStack extends Task {
         // Do not sleep activities in this stack if we're marked as focused and the keyguard
         // is in the process of going away.
         if (isFocusedStackOnDisplay()
-                && mStackSupervisor.getKeyguardController().isKeyguardGoingAway()) {
+                && mStackSupervisor.getKeyguardController().isKeyguardGoingAway()
+                // Avoid resuming activities on secondary displays since we don't want bubble
+                // activities to be resumed while bubble is still collapsed.
+                // TODO(b/113840485): Having keyguard going away state for secondary displays.
+                && display.isDefaultDisplay) {
             return false;
         }
 

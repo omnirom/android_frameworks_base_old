@@ -354,6 +354,9 @@ public class MobileSignalController extends SignalController<
         mNetworkToIconLookup.put(toDisplayIconKey(
                 TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE),
                 TelephonyIcons.NR_5G_PLUS);
+        mNetworkToIconLookup.put(toIconKey(
+                TelephonyManager.NETWORK_TYPE_NR),
+                TelephonyIcons.NR_5G);
     }
 
     private String getIconKey() {
@@ -376,9 +379,9 @@ public class MobileSignalController extends SignalController<
             case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO:
                 return toIconKey(TelephonyManager.NETWORK_TYPE_LTE) + "_CA_Plus";
             case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA:
-                return "5G";
+                return toIconKey(TelephonyManager.NETWORK_TYPE_NR);
             case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE:
-                return "5G_Plus";
+                return toIconKey(TelephonyManager.NETWORK_TYPE_NR) + "_Plus";
             default:
                 return "unsupported";
         }
@@ -541,6 +544,8 @@ public class MobileSignalController extends SignalController<
                 || mConfig.alwaysShowNetworkTypeIcon) ? icons.mDataType : 0;
         if ( mConfig.enableRatIconEnhancement ) {
             typeIcon = getEnhancementDataRatIcon();
+        }else if ( mConfig.enableDdsRatIconEnhancement ) {
+            typeIcon = getEnhancementDdsRatIcon();
         }
         int volteIcon = mConfig.showVolteIcon && isVolteSwitchOn() ? getVolteResId() : 0;
         MobileIconGroup vowifiIconGroup = getVowifiIconGroup();
@@ -581,6 +586,10 @@ public class MobileSignalController extends SignalController<
 
     public boolean isEmergencyOnly() {
         return (mServiceState != null && mServiceState.isEmergencyOnly());
+    }
+
+    public boolean isInService() {
+        return Utils.isInService(mServiceState);
     }
 
     private boolean isRoaming() {
@@ -787,15 +796,21 @@ public class MobileSignalController extends SignalController<
             if ( mFiveGState.isNrIconTypeValid() ) {
                 mCurrentState.iconGroup = mFiveGState.getIconGroup();
             }else {
-                int iconType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
                 if (mCurrentState.connected) {
                     if (isDataNetworkTypeAvailable()) {
-                        iconType = mTelephonyDisplayInfo.getNetworkType();
+                        int type = mTelephonyDisplayInfo.getOverrideNetworkType();
+                        if (type == TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
+                                || type == TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE
+                                || type == TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA ) {
+                            iconKey = toIconKey(mTelephonyDisplayInfo.getNetworkType());
+                        }else {
+                            iconKey = toDisplayIconKey(type);
+                        }
                     } else {
-                        iconType = getVoiceNetworkType();
+                        iconKey = toIconKey(getVoiceNetworkType());
                     }
                 }
-                mCurrentState.iconGroup = mNetworkToIconLookup.getOrDefault(toIconKey(iconType),
+                mCurrentState.iconGroup = mNetworkToIconLookup.getOrDefault(iconKey,
                         mDefaultIcons);
             }
         }
@@ -937,17 +952,21 @@ public class MobileSignalController extends SignalController<
     }
 
     private int getEnhancementDataRatIcon() {
-        int ratIcon = 0;
-        if ( showDataRatIcon() ) {
-            MobileIconGroup iconGroup = mDefaultIcons;
-            if ( mFiveGState.isNrIconTypeValid() ) {
-                iconGroup = mFiveGState.getIconGroup();
-            }else {
-                iconGroup = getNetworkTypeIconGroup();
-            }
-            ratIcon = iconGroup.mDataType;
+        return showDataRatIcon() ? getRatIconGroup().mDataType : 0;
+    }
+
+    private int getEnhancementDdsRatIcon() {
+        return mCurrentState.dataSim ? getRatIconGroup().mDataType : 0;
+    }
+
+    private MobileIconGroup getRatIconGroup() {
+        MobileIconGroup iconGroup = mDefaultIcons;
+        if ( mFiveGState.isNrIconTypeValid() ) {
+            iconGroup = mFiveGState.getIconGroup();
+        }else {
+            iconGroup = getNetworkTypeIconGroup();
         }
-        return ratIcon;
+        return iconGroup;
     }
 
     private boolean isVowifiAvailable() {

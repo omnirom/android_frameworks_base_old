@@ -19,6 +19,10 @@ package com.android.ims.internal.uce.common;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Bundle;
+
+import java.util.Map;
+import java.util.HashMap;
 
 /** Class for capability discovery information.
  *  @hide */
@@ -87,6 +91,95 @@ public class CapInfo implements Parcelable {
     /** Time used to compute when to query again. */
     private long mCapTimestamp = 0;
 
+    private Map<String, String> mCapInfoMap = new HashMap<String, String>();
+
+    /** IM session feature tag key. */
+    public static final String INSTANT_MSG =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.im\"";
+    /** File transfer feature tag key. */
+    public static final String FILE_TRANSFER =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.ft\"";
+    /** File transfer Thumbnail feature tag key. */
+    public static final String FILE_TRANSFER_THUMBNAIL =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.ftthumb\"";
+    /** File transfer Store and forward feature tag key. */
+    public static final String FILE_TRANSFER_SNF =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.ftstandfw\"";
+    /** File transfer HTTP feature tag key. */
+    public static final String FILE_TRANSFER_HTTP =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.fthttp\"";
+    /** Image sharing feature tag key. */
+    public static final String IMAGE_SHARE =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.gsma-is\"";
+    /** Video sharing during a CS call feature tag key-- IR-74. */
+    public static final String VIDEO_SHARE_DURING_CS = "+g.3gpp.cs-voice";
+    /** Video sharing outside of voice call feature tag key-- IR-84. */
+    public static final String VIDEO_SHARE =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.gsma-vs\"";
+    /** Social presence feature tag key. */
+    public static final String SOCIAL_PRESENCE =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.sp\"";
+    /** Presence discovery feature tag key. */
+    public static final String CAPDISC_VIA_PRESENCE =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.dp\"";
+    /** IP voice call feature tag key (IR-92/IR-58). */
+    public static final String IP_VOICE =
+      "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"";
+    /** IP video call feature tag key (IR-92/IR-58). */
+    public static final String IP_VIDEO =
+      "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\";video";
+    /** IP Geo location Pull using File Transfer feature tag key. */
+    public static final String GEOPULL_FT =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geopullft\"";
+    /** IP Geo location Pull feature tag key. */
+    public static final String GEOPULL =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geopull\"";
+    /** IP Geo location Push feature tag key. */
+    public static final String GEOPUSH =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geopush\"";
+    /** Standalone messaging feature tag key. */
+    public static final String STANDALONE_MSG =
+      "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.msg;" +
+      "urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.largemsg\"";
+    /** Full Store and Forward Group Chat information feature tag key. */
+    public static final String FULL_SNF_GROUPCHAT =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.fullsfgroupchat\"";
+    /** RCS IP Voice call feature tag key.  */
+    public static final String RCS_IP_VOICE_CALL =
+      "+g.gsma.rcs.ipcall";
+    /** RCS IP Video call feature tag key.  */
+    public static final String RCS_IP_VIDEO_CALL =
+      "+g.gsma.rcs.ipvideocall";
+    /** RCS IP Video only call feature tag key.  */
+    public static final String RCS_IP_VIDEO_ONLY_CALL =
+      "+g.gsma.rcs.ipvideoonlycall";
+    /** IP Geo location Push using SMS feature tag key. */
+    public static final String GEOSMS =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gppapplication.ims.iari.rcs.geosms\"";
+    /** RCS call composer feature tag key. */
+    public static final String CALLCOMPOSER =
+      "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gppservice.ims.icsi.gsma.callcomposer\"";
+    /** RCS post-call feature tag key. */
+    public static final String POSTCALL =
+      "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gppservice.ims.icsi.gsma.callunanswered\"";
+    /** Shared map feature tag key. */
+    public static final String SHAREDMAP =
+      "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gppservice.ims.icsi.gsma.sharedmap\"";
+    /** Shared Sketch feature tag key. */
+    public static final String SHAREDSKETCH =
+      "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gppservice.ims.icsi.gsma.sharedsketch\"";
+    /** Chatbot communication feature tag key. */
+    public static final String CHATBOT =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gppapplication.ims.iari.rcs.chatbot\"";
+    /** Chatbot role feature tag key. */
+    public static final String CHATBOTROLE = "+g.gsma.rcs.isbot";
+    /** Standalone Chatbot communication feature tag key. */
+    public static final String STANDALONE_CHATBOT =
+      "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.chatbot.sa\"";
+    /** MMtel based call composer feature tag key. */
+    public static final String MMTEL_CALLCOMPOSER = "+g.gsma.callcomposer";
+
+
 
     /**
      * Constructor for the CapInfo class.
@@ -98,6 +191,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether IM is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isImSupported() {
@@ -106,6 +200,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets IM as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setImSupported(boolean imSupported) {
@@ -114,6 +209,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether FT Thumbnail is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isFtThumbSupported() {
@@ -122,16 +218,16 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets FT thumbnail as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setFtThumbSupported(boolean ftThumbSupported) {
         this.mFtThumbSupported = ftThumbSupported;
     }
 
-
-
     /**
      * Checks whether FT Store and Forward is supported
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isFtSnFSupported() {
@@ -140,6 +236,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets FT Store and Forward as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setFtSnFSupported(boolean  ftSnFSupported) {
@@ -148,22 +245,25 @@ public class CapInfo implements Parcelable {
 
    /**
     * Checks whether File transfer HTTP is supported.
+    * @deprecated Use {@link #isCapabilitySupported(String)} instead.
     */
    @UnsupportedAppUsage
    public boolean isFtHttpSupported() {
        return  mFtHttpSupported;
-   }
+    }
 
    /**
     * Sets File transfer HTTP as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
     */
    @UnsupportedAppUsage
    public void setFtHttpSupported(boolean  ftHttpSupported) {
        this.mFtHttpSupported =  ftHttpSupported;
-   }
+    }
 
     /**
      * Checks whether FT is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isFtSupported() {
@@ -172,6 +272,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets FT as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setFtSupported(boolean ftSupported) {
@@ -179,7 +280,7 @@ public class CapInfo implements Parcelable {
     }
 
     /**
-     * Checks whether IS is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isIsSupported() {
@@ -187,7 +288,7 @@ public class CapInfo implements Parcelable {
     }
 
     /**
-     * Sets IS as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setIsSupported(boolean isSupported) {
@@ -195,7 +296,7 @@ public class CapInfo implements Parcelable {
     }
 
     /**
-     * Checks whether video sharing is supported during a CS call.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isVsDuringCSSupported() {
@@ -203,8 +304,7 @@ public class CapInfo implements Parcelable {
     }
 
     /**
-     *  Sets video sharing as supported or not supported during a CS
-     *  call.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setVsDuringCSSupported(boolean vsDuringCSSupported) {
@@ -212,8 +312,9 @@ public class CapInfo implements Parcelable {
     }
 
     /**
-     *  Checks whether video sharing outside a voice call is
-     *   supported.
+     * Checks whether video sharing outside a voice call is
+     *  supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isVsSupported() {
@@ -222,6 +323,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets video sharing as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setVsSupported(boolean vsSupported) {
@@ -230,6 +332,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether social presence is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isSpSupported() {
@@ -238,6 +341,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets social presence as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setSpSupported(boolean spSupported) {
@@ -247,6 +351,7 @@ public class CapInfo implements Parcelable {
     /**
      * Checks whether capability discovery via presence is
      * supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isCdViaPresenceSupported() {
@@ -256,6 +361,7 @@ public class CapInfo implements Parcelable {
     /**
      * Sets capability discovery via presence as supported or not
      * supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setCdViaPresenceSupported(boolean cdViaPresenceSupported) {
@@ -264,6 +370,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether IP voice call is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isIpVoiceSupported() {
@@ -272,6 +379,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets IP voice call as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setIpVoiceSupported(boolean ipVoiceSupported) {
@@ -280,6 +388,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether IP video call is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isIpVideoSupported() {
@@ -288,6 +397,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets IP video call as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setIpVideoSupported(boolean ipVideoSupported) {
@@ -297,6 +407,7 @@ public class CapInfo implements Parcelable {
    /**
     * Checks whether Geo location Pull using File Transfer is
     * supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
     */
    @UnsupportedAppUsage
    public boolean isGeoPullFtSupported() {
@@ -306,14 +417,16 @@ public class CapInfo implements Parcelable {
    /**
     * Sets Geo location Pull using File Transfer as supported or
     * not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
     */
    @UnsupportedAppUsage
    public void setGeoPullFtSupported(boolean geoPullFtSupported) {
        this.mGeoPullFtSupported = geoPullFtSupported;
-   }
+    }
 
     /**
      * Checks whether Geo Pull is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isGeoPullSupported() {
@@ -322,6 +435,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets Geo Pull as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setGeoPullSupported(boolean geoPullSupported) {
@@ -330,6 +444,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether Geo Push is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isGeoPushSupported() {
@@ -338,6 +453,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets Geo Push as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setGeoPushSupported(boolean geoPushSupported) {
@@ -346,6 +462,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether short messaging is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isSmSupported() {
@@ -354,6 +471,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets short messaging as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setSmSupported(boolean smSupported) {
@@ -362,22 +480,32 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether store/forward and group chat are supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     @UnsupportedAppUsage
     public boolean isFullSnFGroupChatSupported() {
         return mFullSnFGroupChatSupported;
     }
 
+    /**
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+     */
     @UnsupportedAppUsage
     public boolean isRcsIpVoiceCallSupported() {
         return mRcsIpVoiceCallSupported;
     }
 
+    /**
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+     */
     @UnsupportedAppUsage
     public boolean isRcsIpVideoCallSupported() {
         return mRcsIpVideoCallSupported;
     }
 
+    /**
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
+     */
     @UnsupportedAppUsage
     public boolean isRcsIpVideoOnlyCallSupported() {
         return mRcsIpVideoOnlyCallSupported;
@@ -385,20 +513,32 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets store/forward and group chat supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     @UnsupportedAppUsage
     public void setFullSnFGroupChatSupported(boolean fullSnFGroupChatSupported) {
         this.mFullSnFGroupChatSupported = fullSnFGroupChatSupported;
     }
 
+    /**
+     * @deprecated Use {@link #addCapability(String, String)} instead.
+     */
     @UnsupportedAppUsage
     public void setRcsIpVoiceCallSupported(boolean rcsIpVoiceCallSupported) {
         this.mRcsIpVoiceCallSupported = rcsIpVoiceCallSupported;
     }
+
+    /**
+     * @deprecated Use {@link #addCapability(String, String)} instead.
+     */
     @UnsupportedAppUsage
     public void setRcsIpVideoCallSupported(boolean rcsIpVideoCallSupported) {
         this.mRcsIpVideoCallSupported = rcsIpVideoCallSupported;
     }
+
+    /**
+     * @deprecated Use {@link #addCapability(String, String)} instead.
+     */
     @UnsupportedAppUsage
     public void setRcsIpVideoOnlyCallSupported(boolean rcsIpVideoOnlyCallSupported) {
         this.mRcsIpVideoOnlyCallSupported = rcsIpVideoOnlyCallSupported;
@@ -406,6 +546,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether Geo Push via SMS is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     public boolean isGeoSmsSupported() {
         return mGeoSmsSupported;
@@ -413,6 +554,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets Geolocation Push via SMS as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     public void setGeoSmsSupported(boolean geoSmsSupported) {
          this.mGeoSmsSupported = geoSmsSupported;
@@ -420,6 +562,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether RCS call composer is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     public boolean isCallComposerSupported() {
         return mCallComposerSupported;
@@ -427,6 +570,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets call composer as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     public void setCallComposerSupported(boolean callComposerSupported) {
         this.mCallComposerSupported = callComposerSupported;
@@ -434,6 +578,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether post call is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     public boolean isPostCallSupported(){
         return mPostCallSupported;
@@ -441,13 +586,15 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets post call as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
-     public void setPostCallSupported(boolean postCallSupported) {
-         this.mPostCallSupported = postCallSupported;
-     }
+    public void setPostCallSupported(boolean postCallSupported) {
+        this.mPostCallSupported = postCallSupported;
+    }
 
     /**
      * Checks whether shared map is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     public boolean isSharedMapSupported() {
         return mSharedMapSupported;
@@ -455,6 +602,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets shared map as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     public void setSharedMapSupported(boolean sharedMapSupported) {
         this.mSharedMapSupported = sharedMapSupported;
@@ -462,6 +610,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether shared sketch is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     public boolean isSharedSketchSupported() {
         return mSharedSketchSupported;
@@ -469,6 +618,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets shared sketch as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     public void setSharedSketchSupported(boolean sharedSketchSupported) {
         this.mSharedSketchSupported = sharedSketchSupported;
@@ -476,6 +626,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether chatbot communication is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     public boolean isChatbotSupported() {
         return mChatbotSupported;
@@ -483,6 +634,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets chatbot communication as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     public void setChatbotSupported(boolean chatbotSupported) {
         this.mChatbotSupported = chatbotSupported;
@@ -490,6 +642,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether chatbot role is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     public boolean isChatbotRoleSupported() {
         return mChatbotRoleSupported;
@@ -497,6 +650,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets chatbot role as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     public void setChatbotRoleSupported(boolean chatbotRoleSupported) {
         this.mChatbotRoleSupported = chatbotRoleSupported;
@@ -504,6 +658,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether standalone chatbot communication is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     public boolean isSmChatbotSupported() {
         return mSmChatbotSupported;
@@ -511,6 +666,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets standalone chatbot communication as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     public void setSmChatbotSupported(boolean smChatbotSupported) {
         this.mSmChatbotSupported = smChatbotSupported;
@@ -518,6 +674,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Checks whether Mmtel based call composer is supported.
+     * @deprecated Use {@link #isCapabilitySupported(String)} instead.
      */
     public boolean isMmtelCallComposerSupported() {
         return mMmtelCallComposerSupported;
@@ -525,6 +682,7 @@ public class CapInfo implements Parcelable {
 
     /**
      * Sets Mmtel based call composer as supported or not supported.
+     * @deprecated Use {@link #addCapability(String, String)} instead.
      */
     public void setMmtelCallComposerSupported(boolean mmtelCallComposerSupported) {
         this.mMmtelCallComposerSupported = mmtelCallComposerSupported;
@@ -552,6 +710,84 @@ public class CapInfo implements Parcelable {
     @UnsupportedAppUsage
     public void setCapTimestamp(long capTimestamp) {
         this.mCapTimestamp = capTimestamp;
+    }
+
+    /**
+     * Adds the feature tag string with supported versions to
+     * the mCapInfoMap.
+     * Map<String featureType, String versions>
+     * Versions format:
+     *    "+g.gsma.rcs.botversion=\"#=1"        -> Version 1 supported
+     *    "+g.gsma.rcs.botversion=\"#=1,#=2\""  -> Versions 1 and 2 are supported
+     *
+     * Example #1: Add standard feature tag with one version support
+     * addCapability(CapInfo.STANDALONE_CHATBOT, "+g.gsma.rcs.botversion=\"#=1");
+     * The above example indicates standalone chatbot feature tag is supported
+     * in version 1.
+     *
+     * Example #2: Add standard feature tag with multiple version support
+     * addCapability(CapInfo.CHATBOT, "+g.gsma.rcs.botversion=\"#=1,#=2\"");
+     * The above example indicates session based chatbot feature tag is supported
+     * in versions 1 and 2.
+     *
+     * Example #3: Add standard feature tag with no version support
+     * addCapability(CapInfo.INSTANT_MSG, "");
+     * The above example indicates im feature tag does not have version support.
+     *
+     * Example #4: Add custom/extension feature tag with no version support
+     * addCapability("+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.custom_im\"",
+     *               "");
+     * Call setNewFeatureTag(int presenceServiceHdl, String featureTag,
+     *           in PresServiceInfo serviceInfo, int userData) API
+     * in IPresenceService.aidl before calling addCapability() API
+     */
+    public void addCapability(String featureTagName, String versions) {
+        this.mCapInfoMap.put(featureTagName, versions);
+    }
+
+    /**
+     * Returns String of versions of the feature tag passed.
+     * Returns "" if versioning support is not present for the feature tag passed.
+     * Returns null if feature tag is not present.
+     *
+     * Example # 1:
+     * getCapabilityVersions(CapInfo.STANDALONE_CHATBOT);
+     * The above returns String in this format "+g.gsma.rcs.botversion=\"#=1,#=2\"",
+     * indicating more than one versions are supported for standalone chatbot feature tag
+     *
+     * Example # 2:
+     * getCapabilityVersions(CapInfo.INSTANT_MSG);
+     * The above returns empty String in this format "",
+     * indicating versions support is not present for im feature tag
+     *
+     * Example #3:
+     * getCapabilityVersions(
+     *   "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.custom_im\");
+     * The above returns String "",
+     * indicating version supported is not present for the custom feature tag passed.
+     */
+    public String getCapabilityVersions(String featureTagName) {
+        return mCapInfoMap.get(featureTagName);
+    }
+
+    /** Removes the entry of the feature tag passed, from the Map. */
+    public void removeCapability(String featureTagName) {
+        this.mCapInfoMap.remove(featureTagName);
+    }
+
+    /** Sets Map of feature tag string and string of supported versions. */
+    public void setCapInfoMap(Map<String, String> capInfoMap) {
+        this.mCapInfoMap = capInfoMap;
+    }
+
+    /** Gets Map of feature tag string and string of supported versions. */
+    public Map<String, String> getCapInfoMap() {
+        return mCapInfoMap;
+    }
+
+    /** Checks whether the featureTag is supported or not. */
+    public boolean isCapabilitySupported(String featureTag) {
+       return mCapInfoMap.containsKey(featureTag);
     }
 
     public int describeContents() {
@@ -593,6 +829,12 @@ public class CapInfo implements Parcelable {
         dest.writeInt(mRcsIpVideoOnlyCallSupported ? 1 : 0);
         dest.writeStringArray(mExts);
         dest.writeLong(mCapTimestamp);
+
+        Bundle capInfoBundle = new Bundle();
+        for (Map.Entry<String, String> entry : mCapInfoMap.entrySet()) {
+          capInfoBundle.putString(entry.getKey(), entry.getValue());
+        }
+        dest.writeBundle(capInfoBundle);
     }
 
     public static final Parcelable.Creator<CapInfo> CREATOR = new Parcelable.Creator<CapInfo>() {
@@ -645,5 +887,10 @@ public class CapInfo implements Parcelable {
 
         mExts = source.createStringArray();
         mCapTimestamp = source.readLong();
+
+        Bundle capInfoBundle = source.readBundle();
+        for (String key: capInfoBundle.keySet()) {
+          mCapInfoMap.put(key, capInfoBundle.getString(key));
+        }
     }
 }

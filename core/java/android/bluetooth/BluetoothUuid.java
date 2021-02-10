@@ -160,6 +160,36 @@ public final class BluetoothUuid {
     public static final ParcelUuid BASE_UUID =
             ParcelUuid.fromString("00000000-0000-1000-8000-00805F9B34FB");
 
+    /** @hide */
+    @NonNull
+    public static ParcelUuid ADVANCE_HEARINGAID_UUID =
+            ParcelUuid.fromString("00006AD2-0000-1000-8000-00805F9B34FB");
+
+    /** @hide */
+    @NonNull
+    public static ParcelUuid ADVANCE_MEDIA_T_UUID =
+            ParcelUuid.fromString("00006AD0-0000-1000-8000-00805F9B34FB");
+
+    /** @hide */
+    @NonNull
+    public static ParcelUuid ADVANCE_MEDIA_P_UUID =
+            ParcelUuid.fromString("00006AD1-0000-1000-8000-00805F9B34FB");
+
+    /** @hide */
+    @NonNull
+    public static ParcelUuid ADVANCE_MEDIA_G_UUID =
+            ParcelUuid.fromString("00006AD3-0000-1000-8000-00805F9B34FB");
+
+    /** @hide */
+    @NonNull
+    public static ParcelUuid ADVANCE_VOICE_P_UUID =
+            ParcelUuid.fromString("00006AD4-0000-1000-8000-00805F9B34FB");
+
+    /** @hide */
+    @NonNull
+    public static ParcelUuid ADVANCE_VOICE_T_UUID =
+            ParcelUuid.fromString("00006AD5-0000-1000-8000-00805F9B34FB");
+
     /**
      * Length of bytes for 16 bit UUID
      *

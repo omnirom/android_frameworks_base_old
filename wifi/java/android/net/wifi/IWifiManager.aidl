@@ -92,6 +92,8 @@ interface IWifiManager
 
     void allowAutojoinGlobal(boolean choice);
 
+    void allowConnectOnPartialScanResults(boolean enable);
+
     void allowAutojoin(int netId, boolean choice);
 
     void allowAutojoinPasspoint(String fqdn, boolean enableAutoJoin);

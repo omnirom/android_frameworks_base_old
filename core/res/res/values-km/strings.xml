@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"ចុច​ម៉ឺនុយ ដើម្បី​ដោះ​សោ​ ឬ​ហៅ​ពេល​អាសន្ន។"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"ចុច​ម៉ឺនុយ ដើម្បី​ដោះ​សោ។"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"គូរ​លំនាំ ដើម្បី​ដោះ​សោ"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"បន្ទាន់"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"ហៅទៅលេខសង្គ្រោះបន្ទាន់"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ត្រឡប់​ទៅ​ការ​ហៅ"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ត្រឹមត្រូវ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ព្យាយាម​ម្ដង​ទៀត"</string>
@@ -2000,7 +2000,7 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ការ​ជូនដំណឹង​ព័ត៌មាន​របស់​មុខងារ​ទម្លាប់"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការកម្មវិធី​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"កម្មវិធីសន្សំថ្ម"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"កម្មវិធី​សន្សំ​ថ្ម​ត្រូវបានបិទ"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ទូរសព្ទ​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ថេប្លេត​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>

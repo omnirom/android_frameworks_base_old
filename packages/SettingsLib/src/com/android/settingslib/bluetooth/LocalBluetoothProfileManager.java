@@ -19,6 +19,7 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothA2dpSink;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDeviceGroup;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHeadsetClient;
@@ -87,10 +88,11 @@ public class LocalBluetoothProfileManager {
 
     private final Context mContext;
     private final CachedBluetoothDeviceManager mDeviceManager;
-    private final BluetoothEventManager mEventManager;
+    protected final BluetoothEventManager mEventManager;
 
     private A2dpProfile mA2dpProfile;
     private A2dpSinkProfile mA2dpSinkProfile;
+    private DeviceGroupClientProfile mGroupClientProfile;
     private HeadsetProfile mHeadsetProfile;
     private HfpClientProfile mHfpClientProfile;
     private MapProfile mMapProfile;
@@ -111,6 +113,12 @@ public class LocalBluetoothProfileManager {
     private final Map<String, LocalBluetoothProfile>
             mProfileNameMap = new HashMap<String, LocalBluetoothProfile>();
 
+    private static final int NO_ADV_AUDIO_SUPPORT = 0;
+    private static final int ADV_AUDIO_CONNECTION_SUPPORT = 1;
+    private static final int ADV_AUDIO_CONECTIONLESS_SUPPORT = 2;
+
+    private int mAdvAudioFeatureMask;
+
     LocalBluetoothProfileManager(Context context,
             LocalBluetoothAdapter adapter,
             CachedBluetoothDeviceManager deviceManager,
@@ -121,6 +129,9 @@ public class LocalBluetoothProfileManager {
         mEventManager = eventManager;
         // pass this reference to adapter and event manager (circular dependency)
         adapter.setProfileManager(this);
+
+        mAdvAudioFeatureMask = SystemProperties.getInt(
+                               "persist.vendor.service.bt.adv_audio_mask", NO_ADV_AUDIO_SUPPORT);
 
         if (DEBUG) Log.d(TAG, "LocalBluetoothProfileManager construction complete");
     }
@@ -228,6 +239,12 @@ public class LocalBluetoothProfileManager {
             mDunProfile = new DunServerProfile(mContext);
             addProfile(mDunProfile, DunServerProfile.NAME,
                     BluetoothDun.ACTION_CONNECTION_STATE_CHANGED);
+        }
+        if (mGroupClientProfile == null && supportedList.contains(BluetoothProfile.GROUP_CLIENT)) {
+            if (DEBUG) Log.d(TAG, "Adding local GROUP CLIENT profile");
+            mGroupClientProfile = new DeviceGroupClientProfile(mContext, mDeviceManager, this);
+            addProfile(mGroupClientProfile, mGroupClientProfile.NAME,
+                    BluetoothDeviceGroup.ACTION_CONNECTION_STATE_CHANGED);
         }
         mEventManager.registerProfileIntentReceiver();
     }
@@ -465,6 +482,9 @@ public class LocalBluetoothProfileManager {
         return mHidDeviceProfile;
     }
 
+    public DeviceGroupClientProfile getDeviceGroupClientProfile() {
+        return mGroupClientProfile;
+    }
     /**
      * Fill in a list of LocalBluetoothProfile objects that are supported by
      * the local device and the remote device.
@@ -513,6 +533,33 @@ public class LocalBluetoothProfileManager {
                 || (mA2dpProfile.getConnectionStatus(device) == BluetoothProfile.STATE_CONNECTED))) {
             profiles.add(mA2dpProfile);
             removedProfiles.remove(mA2dpProfile);
+        }
+
+        if ((mAdvAudioFeatureMask & ADV_AUDIO_CONNECTION_SUPPORT)
+              == ADV_AUDIO_CONNECTION_SUPPORT) {
+            if (mHeadsetProfile != null) {
+                if (ArrayUtils.contains(uuids, BluetoothUuid.ADVANCE_VOICE_P_UUID)
+                       || ArrayUtils.contains(uuids, BluetoothUuid.ADVANCE_VOICE_T_UUID)
+                       || ArrayUtils.contains(uuids, BluetoothUuid.ADVANCE_HEARINGAID_UUID)
+                       || (mHeadsetProfile.getConnectionStatus(device)
+                          == BluetoothProfile.STATE_CONNECTED)) {
+                    if(DEBUG) Log.d(TAG, " Advance Audio Voice supported ");
+                    profiles.add(mHeadsetProfile);
+                    removedProfiles.remove(mHeadsetProfile);
+                }
+            }
+
+            if ((mA2dpProfile != null)
+                && (ArrayUtils.contains(uuids, BluetoothUuid.ADVANCE_MEDIA_T_UUID)
+                    || ArrayUtils.contains(uuids, BluetoothUuid.ADVANCE_HEARINGAID_UUID)
+                    || ArrayUtils.contains(uuids, BluetoothUuid.ADVANCE_MEDIA_P_UUID)
+                    || ArrayUtils.contains(uuids, BluetoothUuid.ADVANCE_MEDIA_G_UUID)
+                    || (mA2dpProfile.getConnectionStatus(device)
+                        == BluetoothProfile.STATE_CONNECTED))) {
+                if(DEBUG) Log.d(TAG, " Advance Audio Media supported ");
+                profiles.add(mA2dpProfile);
+                removedProfiles.remove(mA2dpProfile);
+            }
         }
 
         if (BluetoothUuid.containsAnyUuid(uuids, A2dpSinkProfile.SRC_UUIDS)
