@@ -70,7 +70,6 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/notifications/Fomalhaut.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/notifications/Fomalhaut.ogg \
     $(LOCAL_PATH)/notifications/ogg/Gallium.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/notifications/Gallium.ogg \
     $(LOCAL_PATH)/notifications/Heaven.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/notifications/Heaven.ogg \
-    $(LOCAL_PATH)/notifications/ogg/Helium.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/notifications/Helium.ogg \
     $(LOCAL_PATH)/newwavelabs/Highwire.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/notifications/Highwire.ogg \
     $(LOCAL_PATH)/notifications/ogg/Hojus.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/notifications/Hojus.ogg \
     $(LOCAL_PATH)/notifications/ogg/Iridium.ogg:$(TARGET_COPY_OUT_PRODUCT)/media/audio/notifications/Iridium.ogg \
