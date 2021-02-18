@@ -51,6 +51,7 @@ import android.provider.MediaStore.MediaColumns;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.telephony.SubscriptionManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.database.SortCursor;
@@ -1223,8 +1224,11 @@ public class RingtoneManager {
             // Skip if we've already defined it at least once, so we don't
             // overwrite the user changing to null
             final String setting = getDefaultRingtoneSetting(type);
+            String defaultRingtone2 = Settings.System.getString(context.getContentResolver(), Settings.System.RINGTONE2);
             if (Settings.System.getInt(context.getContentResolver(), setting, 0) != 0) {
-                continue;
+                if (!TextUtils.isEmpty(defaultRingtone2)) {
+                    continue;
+                }
             }
 
             // Try finding the scanned ringtone
@@ -1240,6 +1244,9 @@ public class RingtoneManager {
                     final Uri ringtoneUri = context.getContentResolver().canonicalizeOrElse(
                             ContentUris.withAppendedId(baseUri, cursor.getLong(0)));
                     RingtoneManager.setActualDefaultRingtoneUri(context, type, ringtoneUri);
+                    if (TextUtils.isEmpty(defaultRingtone2)) {
+                        RingtoneManager.setActualDefaultRingtoneUriBySlot(context, TYPE_RINGTONE, ringtoneUri, 1);
+                    }
                     Settings.System.putInt(context.getContentResolver(), setting, 1);
                 }
             }
