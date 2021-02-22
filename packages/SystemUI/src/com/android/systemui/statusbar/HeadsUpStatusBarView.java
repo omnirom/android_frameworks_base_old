@@ -198,7 +198,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         boolean isRtl = isLayoutRtl();
         int start = isRtl ? (mDisplaySize.x - right) : left;
 
-        if (start != targetPadding) {
+        if (start != targetPadding || mCutOutBounds != null) {
             if (mCutOutBounds != null) {
                 for (Rect cutOutRect : mCutOutBounds) {
                     int cutOutStart = (isRtl)
