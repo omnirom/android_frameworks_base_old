@@ -66,6 +66,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
@@ -84,7 +85,8 @@ import javax.inject.Named;
  * View visible under the clock on the lock screen and AoD.
  */
 public class KeyguardSliceView extends LinearLayout implements View.OnClickListener,
-        Observer<Slice>, TunerService.Tunable, ConfigurationController.ConfigurationListener {
+        Observer<Slice>, TunerService.Tunable, ConfigurationController.ConfigurationListener,
+        OmniSettingsService.OmniSettingsObserver {
 
     private static final String TAG = "KeyguardSliceView";
     public static final int DEFAULT_ANIM_DURATION = 550;
@@ -116,12 +118,14 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private float mRowTextSize;
     private float mRowWithHeaderTextSize;
 
+    private static boolean mKeyguardTransitionAnimations = false;
+
     @Inject
     public KeyguardSliceView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             ActivityStarter activityStarter, ConfigurationController configurationController,
             TunerService tunerService, @Main Resources resources) {
         super(context, attrs);
-
+        Log.e("SliceView", "KeyguardSliceView : ");
         mTunerService = tunerService;
         mClickActions = new HashMap<>();
         mRowPadding = resources.getDimensionPixelSize(R.dimen.subtitle_clock_padding);
@@ -160,7 +164,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
         Display display = getDisplay();
         if (display != null) {
             mDisplayId = display.getDisplayId();
@@ -171,6 +174,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             mLiveData.observeForever(this);
         }
         mConfigurationController.addCallback(this);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                Settings.System.OMNI_KEYGUARD_TRANSITION_ANIMATIONS);
     }
 
     @Override
@@ -183,12 +188,20 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         }
         mTunerService.removeTunable(this);
         mConfigurationController.removeCallback(this);
+        Dependency.get(OmniSettingsService.class).removeObserver(this);
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        if (key.equals(Settings.System.OMNI_KEYGUARD_TRANSITION_ANIMATIONS)) {
+            mKeyguardTransitionAnimations = (newValue != null) || (newValue == 1);
+        }
     }
 
     @Override
     public void onVisibilityAggregated(boolean isVisible) {
         super.onVisibilityAggregated(isVisible);
-        setLayoutTransition(isVisible ? mLayoutTransition : null);
+        setLayoutTransition((isVisible && mKeyguardTransitionAnimations) ? mLayoutTransition : null);
     }
 
     /**
@@ -492,7 +505,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         @Override
         public void onVisibilityAggregated(boolean isVisible) {
             super.onVisibilityAggregated(isVisible);
-            setLayoutTransition(isVisible ? mLayoutTransition : null);
+            setLayoutTransition((isVisible && mKeyguardTransitionAnimations) ? mLayoutTransition : null);
         }
 
         @Override

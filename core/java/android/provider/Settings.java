@@ -5294,6 +5294,11 @@ public final class Settings {
         public static final String OMNI_DEVICE_PROXI_CHECK_ENABLED = "device_proxi_check_enabled";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_KEYGUARD_TRANSITION_ANIMATIONS = "keyguard_transition_animations";
+
+        /**
          * some devices have a extra hw button e.g. n3 on the back on the
          * fingerprint sensor. allow mapping button to key
          *
@@ -5559,6 +5564,7 @@ public final class Settings {
             OMNI_SYSTEM_PROXI_CHECK_ENABLED,
             OMNI_DEVICE_PROXI_CHECK_ENABLED,
             OMNI_BUTTON_EXTRA_KEY_MAPPING,
+            OMNI_KEYGUARD_TRANSITION_ANIMATIONS,
             OMNI_DEVICE_FEATURE_SETTINGS,
             OMNI_ADVANCED_REBOOT,
             OMNI_CUSTOM_FP_ICON,
@@ -5616,6 +5622,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNIJAWS_WEATHER_ICON_PACK, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_SYSTEM_PROXI_CHECK_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_PROXI_CHECK_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_KEYGUARD_TRANSITION_ANIMATIONS, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BUTTON_EXTRA_KEY_MAPPING, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_ADVANCED_REBOOT, 0);

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.os.Build;
+import android.provider.Settings;
 import android.transition.Fade;
 import android.transition.Transition;
 import android.transition.TransitionListenerAdapter;
@@ -29,9 +30,11 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.ColorExtractor.OnColorsChangedListener;
 import com.android.keyguard.clock.ClockManager;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -48,7 +51,8 @@ import javax.inject.Named;
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
  */
-public class KeyguardClockSwitch extends RelativeLayout {
+public class KeyguardClockSwitch extends RelativeLayout
+        implements OmniSettingsService.OmniSettingsObserver {
 
     private static final String TAG = "KeyguardClockSwitch";
     private static final boolean CUSTOM_CLOCKS_ENABLED = true;
@@ -135,6 +139,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
      */
     private int mStatusBarState;
 
+    private boolean mKeyguardTransitionAnimations = false;
+
     private final StatusBarStateController.StateListener mStateListener =
             new StatusBarStateController.StateListener() {
                 @Override
@@ -162,6 +168,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
             StatusBarStateController statusBarStateController, SysuiColorExtractor colorExtractor,
             ClockManager clockManager) {
         super(context, attrs);
+
         mStatusBarStateController = statusBarStateController;
         mStatusBarState = mStatusBarStateController.getState();
         mSysuiColorExtractor = colorExtractor;
@@ -209,6 +216,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
         mStatusBarStateController.addCallback(mStateListener);
         mSysuiColorExtractor.addOnColorsChangedListener(mColorsListener);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                Settings.System.OMNI_KEYGUARD_TRANSITION_ANIMATIONS);
         updateColors();
     }
 
@@ -220,7 +229,22 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
         mStatusBarStateController.removeCallback(mStateListener);
         mSysuiColorExtractor.removeOnColorsChangedListener(mColorsListener);
+        Dependency.get(OmniSettingsService.class).removeObserver(this);
         setClockPlugin(null);
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        if (key.equals(Settings.System.OMNI_KEYGUARD_TRANSITION_ANIMATIONS)) {
+            mKeyguardTransitionAnimations = (newValue != null) || (newValue == 1);
+            if (!mKeyguardTransitionAnimations) {
+                // reset to default before we disable transitions
+                if (mClockPlugin == null) {
+                    mClockView.setVisibility(View.VISIBLE);
+                    mClockViewBold.setVisibility(View.INVISIBLE);
+                }
+            }
+        }
     }
 
     private void setClockPlugin(ClockPlugin plugin) {
@@ -476,7 +500,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
             return;
         }
         mShowingHeader = hasHeader;
-        if (hasCustomClock()) {
+        if (hasCustomClock() || !mKeyguardTransitionAnimations) {
             return;
         }
 
