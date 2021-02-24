@@ -1002,17 +1002,6 @@ public class NavigationBarView extends FrameLayout implements
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-
-        if (getPowerButton() != null) {
-            updateButtonLocation(getPowerButton(), false);
-        }
-        if (getVolumeMinusButton() != null) {
-            updateButtonLocation(getVolumeMinusButton(), false);
-        }
-        if (getVolumePlusButton() != null) {
-            updateButtonLocation(getVolumePlusButton(), false);
-        }
-
         notifyActiveTouchRegions();
         mRecentsOnboarding.setNavBarHeight(getMeasuredHeight());
     }
@@ -1033,8 +1022,19 @@ public class NavigationBarView extends FrameLayout implements
         updateButtonLocation(getRecentsButton(), inScreenSpace);
         updateButtonLocation(getImeSwitchButton(), inScreenSpace);
         updateButtonLocation(getAccessibilityButton(), inScreenSpace);
-        updateButtonLocation(getKeyButtonViewById(R.id.dpad_left), inScreenSpace);
-        updateButtonLocation(getKeyButtonViewById(R.id.dpad_right), inScreenSpace);
+        if (showDpadArrowKeys()) {
+            updateButtonLocation(getKeyButtonViewById(R.id.dpad_left), inScreenSpace);
+            updateButtonLocation(getKeyButtonViewById(R.id.dpad_right), inScreenSpace);
+        }
+        if (getPowerButton() != null) {
+            updateButtonLocation(getPowerButton(), false);
+        }
+        if (getVolumeMinusButton() != null) {
+            updateButtonLocation(getVolumeMinusButton(), false);
+        }
+        if (getVolumePlusButton() != null) {
+            updateButtonLocation(getVolumePlusButton(), false);
+        }
         if (includeFloatingRotationButton && mFloatingRotationButton.isVisible()) {
             updateButtonLocation(mFloatingRotationButton.getCurrentView(), inScreenSpace);
         } else {
@@ -1052,6 +1052,10 @@ public class NavigationBarView extends FrameLayout implements
     }
 
     private void updateButtonLocation(View view, boolean inScreenSpace) {
+        // we get called also without ButtonDispatcher before
+        if (view == null || view.getVisibility() != View.VISIBLE) {
+            return;
+        }
         if (inScreenSpace) {
             view.getBoundsOnScreen(mTmpBounds);
         } else {
