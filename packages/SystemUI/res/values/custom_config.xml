@@ -57,4 +57,5 @@
     <string name="config_displayCpus" translatable="false"></string>
 
     <string name="config_navBarLayoutHandleArrows" translatable="false">back[1.7WC];home_handle;ime_switcher[1.7WC]</string>
+
 </resources>
