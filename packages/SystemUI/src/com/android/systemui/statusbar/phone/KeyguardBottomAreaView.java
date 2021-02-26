@@ -48,6 +48,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.service.media.CameraPrewarmService;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
@@ -72,6 +73,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.omni.OmniSystemUIUtils.OmniLockButtonFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.IntentButtonProvider;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton;
@@ -83,7 +85,6 @@ import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
-import com.android.systemui.tuner.LockscreenFragment.LockButtonFactory;
 import com.android.systemui.tuner.TunerService;
 
 import java.util.concurrent.Executor;
@@ -273,14 +274,14 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightExtension = Dependency.get(ExtensionController.class).newExtension(IntentButton.class)
                 .withPlugin(IntentButtonProvider.class, RIGHT_BUTTON_PLUGIN,
                         p -> p.getIntentButton())
-                .withTunerFactory(new LockButtonFactory(mContext, LOCKSCREEN_RIGHT_BUTTON))
+                .withOmniFactory(new OmniLockButtonFactory(mContext, Settings.System.OMNI_LOCKSCREEN_RIGHT_BUTTON))
                 .withDefault(() -> new DefaultRightButton())
                 .withCallback(button -> setRightButton(button))
                 .build();
         mLeftExtension = Dependency.get(ExtensionController.class).newExtension(IntentButton.class)
                 .withPlugin(IntentButtonProvider.class, LEFT_BUTTON_PLUGIN,
                         p -> p.getIntentButton())
-                .withTunerFactory(new LockButtonFactory(mContext, LOCKSCREEN_LEFT_BUTTON))
+                .withOmniFactory(new OmniLockButtonFactory(mContext, Settings.System.OMNI_LOCKSCREEN_LEFT_BUTTON))
                 .withDefault(() -> new DefaultLeftButton())
                 .withCallback(button -> setLeftButton(button))
                 .build();
@@ -567,10 +568,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (!mKeyguardStateController.canDismissLockScreen()) {
             Dependency.get(Executor.class).execute(runnable);
         } else {
-            boolean dismissShade = !TextUtils.isEmpty(mRightButtonStr)
-                    && Dependency.get(TunerService.class).getValue(LOCKSCREEN_RIGHT_UNLOCK, 1) != 0;
             mStatusBar.executeRunnableDismissingKeyguard(runnable, null /* cancelAction */,
-                    dismissShade, false /* afterKeyguardGone */, true /* deferred */);
+                    true, false /* afterKeyguardGone */, true /* deferred */);
         }
     }
 
@@ -588,9 +587,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 }
             });
         } else {
-            boolean dismissShade = !TextUtils.isEmpty(mLeftButtonStr)
-                    && Dependency.get(TunerService.class).getValue(LOCKSCREEN_LEFT_UNLOCK, 1) != 0;
-            mActivityStarter.startActivity(mLeftButton.getIntent(), dismissShade);
+            mActivityStarter.startActivity(mLeftButton.getIntent(), true);
         }
     }
 

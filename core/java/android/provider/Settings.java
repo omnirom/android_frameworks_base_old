@@ -5550,6 +5550,16 @@ public final class Settings {
         public static final String OMNI_NAVIGATION_BAR_ARROW_KEYS = "navigation_bar_menu_arrow_keys";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_LEFT_BUTTON = "lockscreen_left_button";
+        
+        /**
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_RIGHT_BUTTON = "lockscreen_right_button";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5599,7 +5609,9 @@ public final class Settings {
             OMNI_QS_SHOW_MEDIA_DIVIDER,
             OMNI_RECENT_TASKS_VISIBLE_DISABLE,
             OMNI_SHOW_BATTERY_IMAGE,
-            OMNI_NAVIGATION_BAR_ARROW_KEYS
+            OMNI_NAVIGATION_BAR_ARROW_KEYS,
+            OMNI_LOCKSCREEN_LEFT_BUTTON,
+            OMNI_LOCKSCREEN_RIGHT_BUTTON
         };
 
         /**
@@ -5661,6 +5673,8 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_RECENT_TASKS_VISIBLE_DISABLE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_ARROW_KEYS, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_LEFT_BUTTON, 2);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_RIGHT_BUTTON, 2);
         }
     }
 

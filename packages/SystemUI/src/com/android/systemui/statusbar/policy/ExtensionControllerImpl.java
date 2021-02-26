@@ -19,6 +19,8 @@ import android.content.res.Configuration;
 import android.os.Handler;
 import android.util.ArrayMap;
 
+import com.android.systemui.Dependency;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -135,6 +137,12 @@ public class ExtensionControllerImpl implements ExtensionController {
         }
 
         @Override
+        public ExtensionController.ExtensionBuilder<T> withOmniFactory(OmniFactory<T> factory) {
+            mExtension.addOmniFactory(factory, factory.key());
+            return this;
+        }
+
+        @Override
         public ExtensionController.Extension<T> build() {
             // Sort items in ascending order
             Collections.sort(mExtension.mProducers, Comparator.comparingInt(Item::sortOrder));
@@ -221,6 +229,10 @@ public class ExtensionControllerImpl implements ExtensionController {
             mProducers.add(new FeatureItem<>(feature, mode));
         }
 
+        public void addOmniFactory(OmniFactory<T> factory, String key) {
+            mProducers.add(new OmniItem(factory, key));
+        }
+
         private class PluginItem<P extends Plugin> implements Item<T>, PluginListener<P> {
             private final PluginConverter<T, P> mConverter;
             private T mItem;
@@ -288,6 +300,37 @@ public class ExtensionControllerImpl implements ExtensionController {
             public void onTuningChanged(String key, String newValue) {
                 mSettings.put(key, newValue);
                 mItem = mFactory.create(mSettings);
+                notifyChanged();
+            }
+
+            @Override
+            public int sortOrder() {
+                return SORT_ORDER_TUNER;
+            }
+        }
+
+        private class OmniItem<T> implements Item<T>, OmniSettingsService.OmniSettingsObserver {
+            private final OmniFactory<T> mFactory;
+            private T mItem;
+
+            public OmniItem(OmniFactory<T> factory, String key) {
+                mFactory = factory;
+                Dependency.get(OmniSettingsService.class).addStringObserver(this, key);
+            }
+
+            @Override
+            public T get() {
+                return mItem;
+            }
+
+            @Override
+            public void destroy() {
+                Dependency.get(OmniSettingsService.class).removeObserver(this);
+            }
+
+            @Override
+            public void onStringSettingChanged(String key, String newValue) {
+                mItem = mFactory.create();
                 notifyChanged();
             }
 

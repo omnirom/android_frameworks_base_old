@@ -57,6 +57,7 @@ public interface ExtensionController {
         ExtensionBuilder<T> withCallback(Consumer<T> callback);
         ExtensionBuilder<T> withUiMode(int mode, Supplier<T> def);
         ExtensionBuilder<T> withFeature(String feature, Supplier<T> def);
+        ExtensionBuilder<T> withOmniFactory(OmniFactory<T> factory);
         Extension<T> build();
     }
 
@@ -67,5 +68,10 @@ public interface ExtensionController {
     public interface TunerFactory<T> {
         String[] keys();
         T create(Map<String, String> settings);
+    }
+
+    public interface OmniFactory<T> {
+        String key();
+        T create();
     }
 }
