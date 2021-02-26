@@ -66,7 +66,7 @@ public class LockIcon extends KeyguardAffordanceView {
 
             int newState = mState;
             Drawable icon = getIcon(newState);
-            setImageDrawable(icon, false);
+            setImageDrawable(icon, false, false);
 
             if (newState == STATE_SCANNING_FACE) {
                 announceForAccessibility(getResources().getString(
