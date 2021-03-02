@@ -16,6 +16,24 @@
       "revId": "cf742b406e00a3e51395e7612a1d937309c98fb0",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a36877f3_449a87ca",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBar.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 850,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2021-03-02T12:18:28Z",
+      "side": 1,
+      "message": "BTW - I highly recommend - and later demand :)\u003d that this has to be changed to uise OmniSettingsService instead of adding another observer. You can do it in a second change removing that or in one - but it mnust be both in same week",
+      "parentUuid": "edf74c36_e547c303",
+      "revId": "cf742b406e00a3e51395e7612a1d937309c98fb0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": true
     }
   ]
 }
