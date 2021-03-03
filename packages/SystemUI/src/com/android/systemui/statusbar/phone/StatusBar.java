@@ -67,14 +67,12 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
-import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.media.AudioAttributes;
@@ -146,6 +144,7 @@ import com.android.systemui.DemoMode;
 import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.InitController;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
@@ -250,7 +249,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         OnHeadsUpChangedListener, CommandQueue.Callbacks,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
         StatusBarStateController.StateListener, ActivityLaunchAnimator.Callback,
-        LifecycleOwner, BatteryController.BatteryStateChangeCallback {
+        LifecycleOwner, BatteryController.BatteryStateChangeCallback,
+        OmniSettingsService.OmniSettingsObserver {
     public static final boolean MULTIUSER_DEBUG = false;
 
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -400,7 +400,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final UserInfoControllerImpl mUserInfoControllerImpl;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
     private NotificationsController mNotificationsController;
-    private SettingsObserver mSettingsObserver;
 
     // expanded notifications
     // the sliding/resizing panel within the notification window
@@ -847,8 +846,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDisplay = mWindowManager.getDefaultDisplay();
         mDisplayId = mDisplay.getDisplayId();
         updateDisplaySize();
-	mSettingsObserver = new SettingsObserver(mHandler);
-	mSettingsObserver.observe();
 
         mVibrateOnOpening = mContext.getResources().getBoolean(
                 R.bool.config_vibrateOnIconAnimation);
@@ -1110,6 +1107,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationLogger.setHeadsUpManager(mHeadsUpManager);
 
         updateNavigationBar(true);
+
+        // must be AFTER inital updateNavigationBar cause this will try to call it again
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                 Settings.System.OMNI_NAVIGATION_BAR_SHOW);
 
         if (ENABLE_LOCKSCREEN_WALLPAPER && mWallpaperSupported) {
             mLockscreenWallpaper = mLockscreenWallpaperLazy.get();
@@ -1961,26 +1962,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mUserSetup = userSetup;
     }
 
-    private class SettingsObserver extends ContentObserver {
-
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.OMNI_NAVIGATION_BAR_SHOW),
-                    false, this, UserHandle.USER_ALL);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.OMNI_NAVIGATION_BAR_SHOW))) {
-                updateNavigationBar(false);
-            }
-        }
+    @Override
+    public void onIntSettingChanged(String key, Integer newvalue){
+        updateNavigationBar(false);
     }
 
     private void updateNavigationBar(boolean init) {
