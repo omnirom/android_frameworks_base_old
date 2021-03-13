@@ -118,6 +118,8 @@ public class KeyguardIndicationController implements StateListener,
     private boolean mPowerPluggedIn;
     private boolean mPowerPluggedInWired;
     private boolean mPowerCharged;
+    private boolean mBatteryOverheated;
+    private boolean mEnableBatteryDefender;
     private int mChargingSpeed;
     private int mChargingWattage;
     private int mBatteryLevel;
@@ -404,7 +406,7 @@ public class KeyguardIndicationController implements StateListener,
                 } else if (!TextUtils.isEmpty(mAlignmentIndication)) {
                     mTextView.switchIndication(mAlignmentIndication);
                     mTextView.setTextColor(mContext.getColor(R.color.misalignment_text_color));
-                } else if (mPowerPluggedIn) {
+                } else if (mPowerPluggedIn || mEnableBatteryDefender) {
                     String indication = computePowerIndication();
                     if (animate) {
                         animateText(mTextView, indication);
@@ -424,7 +426,7 @@ public class KeyguardIndicationController implements StateListener,
             String trustManagedIndication = getTrustManagedIndication();
 
             String powerIndication = null;
-            if (mPowerPluggedIn && (mPresentVisibility ? mBatteryPresent : true)) {
+            if (mPowerPluggedIn || mEnableBatteryDefender && (mPresentVisibility ? mBatteryPresent : true)) {
                 powerIndication = computePowerIndication();
             }
 
@@ -454,7 +456,7 @@ public class KeyguardIndicationController implements StateListener,
             } else if (!TextUtils.isEmpty(mAlignmentIndication)) {
                 mTextView.switchIndication(mAlignmentIndication);
                 isError = true;
-            } else if (mPowerPluggedIn && (mPresentVisibility ? mBatteryPresent : true)) {
+            } else if (mPowerPluggedIn || mEnableBatteryDefender && (mPresentVisibility ? mBatteryPresent : true)) {
                 if (DEBUG_CHARGING_SPEED) {
                     powerIndication += ",  " + (mChargingWattage / 1000) + " mW";
                 }
@@ -531,8 +533,15 @@ public class KeyguardIndicationController implements StateListener,
             return mContext.getResources().getString(R.string.keyguard_charged);
         }
 
-        final boolean hasChargingTime = mChargingTimeRemaining > 0;
         int chargingId;
+        String percentage = NumberFormat.getPercentInstance().format(mBatteryLevel / 100f);
+
+        if (mBatteryOverheated) {
+            chargingId = R.string.keyguard_plugged_in_charging_limited;
+            return mContext.getResources().getString(chargingId, percentage);
+        }
+
+        final boolean hasChargingTime = mChargingTimeRemaining > 0;
         if (mPowerPluggedInWired) {
             switch (mChargingSpeed) {
                 case BatteryStatus.CHARGING_DASH:
@@ -562,8 +571,6 @@ public class KeyguardIndicationController implements StateListener,
                     : R.string.keyguard_plugged_in_wireless;
         }
 
-        String percentage = NumberFormat.getPercentInstance()
-                .format(mBatteryLevel / 100f);
         if (hasChargingTime) {
             // We now have battery percentage in these strings and it's expected that all
             // locales will also have it in the future. For now, we still have to support the old
@@ -693,6 +700,8 @@ public class KeyguardIndicationController implements StateListener,
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mContext);
             mBatteryLevel = status.level;
+            mBatteryOverheated = status.isOverheated();
+            mEnableBatteryDefender = mBatteryOverheated && status.isPluggedIn();
             mBatteryPresent = status.isBatteryPresent();
             try {
                 mChargingTimeRemaining = mPowerPluggedIn
