@@ -350,6 +350,8 @@ public class AudioDeviceInventory {
             address = "";
         }
 
+        final @AudioSystem.AudioFormatNativeEnumForBtCodec int a2dpCodec = btInfo.getCodec();
+
         synchronized (mDevicesLock) {
             final String key = DeviceInfo.makeDeviceListKey(
                     AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address);
@@ -368,7 +370,7 @@ public class AudioDeviceInventory {
             if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
                 makeA2dpSrcUnavailable(address);
             } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
-                makeA2dpSrcAvailable(address);
+                makeA2dpSrcAvailable(address, a2dpCodec);
             }
         }
     }
@@ -870,6 +872,13 @@ public class AudioDeviceInventory {
               BtHelper.SetA2dpActiveDevice(null);
               return;
           }
+
+          if (state == BluetoothProfile.STATE_CONNECTED && profile == BluetoothProfile.A2DP_SINK) {
+              mDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                               device, state, profile, suppressNoisyIntent, a2dpVolume);
+              return;
+          }
+
           // state == BluetoothProfile.STATE_CONNECTED
           synchronized (mConnectedDevices) {
                  final String address = device.getAddress();
@@ -1045,21 +1054,25 @@ public class AudioDeviceInventory {
 
 
     @GuardedBy("mDevicesLock")
-    private void makeA2dpSrcAvailable(String address) {
+    private void makeA2dpSrcAvailable(String address, int a2dpCodec) {
         mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, "",
-                AudioSystem.AUDIO_FORMAT_DEFAULT);
+                a2dpCodec);
         mConnectedDevices.put(
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address),
                 new DeviceInfo(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, "",
-                        address, AudioSystem.AUDIO_FORMAT_DEFAULT));
+                        address, a2dpCodec));
     }
 
     @GuardedBy("mDevicesLock")
     private void makeA2dpSrcUnavailable(String address) {
+        final String deviceKey =
+               DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address);
+        final DeviceInfo deviceInfo = mConnectedDevices.get(deviceKey);
+        final int a2dpCodec = deviceInfo != null ? deviceInfo.mDeviceCodecFormat :
+                  AudioSystem.AUDIO_FORMAT_DEFAULT;
         mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "",
-                AudioSystem.AUDIO_FORMAT_DEFAULT);
+                AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "", a2dpCodec);
         mConnectedDevices.remove(
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address));
     }
