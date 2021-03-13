@@ -2308,7 +2308,10 @@ public final class ProcessList {
                         new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             }
             if (mPerfServiceStartHint != null) {
-                if ((hostingRecord.getType() != null) && (hostingRecord.getType().equals("activity"))) {
+                if ((hostingRecord.getType() != null)
+                       && (hostingRecord.getType().equals("activity")
+                               || hostingRecord.getType().equals("pre-top-activity"))) {
+                                   //TODO: not acting on pre-activity
                     if (startResult != null) {
                         mPerfServiceStartHint.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, app.processName, startResult.pid, BoostFramework.Launch.TYPE_START_PROC);
                     }
