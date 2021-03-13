@@ -952,11 +952,11 @@ public class MobileSignalController extends SignalController<
     }
 
     private int getEnhancementDataRatIcon() {
-        return showDataRatIcon() ? getRatIconGroup().mDataType : 0;
+        return showDataRatIcon() && mCurrentState.connected ? getRatIconGroup().mDataType : 0;
     }
 
     private int getEnhancementDdsRatIcon() {
-        return mCurrentState.dataSim ? getRatIconGroup().mDataType : 0;
+        return mCurrentState.dataSim && mCurrentState.connected ? getRatIconGroup().mDataType : 0;
     }
 
     private MobileIconGroup getRatIconGroup() {
