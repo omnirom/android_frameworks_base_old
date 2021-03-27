@@ -18,37 +18,7 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="global_action_reboot">Taaskäivita</string>
-    <string name="global_action_reboot_more">Taaskäivita\u2026</string>
-    <string name="global_action_reboot_sub">Süsteemi</string>
-    <string name="global_action_reboot_recovery">Taastusesse</string>
-    <string name="global_action_reboot_bootloader">Käivituslaadurisse</string>
-    <string name="global_action_reboot_fastboot">Fastboot</string>
-    <string name="global_action_screenrecord">Salvesta</string>
-    <!-- Caffeine tile -->
-    <string name="quick_settings_caffeine_label">Kofeiin</string>
-    <string name="accessibility_quick_settings_caffeine_off">Kofeiin väljas</string>
-    <string name="accessibility_quick_settings_caffeine_on">Kofeiin sees</string>
-    <!-- AOD QS tile -->
-    <string name="quick_settings_aod_label">Alati sees ekraan</string>
-    <string name="lockscreen_default">Vaikimisi</string>
-    <string name="lockscreen_hidden">Puudub</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <string name="custom_hint">Käivitamiseks viipa ikoonilt</string>
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Veerud</string>
-    <string name="qs_menu_item_columns_landscape">Horisontaalsed veerud</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Lähtesta</string>
-    <string name="qs_menu_item_titles">Kuva sildid</string>
-    <string name="qs_menu_item_qs_columns">Kiirriba veerud</string>
-    <string name="qs_menu_item_columns_auto">Automaatne</string>
+    <!-- qs customize -->
     <string name="tuner_show_brightness_mode">Kuva heledusrežiimi lülitit</string>
     <string name="tuner_show_brightness_side_buttons">Kuva heleduse liuguri küljenuppe</string>
     <string name="tuner_quick_settings">Kiirseaded</string>
@@ -58,43 +28,7 @@
     <string name="tuner_show_drag_handle">Kuva sikutushoob</string>
     <string name="tuner_battery_location_bar">Kuva aku olekuribal</string>
     <string name="tuner_status_bar_bg_transparency">Läbipaistev olekuriba taust</string>
-    <!-- ADB over network tile -->
-    <string name="quick_settings_network_adb_enabled_label">Sees</string>
-    <string name="quick_settings_network_adb_disabled_label">Keelatud</string>
-    <string name="quick_settings_network_adb_label">ADB üle võrgu</string>
-    <string name="quick_settings_network_adb_toast">USB silumine pole lubatud</string>
-    <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Hüpikmärguanded</string>
-    <string name="accessibility_quick_settings_heads_up_off">Hüpikmärguanded keelatud.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Hüpikmärguanded lubatud.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Hüpikmärguanded välja lülitatud.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Hüpikmärguanded sisse lülitatud.</string>
-    <string name="quick_settings_screenrecord_label">Kuva lindistamine</string>
-    <string name="tuner_keyguard_show_battery_bar_title">Kuva akuriba</string>
-    <string name="tuner_keyguard_show_battery_bar_summary">Kuva akuriba laadimise ajal alati sees ekraanil</string>
-    <string name="tuner_keyguard_show_battery_bar_always_title">Kuva akuriba alati</string>
-    <string name="tuner_keyguard_show_battery_bar_always_summary">Kuva akuriba alati laadimise ajal</string>
-    <string name="tuner_keyguard_battery_percent_title">Kuva akuprotsenti</string>
-    <string name="tuner_keyguard_battery_percent_summary">Sunni akuprotsendi kuvamine laadimise ajal olekuribal</string>
-    <string name="tuner_keyguard_show_watt_title">Kuva laadimise vatte</string>
-    <string name="tuner_keyguard_show_watt_summary">Kuva laadimise vatte millivattides</string>
-    <string name="tuner_keyguard_show_current_title">Kuva laadimise voolu</string>
-    <string name="tuner_keyguard_show_current_summary">Kuva laadimise voolu väärtusi</string>
-    <string name="tuner_keyguard_show_battery_temp_title">Kuva aku temperatuuri</string>
-    <string name="tuner_keyguard_show_battery_temp_summary">Kuva aku temperatuuri väärtust</string>
-    <string name="tuner_battery_percent_disable">Ära protsente kuva</string>
-    <string name="tuner_battery_percent_enable">Kuva alati protsendid</string>
-    <string name="tuner_battery_percent_charging">Kuva protsente laadimise ajal</string>
-    <string name="tuner_battery_percent_hide">Ära kuva seda ikooni</string>
-    <string name="tuner_battery_percent_title">Aku protsendid</string>
-    <string name="tuner_status_bar_show_battery_image">Aku pilt</string>
-    <string name="tuner_keyguard_show_lock_icon_title">Kuva lukustusolekut</string>
-    <string name="tuner_keyguard_show_lock_icon_summary">Kuva hetke lukustusolekut üleval</string>
-    <string name="tuner_nav_bar_show_handle_title">Kuva hoob</string>
-    <string name="tuner_nav_bar_legacy_category">3 nupuga navigeerimine</string>
-    <string name="tuner_nav_bar_gesture_category">Viibetega navigeerimine</string>
-    <string name="tuner_keyguard_show_assistant_handle_title">Kuva assistendihoovad</string>
-    <string name="tuner_keyguard_show_assistant_handle_summary">Kuva assistendihoovad ekraani servades</string>
+    <!-- omnijaws -->
     <string name="omnijaws_service_error">Viga</string>
     <string name="omnijaws_service_unkown">Ilmateade puudub</string>
     <string name="omnijaws_service_error_long">Ilmateate laadimisel esines viga</string>
@@ -104,44 +38,25 @@
     <string name="omnijaws_current_text">Nüüd</string>
     <string name="omnijaws_package_not_available">OmniJaws pole saadaval</string>
     <string name="omnijaws_service_last_update">Viimane uuendus:</string>
-    <!-- navbar editor -->
-    <string name="preview">Eelvaade</string>
-    <string name="keycode">Nupukood</string>
-    <string name="no_home_title">Kodunuppu ei leitud</string>
-    <string name="no_home_message">Kodunupp on vajalik selles seadmes navigeerimiseks. Palun lisa kodunupp enne salvestamist.</string>
-    <string name="clipboard_description">Lõikelaud võimaldab üksusi otse lõikelauda lohistada. Üksusi saab ka otse välja lohistada, kui need on olemas.</string>
-    <string name="keycode_description">Nupukoodiga nupud võimaldavad klaviatuuriklahvide lisamist navigatsiooniribale. Vajutades need emuleerivad valitud klaviatuuriklahvi. Kõigepealt tuleb valida nupu jaoks klahv, seejärel nupul kuvatav pilt.</string>
-    <string name="start">Algus</string>
-    <string name="center">Keskkoht</string>
-    <string name="end">Lõpp</string>
-    <string name="space">Tühik</string>
-    <string name="menu_ime">Menüü/klaviatuurivahetaja</string>
-    <string name="select_button">Vali lisatav nupp</string>
-    <string name="add_button">Lisa nupp</string>
-    <string name="save">Salvesta</string>
-    <string name="reset">Lähtesta</string>
-    <string name="select_keycode">Vali klaviatuurinupp</string>
-    <string name="left">Vasakule</string>
-    <string name="right">Paremale</string>
-    <string name="navbar_editor_title">Redaktor</string>
-    <string name="navbar_editor_summary">Seadista navigeerimisriba</string>
-    <string name="status_bar_vpn">VPN</string>
-    <string name="quick_settings_roaming_title">Rändlusindikaator</string>
-    <string name="status_bar_location">Asukoht</string>
-    <!-- Navigation bar dpad -->
-    <string name="accessibility_dpad_left">Kursor vasakule</string>
-    <string name="accessibility_dpad_right">Kursor paremale</string>
-    <string name="screenrecord_stopdot_label">Kuva peatamispunkti</string>
-    <string name="screenrecord_low_quality_label">Madal kvaliteet</string>
-    <!-- Immersive tile -->
-    <string name="quick_settings_immersive_tile">Täisekraanirežiim</string>
-    <string name="quick_settings_immersive_tile_statusbar">Täisekraanis olekuriba</string>
-    <string name="quick_settings_immersive_tile_navbar">Täisekraanis navigeerimisriba</string>
-    <string name="quick_settings_immersive_tile_full">Täielik täisekraan</string>
-    <!-- DataSwitch Tile -->
-    <string name="qs_data_switch_label">Vaheta andmesidekaarti</string>
-    <string name="qs_data_switch_changed_1">Andmesideks kasutatakse SIM 1te</string>
-    <string name="qs_data_switch_changed_2">Andmesideks kasutatakse SIM 2te</string>
+    <!-- Power Tile -->
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">Hüpikmärguanded</string>
+    <string name="accessibility_quick_settings_heads_up_off">Hüpikmärguanded keelatud.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Hüpikmärguanded lubatud.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Hüpikmärguanded välja lülitatud.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Hüpikmärguanded sisse lülitatud.</string>
+    <!-- Screenshot Tile -->
     <string name="screenshot_error_title">Ekraanipilt sobimatu</string>
-    <string name="screenrecord_error_title">Ekraanisalvestus sobimatu</string>
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">Alati sees ekraan</string>
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Taaskäivita</string>
+    <string name="global_action_reboot_more">Taaskäivita\u2026</string>
+    <string name="global_action_reboot_sub">Süsteemi</string>
+    <string name="global_action_reboot_recovery">Taastusesse</string>
+    <string name="global_action_reboot_bootloader">Käivituslaadurisse</string>
+    <string name="global_action_reboot_fastboot">Fastboot</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
+    <!-- Navigation bar dpad -->
+    <!-- DataSwitch Tile -->
 </resources>

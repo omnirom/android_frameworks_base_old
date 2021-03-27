@@ -18,40 +18,10 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="global_action_reboot">다시 시작</string>
-    <string name="global_action_reboot_more">다시 시작\u2026</string>
-    <string name="global_action_reboot_sub">시스템</string>
-    <string name="global_action_reboot_recovery">복구 모드</string>
-    <string name="global_action_reboot_bootloader">부트로더</string>
-    <!-- Caffeine tile -->
-    <string name="quick_settings_caffeine_label">카페인</string>
-    <string name="accessibility_quick_settings_caffeine_off">카페인 끄기</string>
-    <string name="accessibility_quick_settings_caffeine_on">카페인 켜기</string>
-    <!-- AOD QS tile -->
-    <string name="lockscreen_default">기본값</string>
-    <string name="lockscreen_hidden">없음</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">열</string>
-    <string name="qs_menu_item_columns_landscape">가로 모드 열</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">재설정</string>
-    <string name="qs_menu_item_titles">레이블 표시</string>
+    <!-- qs customize -->
     <string name="tuner_quick_settings">빠른 설정</string>
     <string name="tuner_show_brightness_new">화면 밝기 슬라이더 표시</string>
-    <!-- ADB over network tile -->
-    <string name="quick_settings_network_adb_enabled_label">사용</string>
-    <string name="quick_settings_network_adb_disabled_label">사용 안 함</string>
-    <string name="quick_settings_network_adb_label">네트워크를 통한 ADB</string>
-    <string name="quick_settings_network_adb_toast">USB 디버깅이 꺼져 있음</string>
-    <!-- Heads Up QS Tile -->
-    <string name="quick_settings_screenrecord_label">화면 녹화</string>
+    <!-- omnijaws -->
     <string name="omnijaws_service_error">오류</string>
     <string name="omnijaws_service_unkown">날씨 데이터 없음</string>
     <string name="omnijaws_service_error_long">날씨 데이터를 불러올 수 없음</string>
@@ -61,8 +31,17 @@
     <string name="omnijaws_current_text">지금</string>
     <string name="omnijaws_package_not_available">OmniJaws가 설치되어 있지 않음</string>
     <string name="omnijaws_service_last_update">마지막 업데이트:</string>
-    <!-- navbar editor -->
+    <!-- Power Tile -->
+    <!-- Heads Up QS Tile -->
+    <!-- Screenshot Tile -->
+    <!-- AOD QS tile -->
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">다시 시작</string>
+    <string name="global_action_reboot_more">다시 시작\u2026</string>
+    <string name="global_action_reboot_sub">시스템</string>
+    <string name="global_action_reboot_recovery">복구 모드</string>
+    <string name="global_action_reboot_bootloader">부트로더</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
     <!-- Navigation bar dpad -->
-    <!-- Immersive tile -->
     <!-- DataSwitch Tile -->
 </resources>

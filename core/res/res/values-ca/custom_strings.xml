@@ -18,8 +18,12 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
-         when the user asks to reboot. [CHAR LIMIT=NONE] -->
+    <!-- MicroG -->
+    <!-- Description of an application permission, listed so the user can choose whether
+         they want to allow the application to do this. -->
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
     <!-- advanced reboot to bootloader. -->
     <string name="reboot_to_bootloader_title">Reinicia al carregador d\'arrencada</string>
     <string name="reboot_to_bootloader_message">S\'està reiniciant al carregador d\'arrencada\u2026</string>
@@ -30,10 +34,4 @@
     <string name="reboot_system_title">Reinicia el sistema</string>
     <string name="reboot_system_message">S\'està reiniciant el sistema\u2026</string>
     <!-- advanced reboot to fastboot. -->
-    <!-- MicroG -->
-    <!-- Description of an application permission, listed so the user can choose whether
-         they want to allow the application to do this. -->
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
 </resources>

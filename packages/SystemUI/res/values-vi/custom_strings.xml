@@ -18,39 +18,22 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- qs customize -->
+    <string name="tuner_quick_settings">Cài đặt nhanh</string>
+    <string name="tuner_show_brightness_new">Hiển thị độ sáng trượt</string>
+    <string name="tuner_brightness_position_bottom">Độ sáng trượt bên dưới</string>
+    <!-- omnijaws -->
+    <!-- Power Tile -->
+    <!-- Heads Up QS Tile -->
+    <!-- Screenshot Tile -->
+    <!-- AOD QS tile -->
+    <!-- Power menu reboot -->
     <string name="global_action_reboot">Khởi động lại</string>
     <string name="global_action_reboot_more">Khởi động lại\u2026</string>
     <string name="global_action_reboot_sub">Hệ thống</string>
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
-    <!-- Caffeine tile -->
-    <!-- AOD QS tile -->
-    <string name="lockscreen_default">Mặc định</string>
-    <string name="lockscreen_hidden">Không có</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <string name="custom_hint">Vuốt từ các biểu tượng để khởi chạy</string>
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Số cột</string>
-    <string name="qs_menu_item_columns_landscape">Số ngang</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Đặt lại</string>
-    <string name="qs_menu_item_titles">Hiện thị nhãn</string>
-    <string name="qs_menu_item_qs_columns">Quickbar cột</string>
-    <string name="tuner_quick_settings">Cài đặt nhanh</string>
-    <string name="tuner_show_brightness_new">Hiển thị độ sáng trượt</string>
-    <string name="tuner_brightness_position_bottom">Độ sáng trượt bên dưới</string>
-    <!-- ADB over network tile -->
-    <!-- Heads Up QS Tile -->
-    <!-- navbar editor -->
-    <string name="end">Kết thúc</string>
-    <string name="space">Spacer</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
     <!-- Navigation bar dpad -->
-    <!-- Immersive tile -->
     <!-- DataSwitch Tile -->
 </resources>

@@ -18,22 +18,6 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
-         when the user asks to reboot. [CHAR LIMIT=NONE] -->
-    <string name="reboot_confirm">Kas soovid taaskäivitada?</string>
-    <string name="reboot_title">Taaskäivita</string>
-    <!-- advanced reboot to bootloader. -->
-    <string name="reboot_to_bootloader_title">Taaskäivita käivituslaadurisse</string>
-    <string name="reboot_to_bootloader_message">Taaskäivitan käivituslaadurisse\u2026</string>
-    <!-- advanced reboot to recovery. -->
-    <string name="reboot_to_recovery_title">Taaskäivita taastusesse</string>
-    <string name="reboot_to_recovery_message">Taaskäivitan taastusesse\u2026</string>
-    <!-- advanced reboot system -->
-    <string name="reboot_system_title">Taaskäivita süsteemi</string>
-    <string name="reboot_system_message">Taaskäivitan süsteemi\u2026</string>
-    <!-- advanced reboot to fastboot. -->
-    <string name="reboot_to_fastboot_title">Taaskäivita fastbooti</string>
-    <string name="reboot_to_fastboot_message">Taaskäivitan fastbooti\u2026</string>
     <!-- MicroG -->
     <string name="permlab_fakePackageSignature">Peta paketi allkirja</string>
     <!-- Description of an application permission, listed so the user can choose whether
@@ -46,4 +30,16 @@
     <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
     <string name="permgrouprequest_fake_package_signature">Kas lubada rakendusele
         &lt;b&gt;<xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b&gt; paketi allkirja petta?</string>
+    <!-- advanced reboot to bootloader. -->
+    <string name="reboot_to_bootloader_title">Taaskäivita käivituslaadurisse</string>
+    <string name="reboot_to_bootloader_message">Taaskäivitan käivituslaadurisse\u2026</string>
+    <!-- advanced reboot to recovery. -->
+    <string name="reboot_to_recovery_title">Taaskäivita taastusesse</string>
+    <string name="reboot_to_recovery_message">Taaskäivitan taastusesse\u2026</string>
+    <!-- advanced reboot system -->
+    <string name="reboot_system_title">Taaskäivita süsteemi</string>
+    <string name="reboot_system_message">Taaskäivitan süsteemi\u2026</string>
+    <!-- advanced reboot to fastboot. -->
+    <string name="reboot_to_fastboot_title">Taaskäivita fastbooti</string>
+    <string name="reboot_to_fastboot_message">Taaskäivitan fastbooti\u2026</string>
 </resources>

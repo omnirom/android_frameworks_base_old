@@ -18,37 +18,7 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="global_action_reboot">Uruchom ponownie</string>
-    <string name="global_action_reboot_more">Uruchamianie ponownie\u2026</string>
-    <string name="global_action_reboot_sub">System</string>
-    <string name="global_action_reboot_recovery">Tryb Recovery</string>
-    <string name="global_action_reboot_bootloader">Bootloader</string>
-    <string name="global_action_reboot_fastboot">Fastboot</string>
-    <string name="global_action_screenrecord">Nagraj</string>
-    <!-- Caffeine tile -->
-    <string name="quick_settings_caffeine_label">Kofeina</string>
-    <string name="accessibility_quick_settings_caffeine_off">Kofeina wyłączona</string>
-    <string name="accessibility_quick_settings_caffeine_on">Kofeina włączona</string>
-    <!-- AOD QS tile -->
-    <string name="quick_settings_aod_label">AOD</string>
-    <string name="lockscreen_default">Domyślnie</string>
-    <string name="lockscreen_hidden">Brak</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <string name="custom_hint">Przesuń od ikony, aby uruchomić</string>
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Kolumny</string>
-    <string name="qs_menu_item_columns_landscape">Kolumny poziomo</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Zresetuj</string>
-    <string name="qs_menu_item_titles">Pokaż etykiety</string>
-    <string name="qs_menu_item_qs_columns">Kolumny szybkich ustawień</string>
-    <string name="qs_menu_item_columns_auto">Automatyczne</string>
+    <!-- qs customize -->
     <string name="tuner_show_brightness_mode">Pokaż przełącznik trybu jasności</string>
     <string name="tuner_show_brightness_side_buttons">Pokaż boczne przyciski suwaka jasności</string>
     <string name="tuner_quick_settings">Szybkie ustawienia</string>
@@ -58,45 +28,7 @@
     <string name="tuner_show_drag_handle">Pokaż uchwyt przeciągania</string>
     <string name="tuner_battery_location_bar">Pokazuj ikonę baterii na pasku stanu</string>
     <string name="tuner_status_bar_bg_transparency">Przezroczyste tło paska stanu</string>
-    <!-- ADB over network tile -->
-    <string name="quick_settings_network_adb_enabled_label">Włączone</string>
-    <string name="quick_settings_network_adb_disabled_label">Wyłączone</string>
-    <string name="quick_settings_network_adb_label">ADB przez sieć</string>
-    <string name="quick_settings_network_adb_toast">Debugowanie USB jest wyłączone</string>
-    <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Powiadomienia Heads-up</string>
-    <string name="accessibility_quick_settings_heads_up_off">Powiadomienia Heads-up są wyłączone</string>
-    <string name="accessibility_quick_settings_heads_up_on">Powiadomienia Heads-up dozwolone.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Powiadomienia Heads-up są wyłączone</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Powiadomienia Heads-up są włączone</string>
-    <string name="quick_settings_screenrecord_label">Nagrywanie ekranu</string>
-    <string name="tuner_keyguard_show_battery_bar_title">Pokaż pasek baterii</string>
-    <string name="tuner_keyguard_show_battery_bar_summary">Zawsze pokazuj pasek baterii podczas ładowania</string>
-    <string name="tuner_keyguard_show_battery_bar_always_title">Zawsze pokazuj pasek baterii</string>
-    <string name="tuner_keyguard_show_battery_bar_always_summary">Zawsze pokazuj pasek baterii podczas ładowania</string>
-    <string name="tuner_keyguard_battery_percent_title">Pokaż procent baterii</string>
-    <string name="tuner_keyguard_battery_percent_summary">Wymuś pokazanie procentowego poziomu baterii na pasku stanu podczas ładowania</string>
-    <string name="tuner_keyguard_show_watt_title">Pokaż wat ładowania</string>
-    <string name="tuner_keyguard_show_watt_summary">Pokaż wartość ładowania wat w mW</string>
-    <string name="tuner_keyguard_show_current_title">Pokaż prąd ładowania</string>
-    <string name="tuner_keyguard_show_current_summary">Pokaż bieżące wartości ładowania</string>
-    <string name="tuner_keyguard_show_battery_temp_title">Pokaż temperaturę baterii</string>
-    <string name="tuner_keyguard_show_battery_temp_summary">Pokaż wartość temperatury baterii</string>
-    <string name="tuner_battery_percent_disable">Nie pokazuj procentu</string>
-    <string name="tuner_battery_percent_enable">Zawsze pokazuj procent</string>
-    <string name="tuner_battery_percent_charging">Pokaż procent podczas ładowania</string>
-    <string name="tuner_battery_percent_hide">Nie pokazuj tej ikony</string>
-    <string name="tuner_battery_percent_title">Procent baterii</string>
-    <string name="tuner_status_bar_show_battery_image">Wygląd ikony baterii</string>
-    <string name="tuner_keyguard_show_lock_icon_title">Pokaż status blokady</string>
-    <string name="tuner_keyguard_show_lock_icon_summary">Pokaż ikonę statusu bieżącej blokady na górze</string>
-    <string name="tuner_nav_bar_show_handle_title">Pokaż uchwyt</string>
-    <string name="tuner_nav_bar_legacy_category">Nawigacja 3-przyciskowa</string>
-    <string name="tuner_nav_bar_gesture_category">Nawigacja gestami</string>
-    <string name="tuner_keyguard_transition_animations_title">Pokaż animacje przejścia</string>
-    <string name="tuner_keyguard_transition_animations_summary">Pokaż bezużyteczne animacje</string>
-    <string name="tuner_qs_long_press_action">Nie pokazuj paneli po długim naciśnięciu</string>
-    <string name="tuner_keyguard_fod_unlock_enabled_title">Zezwalaj na wtórne odblokowanie FOD</string>
+    <!-- omnijaws -->
     <string name="omnijaws_service_error">Błąd</string>
     <string name="omnijaws_service_unkown">Brak danych pogodowych</string>
     <string name="omnijaws_service_error_long">Błąd ładowania danych pogody</string>
@@ -106,44 +38,25 @@
     <string name="omnijaws_current_text">Teraz</string>
     <string name="omnijaws_package_not_available">OmniJaws nie jest dostępny</string>
     <string name="omnijaws_service_last_update">Ostatnia aktualizacja:</string>
-    <!-- navbar editor -->
-    <string name="preview">Podgląd</string>
-    <string name="keycode">Kod przycisku klawiatury</string>
-    <string name="no_home_title">Nie odnaleziono przycisku home</string>
-    <string name="no_home_message">Przycisk home jest wymagany by obsługiwać to urządzenie. Proszę dodać przycisk home przed zapisaniem.</string>
-    <string name="clipboard_description">Schowek pozwala by elementy można było przeciągać bezpośrednio do schowka. Elementy mogą być też wyciągane z schowka gdy są dostępne.</string>
-    <string name="keycode_description">Przyciski kodu klawiatury pozwalają na dodawanie klawiszy do paska nawigacyjnego. Po naciśnięciu klawisza emulują wybrany klawisz klawiatury. Najpierw należy wybrać klawisz dla przycisku, a następnie obrazek, który ma zostać wyświetlony na przycisku.</string>
-    <string name="start">Rozpocznij</string>
-    <string name="center">Środek</string>
-    <string name="end">Koniec</string>
-    <string name="space">Odstęp</string>
-    <string name="menu_ime">Przełącznik Menu i Klawiatury</string>
-    <string name="select_button">Wybierz przycisk aby dodać</string>
-    <string name="add_button">Dodaj przycisk</string>
-    <string name="save">Zapisz</string>
-    <string name="reset">Reset</string>
-    <string name="select_keycode">Wybierz przycisk klawiatury</string>
-    <string name="left">Lewa</string>
-    <string name="right">Prawa</string>
-    <string name="navbar_editor_title">Edytor</string>
-    <string name="navbar_editor_summary">Skonfiguruj pasek nawigacji</string>
-    <string name="status_bar_vpn">VPN</string>
-    <string name="quick_settings_roaming_title">Wskaźnik roamingu</string>
-    <string name="status_bar_location">Lokalizacja</string>
-    <!-- Navigation bar dpad -->
-    <string name="accessibility_dpad_left">Kursor w lewo</string>
-    <string name="accessibility_dpad_right">Kursor w prawo</string>
-    <string name="screenrecord_stopdot_label">Pokaż kropkę zatrzymania</string>
-    <string name="screenrecord_low_quality_label">Niska jakość</string>
-    <!-- Immersive tile -->
-    <string name="quick_settings_immersive_tile">Tryb pełnoekranowy</string>
-    <string name="quick_settings_immersive_tile_statusbar">Pełnoekranowy pasek stanu</string>
-    <string name="quick_settings_immersive_tile_navbar">Pełnoekranowy pasek nawigacyjny</string>
-    <string name="quick_settings_immersive_tile_full">W pełni pełnoekranowy</string>
-    <!-- DataSwitch Tile -->
-    <string name="qs_data_switch_label">Przełącz kartę danych mobilnych</string>
-    <string name="qs_data_switch_changed_1">Używanie karty SIM 1 dla danych mobilnych</string>
-    <string name="qs_data_switch_changed_2">Używanie karty SIM 2 dla danych mobilnych</string>
+    <!-- Power Tile -->
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">Powiadomienia Heads-up</string>
+    <string name="accessibility_quick_settings_heads_up_off">Powiadomienia Heads-up są wyłączone</string>
+    <string name="accessibility_quick_settings_heads_up_on">Powiadomienia Heads-up dozwolone.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Powiadomienia Heads-up są wyłączone</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Powiadomienia Heads-up są włączone</string>
+    <!-- Screenshot Tile -->
     <string name="screenshot_error_title">Zrzut ekranu jest nieprawidłowy</string>
-    <string name="screenrecord_error_title">Nagranie jest zepsute </string>
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Uruchom ponownie</string>
+    <string name="global_action_reboot_more">Uruchamianie ponownie\u2026</string>
+    <string name="global_action_reboot_sub">System</string>
+    <string name="global_action_reboot_recovery">Tryb Recovery</string>
+    <string name="global_action_reboot_bootloader">Bootloader</string>
+    <string name="global_action_reboot_fastboot">Fastboot</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
+    <!-- Navigation bar dpad -->
+    <!-- DataSwitch Tile -->
 </resources>

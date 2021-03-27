@@ -18,41 +18,25 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="global_action_reboot">Ponovno zaženi</string>
-    <string name="global_action_reboot_sub">Sistem</string>
-    <string name="global_action_reboot_recovery">Obnovitev</string>
-    <string name="global_action_reboot_bootloader">Zagonski nalagalnik</string>
-    <!-- Caffeine tile -->
-    <string name="accessibility_quick_settings_caffeine_off">Kofein izklopljen</string>
-    <!-- AOD QS tile -->
-    <string name="lockscreen_default">Privzeto</string>
-    <string name="lockscreen_hidden">Brez</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Stolpci</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Ponastavi</string>
-    <string name="qs_menu_item_titles">Prikaži oznake</string>
+    <!-- qs customize -->
     <string name="tuner_show_brightness_new">Prikaži drsnik za svetlost</string>
     <string name="tuner_brightness_position_bottom">Drsnik za svetlost na dnu</string>
-    <!-- ADB over network tile -->
-    <string name="quick_settings_network_adb_enabled_label">Omogočeno</string>
-    <string name="quick_settings_network_adb_label">ADB prek omrežja</string>
-    <string name="quick_settings_network_adb_toast">Razhroščevanje USB ni omogočeno</string>
-    <!-- Heads Up QS Tile -->
+    <!-- omnijaws -->
     <string name="omnijaws_service_error">Napaka</string>
     <string name="omnijaws_service_unkown">Ni podatkov o vremenu</string>
     <string name="omnijaws_service_error_long">Napaka pri nalaganju podatkov o vremenu</string>
     <string name="omnijaws_detail_header">Vreme</string>
     <string name="omnijaws_label_default">Vreme</string>
-    <!-- navbar editor -->
+    <!-- Power Tile -->
+    <!-- Heads Up QS Tile -->
+    <!-- Screenshot Tile -->
+    <!-- AOD QS tile -->
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Ponovno zaženi</string>
+    <string name="global_action_reboot_sub">Sistem</string>
+    <string name="global_action_reboot_recovery">Obnovitev</string>
+    <string name="global_action_reboot_bootloader">Zagonski nalagalnik</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
     <!-- Navigation bar dpad -->
-    <!-- Immersive tile -->
     <!-- DataSwitch Tile -->
 </resources>

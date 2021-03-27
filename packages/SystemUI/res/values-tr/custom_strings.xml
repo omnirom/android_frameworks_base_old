@@ -18,37 +18,15 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="global_action_reboot">Tekrar başlat</string>
-    <string name="global_action_reboot_more">Tekrar başlat\u2026</string>
-    <string name="global_action_reboot_sub">Sistem</string>
-    <string name="global_action_reboot_recovery">Recovery</string>
-    <string name="global_action_reboot_bootloader">Bootloader</string>
-    <string name="global_action_reboot_fastboot">Fastboot</string>
-    <string name="global_action_screenrecord">Kayıt</string>
-    <!-- Caffeine tile -->
-    <string name="quick_settings_caffeine_label">Caffeine</string>
-    <string name="accessibility_quick_settings_caffeine_off">Caffeine kapalı</string>
-    <string name="accessibility_quick_settings_caffeine_on">Caffeine açık</string>
-    <!-- AOD QS tile -->
-    <string name="quick_settings_aod_label">AOD</string>
-    <string name="lockscreen_default">Standart</string>
-    <string name="lockscreen_hidden">Hiçbiri</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <string name="custom_hint">Başlatmak için simgeden kaydırın</string>
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Sütunlar</string>
-    <string name="qs_menu_item_columns_landscape">Yatay sütunlar</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Sıfırla</string>
-    <string name="qs_menu_item_titles">Etiketleri göster</string>
-    <string name="qs_menu_item_qs_columns">Hızlı çubuğun sütunları</string>
-    <string name="qs_menu_item_columns_auto">Kendiliğinden</string>
+    <!-- qs customize -->
+    <string name="drag_or_touch_to_rearrange_tiles">Kutuları kaldırmak için dokunun, yeniden düzenlemek için sürükleyin</string>
+    <string name="drag_or_touch_to_add_tiles">Kutuları ilâve etmek için dokunun veya sürükleyin</string>
+    <string name="customize_settings_info_text"><b>Not:</b> Sütunlar müsait alana göre otomatik olarak sınırlandırılacaktır. Daha fazla ayar için kaydırın.</string>
+    <string name="customize_show_labels">Etiketler</string>
+    <string name="customize_quickbar_sync">Senkronizasyon</string>
+    <string name="customize_quickbar_label">Hızlı çubuk</string>
+    <string name="customize_columns_land_label">Yatay</string>
+    <string name="customize_columns_port_label">Dikey</string>
     <string name="tuner_show_brightness_mode">Parlaklık modu düğmesini göster</string>
     <string name="tuner_show_brightness_side_buttons">Parlaklık kaydırağının yan düğmelerini göster</string>
     <string name="tuner_quick_settings">Hızlı ayarlar</string>
@@ -58,95 +36,48 @@
     <string name="tuner_show_drag_handle">Sürükleme kolunu göster</string>
     <string name="tuner_battery_location_bar">Durum çubuğunda pili göster</string>
     <string name="tuner_status_bar_bg_transparency">Şeffaf durum çubuğu arka planı</string>
-    <!-- ADB over network tile -->
-    <string name="quick_settings_network_adb_enabled_label">Devrede</string>
-    <string name="quick_settings_network_adb_disabled_label">Devre dışı</string>
-    <string name="quick_settings_network_adb_label">Ağ üzerinden ADB</string>
-    <string name="quick_settings_network_adb_toast">USB hatâ ayıklama devre dışıdır</string>
+    <string name="tuner_qs_media_player">Medya çalar - yeniden başlatma gerekir</string>
+    <string name="tuner_qs_media_player_rows">Gizli medya çalardaki satırları genişlet</string>
+    <string name="tuner_qs_show_media_divider">Medya çalar ayracını göster</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_title">İkincil FOD kilit açmaya izin ver</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_summary">FOD (ekran üstü parmak izi tarayıcısı) özelliğine sahip cihazlar için ikincil kilit açma ekranlarında kullanmaya izin verin</string>
+    <!-- omnijaws -->
+    <string name="omnijaws_service_error">Hata</string>
+    <string name="omnijaws_service_unkown">Hava durumu verisi yok</string>
+    <string name="omnijaws_service_error_long">Hava durumuna dair veriler yüklenemedi</string>
+    <string name="omnijaws_service_disabled">Hizmet devre dışı</string>
+    <string name="omnijaws_detail_header">Hava durumu</string>
+    <string name="omnijaws_label_default">Hava durumu</string>
+    <string name="omnijaws_current_text">Şimdi</string>
+    <string name="omnijaws_package_not_available">OmniJaws kullanılabilir değil</string>
+    <string name="omnijaws_service_last_update">Son güncelleme:</string>
+    <!-- Power Tile -->
+    <string name="qs_power_button_title">Güç düğmesi</string>
     <!-- Heads Up QS Tile -->
     <string name="quick_settings_heads_up_label">Ekran üstü bildirimler</string>
     <string name="accessibility_quick_settings_heads_up_off">Ekran üstü bildirimler devre dışıdır.</string>
     <string name="accessibility_quick_settings_heads_up_on">Ekran üstü bildirimler devrededir.</string>
     <string name="accessibility_quick_settings_heads_up_changed_off">Ekran üstü bildirimler kapalıdır.</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Ekran üstü bildirimler açıktır.</string>
-    <string name="quick_settings_screenrecord_label">Ekran kaydı</string>
-    <string name="tuner_keyguard_show_battery_bar_title">Pil çubuğunu göster</string>
-    <string name="tuner_keyguard_show_battery_bar_summary">Always on display\'de şarj edilirken pil çubuğunu gösterir</string>
-    <string name="tuner_keyguard_show_battery_bar_always_title">Pil çubuğunu daima göster</string>
-    <string name="tuner_keyguard_show_battery_bar_always_summary">Pil çubuğunu şarj edilirken daima gösterir</string>
-    <string name="tuner_keyguard_battery_percent_title">Pil yüzdesini göster</string>
-    <string name="tuner_keyguard_battery_percent_summary">Şarj edilirken pil yüzdesi durum çubuğunda görünmeye mecbur edilir</string>
-    <string name="tuner_keyguard_show_watt_title">Şarj edilme watt\'ını göster</string>
-    <string name="tuner_keyguard_show_watt_summary">Şarj edilme watt\'ı değerini mW biriminde gösterir</string>
-    <string name="tuner_keyguard_show_current_title">Şarj edilme akımını göster</string>
-    <string name="tuner_keyguard_show_current_summary">Şarj edilme akımı değerlerini gösterir</string>
-    <string name="tuner_keyguard_show_battery_temp_title">Pil sıcaklığını göster</string>
-    <string name="tuner_keyguard_show_battery_temp_summary">Pil sıcaklığı değerini gösterir</string>
-    <string name="tuner_battery_percent_disable">Yüzdeyi gösterme</string>
-    <string name="tuner_battery_percent_enable">Yüzdeyi daima göster</string>
-    <string name="tuner_battery_percent_charging">Yüzdeyi şarj edilirken göster</string>
-    <string name="tuner_battery_percent_hide">Bu simgeyi gösterme</string>
-    <string name="tuner_battery_percent_title">Pil yüzdesi</string>
-    <string name="tuner_status_bar_show_battery_image">Pil görüntüsü</string>
-    <string name="tuner_keyguard_show_lock_icon_title">Kilit durumunu göster</string>
-    <string name="tuner_keyguard_show_lock_icon_summary">Mevcut kilit durumu simgesini üstte gösterir</string>
-    <string name="tuner_nav_bar_show_handle_title">Kol göster</string>
-    <string name="tuner_nav_bar_legacy_category">3 düğmeli gezinti</string>
-    <string name="tuner_nav_bar_gesture_category">El hareketiyle gezinti</string>
-    <string name="tuner_keyguard_transition_animations_title">Geçiş animasyonlarını göster</string>
-    <string name="tuner_keyguard_transition_animations_summary">Lüzumsuz animasyonlar gösterir</string>
-    <string name="tuner_qs_long_press_action">Uzun basıldığında panelleri gösterme</string>
-    <string name="tuner_keyguard_fod_unlock_enabled_title">İkincil FOD kilit açmaya izin ver</string>
-    <string name="tuner_keyguard_fod_unlock_enabled_summary">FOD (ekran üstü parmak izi tarayıcısı) özelliğine sahip cihazlar için ikincil kilit açma ekranlarında kullanmaya izin verin</string>
-    <string name="tuner_keyguard_show_assistant_handle_title">Asistanı göster</string>
-    <string name="tuner_keyguard_show_assistant_handle_summary">Ekran köşelerinde asistanı gösterir</string>
-    <string name="omnijaws_service_error">Hatâ</string>
-    <string name="omnijaws_service_unkown">Hava durumu verisi yok</string>
-    <string name="omnijaws_service_error_long">Hava durumuna dair veriler yüklenemedi</string>
-    <string name="omnijaws_service_disabled">Hizmet devre dışı</string>
-    <string name="omnijaws_detail_header">Hava durumu</string>
-    <string name="omnijaws_label_default">Hava durumu</string>
-    <string name="omnijaws_current_text">Şu ânda</string>
-    <string name="omnijaws_package_not_available">OmniJaws kullanılabilir değil</string>
-    <string name="omnijaws_service_last_update">Son güncelleme:</string>
-    <!-- navbar editor -->
-    <string name="preview">Göz atma</string>
-    <string name="keycode">Tuş kodu</string>
-    <string name="no_home_title">Ana ekran düğmesi bulunmadı</string>
-    <string name="no_home_message">Bu cihazda gezinmeniz için bir ana ekran düğmesine ihtiyâcınız var. Kaydetmeden evvel lütfen bir ana ekran düğmesi ilâve edin.</string>
-    <string name="clipboard_description">Pano, unsurların doğrudan panoya sürüklenmesine imkân sağlar. Unsurlar panoda mevcutsa doğrudan pano dışına da sürüklenebilir.</string>
-    <string name="keycode_description">Tuş kodu düğmeleri klavye tuşlarının gezinti çubuğuna ilâve edilmesine imkân sağlar. Dokunulduğu vakit seçilen klavye tuşunu taklit ederler. Evvelâ düğme için bir tuş ve ardından düğme üzerinde gösterilecek bir resim seçilmelidir.</string>
-    <string name="start">Başlangıç</string>
-    <string name="center">Merkez</string>
-    <string name="end">Bitiş</string>
-    <string name="space">Ara kısım</string>
-    <string name="menu_ime">Menü / Klavye Değiştiricisi</string>
-    <string name="select_button">İlâve edilecek düğmeyi seçin</string>
-    <string name="add_button">Düğme ilâve edin</string>
-    <string name="save">Kaydet</string>
-    <string name="reset">Sıfırla</string>
-    <string name="select_keycode">Klavye Düğmesi Seçin</string>
-    <string name="left">Sol</string>
-    <string name="right">Sağ</string>
-    <string name="navbar_editor_title">Düzenleyici</string>
-    <string name="navbar_editor_summary">Gezinti çubuğunu ayarlayın</string>
-    <string name="status_bar_vpn">VPN</string>
-    <string name="quick_settings_roaming_title">Dolaşım göstergesi</string>
-    <string name="status_bar_location">Konum</string>
+    <!-- Screenshot Tile -->
+    <string name="screenshot_error_title">Ekran görüntüsü geçersizdir</string>
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Yeniden başlat</string>
+    <string name="global_action_reboot_more">Yeniden başlat\u2026</string>
+    <string name="global_action_reboot_sub">Sistem</string>
+    <string name="global_action_reboot_recovery">Kurtarma</string>
+    <string name="global_action_reboot_bootloader">Önyükleyici</string>
+    <string name="global_action_reboot_fastboot">Fastboot</string>
+    <string name="keyguard_plugged_in_charging_dash"><xliff:g id="percentage">%s</xliff:g> • Hızlı şarj ediliyor</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
+    <string name="keyguard_indication_charging_time_dash"><xliff:g id="percentage">%2$s</xliff:g> • Hızlı şarj ediliyor (Tamamen şarj edilmesi için gereken müddet: <xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g>)</string>
     <!-- Navigation bar dpad -->
     <string name="accessibility_dpad_left">İşâretçi solda</string>
     <string name="accessibility_dpad_right">İşâretçi sağda</string>
-    <string name="screenrecord_stopdot_label">Durdurma noktasını göster</string>
-    <string name="screenrecord_low_quality_label">Düşük kalite</string>
-    <!-- Immersive tile -->
-    <string name="quick_settings_immersive_tile">Tam ekran modu</string>
-    <string name="quick_settings_immersive_tile_statusbar">Tam ekran modu: Durum çubuğu</string>
-    <string name="quick_settings_immersive_tile_navbar">Tam ekran modu: Gezinti çubuğu</string>
-    <string name="quick_settings_immersive_tile_full">Tam ekran modu: Tam</string>
     <!-- DataSwitch Tile -->
     <string name="qs_data_switch_label">Veri kartını değiştir</string>
     <string name="qs_data_switch_changed_1">SIM 1, mobil veri için kullanılıyor</string>
     <string name="qs_data_switch_changed_2">SIM 2, mobil veri için kullanılıyor</string>
-    <string name="screenshot_error_title">Ekran görüntüsü geçersizdir</string>
-    <string name="screenrecord_error_title">Ekran kaydı geçersizdir</string>
 </resources>
