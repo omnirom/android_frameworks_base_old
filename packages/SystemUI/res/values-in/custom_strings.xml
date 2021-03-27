@@ -18,40 +18,10 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="global_action_reboot">Mulai ulang</string>
-    <string name="global_action_reboot_more">Mulai ulang\u2026</string>
-    <string name="global_action_reboot_sub">Sistem</string>
-    <string name="global_action_reboot_recovery">Pemulihan</string>
-    <string name="global_action_reboot_bootloader">Bootloader</string>
-    <!-- Caffeine tile -->
-    <string name="quick_settings_caffeine_label">Kafein</string>
-    <string name="accessibility_quick_settings_caffeine_off">Kafein mati</string>
-    <string name="accessibility_quick_settings_caffeine_on">Kafein hidup</string>
-    <!-- AOD QS tile -->
-    <string name="lockscreen_default">Standar</string>
-    <string name="lockscreen_hidden">Tiada</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <string name="custom_hint">Geser dari ikon untuk meluncurkan</string>
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Kolom</string>
-    <string name="qs_menu_item_columns_landscape">Lanskap kolom</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Reset</string>
-    <string name="qs_menu_item_titles">Tampilkan label</string>
+    <!-- qs customize -->
     <string name="tuner_quick_settings">Pengaturan cepat</string>
     <string name="tuner_show_brightness_new">Tampilkan penggeser kecerahan</string>
-    <!-- ADB over network tile -->
-    <string name="quick_settings_network_adb_enabled_label">Aktif</string>
-    <string name="quick_settings_network_adb_disabled_label">Nonaktif</string>
-    <string name="quick_settings_network_adb_label">ADB melalui jaringan</string>
-    <string name="quick_settings_network_adb_toast">USB debugging tidak diaktifkan</string>
-    <!-- Heads Up QS Tile -->
+    <!-- omnijaws -->
     <string name="omnijaws_service_error">Galat</string>
     <string name="omnijaws_service_unkown">Tidak ada data cuaca</string>
     <string name="omnijaws_service_error_long">Kesalahan saat memuat data cuaca</string>
@@ -61,8 +31,17 @@
     <string name="omnijaws_current_text">Sekarang</string>
     <string name="omnijaws_package_not_available">OmniJaws tidak tersedia</string>
     <string name="omnijaws_service_last_update">Pembaruan terakhir:</string>
-    <!-- navbar editor -->
+    <!-- Power Tile -->
+    <!-- Heads Up QS Tile -->
+    <!-- Screenshot Tile -->
+    <!-- AOD QS tile -->
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Mulai ulang</string>
+    <string name="global_action_reboot_more">Mulai ulang\u2026</string>
+    <string name="global_action_reboot_sub">Sistem</string>
+    <string name="global_action_reboot_recovery">Pemulihan</string>
+    <string name="global_action_reboot_bootloader">Bootloader</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
     <!-- Navigation bar dpad -->
-    <!-- Immersive tile -->
     <!-- DataSwitch Tile -->
 </resources>

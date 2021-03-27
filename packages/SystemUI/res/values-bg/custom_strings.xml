@@ -18,30 +18,9 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="global_action_reboot">Рестартиране</string>
-    <string name="global_action_reboot_more">Рестартиране\u2026</string>
-    <string name="global_action_reboot_sub">Система</string>
-    <string name="global_action_reboot_recovery">Възстановяване</string>
-    <!-- Caffeine tile -->
-    <string name="quick_settings_caffeine_label">Кофеин</string>
-    <string name="accessibility_quick_settings_caffeine_off">Кофеин изкл.</string>
-    <string name="accessibility_quick_settings_caffeine_on">Кофеин вкл.</string>
-    <!-- AOD QS tile -->
-    <string name="quick_settings_aod_label">Always on Display</string>
-    <string name="lockscreen_default">Стандартно</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Колони</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
+    <!-- qs customize -->
     <string name="tuner_quick_settings">Бързи настройки</string>
-    <!-- ADB over network tile -->
-    <!-- Heads Up QS Tile -->
+    <!-- omnijaws -->
     <string name="omnijaws_service_error">Грешка</string>
     <string name="omnijaws_service_unkown">Няма данни за времето</string>
     <string name="omnijaws_service_error_long">Грешка, зареждайки данните за времето</string>
@@ -50,24 +29,17 @@
     <string name="omnijaws_label_default">Времето</string>
     <string name="omnijaws_current_text">Сега</string>
     <string name="omnijaws_service_last_update">Последно обновяване:</string>
-    <!-- navbar editor -->
-    <string name="preview">Преглед</string>
-    <string name="keycode">Ключов код</string>
-    <string name="no_home_title">Няма открит бутон към начало</string>
-    <string name="start">Пускане</string>
-    <string name="center">В средата</string>
-    <string name="end">Край</string>
-    <string name="space">Разредка</string>
-    <string name="menu_ime">Превключвател на меню/клавиатура</string>
-    <string name="select_button">Изберете бутон за добавяне</string>
-    <string name="add_button">Добавяне на бутон</string>
-    <string name="save">Запис</string>
-    <string name="reset">Първоначално състояние</string>
-    <string name="select_keycode">Изберете клавиш от клавиатурата</string>
-    <string name="left">Ляво</string>
-    <string name="right">Дясно</string>
-    <string name="navbar_editor_title">Редактор</string>
+    <!-- Power Tile -->
+    <!-- Heads Up QS Tile -->
+    <!-- Screenshot Tile -->
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">Always on Display</string>
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Рестартиране</string>
+    <string name="global_action_reboot_more">Рестартиране\u2026</string>
+    <string name="global_action_reboot_sub">Система</string>
+    <string name="global_action_reboot_recovery">Възстановяване</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
     <!-- Navigation bar dpad -->
-    <!-- Immersive tile -->
     <!-- DataSwitch Tile -->
 </resources>

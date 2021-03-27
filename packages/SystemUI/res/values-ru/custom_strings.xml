@@ -18,37 +18,7 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="global_action_reboot">Перезапуск</string>
-    <string name="global_action_reboot_more">Перезапуск\u2026</string>
-    <string name="global_action_reboot_sub">Система</string>
-    <string name="global_action_reboot_recovery">Рекавери</string>
-    <string name="global_action_reboot_bootloader">Загрузчик</string>
-    <string name="global_action_reboot_fastboot">Fastboot</string>
-    <string name="global_action_screenrecord">Запись</string>
-    <!-- Caffeine tile -->
-    <string name="quick_settings_caffeine_label">Запрет сна</string>
-    <string name="accessibility_quick_settings_caffeine_off">Запрет сна выкл.</string>
-    <string name="accessibility_quick_settings_caffeine_on">Запрет сна вкл.</string>
-    <!-- AOD QS tile -->
-    <string name="quick_settings_aod_label">AOD</string>
-    <string name="lockscreen_default">По умолчанию</string>
-    <string name="lockscreen_hidden">Нет</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <string name="custom_hint">Проведите пальцем по значку, чтобы запустить</string>
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Столбцы</string>
-    <string name="qs_menu_item_columns_landscape">Столбцов в альбомной ориентации экрана</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Сбросить</string>
-    <string name="qs_menu_item_titles">Показать метки</string>
-    <string name="qs_menu_item_qs_columns">Столбцы быстрой панели</string>
-    <string name="qs_menu_item_columns_auto">Авто</string>
+    <!-- qs customize -->
     <string name="tuner_quick_settings">Быстрые настройки</string>
     <string name="tuner_show_brightness_new">Отображать ползунок яркости</string>
     <string name="tuner_brightness_position_bottom">Ползунок яркости внизу</string>
@@ -56,39 +26,7 @@
     <string name="tuner_show_drag_handle">Показывать плашку для перетаскивания</string>
     <string name="tuner_battery_location_bar">Показывать батарею в строке состояния</string>
     <string name="tuner_status_bar_bg_transparency">Прозрачный фон строки состояния</string>
-    <!-- ADB over network tile -->
-    <string name="quick_settings_network_adb_enabled_label">Включено</string>
-    <string name="quick_settings_network_adb_disabled_label">Выключено</string>
-    <string name="quick_settings_network_adb_label">Отладки по сети</string>
-    <string name="quick_settings_network_adb_toast">Отладка по USB отключена</string>
-    <!-- Heads Up QS Tile -->
-    <string name="quick_settings_screenrecord_label">Запись экрана</string>
-    <string name="tuner_keyguard_show_battery_bar_title">Показать панель батареи</string>
-    <string name="tuner_keyguard_show_battery_bar_summary">Показывать панель батареи на AOD</string>
-    <string name="tuner_keyguard_show_battery_bar_always_title">Всегда показывать панель батареи</string>
-    <string name="tuner_keyguard_show_battery_bar_always_summary">Всегда показывать панель батареи при зарядке</string>
-    <string name="tuner_keyguard_battery_percent_title">Показывать процент заряда батареи</string>
-    <string name="tuner_keyguard_battery_percent_summary">Принудительно показывать процент батареи в строке состояния при зарядке</string>
-    <string name="tuner_keyguard_show_watt_title">Показывать мощность тока при зарядке</string>
-    <string name="tuner_keyguard_show_watt_summary">Показывать мощность тока при зарядке в мВт</string>
-    <string name="tuner_keyguard_show_current_title">Показывать силу тока при зарядке</string>
-    <string name="tuner_keyguard_show_current_summary">Показывать значение силы тока при зарядке</string>
-    <string name="tuner_keyguard_show_battery_temp_title">Показывать температуру батареи</string>
-    <string name="tuner_keyguard_show_battery_temp_summary">Показывать значение температуры батареи</string>
-    <string name="tuner_battery_percent_disable">Не показывать проценты</string>
-    <string name="tuner_battery_percent_enable">Всегда показывать проценты</string>
-    <string name="tuner_battery_percent_charging">Показывать проценты во время зарядки</string>
-    <string name="tuner_battery_percent_hide">Не показывать этот значок</string>
-    <string name="tuner_battery_percent_title">Процент заряда батареи</string>
-    <string name="tuner_status_bar_show_battery_image">Отображение иконки батареи</string>
-    <string name="tuner_keyguard_show_lock_icon_title">Показать статус блокировки</string>
-    <string name="tuner_keyguard_show_lock_icon_summary">Показать текущий значок блокировки сверху</string>
-    <string name="tuner_nav_bar_show_handle_title">Показать дескриптор</string>
-    <string name="tuner_nav_bar_legacy_category">3-х кнопочная навигация</string>
-    <string name="tuner_nav_bar_gesture_category">Навигация жестами</string>
-    <string name="tuner_keyguard_transition_animations_title">Показать анимации перехода</string>
-    <string name="tuner_keyguard_transition_animations_summary">Показать бесполезные анимации</string>
-    <string name="tuner_qs_long_press_action">Не показывать панели при долгом нажатии</string>
+    <!-- omnijaws -->
     <string name="omnijaws_service_error">Ошибка</string>
     <string name="omnijaws_service_unkown">Нет данных погоды</string>
     <string name="omnijaws_service_error_long">Ошибка загрузки данных о погоде</string>
@@ -98,42 +36,19 @@
     <string name="omnijaws_current_text">Только что</string>
     <string name="omnijaws_package_not_available">OmniJaws недоступен</string>
     <string name="omnijaws_service_last_update">Последнее обновление:</string>
-    <!-- navbar editor -->
-    <string name="preview">Предпросмотр</string>
-    <string name="keycode">Ключевой код</string>
-    <string name="no_home_title">Не найдена кнопка \"Домой\"</string>
-    <string name="no_home_message">Для навигации по этому устройству требуется кнопка \"Домой\". Перед сохранением добавьте кнопку \"Домой\".</string>
-    <string name="clipboard_description">Буфер обмена позволяет перемещать элементы непосредственно в буфер обмена. Элементы также можно перетаскивать непосредственно из буфера обмена, когда они присутствуют.</string>
-    <string name="keycode_description">Кнопки клавиш позволяют добавлять клавиши клавиатуры в панель навигации. При нажатии они эмулируют выбранную клавишу клавиатуры. Сначала необходимо выбрать клавишу, затем изображение будет показано на кнопке.</string>
-    <string name="start">В начале</string>
-    <string name="center">В середине</string>
-    <string name="end">В конце</string>
-    <string name="space">Разделитель</string>
-    <string name="menu_ime">Переключатель меню/клавиатуры</string>
-    <string name="select_button">Выберите кнопку для добавления</string>
-    <string name="add_button">Добавить кнопку</string>
-    <string name="save">Сохранить</string>
-    <string name="reset">Сброс</string>
-    <string name="select_keycode">Выберите клавиатуру</string>
-    <string name="left">Слева</string>
-    <string name="right">Справа</string>
-    <string name="navbar_editor_title">Редактор</string>
-    <string name="navbar_editor_summary">Настройка панели навигации</string>
-    <string name="status_bar_vpn">VPN</string>
-    <string name="quick_settings_roaming_title">Индикатор роуминга</string>
-    <string name="status_bar_location">Местоположение</string>
+    <!-- Power Tile -->
+    <!-- Heads Up QS Tile -->
+    <!-- Screenshot Tile -->
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Перезапуск</string>
+    <string name="global_action_reboot_more">Перезапуск\u2026</string>
+    <string name="global_action_reboot_sub">Система</string>
+    <string name="global_action_reboot_recovery">Рекавери</string>
+    <string name="global_action_reboot_bootloader">Загрузчик</string>
+    <string name="global_action_reboot_fastboot">Fastboot</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
     <!-- Navigation bar dpad -->
-    <string name="accessibility_dpad_left">Курсор влево</string>
-    <string name="accessibility_dpad_right">Курсор вправо</string>
-    <string name="screenrecord_stopdot_label">Показать точку остановки</string>
-    <string name="screenrecord_low_quality_label">Низкое качество</string>
-    <!-- Immersive tile -->
-    <string name="quick_settings_immersive_tile">Режим погружения</string>
-    <string name="quick_settings_immersive_tile_statusbar">Иммерсивная строка состояния</string>
-    <string name="quick_settings_immersive_tile_navbar">Иммерсивная панель навигации</string>
-    <string name="quick_settings_immersive_tile_full">Полное погружение</string>
     <!-- DataSwitch Tile -->
-    <string name="qs_data_switch_label">Переключить карту мобильных данных</string>
-    <string name="qs_data_switch_changed_1">Использование SIM 1 для передачи данных</string>
-    <string name="qs_data_switch_changed_2">Использование SIM 2 для передачи данных</string>
 </resources>

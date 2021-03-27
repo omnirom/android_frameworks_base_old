@@ -18,22 +18,6 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
-         when the user asks to reboot. [CHAR LIMIT=NONE] -->
-    <string name="reboot_confirm">再起動しますか?</string>
-    <string name="reboot_title">再起動</string>
-    <!-- advanced reboot to bootloader. -->
-    <string name="reboot_to_bootloader_title">ブートローダーへ再起動</string>
-    <string name="reboot_to_bootloader_message">ブートローダーへ再起動中\u2026</string>
-    <!-- advanced reboot to recovery. -->
-    <string name="reboot_to_recovery_title">リカバリーへ再起動</string>
-    <string name="reboot_to_recovery_message">リカバリーへ再起動中\u2026</string>
-    <!-- advanced reboot system -->
-    <string name="reboot_system_title">再起動</string>
-    <string name="reboot_system_message">システム再起動中\u2026</string>
-    <!-- advanced reboot to fastboot. -->
-    <string name="reboot_to_fastboot_title">ファストブートへ再起動</string>
-    <string name="reboot_to_fastboot_message">ファストブートへ再起動中\u2026</string>
     <!-- MicroG -->
     <string name="permlab_fakePackageSignature">パッケージの署名を偽装</string>
     <!-- Description of an application permission, listed so the user can choose whether
@@ -45,4 +29,16 @@
     <string name="permgroupdesc_fake_package_signature">パッケージ署名の偽装を許可する</string>
     <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
     <string name="permgrouprequest_fake_package_signature"><xliff:g id="app_name" example="Gmail">%1$s</xliff:g> のパッケージ署名の偽装を許可しますか?</string>
+    <!-- advanced reboot to bootloader. -->
+    <string name="reboot_to_bootloader_title">ブートローダーへ再起動</string>
+    <string name="reboot_to_bootloader_message">ブートローダーへ再起動中\u2026</string>
+    <!-- advanced reboot to recovery. -->
+    <string name="reboot_to_recovery_title">リカバリーへ再起動</string>
+    <string name="reboot_to_recovery_message">リカバリーへ再起動中\u2026</string>
+    <!-- advanced reboot system -->
+    <string name="reboot_system_title">再起動</string>
+    <string name="reboot_system_message">システムを再起動中\u2026</string>
+    <!-- advanced reboot to fastboot. -->
+    <string name="reboot_to_fastboot_title">ファストブートへ再起動</string>
+    <string name="reboot_to_fastboot_message">ファストブートへ再起動中\u2026</string>
 </resources>

@@ -18,10 +18,15 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
-         when the user asks to reboot. [CHAR LIMIT=NONE] -->
-    <string name="reboot_confirm">你想要重新開機嗎?</string>
-    <string name="reboot_title">重新開機</string>
+    <!-- MicroG -->
+    <string name="permlab_fakePackageSignature">偽裝安裝包簽名</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+         they want to allow the application to do this. -->
+    <string name="permdesc_fakePackageSignature">允許該應用程式假裝為其他應用程式。 惡意應用程式可能能夠使用它來存取私有應用程式資料。 合法用途包括一個偽裝成它所模擬的模擬器。 僅謹慎授予此許可權！</string>
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_fake_package_signature">偽裝安裝包簽名</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
     <!-- advanced reboot to bootloader. -->
     <string name="reboot_to_bootloader_title">重開機至 bootloader</string>
     <string name="reboot_to_bootloader_message">重新開機到 bootloader\u2026</string>
@@ -34,13 +39,4 @@
     <!-- advanced reboot to fastboot. -->
     <string name="reboot_to_fastboot_title">重新啟動至 fastboot</string>
     <string name="reboot_to_fastboot_message">重新啓動至 fastboot\u2026</string>
-    <!-- MicroG -->
-    <string name="permlab_fakePackageSignature">偽裝安裝包簽名</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-         they want to allow the application to do this. -->
-    <string name="permdesc_fakePackageSignature">允許該應用程式假裝為其他應用程式。 惡意應用程式可能能夠使用它來存取私有應用程式資料。 合法用途包括一個偽裝成它所模擬的模擬器。 僅謹慎授予此許可權！</string>
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_fake_package_signature">偽裝安裝包簽名</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
 </resources>

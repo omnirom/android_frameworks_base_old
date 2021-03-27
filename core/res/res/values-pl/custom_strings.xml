@@ -18,22 +18,6 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
-         when the user asks to reboot. [CHAR LIMIT=NONE] -->
-    <string name="reboot_confirm">Czy chcesz uruchomić ponownie?</string>
-    <string name="reboot_title">Uruchom ponownie</string>
-    <!-- advanced reboot to bootloader. -->
-    <string name="reboot_to_bootloader_title">Restart do bootloadera</string>
-    <string name="reboot_to_bootloader_message">Restartowanie do bootloadera\u2026</string>
-    <!-- advanced reboot to recovery. -->
-    <string name="reboot_to_recovery_title">Restart do recovery</string>
-    <string name="reboot_to_recovery_message">Restartowanie do recovery\u2026</string>
-    <!-- advanced reboot system -->
-    <string name="reboot_system_title">Uruchom ponownie</string>
-    <string name="reboot_system_message">Ponowne uruchamianie\u2026</string>
-    <!-- advanced reboot to fastboot. -->
-    <string name="reboot_to_fastboot_title">Restart do fastboot</string>
-    <string name="reboot_to_fastboot_message">Restartowanie do fastboot\u2026</string>
     <!-- MicroG -->
     <string name="permlab_fakePackageSignature">Fałszywy podpis pakietu</string>
     <!-- Description of an application permission, listed so the user can choose whether
@@ -46,4 +30,16 @@
     <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
     <string name="permgrouprequest_fake_package_signature">Zezwolić
         &lt;b&gt;<xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b&gt; na fałszywy podpis pakietu?</string>
+    <!-- advanced reboot to bootloader. -->
+    <string name="reboot_to_bootloader_title">Restart do bootloadera</string>
+    <string name="reboot_to_bootloader_message">Restartowanie do bootloadera\u2026</string>
+    <!-- advanced reboot to recovery. -->
+    <string name="reboot_to_recovery_title">Restart do recovery</string>
+    <string name="reboot_to_recovery_message">Restartowanie do recovery\u2026</string>
+    <!-- advanced reboot system -->
+    <string name="reboot_system_title">Uruchom ponownie</string>
+    <string name="reboot_system_message">Ponowne uruchamianie\u2026</string>
+    <!-- advanced reboot to fastboot. -->
+    <string name="reboot_to_fastboot_title">Restart do fastboot</string>
+    <string name="reboot_to_fastboot_message">Restartowanie do fastboot\u2026</string>
 </resources>

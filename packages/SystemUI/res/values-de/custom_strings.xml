@@ -18,37 +18,15 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="global_action_reboot">Neu starten</string>
-    <string name="global_action_reboot_more">Starte neu</string>
-    <string name="global_action_reboot_sub">System</string>
-    <string name="global_action_reboot_recovery">Recovery</string>
-    <string name="global_action_reboot_bootloader">Bootloader</string>
-    <string name="global_action_reboot_fastboot">Fastboot</string>
-    <string name="global_action_screenrecord">Aufnehmen</string>
-    <!-- Caffeine tile -->
-    <string name="quick_settings_caffeine_label">Koffein</string>
-    <string name="accessibility_quick_settings_caffeine_off">Koffein aus</string>
-    <string name="accessibility_quick_settings_caffeine_on">Koffein an</string>
-    <!-- AOD QS tile -->
-    <string name="quick_settings_aod_label">AOD</string>
-    <string name="lockscreen_default">Standard</string>
-    <string name="lockscreen_hidden">Kein</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <string name="custom_hint">Vom Icon wischen, um zu starten</string>
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Spalten</string>
-    <string name="qs_menu_item_columns_landscape">Spalten (Querformat)</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Zurücksetzen</string>
-    <string name="qs_menu_item_titles">Beschriftungen anzeigen</string>
-    <string name="qs_menu_item_qs_columns">Quickbar Spalten</string>
-    <string name="qs_menu_item_columns_auto">Automatisch</string>
+    <!-- qs customize -->
+    <string name="drag_or_touch_to_rearrange_tiles">Tippe zum Entfernen oder halte gedrückt, um Kacheln neu anzuordnen</string>
+    <string name="drag_or_touch_to_add_tiles">Berühren oder ziehen, um Kacheln hinzuzufügen</string>
+    <string name="customize_settings_info_text"><b>Hinweis:</b> Spalten werden automatisch auf verfügbaren Platz beschränkt. Wischen für weitere Einstellungen.</string>
+    <string name="customize_show_labels">Beschriftungen</string>
+    <string name="customize_quickbar_sync">Synchronisieren</string>
+    <string name="customize_quickbar_label">Schnellleiste</string>
+    <string name="customize_columns_land_label">Querformat</string>
+    <string name="customize_columns_port_label">Hochformat</string>
     <string name="tuner_show_brightness_mode">Zeige Umschalter für Helligkeitsmodus</string>
     <string name="tuner_show_brightness_side_buttons">Zeige Helligkeitsregler-Seitenschaltflächen</string>
     <string name="tuner_quick_settings">Schnelleinstellungen</string>
@@ -58,48 +36,9 @@
     <string name="tuner_show_drag_handle">Ziehschalter anzeigen</string>
     <string name="tuner_battery_location_bar">Zeige Akkusymbol in der Statusleiste</string>
     <string name="tuner_status_bar_bg_transparency">Transparenter Hintergrund der Statusleiste</string>
-    <!-- ADB over network tile -->
-    <string name="quick_settings_network_adb_enabled_label">Aktiviert</string>
-    <string name="quick_settings_network_adb_disabled_label">Deaktiviert</string>
-    <string name="quick_settings_network_adb_label">ADB über Netzwerk</string>
-    <string name="quick_settings_network_adb_toast">USB Debugging ist nicht aktiv</string>
-    <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Heads-up</string>
-    <string name="accessibility_quick_settings_heads_up_off">Heads-up Benachrichtigungen deaktiviert.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Heads-up Benachrichtigungen erlaubt.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Heads-up Benachrichtigungen deaktiviert.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Heads-up Benachrichtigungen aktiviert.</string>
-    <string name="quick_settings_screenrecord_label">Bildschirmaufnahme</string>
-    <string name="tuner_keyguard_show_battery_bar_title">Batterie Bar anzeigen</string>
-    <string name="tuner_keyguard_show_battery_bar_summary">Batterie Bar bei \"nur beim Laden\" AOD-Modus anzeigen</string>
-    <string name="tuner_keyguard_show_battery_bar_always_title">Batterie Bar immer anzeigen</string>
-    <string name="tuner_keyguard_show_battery_bar_always_summary">Batterie Bar beim Laden immer anzeigen</string>
-    <string name="tuner_keyguard_battery_percent_title">Zeige Akku-Prozentanzeige</string>
-    <string name="tuner_keyguard_battery_percent_summary">Akku-Prozentanzeige in der Statusleiste beim Laden erzwingen</string>
-    <string name="tuner_keyguard_show_watt_title">Lade-Watt anzeigen</string>
-    <string name="tuner_keyguard_show_watt_summary">Lade Watt-Wert in mW anzeigen</string>
-    <string name="tuner_keyguard_show_current_title">Ladestrom anzeigen</string>
-    <string name="tuner_keyguard_show_current_summary">Ladestromwerte anzeigen</string>
-    <string name="tuner_keyguard_show_battery_temp_title">Akkutemperatur anzeigen</string>
-    <string name="tuner_keyguard_show_battery_temp_summary">Zeigt die aktuelle Akkutemperatur an</string>
-    <string name="tuner_battery_percent_disable">Prozent nicht anzeigen</string>
-    <string name="tuner_battery_percent_enable">Prozent immer anzeigen</string>
-    <string name="tuner_battery_percent_charging">Prozent beim Laden anzeigen</string>
-    <string name="tuner_battery_percent_hide">Dieses Symbol nicht anzeigen</string>
-    <string name="tuner_battery_percent_title">Akku Prozent</string>
-    <string name="tuner_status_bar_show_battery_image">Akkusymbol</string>
-    <string name="tuner_keyguard_show_lock_icon_title">Sperrstatus anzeigen</string>
-    <string name="tuner_keyguard_show_lock_icon_summary">Zeige das aktuelle Sperrsymbol oben</string>
-    <string name="tuner_nav_bar_show_handle_title">Handle anzeigen</string>
-    <string name="tuner_nav_bar_legacy_category">3-Tasten Navigation</string>
-    <string name="tuner_nav_bar_gesture_category">Gesten Navigation</string>
-    <string name="tuner_keyguard_transition_animations_title">Übergangsanimationen anzeigen</string>
-    <string name="tuner_keyguard_transition_animations_summary">Nutzlose Animationen anzeigen</string>
-    <string name="tuner_qs_long_press_action">Panel bei langem Drücken nicht anzeigen</string>
     <string name="tuner_keyguard_fod_unlock_enabled_title">Sekundäres FOD Entsperren erlauben</string>
-    <string name="tuner_keyguard_fod_unlock_enabled_summary">Erlaubt es den Geräten mit FOD die Verwendung auf dem sekundären Entsperrbildschirm</string>
-    <string name="tuner_keyguard_show_assistant_handle_title">Assistenten-Handles anzeigen</string>
-    <string name="tuner_keyguard_show_assistant_handle_summary">Assistenten-Handles an Bildschirmrändern anzeigen</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_summary">Bei Geräten mit FOD die Verwendung auf sekundären Entsperrbildschirmen erlauben</string>
+    <!-- omnijaws -->
     <string name="omnijaws_service_error">Fehler</string>
     <string name="omnijaws_service_unkown">Keine Wetterdaten</string>
     <string name="omnijaws_service_error_long">Fehler beim Laden der Wetterdaten</string>
@@ -109,44 +48,26 @@
     <string name="omnijaws_current_text">Jetzt</string>
     <string name="omnijaws_package_not_available">OmniJaws ist nicht verfügbar</string>
     <string name="omnijaws_service_last_update">Letzte Aktualisierung:</string>
-    <!-- navbar editor -->
-    <string name="preview">Vorschau</string>
-    <string name="keycode">Tastencode</string>
-    <string name="no_home_title">Keine \"Home\"-Taste gefunden</string>
-    <string name="no_home_message">Eine \"Home\"-Taste ist erforderlich, um dieses Gerät zu bedienen. Bitte fügen Sie eine \"Home\"-Taste vor dem Speichern hinzu.</string>
-    <string name="clipboard_description">Die Zwischenablage erlaubt es Elemente direkt in die Zwischenablage zu verschieben. Ebenso können vorhandene Elemente direkt aus der Zwischenablage gezogen werden.</string>
-    <string name="keycode_description">Tastencode-Schaltflächen erlauben es, Tastaturtasten zur Navigationsleiste hinzuzufügen. Wenn sie gedrückt werden, emulieren sie die gewählte Tastaturtaste. Zuerst muss die Taste für die Schaltfläche ausgewählt werden, danach ein Bild, das auf der Schaltfläche angezeigt wird.</string>
-    <string name="start">Start</string>
-    <string name="center">Mitte</string>
-    <string name="end">Ende</string>
-    <string name="space">Abstandhalter</string>
-    <string name="menu_ime">Menü / Tastatur-Umschalter</string>
-    <string name="select_button">Schaltfläche zum hinzufügen auswählen</string>
-    <string name="add_button">Schaltfläche hinzufügen</string>
-    <string name="save">Speichern</string>
-    <string name="reset">Zurücksetzen</string>
-    <string name="select_keycode">Tastaturauswahl-Schaltfläche</string>
-    <string name="left">Links</string>
-    <string name="right">Rechts</string>
-    <string name="navbar_editor_title">Editor</string>
-    <string name="navbar_editor_summary">Navigationsleiste konfigurieren</string>
-    <string name="status_bar_vpn">VPN</string>
-    <string name="quick_settings_roaming_title">Roaming-Anzeige</string>
-    <string name="status_bar_location">Standort</string>
-    <!-- Navigation bar dpad -->
-    <string name="accessibility_dpad_left">Zeiger links</string>
-    <string name="accessibility_dpad_right">Zeiger rechts</string>
-    <string name="screenrecord_stopdot_label">Stop-Punkt anzeigen</string>
-    <string name="screenrecord_low_quality_label">Niedrige Qualität</string>
-    <!-- Immersive tile -->
-    <string name="quick_settings_immersive_tile">Vollbildmodus</string>
-    <string name="quick_settings_immersive_tile_statusbar">Statusbar verstecken</string>
-    <string name="quick_settings_immersive_tile_navbar">Navigationsleiste verstecken</string>
-    <string name="quick_settings_immersive_tile_full">Vollständig</string>
-    <!-- DataSwitch Tile -->
-    <string name="qs_data_switch_label">Daten SIM wechseln</string>
-    <string name="qs_data_switch_changed_1">SIM 1 für mobile Daten verwenden</string>
-    <string name="qs_data_switch_changed_2">SIM 2 für mobile Daten verwenden</string>
+    <!-- Power Tile -->
+    <string name="qs_power_button_title">Power Taste</string>
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">Heads-up</string>
+    <string name="accessibility_quick_settings_heads_up_off">Heads-up Benachrichtigungen deaktiviert.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Heads-up Benachrichtigungen erlaubt.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Heads-up Benachrichtigungen deaktiviert.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Heads-up Benachrichtigungen aktiviert.</string>
+    <!-- Screenshot Tile -->
     <string name="screenshot_error_title">Screenshot ungültig</string>
-    <string name="screenrecord_error_title">Bildschirmaufnahme ungültig</string>
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Neu starten</string>
+    <string name="global_action_reboot_more">Starte neu</string>
+    <string name="global_action_reboot_sub">System</string>
+    <string name="global_action_reboot_recovery">Recovery</string>
+    <string name="global_action_reboot_bootloader">Bootloader</string>
+    <string name="global_action_reboot_fastboot">Fastboot</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
+    <!-- Navigation bar dpad -->
+    <!-- DataSwitch Tile -->
 </resources>
