@@ -18,14 +18,14 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Caffeine tile -->
-    <!-- AOD QS tile -->
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <!-- QS Config -->
-    <!-- ADB over network tile -->
+    <!-- qs customize -->
+    <!-- omnijaws -->
+    <!-- Power Tile -->
     <!-- Heads Up QS Tile -->
-    <!-- navbar editor -->
+    <!-- Screenshot Tile -->
+    <!-- AOD QS tile -->
+    <!-- Power menu reboot -->
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
     <!-- Navigation bar dpad -->
-    <!-- Immersive tile -->
     <!-- DataSwitch Tile -->
 </resources>

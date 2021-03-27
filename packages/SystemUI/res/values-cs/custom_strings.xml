@@ -18,37 +18,15 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="global_action_reboot">Restartovat</string>
-    <string name="global_action_reboot_more">Restart\u2026</string>
-    <string name="global_action_reboot_sub">Systém</string>
-    <string name="global_action_reboot_recovery">Recovery</string>
-    <string name="global_action_reboot_bootloader">Bootloader</string>
-    <string name="global_action_reboot_fastboot">Fastboot</string>
-    <string name="global_action_screenrecord">Záznam</string>
-    <!-- Caffeine tile -->
-    <string name="quick_settings_caffeine_label">Caffeine</string>
-    <string name="accessibility_quick_settings_caffeine_off">Caffeine vypnuto</string>
-    <string name="accessibility_quick_settings_caffeine_on">Caffeine zapnuto</string>
-    <!-- AOD QS tile -->
-    <string name="quick_settings_aod_label">AOD</string>
-    <string name="lockscreen_default">Výchozí</string>
-    <string name="lockscreen_hidden">Nic</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <string name="custom_hint">Přejeďte od ikony pro spuštění</string>
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Sloupce</string>
-    <string name="qs_menu_item_columns_landscape">Sloupce na šířku</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Resetovat</string>
-    <string name="qs_menu_item_titles">Zobrazit popisky</string>
-    <string name="qs_menu_item_qs_columns">Sloupce panelu QS</string>
-    <string name="qs_menu_item_columns_auto">Automaticky</string>
+    <!-- qs customize -->
+    <string name="drag_or_touch_to_rearrange_tiles">Klepnutím odstranit nebo přetažením změnit uspořádání dlaždic</string>
+    <string name="drag_or_touch_to_add_tiles">Dotykem nebo přetažením přidat dlaždice</string>
+    <string name="customize_settings_info_text"><b>Poznámka:</b> sloupce budou automaticky omezeny. Potáhnutím zobrazíte další nastavení.</string>
+    <string name="customize_show_labels">Popisky</string>
+    <string name="customize_quickbar_sync">Synchronizace</string>
+    <string name="customize_quickbar_label">Rychlý panel</string>
+    <string name="customize_columns_land_label">Na šířku</string>
+    <string name="customize_columns_port_label">Na výšku</string>
     <string name="tuner_show_brightness_mode">Zobrazit přepínač režimu jasu</string>
     <string name="tuner_show_brightness_side_buttons">Zobrazit boční tlačítka posuvníku jasu</string>
     <string name="tuner_quick_settings">Rychlá nastavení</string>
@@ -58,48 +36,12 @@
     <string name="tuner_show_drag_handle">Zobrazit táhnutí</string>
     <string name="tuner_battery_location_bar">Zobrazit baterii ve stavové liště</string>
     <string name="tuner_status_bar_bg_transparency">Průhledné pozadí stavové lišty</string>
-    <!-- ADB over network tile -->
-    <string name="quick_settings_network_adb_enabled_label">Povoleno</string>
-    <string name="quick_settings_network_adb_disabled_label">Zakázáno</string>
-    <string name="quick_settings_network_adb_label">ADB přes síť</string>
-    <string name="quick_settings_network_adb_toast">USB ladění není povoleno</string>
-    <!-- Heads Up QS Tile -->
-    <string name="quick_settings_heads_up_label">Plovoucí oznámení</string>
-    <string name="accessibility_quick_settings_heads_up_off">Plovoucí oznámení jsou zakázána.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Plovoucí oznámení jsou povolena.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_off">Plovoucí oznámení vypnuto.</string>
-    <string name="accessibility_quick_settings_heads_up_changed_on">Plovoucí oznámení zapnuto.</string>
-    <string name="quick_settings_screenrecord_label">Nahrávání obrazovky</string>
-    <string name="tuner_keyguard_show_battery_bar_title">Zobrazit pruh baterie</string>
-    <string name="tuner_keyguard_show_battery_bar_summary">Zobrazit pruh baterie při nabíjení v režimu AOD</string>
-    <string name="tuner_keyguard_show_battery_bar_always_title">Vždy zobrazit pruh baterie</string>
-    <string name="tuner_keyguard_show_battery_bar_always_summary">Vždy zobrazit pruh baterie při nabíjení</string>
-    <string name="tuner_keyguard_battery_percent_title">Zobrazit procenta baterie</string>
-    <string name="tuner_keyguard_battery_percent_summary">Vynuceně zobrazit procenta baterie při nabíjení ve stavové liště</string>
-    <string name="tuner_keyguard_show_watt_title">Zobrazit příkon nabíjení</string>
-    <string name="tuner_keyguard_show_watt_summary">Zobrazit příkon nabíjení v mW</string>
-    <string name="tuner_keyguard_show_current_title">Zobrazit nabíjecí proud</string>
-    <string name="tuner_keyguard_show_current_summary">Zobrazit hodnotu nabíjecího proudu</string>
-    <string name="tuner_keyguard_show_battery_temp_title">Zobrazit teplotu baterie</string>
-    <string name="tuner_keyguard_show_battery_temp_summary">Zobrazit hodnotu teploty baterie</string>
-    <string name="tuner_battery_percent_disable">Nezobrazovat procenta</string>
-    <string name="tuner_battery_percent_enable">Vždy zobrazovat procenta</string>
-    <string name="tuner_battery_percent_charging">Zobrazovat procenta při nabíjení</string>
-    <string name="tuner_battery_percent_hide">Nezobrazovat tuto ikonu</string>
-    <string name="tuner_battery_percent_title">Procenta baterie</string>
-    <string name="tuner_status_bar_show_battery_image">Styl ikony baterie</string>
-    <string name="tuner_keyguard_show_lock_icon_title">Zobrazit stav zámku</string>
-    <string name="tuner_keyguard_show_lock_icon_summary">Zobrazit aktuální ikonu stavu zámku</string>
-    <string name="tuner_nav_bar_show_handle_title">Zobrazit úchyt</string>
-    <string name="tuner_nav_bar_legacy_category">Navigace třemi tlačítky</string>
-    <string name="tuner_nav_bar_gesture_category">Navigace gesty</string>
-    <string name="tuner_keyguard_transition_animations_title">Zobrazit animace přechodu</string>
-    <string name="tuner_keyguard_transition_animations_summary">Zobrazit zbytečné animace</string>
-    <string name="tuner_qs_long_press_action">Nezobrazovat panely při dlouhém stisku</string>
+    <string name="tuner_qs_media_player">Přehrávač médií – je vyžadován restart</string>
+    <string name="tuner_qs_media_player_rows">Rozbalit řádky ve skrytém přehrávači médií</string>
+    <string name="tuner_qs_show_media_divider">Zobrazit rozdělovač přehrávače médií</string>
     <string name="tuner_keyguard_fod_unlock_enabled_title">Povolit sekundární odemčení FOD</string>
     <string name="tuner_keyguard_fod_unlock_enabled_summary">Pro zařízení s FOD umožní používat odemčení na sekundárních obrazovkách</string>
-    <string name="tuner_keyguard_show_assistant_handle_title">Zobrazit pomocný úchop</string>
-    <string name="tuner_keyguard_show_assistant_handle_summary">Zobrazit pomocný úchop na okrajích obrazovky</string>
+    <!-- omnijaws -->
     <string name="omnijaws_service_error">Chyba</string>
     <string name="omnijaws_service_unkown">Žádné údaje o počasí</string>
     <string name="omnijaws_service_error_long">Chyba při načítání údajů o počasí</string>
@@ -109,44 +51,33 @@
     <string name="omnijaws_current_text">Nyní</string>
     <string name="omnijaws_package_not_available">OmniJaws není k dispozici</string>
     <string name="omnijaws_service_last_update">Poslední aktualizace:</string>
-    <!-- navbar editor -->
-    <string name="preview">Náhled</string>
-    <string name="keycode">Klíčový kód</string>
-    <string name="no_home_title">Tlačítko Domů nebylo nalezeno</string>
-    <string name="no_home_message">K ovládání tohoto zařízení je zapotřebí tlačítko Domů. Před uložením přidejte tlačítko Domů.</string>
-    <string name="clipboard_description">Schránka umožňuje přetažení položek přímo do schránky. Položky lze také přetáhnout přímo ze schránky, pokud jsou k dispozici.</string>
-    <string name="keycode_description">Tlačítka Klávesa umožňují přidat na navigační panel klávesy z klávesnice. Když na ně klepnete, budou emulovat vybranou klávesu. K tlačítku je nejprve nutné přiřadit klávesu a poté přidat obrázek tlačítka.</string>
-    <string name="start">Spustit</string>
-    <string name="center">Uprostřed</string>
-    <string name="end">Ukončit</string>
-    <string name="space">Mezerník</string>
-    <string name="menu_ime">Nabídka / Přepínač klávesnice</string>
-    <string name="select_button">Vyberte tlačítko pro přidání</string>
-    <string name="add_button">Přidat tlačítko</string>
-    <string name="save">Uložit</string>
-    <string name="reset">Resetovat</string>
-    <string name="select_keycode">Vyberte tlačítko klávesnice</string>
-    <string name="left">Vlevo</string>
-    <string name="right">Vpravo</string>
-    <string name="navbar_editor_title">Editor</string>
-    <string name="navbar_editor_summary">Konfigurace navigačního panelu</string>
-    <string name="status_bar_vpn">VPN</string>
-    <string name="quick_settings_roaming_title">Indikátor roamingu</string>
-    <string name="status_bar_location">Poloha</string>
+    <!-- Power Tile -->
+    <string name="qs_power_button_title">Tlačítko napájení</string>
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">Plovoucí oznámení</string>
+    <string name="accessibility_quick_settings_heads_up_off">Plovoucí oznámení jsou zakázána.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Plovoucí oznámení jsou povolena.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Plovoucí oznámení vypnuto.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Plovoucí oznámení zapnuto.</string>
+    <!-- Screenshot Tile -->
+    <string name="screenshot_error_title">Neplatný snímek obrazovky</string>
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Restartovat</string>
+    <string name="global_action_reboot_more">Restart\u2026</string>
+    <string name="global_action_reboot_sub">Systém</string>
+    <string name="global_action_reboot_recovery">Recovery</string>
+    <string name="global_action_reboot_bootloader">Bootloader</string>
+    <string name="global_action_reboot_fastboot">Fastboot</string>
+    <string name="keyguard_plugged_in_charging_dash"><xliff:g id="percentage">%s</xliff:g> • Dash nabíjení</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
+    <string name="keyguard_indication_charging_time_dash"><xliff:g id="percentage">%2$s</xliff:g> • Dash nabíjení (zbývá <xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g> do plného nabití)</string>
     <!-- Navigation bar dpad -->
     <string name="accessibility_dpad_left">Kurzor vlevo</string>
     <string name="accessibility_dpad_right">Kurzor vpravo</string>
-    <string name="screenrecord_stopdot_label">Zobrazit tečku ukončení</string>
-    <string name="screenrecord_low_quality_label">Nízká kvalita</string>
-    <!-- Immersive tile -->
-    <string name="quick_settings_immersive_tile">Režim pohlcení</string>
-    <string name="quick_settings_immersive_tile_statusbar">Pohlcující stavový řádek</string>
-    <string name="quick_settings_immersive_tile_navbar">Pohlcující navigační panel</string>
-    <string name="quick_settings_immersive_tile_full">Úplný režim pohlcení</string>
     <!-- DataSwitch Tile -->
     <string name="qs_data_switch_label">Přepnout kartu pro data</string>
     <string name="qs_data_switch_changed_1">Používání SIM 1 pro mobilní data</string>
     <string name="qs_data_switch_changed_2">Používání SIM 2 pro mobilní data</string>
-    <string name="screenshot_error_title">Neplatný snímek obrazovky</string>
-    <string name="screenrecord_error_title">Neplatný videozáznam obrazovky</string>
 </resources>

@@ -18,39 +18,19 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- qs customize -->
+    <string name="tuner_quick_settings">Швидкі налаштування</string>
+    <!-- omnijaws -->
+    <!-- Power Tile -->
+    <!-- Heads Up QS Tile -->
+    <!-- Screenshot Tile -->
+    <!-- AOD QS tile -->
+    <!-- Power menu reboot -->
     <string name="global_action_reboot">Перезавантажити</string>
     <string name="global_action_reboot_sub">Система</string>
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
-    <!-- Caffeine tile -->
-    <!-- AOD QS tile -->
-    <string name="lockscreen_default">За замовчуванням</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Колонки</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Очистити</string>
-    <string name="qs_menu_item_titles">Показати всі мітки</string>
-    <string name="tuner_quick_settings">Швидкі налаштування</string>
-    <!-- ADB over network tile -->
-    <string name="quick_settings_network_adb_enabled_label">Увімкнено</string>
-    <string name="quick_settings_network_adb_disabled_label">Вимкнено</string>
-    <!-- Heads Up QS Tile -->
-    <!-- navbar editor -->
-    <string name="start">Пуск</string>
-    <string name="center">Центр</string>
-    <string name="end">Кінець</string>
-    <string name="save">Зберегти</string>
-    <string name="left">Ліворуч</string>
-    <string name="right">Праворуч</string>
-    <string name="navbar_editor_title">Редактор</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
     <!-- Navigation bar dpad -->
-    <!-- Immersive tile -->
     <!-- DataSwitch Tile -->
 </resources>

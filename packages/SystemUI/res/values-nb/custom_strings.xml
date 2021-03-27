@@ -18,37 +18,9 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="global_action_reboot">Start på nytt</string>
-    <string name="global_action_reboot_sub">System</string>
-    <string name="global_action_reboot_recovery">Gjenoppretting</string>
-    <string name="global_action_reboot_bootloader">Bootloader</string>
-    <!-- Caffeine tile -->
-    <string name="quick_settings_caffeine_label">Koffein</string>
-    <string name="accessibility_quick_settings_caffeine_off">Koffein av</string>
-    <string name="accessibility_quick_settings_caffeine_on">Koffein på</string>
-    <!-- AOD QS tile -->
-    <string name="lockscreen_default">Standard</string>
-    <string name="lockscreen_hidden">Stille</string>
-    <!-- Shows when people have clicked on the custom lockscreen shortcut [CHAR LIMIT=60] -->
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Kolonner</string>
-    <string name="qs_menu_item_columns_landscape">Kolonneutforming</string>
-    <string name="qs_menu_item_columns_three">3</string>
-    <string name="qs_menu_item_columns_four">4</string>
-    <string name="qs_menu_item_columns_five">5</string>
-    <string name="qs_menu_item_columns_six">6</string>
-    <string name="qs_menu_item_columns_seven">7</string>
-    <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
-    <string name="qs_menu_item_reset">Tilbakestill</string>
+    <!-- qs customize -->
     <string name="tuner_quick_settings">Hurtiginnstillinger</string>
-    <!-- ADB over network tile -->
-    <string name="quick_settings_network_adb_enabled_label">Aktivert</string>
-    <string name="quick_settings_network_adb_disabled_label">Deaktivert</string>
-    <string name="quick_settings_network_adb_label">ADB over nettverk</string>
-    <string name="quick_settings_network_adb_toast">USB-feilsøking er ikke aktivert</string>
-    <!-- Heads Up QS Tile -->
-    <string name="quick_settings_screenrecord_label">Skjermopptak</string>
+    <!-- omnijaws -->
     <string name="omnijaws_service_error">Feil</string>
     <string name="omnijaws_service_unkown">Ingen værdata</string>
     <string name="omnijaws_service_error_long">Feil ved henting av værdata</string>
@@ -58,8 +30,16 @@
     <string name="omnijaws_current_text">Nå</string>
     <string name="omnijaws_package_not_available">OmniJaws ikke tilgjengelig</string>
     <string name="omnijaws_service_last_update">Siste oppdatering:</string>
-    <!-- navbar editor -->
+    <!-- Power Tile -->
+    <!-- Heads Up QS Tile -->
+    <!-- Screenshot Tile -->
+    <!-- AOD QS tile -->
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Start på nytt</string>
+    <string name="global_action_reboot_sub">System</string>
+    <string name="global_action_reboot_recovery">Gjenoppretting</string>
+    <string name="global_action_reboot_bootloader">Bootloader</string>
+    <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
     <!-- Navigation bar dpad -->
-    <!-- Immersive tile -->
     <!-- DataSwitch Tile -->
 </resources>

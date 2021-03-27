@@ -18,10 +18,14 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
-         when the user asks to reboot. [CHAR LIMIT=NONE] -->
-    <string name="reboot_confirm">您想要重新启动吗？</string>
-    <string name="reboot_title">重新启动</string>
+    <!-- MicroG -->
+    <string name="permlab_fakePackageSignature">伪装软件包签名</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+         they want to allow the application to do this. -->
+    <string name="permdesc_fakePackageSignature">允许应用假装成为一个不同的应用。恶意应用可能能够使用它来访问私人应用数据。 合法的使用包括假装仿真的仿真器。只是谨慎地授予此权限！</string>
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
     <!-- advanced reboot to bootloader. -->
     <string name="reboot_to_bootloader_title">重启到引导模式</string>
     <string name="reboot_to_bootloader_message">正在重启到引导模式\u2026</string>
@@ -34,12 +38,4 @@
     <!-- advanced reboot to fastboot. -->
     <string name="reboot_to_fastboot_title">重启到引导模式</string>
     <string name="reboot_to_fastboot_message">正在重启到引导模式\u2026</string>
-    <!-- MicroG -->
-    <string name="permlab_fakePackageSignature">伪装软件包签名</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-         they want to allow the application to do this. -->
-    <string name="permdesc_fakePackageSignature">允许应用假装成为一个不同的应用。恶意应用可能能够使用它来访问私人应用数据。 合法的使用包括假装仿真的仿真器。只是谨慎地授予此权限！</string>
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
 </resources>
