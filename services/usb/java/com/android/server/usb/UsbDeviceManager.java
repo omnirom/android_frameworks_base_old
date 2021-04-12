@@ -207,6 +207,16 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     private static Set<Integer> sDenyInterfaces;
     private HashMap<Long, FileDescriptor> mControlFds;
 
+    /* Omni add-on */
+    private static boolean mUseMultiUsbController;
+    private static String udc_change;
+    private static final long FUNCTION_UDC_SWITCH = 128;
+    private static final String USB_CONTROLLER_PROPERTY = "sys.usb.controller";
+    private static final String UDC1_MODE = "/sys/devices/platform/soc/a600000.ssusb/mode";
+    private static final String UDC2_MODE = "/sys/devices/platform/soc/a800000.ssusb/mode";
+    private static final String UDC1_NAME_MATCH = "DEVPATH=/devices/platform/soc/a600000.ssusb/a600000.dwc3";
+    private static final String UDC2_NAME_MATCH = "DEVPATH=/devices/platform/soc/a800000.ssusb/a800000.dwc3";
+
     static {
         sDenyInterfaces = new HashSet<>();
         sDenyInterfaces.add(UsbConstants.USB_CLASS_AUDIO);
@@ -248,6 +258,17 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 mHandler.removeMessages(MSG_ACCESSORY_HANDSHAKE_TIMEOUT);
                 mHandler.setStartAccessoryTrue();
                 startAccessoryMode();
+            }
+            if (mUseMultiUsbController) {
+                String udcname = event.get("UDC_NAME");
+                if (udcname != null) {
+                    String controller = SystemProperties.get(USB_CONTROLLER_PROPERTY);
+                    if (!controller.equals(udcname)) {
+                        String unused = udc_change = udcname;
+                        setCurrentFunctions(FUNCTION_UDC_SWITCH);
+                    }
+                    Slog.i(TAG, "Controller=" + controller + " UDC_NAME=" + udcname);
+                }
             }
         }
     }
@@ -376,10 +397,17 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         mContext.registerReceiver(languageChangedReceiver,
                 new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
 
+        mUseMultiUsbController = mContext.getResources().getBoolean(
+                                    com.android.internal.R.bool.config_switchUsbController);
+
         // Watch for USB configuration changes
         mUEventObserver = new UsbUEventObserver();
         mUEventObserver.startObserving(USB_STATE_MATCH);
         mUEventObserver.startObserving(ACCESSORY_START_MATCH);
+        if (mUseMultiUsbController) {
+            mUEventObserver.startObserving(UDC1_NAME_MATCH);
+            mUEventObserver.startObserving(UDC2_NAME_MATCH);
+        }
     }
 
     UsbProfileGroupSettingsManager getCurrentSettings() {
@@ -991,6 +1019,20 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     break;
                 case MSG_SET_CURRENT_FUNCTIONS:
                     long functions = (Long) msg.obj;
+                    if (mUseMultiUsbController) {
+                        if (FUNCTION_UDC_SWITCH == functions) {
+                            SystemProperties.set(USB_CONTROLLER_PROPERTY, udc_change);
+                            if (!mScreenLocked) {
+                                long unlockfunctions = mScreenUnlockedFunctions;
+                                if (unlockfunctions != 0) {
+                                    setEnabledFunctions(unlockfunctions, true);
+                                    break;
+                                }
+                            }
+                            setEnabledFunctions(0, true);
+                            break;
+                        }
+                    }
                     setEnabledFunctions(functions, false);
                     break;
                 case MSG_SET_SCREEN_UNLOCKED_FUNCTIONS:
@@ -1104,15 +1146,38 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         protected void finishBoot() {
             if (mBootCompleted && mCurrentUsbFunctionsReceived && mSystemReady) {
+                boolean switchudc = false;
                 if (mPendingBootBroadcast) {
                     updateUsbStateBroadcastIfNeeded(getAppliedFunctions(mCurrentFunctions));
                     mPendingBootBroadcast = false;
+                }
+                if (mUseMultiUsbController) {
+                    String controller = SystemProperties.get(USB_CONTROLLER_PROPERTY);
+                    try {
+                        String usb1mode = FileUtils.readTextFile(new File(UDC1_MODE), 0, null).trim();
+                        String usb2mode = FileUtils.readTextFile(new File(UDC2_MODE), 0, null).trim();
+                        if ("peripheral".equals(usb1mode) && !"a600000.dwc3".equals(controller)) {
+                            switchudc = true;
+                            SystemProperties.set(USB_CONTROLLER_PROPERTY, "a600000.dwc3");
+                        } else if ("peripheral".equals(usb2mode) && !"a800000.dwc3".equals(controller)) {
+                            switchudc = true;
+                            SystemProperties.set(USB_CONTROLLER_PROPERTY, "a800000.dwc3");
+                        }
+                        String str = TAG;
+                        Slog.i(str, "usb1_mode=" + usb1mode + " usb2_mode=" + usb2mode + " controller=" + controller);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Error read usb mode", e);
+                    }
                 }
                 if (!mScreenLocked
                         && mScreenUnlockedFunctions != UsbManager.FUNCTION_NONE) {
                     setScreenUnlockedFunctions();
                 } else {
-                    setEnabledFunctions(UsbManager.FUNCTION_NONE, false);
+                    if (mUseMultiUsbController) {
+                        setEnabledFunctions(UsbManager.FUNCTION_NONE, switchudc);
+                    } else {
+                        setEnabledFunctions(UsbManager.FUNCTION_NONE, false);
+                    }
                 }
                 if (mCurrentAccessory != null) {
                     mUsbDeviceManager.getCurrentSettings().accessoryAttached(mCurrentAccessory);
