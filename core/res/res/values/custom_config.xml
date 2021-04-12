@@ -57,4 +57,7 @@
           vendor fingerprint HAL implementations. -->
      <bool name="config_fingerprintPostResetRunnableForAllClients">false</bool>
 
+    <!-- Switch USB controller on Asus ROG devices-->
+    <bool name="config_switchUsbController">false</bool>
+
 </resources>

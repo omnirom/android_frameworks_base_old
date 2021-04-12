@@ -64,4 +64,7 @@
 
   <!-- Post reset runnable for all clients -->
   <java-symbol type="bool" name="config_fingerprintPostResetRunnableForAllClients" />
+
+  <!-- Switch USB controller on Asus ROG devices-->
+  <java-symbol type="bool" name="config_switchUsbController" />
 </resources>
