@@ -22,4 +22,7 @@
     <java-symbol type="bool" name="config_multiColorBatteryLed" />
     <java-symbol type="bool" name="config_FastChargingLedSupported" />
     <java-symbol type="integer" name="config_notificationsFastBatteryARGB" />
+
+    <!-- Switch USB controller on Asus ROG devices-->
+    <java-symbol type="bool" name="config_switchUsbController" />
 </resources>

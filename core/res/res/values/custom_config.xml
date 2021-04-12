@@ -20,4 +20,7 @@
     <bool name="config_FastChargingLedSupported">false</bool>
     <!-- Default value for led color when fast charging is active -->
     <integer name="config_notificationsFastBatteryARGB">0x0000FF</integer>
+
+    <!-- Switch USB controller on Asus ROG devices-->
+    <bool name="config_switchUsbController">false</bool>
 </resources>
