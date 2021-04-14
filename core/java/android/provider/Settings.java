@@ -5675,6 +5675,11 @@ public final class Settings {
         public static final String OMNI_NAVIGATION_BAR_ARROW_KEYS = "navigation_bar_menu_arrow_keys";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_GESTURE_HANDLE_HIDE = "navbar_gesture_handle_hide";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5692,6 +5697,7 @@ public final class Settings {
             OMNI_SHOW_BATTERY_IMAGE,
             OMNI_BACK_GESTURE_HEIGHT,
             OMNI_NAVIGATION_BAR_ARROW_KEYS,
+            OMNI_GESTURE_HANDLE_HIDE,
         };
 
         /**
@@ -5717,6 +5723,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BACK_GESTURE_HEIGHT, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_ARROW_KEYS, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_GESTURE_HANDLE_HIDE, 0);
         }
     }
 
