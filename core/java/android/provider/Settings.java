@@ -6292,6 +6292,11 @@ public final class Settings {
         public static final String OMNI_LOCKSCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_GESTURE_HANDLE_HIDE = "navbar_gesture_handle_hide";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -6306,7 +6311,8 @@ public final class Settings {
             OMNI_ADVANCED_REBOOT,
             OMNI_MONET_DISABLE,
             OMNI_SHOW_BATTERY_IMAGE,
-            OMNI_LOCKSCREEN_WEATHER_ENABLED
+            OMNI_LOCKSCREEN_WEATHER_ENABLED,
+            OMNI_GESTURE_HANDLE_HIDE,
         };
 
         /**
@@ -6330,6 +6336,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_MONET_DISABLE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_GESTURE_HANDLE_HIDE, 0);
         }
     }
 
