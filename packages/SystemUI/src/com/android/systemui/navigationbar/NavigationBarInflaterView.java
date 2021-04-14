@@ -163,13 +163,21 @@ public class NavigationBarInflaterView extends FrameLayout
     }
 
     protected String getDefaultLayout() {
-        final int defaultResource = QuickStepContract.isGesturalMode(mNavBarMode)
-                        ? (showDpadArrowKeys() ? R.string.config_navBarLayoutHandleArrows
-                        : R.string.config_navBarLayoutHandle)
-                : mOverviewProxyService.shouldShowSwipeUpUI()
-                        ? R.string.config_navBarLayoutQuickstep
-                        : R.string.config_navBarLayout;
-        return getContext().getString(defaultResource);
+        if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+            String navbarLayout = getContext().getString(showDpadArrowKeys()
+                    ? R.string.config_navBarLayoutHandleArrows
+                    : R.string.config_navBarLayoutHandle);
+            if (hideGestureHandle()) {
+                return navbarLayout.replace(HOME_HANDLE, NAVSPACE);
+            } else {
+                return navbarLayout;
+            }
+        } else {
+            final int defaultResource = mOverviewProxyService.shouldShowSwipeUpUI()
+                            ? R.string.config_navBarLayoutQuickstep
+                            : R.string.config_navBarLayout;
+            return getContext().getString(defaultResource);
+        }
     }
 
     private void onNavigationModeChanged(int mode) {
@@ -188,6 +196,8 @@ public class NavigationBarInflaterView extends FrameLayout
         super.onAttachedToWindow();
         Dependency.get(OmniSettingsService.class).addIntObserver(this,
             OmniSettings.OMNI_NAVIGATION_BAR_ARROW_KEYS);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+            OmniSettings.OMNI_GESTURE_HANDLE_HIDE);
     }
 
     public void onLikelyDefaultLayoutChange() {
@@ -517,6 +527,11 @@ public class NavigationBarInflaterView extends FrameLayout
     private boolean showDpadArrowKeys() {
         return Settings.System.getIntForUser(getContext().getContentResolver(),
                 OmniSettings.OMNI_NAVIGATION_BAR_ARROW_KEYS, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
+    private boolean hideGestureHandle() {
+        return Settings.System.getIntForUser(getContext().getContentResolver(),
+                OmniSettings.OMNI_GESTURE_HANDLE_HIDE, 0, UserHandle.USER_CURRENT) != 0;
     }
 
     @Override
