@@ -5593,6 +5593,11 @@ public final class Settings {
         public static final String OMNI_KEYGUARD_SHOW_BATTERY_TEMP = "sysui_keyguard_show_battery_temp";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_GESTURE_HANDLE_HIDE = "navbar_gesture_handle_hide";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5650,7 +5655,8 @@ public final class Settings {
             OMNI_KEYGUARD_SHOW_BATTERY_BAR_ALWAYS,
             OMNI_KEYGUARD_SHOW_WATT_ON_CHARGING,
             OMNI_KEYGUARD_SHOW_CURRENT_ON_CHARGING,
-            OMNI_KEYGUARD_SHOW_BATTERY_TEMP
+            OMNI_KEYGUARD_SHOW_BATTERY_TEMP,
+            OMNI_GESTURE_HANDLE_HIDE
         };
 
         /**
@@ -5720,6 +5726,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_KEYGUARD_SHOW_WATT_ON_CHARGING, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_KEYGUARD_SHOW_CURRENT_ON_CHARGING, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_KEYGUARD_SHOW_BATTERY_TEMP, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_GESTURE_HANDLE_HIDE, 0);
         }
     }
 
