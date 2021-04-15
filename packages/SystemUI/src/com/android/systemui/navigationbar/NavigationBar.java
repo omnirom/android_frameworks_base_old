@@ -159,6 +159,8 @@ import com.android.systemui.util.ViewController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
+import org.omnirom.omnilib.utils.TaskUtils;
+
 import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Map;
@@ -1253,6 +1255,10 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         ButtonDispatcher homeButton = mView.getHomeButton();
         homeButton.setOnTouchListener(this::onHomeTouch);
 
+        ButtonDispatcher homeHandleButton = mView.getHomeHandle();
+        homeHandleButton.setLongClickable(true);
+        homeHandleButton.setOnLongClickListener(this::onHomeHandleLongClick);
+
         reconfigureHomeLongClick();
 
         ButtonDispatcher accessibilityButton = mView.getAccessibilityButton();
@@ -1783,6 +1789,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 region, touchRegionCache, mView.getVolumePlusButton(), inScreenSpace, useNearestRegion);
         updateButtonLocation(
                 region, touchRegionCache, mView.getNotificationsButton(), inScreenSpace, useNearestRegion);
+        updateButtonLocation(
+                region, touchRegionCache, mView.getHomeHandle(), inScreenSpace, useNearestRegion);
         return region;
     }
 
@@ -1946,4 +1954,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             return false;
         }
     };
+
+    private boolean onHomeHandleLongClick(View v) {
+        TaskUtils.toggleLastApp(mContext, UserHandle.myUserId());
+        return true;
+    }
 }
