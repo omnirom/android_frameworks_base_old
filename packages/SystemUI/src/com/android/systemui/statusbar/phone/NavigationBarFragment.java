@@ -100,6 +100,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.omni.TaskUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.R;
@@ -999,6 +1000,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         homeButton.setOnTouchListener(this::onHomeTouch);
         homeButton.setOnLongClickListener(this::onHomeLongClick);
 
+        ButtonDispatcher homeHandleButton = mNavigationBarView.getHomeHandle();
+        homeHandleButton.setLongClickable(true);
+        homeHandleButton.setOnLongClickListener(this::onHomeHandleLongClick);
+
         ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
         accessibilityButton.setOnClickListener(this::onAccessibilityClick);
         accessibilityButton.setOnLongClickListener(this::onAccessibilityLongClick);
@@ -1486,5 +1491,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     @VisibleForTesting
     int getNavigationIconHints() {
         return mNavigationIconHints;
+    }
+
+    private boolean onHomeHandleLongClick(View v) {
+        TaskUtils.toggleLastApp(getContext(), UserHandle.myUserId());
+        return true;
     }
 }
