@@ -34,4 +34,8 @@
 
     <dimen name="volume_seekbar_progress_width">8dp</dimen>
     <dimen name="volume_seekbar_progress_corner_radius">4dp</dimen>
+
+    <dimen name="navigation_home_handle_small_width">48dp</dimen>
+    <!-- 2 * navigation_handle_radius + 2 * navigation_handle_bottom-->
+    <dimen name="navigation_home_handle_height">14dp</dimen>
 </resources>

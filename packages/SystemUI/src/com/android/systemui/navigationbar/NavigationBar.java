@@ -146,6 +146,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
+import org.omnirom.omnilib.utils.TaskUtils;
+
 import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Optional;
@@ -1153,6 +1155,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         homeButton.setOnTouchListener(this::onHomeTouch);
 
+        ButtonDispatcher homeHandleButton = mNavigationBarView.getHomeHandle();
+        homeHandleButton.setLongClickable(true);
+        homeHandleButton.setOnLongClickListener(this::onHomeHandleLongClick);
+
         reconfigureHomeLongClick();
 
         ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
@@ -1768,5 +1774,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                     mMainAutoHideController, mAutoHideControllerFactory, mTelecomManagerOptional,
                     mInputMethodManager);
         }
+    }
+
+    private boolean onHomeHandleLongClick(View v) {
+        TaskUtils.toggleLastApp(mContext, UserHandle.myUserId());
+        return true;
     }
 }
