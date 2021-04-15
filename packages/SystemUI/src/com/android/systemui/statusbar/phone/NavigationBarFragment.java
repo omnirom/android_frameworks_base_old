@@ -100,8 +100,10 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.omni.TaskUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistHandleViewController;
@@ -111,6 +113,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
@@ -145,7 +148,8 @@ import dagger.Lazy;
  * on clicks and view states of the nav bar.
  */
 public class NavigationBarFragment extends LifecycleFragment implements Callbacks,
-        NavigationModeController.ModeChangedListener, DisplayManager.DisplayListener {
+        NavigationModeController.ModeChangedListener, DisplayManager.DisplayListener,
+        OmniSettingsService.OmniSettingsObserver {
 
     public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
@@ -228,6 +232,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private ViewTreeObserver.OnGlobalLayoutListener mOrientationHandleGlobalLayoutListener;
     private UiEventLogger mUiEventLogger;
     private boolean mShowOrientedHandleForImmersiveMode;
+
+    // omni addition start
+    private boolean mHideGestureHandle;
 
     @com.android.internal.annotations.VisibleForTesting
     public enum NavBarActionEvent implements UiEventLogger.UiEventEnum {
@@ -320,7 +327,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             boolean forceVisible = false;
             if (QuickStepContract.isSwipeUpMode(mNavBarMode)) {
                 buttonDispatcher = mNavigationBarView.getBackButton();
-            } else if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+            } else if (QuickStepContract.isGesturalMode(mNavBarMode) && !mHideGestureHandle) {
                 forceVisible = mForceNavBarHandleOpaque;
                 buttonDispatcher = mNavigationBarView.getHomeHandle();
             }
@@ -458,6 +465,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
         mIsCurrentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
         mDeviceProvisionedController.addCallback(mUserSetupListener);
+
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, 
+                Settings.System.OMNI_GESTURE_HANDLE_HIDE);
     }
 
     @Override
@@ -469,6 +479,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mDeviceProvisionedController.removeCallback(mUserSetupListener);
 
         DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
+        Dependency.get(OmniSettingsService.class).removeObserver(this);
     }
 
     @Override
@@ -999,6 +1010,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         homeButton.setOnTouchListener(this::onHomeTouch);
         homeButton.setOnLongClickListener(this::onHomeLongClick);
 
+        ButtonDispatcher homeHandleButton = mNavigationBarView.getHomeHandle();
+        homeHandleButton.setLongClickable(true);
+        homeHandleButton.setOnLongClickListener(this::onHomeHandleLongClick);
+
         ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
         accessibilityButton.setOnClickListener(this::onAccessibilityClick);
         accessibilityButton.setOnLongClickListener(this::onAccessibilityLongClick);
@@ -1486,5 +1501,20 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     @VisibleForTesting
     int getNavigationIconHints() {
         return mNavigationIconHints;
+    }
+
+    private boolean hideGestureHandle() {
+        return Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.OMNI_GESTURE_HANDLE_HIDE, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        mHideGestureHandle = hideGestureHandle();
+    }
+
+    private boolean onHomeHandleLongClick(View v) {
+        TaskUtils.toggleLastApp(getContext(), UserHandle.myUserId());
+        return true;
     }
 }
