@@ -70,6 +70,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsOnboarding;
@@ -90,7 +91,8 @@ import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 public class NavigationBarView extends FrameLayout implements
-        NavigationModeController.ModeChangedListener {
+        NavigationModeController.ModeChangedListener,
+        OmniSettingsService.OmniSettingsObserver {
     final static boolean DEBUG = false;
     final static String TAG = "StatusBar/NavBarView";
 
@@ -178,6 +180,9 @@ public class NavigationBarView extends FrameLayout implements
      */
     @Nullable
     private Rect mOrientedHandleSamplingRegion;
+
+    // omni addition start
+    private boolean mShowDpadArrowKeys;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -701,7 +706,7 @@ public class NavigationBarView extends FrameLayout implements
         updateRecentsIcon();
 
         // Update arrow buttons
-        if (showDpadArrowKeys()) {
+        if (mShowDpadArrowKeys) {
             getKeyButtonViewById(R.id.dpad_left).setImageDrawable(mArrowLeftIcon);
             getKeyButtonViewById(R.id.dpad_right).setImageDrawable(mArrowRightIcon);
             updateDpadKeys();
@@ -713,7 +718,7 @@ public class NavigationBarView extends FrameLayout implements
 
 
         // right arrow overrules ime in 3 button mode cause there is not enough space
-        if (QuickStepContract.isLegacyMode(mNavBarMode) && showDpadArrowKeys()) {
+        if (QuickStepContract.isLegacyMode(mNavBarMode) && mShowDpadArrowKeys) {
             mContextualButtonGroup.setButtonVisibility(R.id.ime_switcher, false);
         }
 
@@ -736,8 +741,8 @@ public class NavigationBarView extends FrameLayout implements
         boolean disableRecent = isRecentsButtonDisabled();
 
         // Disable the home handle if both hone and recents are disabled
-        boolean disableHomeHandle = disableRecent
-                && ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
+        boolean disableHomeHandle = hideGestureHandle() || (disableRecent
+                && ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0));
 
         boolean disableBack = !useAltBack && (mEdgeBackGestureHandler.isHandlingGestures()
                 || ((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0));
@@ -1022,23 +1027,26 @@ public class NavigationBarView extends FrameLayout implements
         updateButtonLocation(getRecentsButton(), inScreenSpace);
         updateButtonLocation(getImeSwitchButton(), inScreenSpace);
         updateButtonLocation(getAccessibilityButton(), inScreenSpace);
-        if (showDpadArrowKeys()) {
+        if (mShowDpadArrowKeys) {
             updateButtonLocation(getKeyButtonViewById(R.id.dpad_left), inScreenSpace);
             updateButtonLocation(getKeyButtonViewById(R.id.dpad_right), inScreenSpace);
-        }
+//         }
         if (getPowerButton() != null) {
-            updateButtonLocation(getPowerButton(), false);
+            updateButtonLocation(getPowerButton(), inScreenSpace);
         }
         if (getVolumeMinusButton() != null) {
-            updateButtonLocation(getVolumeMinusButton(), false);
+            updateButtonLocation(getVolumeMinusButton(), inScreenSpace);
         }
         if (getVolumePlusButton() != null) {
-            updateButtonLocation(getVolumePlusButton(), false);
+            updateButtonLocation(getVolumePlusButton(), inScreenSpace);
         }
         if (includeFloatingRotationButton && mFloatingRotationButton.isVisible()) {
             updateButtonLocation(mFloatingRotationButton.getCurrentView(), inScreenSpace);
         } else {
             updateButtonLocation(getRotateSuggestionButton(), inScreenSpace);
+        }
+        if (getHomeHandle() != null) {
+            updateButtonLocation(getHomeHandle(), inScreenSpace);
         }
         return mTmpRegion;
     }
@@ -1264,6 +1272,10 @@ public class NavigationBarView extends FrameLayout implements
 
         mEdgeBackGestureHandler.onNavBarAttached();
         getViewTreeObserver().addOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                Settings.System.OMNI_NAVIGATION_BAR_ARROW_KEYS);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                Settings.System.OMNI_GESTURE_HANDLE_HIDE);
     }
 
     @Override
@@ -1281,6 +1293,7 @@ public class NavigationBarView extends FrameLayout implements
         mEdgeBackGestureHandler.onNavBarDetached();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mOnComputeInternalInsetsListener);
+        Dependency.get(OmniSettingsService.class).removeObserver(this);
     }
 
     private void setUpSwipeUpOnboarding(boolean connectedToOverviewProxy) {
@@ -1389,19 +1402,32 @@ public class NavigationBarView extends FrameLayout implements
     });
 
     private void updateDpadKeys() {
-        final int visibility = showDpadArrowKeys() && (mNavigationIconHints
+        final int visibility = mShowDpadArrowKeys && (mNavigationIconHints
                 & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0 ? View.VISIBLE : View.GONE;
         getKeyButtonViewById(R.id.dpad_left).setVisibility(visibility);
         getKeyButtonViewById(R.id.dpad_right).setVisibility(visibility);
     }
     public void setDpadDarkIntensity(float darkIntensity) {
-        if (showDpadArrowKeys()) {
+        if (mShowDpadArrowKeys) {
             getKeyButtonViewById(R.id.dpad_left).setDarkIntensity(darkIntensity);
             getKeyButtonViewById(R.id.dpad_right).setDarkIntensity(darkIntensity);
         }
     }
+
     private boolean showDpadArrowKeys() {
         return Settings.System.getIntForUser(getContext().getContentResolver(),
                 Settings.System.OMNI_NAVIGATION_BAR_ARROW_KEYS, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
+    private boolean hideGestureHandle() {
+        return Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.OMNI_GESTURE_HANDLE_HIDE, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        mShowDpadArrowKeys = showDpadArrowKeys();
+        updateNavButtonIcons();
+        notifyActiveTouchRegions();
     }
 }
