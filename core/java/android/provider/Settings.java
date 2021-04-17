@@ -5324,6 +5324,11 @@ public final class Settings {
         /**
          * @hide
          */
+        public static final String OMNI_QS_SHOW_NETWORK_ACTIVITY = "qs_show_network_activity";
+
+        /**
+         * @hide
+         */
         public static final String OMNIJAWS_WEATHER_ICON_PACK = "omnijaws_weather_icon_pack";
 
         /**

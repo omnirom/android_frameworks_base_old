@@ -33,7 +33,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:text="@string/tuner_qs_media_player" />
+                android:text="@string/tuner_qs_media_player_new" />
 
             <org.omnirom.omnilib.widget.SystemSettingsSwitch
                 android:id="@+id/qs_media_player"
