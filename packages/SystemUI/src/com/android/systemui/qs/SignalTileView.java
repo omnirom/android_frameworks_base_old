@@ -18,6 +18,8 @@ package com.android.systemui.qs;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -134,8 +136,9 @@ public class SignalTileView extends QSIconViewImpl {
             mSignal.setPaddingRelative(0, 0, 0, 0);
         }
         final boolean shouldAnimate = allowAnimations && isShown();
-        setVisibility(mIn, shouldAnimate, s.activityIn);
-        setVisibility(mOut, shouldAnimate, s.activityOut);
+        final boolean showActivity = showNetworkActivity();
+        setVisibility(mIn, shouldAnimate, s.activityIn && showActivity);
+        setVisibility(mOut, shouldAnimate, s.activityOut && showActivity);
     }
 
     private void setVisibility(View view, boolean shown, boolean visible) {
@@ -149,5 +152,11 @@ public class SignalTileView extends QSIconViewImpl {
         } else {
             view.setAlpha(newAlpha);
         }
+    }
+
+    private boolean showNetworkActivity() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_QS_SHOW_NETWORK_ACTIVITY, 1,
+                UserHandle.USER_CURRENT) == 1;
     }
 }
