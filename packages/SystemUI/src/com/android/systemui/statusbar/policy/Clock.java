@@ -308,7 +308,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             updateShowSeconds();
         } else {
             setClockVisibleByUser(!StatusBarIconController.getIconBlacklist(getContext(), newValue)
-                    .contains("clock"));
+                    .contains(getContext().getString(com.android.internal.R.string.status_bar_clock)));
             updateClockVisibility();
         }
     }
