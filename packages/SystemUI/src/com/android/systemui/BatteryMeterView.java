@@ -84,6 +84,7 @@ public class BatteryMeterView extends LinearLayout implements
     public static final int MODE_ON = 1;
     public static final int MODE_OFF = 2;
     public static final int MODE_ESTIMATE = 3;
+    public static final String BATTERY_ICON_SLOT = "battery";
 
     private final ThemedBatteryDrawable mDrawable;
     private final String mSlotBattery;
@@ -148,8 +149,7 @@ public class BatteryMeterView extends LinearLayout implements
 
         setupLayoutTransition();
 
-        mSlotBattery = context.getString(
-                com.android.internal.R.string.status_bar_battery);
+        mSlotBattery = BATTERY_ICON_SLOT;
         mBatteryIconView = new ImageView(context);
         mBatteryIconView.setImageDrawable(mDrawable);
         final MarginLayoutParams mlp = new MarginLayoutParams(

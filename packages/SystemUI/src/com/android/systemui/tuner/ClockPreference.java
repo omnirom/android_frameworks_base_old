@@ -13,6 +13,9 @@
  */
 package com.android.systemui.tuner;
 
+import static com.android.systemui.statusbar.policy.Clock.CLOCK_ICON_SLOT;
+import static com.android.systemui.statusbar.policy.Clock.CLOCK_SECONDS;
+
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -22,7 +25,6 @@ import androidx.preference.DropDownPreference;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
-import com.android.systemui.statusbar.policy.Clock;
 
 public class ClockPreference extends DropDownPreference implements TunerService.Tunable {
 
@@ -40,7 +42,7 @@ public class ClockPreference extends DropDownPreference implements TunerService.
 
     public ClockPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mClock = context.getString(com.android.internal.R.string.status_bar_clock);
+        mClock = CLOCK_ICON_SLOT;
         setEntryValues(new CharSequence[] { SECONDS, DEFAULT, DISABLED });
     }
 
@@ -48,7 +50,7 @@ public class ClockPreference extends DropDownPreference implements TunerService.
     public void onAttached() {
         super.onAttached();
         Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST,
-                Clock.CLOCK_SECONDS);
+                CLOCK_SECONDS);
     }
 
     @Override
@@ -63,7 +65,7 @@ public class ClockPreference extends DropDownPreference implements TunerService.
             mReceivedClock = true;
             mBlacklist = StatusBarIconController.getIconBlacklist(getContext(), newValue);
             mClockEnabled = !mBlacklist.contains(mClock);
-        } else if (Clock.CLOCK_SECONDS.equals(key)) {
+        } else if (CLOCK_SECONDS.equals(key)) {
             mReceivedSeconds = true;
             mHasSeconds = newValue != null && Integer.parseInt(newValue) != 0;
         }
@@ -84,7 +86,7 @@ public class ClockPreference extends DropDownPreference implements TunerService.
 
     @Override
     protected boolean persistString(String value) {
-        Dependency.get(TunerService.class).setValue(Clock.CLOCK_SECONDS, SECONDS.equals(value) ? 1
+        Dependency.get(TunerService.class).setValue(CLOCK_SECONDS, SECONDS.equals(value) ? 1
                 : 0);
         if (DISABLED.equals(value)) {
             mBlacklist.add(mClock);

@@ -15,6 +15,7 @@
 package com.android.systemui.tuner;
 
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
+import static com.android.systemui.BatteryMeterView.BATTERY_ICON_SLOT;
 
 import android.content.Context;
 import android.provider.Settings;
@@ -28,7 +29,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
-
 public class BatteryPreference extends DropDownPreference implements TunerService.Tunable {
 
     private static final String PERCENT = "percent";
@@ -43,7 +43,7 @@ public class BatteryPreference extends DropDownPreference implements TunerServic
 
     public BatteryPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mBattery = context.getString(com.android.internal.R.string.status_bar_battery);
+        mBattery = BATTERY_ICON_SLOT;
         setEntryValues(new CharSequence[] {PERCENT, DEFAULT, DISABLED });
     }
 
