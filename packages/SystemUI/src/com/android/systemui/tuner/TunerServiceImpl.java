@@ -97,6 +97,8 @@ public class TunerServiceImpl extends TunerService {
             }
         }
 
+        initIconBlacklist();
+
         mCurrentUser = ActivityManager.getCurrentUser();
         mUserTracker = new CurrentUserTracker(broadcastDispatcher) {
             @Override
@@ -114,21 +116,18 @@ public class TunerServiceImpl extends TunerService {
         mUserTracker.stopTracking();
     }
 
-    private void upgradeTuner(int oldVersion, int newVersion, Handler mainHandler) {
-        if (oldVersion < 1) {
-            String blacklistStr = getValue(StatusBarIconController.ICON_BLACKLIST);
-            if (blacklistStr != null) {
-                ArraySet<String> iconBlacklist =
-                        StatusBarIconController.getIconBlacklist(mContext, blacklistStr);
-
-                iconBlacklist.add("rotate");
-                iconBlacklist.add("headset");
-
-                Settings.Secure.putStringForUser(mContentResolver,
-                        StatusBarIconController.ICON_BLACKLIST,
-                        TextUtils.join(",", iconBlacklist), mCurrentUser);
-            }
+    private void initIconBlacklist() {
+        String blacklistStr = getValue(StatusBarIconController.ICON_BLACKLIST);
+        if (blacklistStr == null) {
+            ArraySet<String> iconBlacklist =
+                    StatusBarIconController.getIconBlacklist(mContext, blacklistStr);
+            Settings.Secure.putStringForUser(mContentResolver,
+                    StatusBarIconController.ICON_BLACKLIST,
+                    TextUtils.join(",", iconBlacklist), mCurrentUser);
         }
+    }
+
+    private void upgradeTuner(int oldVersion, int newVersion, Handler mainHandler) {
         if (oldVersion < 2) {
             setTunerEnabled(mContext, false);
         }
