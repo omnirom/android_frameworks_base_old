@@ -30,6 +30,7 @@ import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.DejankUtils;
@@ -53,7 +54,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class TunerServiceImpl extends TunerService {
-
+    private static final String TAG = "TunerServiceImpl";
     private static final String TUNER_VERSION = "sysui_tuner_version";
 
     private static final int CURRENT_TUNER_VERSION = 4;
@@ -90,12 +91,15 @@ public class TunerServiceImpl extends TunerService {
         mContentResolver = mContext.getContentResolver();
         mLeakDetector = leakDetector;
 
+        Log.i(TAG, "init");
         for (UserInfo user : UserManager.get(mContext).getUsers()) {
             mCurrentUser = user.getUserHandle().getIdentifier();
             if (getValue(TUNER_VERSION, 0) != CURRENT_TUNER_VERSION) {
                 upgradeTuner(getValue(TUNER_VERSION, 0), CURRENT_TUNER_VERSION, mainHandler);
             }
         }
+
+        initIconBlacklist();
 
         mCurrentUser = ActivityManager.getCurrentUser();
         mUserTracker = new CurrentUserTracker(broadcastDispatcher) {
@@ -114,21 +118,19 @@ public class TunerServiceImpl extends TunerService {
         mUserTracker.stopTracking();
     }
 
-    private void upgradeTuner(int oldVersion, int newVersion, Handler mainHandler) {
-        if (oldVersion < 1) {
-            String blacklistStr = getValue(StatusBarIconController.ICON_BLACKLIST);
-            if (blacklistStr != null) {
-                ArraySet<String> iconBlacklist =
-                        StatusBarIconController.getIconBlacklist(mContext, blacklistStr);
-
-                iconBlacklist.add("rotate");
-                iconBlacklist.add("headset");
-
-                Settings.Secure.putStringForUser(mContentResolver,
-                        StatusBarIconController.ICON_BLACKLIST,
-                        TextUtils.join(",", iconBlacklist), mCurrentUser);
-            }
+    private void initIconBlacklist() {
+        String blacklistStr = getValue(StatusBarIconController.ICON_BLACKLIST);
+        if (blacklistStr == null) {
+            ArraySet<String> iconBlacklist =
+                    StatusBarIconController.getIconBlacklist(mContext, blacklistStr);
+            Log.i(TAG, "initIconBlacklist " + iconBlacklist);
+            Settings.Secure.putStringForUser(mContentResolver,
+                    StatusBarIconController.ICON_BLACKLIST,
+                    TextUtils.join(",", iconBlacklist), mCurrentUser);
         }
+    }
+
+    private void upgradeTuner(int oldVersion, int newVersion, Handler mainHandler) {
         if (oldVersion < 2) {
             setTunerEnabled(mContext, false);
         }
