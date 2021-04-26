@@ -1045,7 +1045,7 @@ public class NavigationBarView extends FrameLayout implements
         } else {
             updateButtonLocation(getRotateSuggestionButton(), inScreenSpace);
         }
-        if (getHomeHandle() != null) {
+        if (getHomeHandle() != null && isGestureHandleAction()) {
             updateButtonLocation(getHomeHandle(), inScreenSpace);
         }
         return mTmpRegion;
@@ -1274,6 +1274,8 @@ public class NavigationBarView extends FrameLayout implements
         getViewTreeObserver().addOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
         Dependency.get(OmniSettingsService.class).addIntObserver(this,
                 Settings.System.OMNI_NAVIGATION_BAR_ARROW_KEYS);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                Settings.System.OMNI_GESTURE_HANDLE_ACTION);
     }
 
     @Override
@@ -1415,6 +1417,11 @@ public class NavigationBarView extends FrameLayout implements
     private boolean showDpadArrowKeys() {
         return Settings.System.getIntForUser(getContext().getContentResolver(),
                 Settings.System.OMNI_NAVIGATION_BAR_ARROW_KEYS, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
+    private boolean isGestureHandleAction() {
+        return Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.OMNI_GESTURE_HANDLE_ACTION, 1, UserHandle.USER_CURRENT) == 1;
     }
 
     @Override
