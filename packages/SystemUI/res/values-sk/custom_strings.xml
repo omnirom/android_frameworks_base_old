@@ -36,9 +36,10 @@
     <string name="tuner_show_drag_handle">Zobraziť ťahanie</string>
     <string name="tuner_battery_location_bar">Zobraziť ikonu batérie v stavovom riadku</string>
     <string name="tuner_status_bar_bg_transparency">Priehľadné pozadie stavového riadku</string>
-    <string name="tuner_qs_media_player">Prehrávač médií - je vyžadovaný reštart</string>
+    <string name="tuner_qs_media_player_new">Vstavaný prehrávač médií</string>
     <string name="tuner_qs_media_player_rows">Rozbaliť riadky v skrytom prehrávači médií</string>
     <string name="tuner_qs_show_media_divider">Zobraziť rozdeľovač prehrávača médií</string>
+    <string name="qs_show_network_activity_title">Zobraziť indikátor sieťovej aktivity</string>
     <string name="tuner_keyguard_fod_unlock_enabled_title">Povoliť sekundárne odomknutie FOD</string>
     <string name="tuner_keyguard_fod_unlock_enabled_summary">Pre zariadenia s FOD umožní používať odomknutie na sekundárnych obrazovkách</string>
     <!-- omnijaws -->
@@ -80,4 +81,5 @@
     <string name="qs_data_switch_label">Prepnúť kartu pre mobilné dáta</string>
     <string name="qs_data_switch_changed_1">Používanie SIM 1 pre mobilné dáta</string>
     <string name="qs_data_switch_changed_2">Používanie SIM 2 pre mobilné dáta</string>
+    <string name="status_bar_vpn">Sieť VPN</string>
 </resources>

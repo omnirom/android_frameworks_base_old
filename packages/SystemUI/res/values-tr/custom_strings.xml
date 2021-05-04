@@ -36,9 +36,10 @@
     <string name="tuner_show_drag_handle">Sürükleme kolunu göster</string>
     <string name="tuner_battery_location_bar">Durum çubuğunda pili göster</string>
     <string name="tuner_status_bar_bg_transparency">Şeffaf durum çubuğu arka planı</string>
-    <string name="tuner_qs_media_player">Medya çalar - yeniden başlatma gerekir</string>
-    <string name="tuner_qs_media_player_rows">Gizli medya çalardaki satırları genişlet</string>
+    <string name="tuner_qs_media_player_new">Gömülü medya çalar</string>
+    <string name="tuner_qs_media_player_rows">Gizlenmiş medya çalardaki satırları genişlet</string>
     <string name="tuner_qs_show_media_divider">Medya çalar ayracını göster</string>
+    <string name="qs_show_network_activity_title">Ağ faaliyetini göster</string>
     <string name="tuner_keyguard_fod_unlock_enabled_title">İkincil FOD kilit açmaya izin ver</string>
     <string name="tuner_keyguard_fod_unlock_enabled_summary">FOD (ekran üstü parmak izi tarayıcısı) özelliğine sahip cihazlar için ikincil kilit açma ekranlarında kullanmaya izin verin</string>
     <!-- omnijaws -->
@@ -80,4 +81,5 @@
     <string name="qs_data_switch_label">Veri kartını değiştir</string>
     <string name="qs_data_switch_changed_1">SIM 1, mobil veri için kullanılıyor</string>
     <string name="qs_data_switch_changed_2">SIM 2, mobil veri için kullanılıyor</string>
+    <string name="status_bar_vpn">VPN</string>
 </resources>

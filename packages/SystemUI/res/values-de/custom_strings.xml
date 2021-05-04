@@ -36,8 +36,6 @@
     <string name="tuner_show_drag_handle">Ziehschalter anzeigen</string>
     <string name="tuner_battery_location_bar">Zeige Akkusymbol in der Statusleiste</string>
     <string name="tuner_status_bar_bg_transparency">Transparenter Hintergrund der Statusleiste</string>
-    <string name="tuner_qs_media_player">Media Player - Neustart erforderlich</string>
-    <string name="tuner_qs_media_player_rows">Zeilen auf verstecktem Media-Player erweitern</string>
     <string name="tuner_keyguard_fod_unlock_enabled_title">Sekundäres FOD Entsperren erlauben</string>
     <string name="tuner_keyguard_fod_unlock_enabled_summary">Bei Geräten mit FOD die Verwendung auf sekundären Entsperrbildschirmen erlauben</string>
     <!-- omnijaws -->

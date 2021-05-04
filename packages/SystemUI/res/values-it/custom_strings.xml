@@ -19,28 +19,29 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- qs customize -->
-    <string name="drag_or_touch_to_rearrange_tiles">Tocca per rimuovere o trascinare per riorganizzare i tile</string>
-    <string name="drag_or_touch_to_add_tiles">Tocca o trascina per aggiungere tile</string>
-    <string name="customize_settings_info_text"><b>Nota:</b> le colonne saranno limitate automaticamente in base allo spazio disponibile. Scorri per ulteriori impostazioni.</string>
+    <string name="drag_or_touch_to_rearrange_tiles">Tocca per rimuovere o trascina per riorganizzare i pannelli</string>
+    <string name="drag_or_touch_to_add_tiles">Tocca o trascina per aggiungere i pannelli</string>
+    <string name="customize_settings_info_text"><b>Nota:</b> le colonne saranno automaticamente limitate in base allo spazio disponibile. Scorri per altre impostazioni.</string>
     <string name="customize_show_labels">Etichette</string>
     <string name="customize_quickbar_sync">Sincronizza</string>
     <string name="customize_quickbar_label">Barra Rapida</string>
     <string name="customize_columns_land_label">Orizzontale</string>
     <string name="customize_columns_port_label">Verticale</string>
-    <string name="tuner_show_brightness_mode">Mostra la mattonella (toggle) per la luminosità automatica vicino al cursore</string>
-    <string name="tuner_show_brightness_side_buttons">Mostra pulsanti ai lati del cursore luminosità</string>
+    <string name="tuner_show_brightness_mode">Mostra interruttore della modalità di luminosità</string>
+    <string name="tuner_show_brightness_side_buttons">Mostra i tasti laterali del cursore della luminosità</string>
     <string name="tuner_quick_settings">Impostazioni rapide</string>
     <string name="tuner_show_brightness_new">Mostra il cursore di luminosità</string>
     <string name="tuner_brightness_position_bottom">Cursore luminosità in basso</string>
     <string name="tuner_show_secure_title">Mostra piè di pagina di sicurezza</string>
     <string name="tuner_show_drag_handle">Mostra maniglia di trascinamento</string>
-    <string name="tuner_battery_location_bar">Mostra batteria nella barra di stato</string>
+    <string name="tuner_battery_location_bar">Mostra la batteria nella barra di stato</string>
     <string name="tuner_status_bar_bg_transparency">Sfondo della barra di stato trasparente</string>
-    <string name="tuner_qs_media_player">Riproduttore multimediale - è necessario il riavvio</string>
-    <string name="tuner_qs_media_player_rows">Espandi righe sul lettore multimediale nascosto</string>
-    <string name="tuner_qs_show_media_divider">Mostra divisore lettore multimediale</string>
-    <string name="tuner_keyguard_fod_unlock_enabled_title">Consenti sblocco FOD secondario</string>
-    <string name="tuner_keyguard_fod_unlock_enabled_summary">Per dispositivi con FOD consentire l\'utilizzo su schermi di sblocco secondari</string>
+    <string name="tuner_qs_media_player_new">Lettore multimediale incorporato</string>
+    <string name="tuner_qs_media_player_rows">Espandi righe sul lettore nascosto</string>
+    <string name="tuner_qs_show_media_divider">Mostra divisore del lettore multimediale</string>
+    <string name="qs_show_network_activity_title">Mostra l\'attività di rete</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_title">Consenti lo sblocco del FOD secondario</string>
+    <string name="tuner_keyguard_fod_unlock_enabled_summary">Per i dispositivi con FOD consente l\'uso sugli schermi di sblocco secondari</string>
     <!-- omnijaws -->
     <string name="omnijaws_service_error">Errore</string>
     <string name="omnijaws_service_unkown">Dati meteo non disponibili</string>
@@ -52,11 +53,11 @@
     <string name="omnijaws_package_not_available">OmniJaws non disponibile</string>
     <string name="omnijaws_service_last_update">Ultimo aggiornamento:</string>
     <!-- Power Tile -->
-    <string name="qs_power_button_title">Pulsante di alimentazione</string>
+    <string name="qs_power_button_title">Tasto di accensione</string>
     <!-- Heads Up QS Tile -->
     <string name="quick_settings_heads_up_label">Notifiche fluttuanti</string>
-    <string name="accessibility_quick_settings_heads_up_off">Le notifiche fluttuanti sono disattivate.</string>
-    <string name="accessibility_quick_settings_heads_up_on">Le notifiche fluttuanti sono attivate.</string>
+    <string name="accessibility_quick_settings_heads_up_off">Notifiche fluttuanti disabilitate.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Notifiche fluttuanti consentite.</string>
     <string name="accessibility_quick_settings_heads_up_changed_off">Notifiche fluttuanti disattivate.</string>
     <string name="accessibility_quick_settings_heads_up_changed_on">Notifiche fluttuanti attivate.</string>
     <!-- Screenshot Tile -->
@@ -70,14 +71,15 @@
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
     <string name="global_action_reboot_fastboot">Fastboot</string>
-    <string name="keyguard_plugged_in_charging_dash"><xliff:g id="percentage">%s</xliff:g> • Ricarica rapida</string>
+    <string name="keyguard_plugged_in_charging_dash"><xliff:g id="percentage">%s</xliff:g> • Dash charging</string>
     <!-- Indication on the keyguard that is shown when the device is charging rapidly. Should match keyguard_plugged_in_charging_fast [CHAR LIMIT=50]-->
-    <string name="keyguard_indication_charging_time_dash"><xliff:g id="percentage">%2$s</xliff:g> • Ricarica rapida (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g> fino al completamento)</string>
+    <string name="keyguard_indication_charging_time_dash"><xliff:g id="percentage">%2$s</xliff:g> • Dash charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g> al completamento)</string>
     <!-- Navigation bar dpad -->
     <string name="accessibility_dpad_left">Cursore a sinistra</string>
     <string name="accessibility_dpad_right">Cursore a destra</string>
     <!-- DataSwitch Tile -->
     <string name="qs_data_switch_label">Cambia scheda dati</string>
-    <string name="qs_data_switch_changed_1">Stai utilizzando la SIM 1 per i dati mobili</string>
-    <string name="qs_data_switch_changed_2">Stai utilizzando la SIM 2 per i dati mobili</string>
+    <string name="qs_data_switch_changed_1">Stai usando la SIM 1 per i dati Mobili</string>
+    <string name="qs_data_switch_changed_2">Stai usando la SIM 2 per i dati Mobili</string>
+    <string name="status_bar_vpn">VPN</string>
 </resources>

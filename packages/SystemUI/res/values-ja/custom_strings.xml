@@ -36,9 +36,10 @@
     <string name="tuner_show_drag_handle">ドラッグハンドルを表示</string>
     <string name="tuner_battery_location_bar">ステータスバーにバッテリーを表示</string>
     <string name="tuner_status_bar_bg_transparency">ステータスバーの背景を透明化</string>
-    <string name="tuner_qs_media_player">メディアプレーヤー - 再起動が必要です</string>
-    <string name="tuner_qs_media_player_rows">非表示のメディアプレーヤーで行を展開</string>
+    <string name="tuner_qs_media_player_new">埋め込みメディアプレーヤー</string>
+    <string name="tuner_qs_media_player_rows">非表示のプレーヤーに行を展開</string>
     <string name="tuner_qs_show_media_divider">メディアプレーヤーの分割線を表示</string>
+    <string name="qs_show_network_activity_title">通信速度を表示</string>
     <string name="tuner_keyguard_fod_unlock_enabled_title">セカンダリ画面指紋認証ロック解除を許可</string>
     <string name="tuner_keyguard_fod_unlock_enabled_summary">画面指紋認証を備えたデバイスの場合はセカンダリ画面でロック解除を使用できます</string>
     <!-- omnijaws -->
@@ -80,4 +81,5 @@
     <string name="qs_data_switch_label">データ SIM の切換え</string>
     <string name="qs_data_switch_changed_1">SIM 1 をデータ通信に使用中</string>
     <string name="qs_data_switch_changed_2">SIM 2 をデータ通信に使用中</string>
+    <string name="status_bar_vpn">VPN</string>
 </resources>
