@@ -798,5 +798,6 @@
         <!-- omni additions start -->
         <service android:name=".omni.CPUInfoService"
                 android:exported="false" />
+
     </application>
 </manifest>

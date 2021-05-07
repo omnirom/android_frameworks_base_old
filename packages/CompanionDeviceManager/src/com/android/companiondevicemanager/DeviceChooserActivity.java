@@ -21,6 +21,8 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import static java.util.Objects.requireNonNull;
 
+import static java.util.Objects.requireNonNull;
+
 import android.app.Activity;
 import android.companion.CompanionDeviceManager;
 import android.content.Intent;
