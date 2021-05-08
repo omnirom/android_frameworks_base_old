@@ -622,6 +622,9 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         // as a square
         int newRoundedDefault = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.rounded_corner_radius);
+        if (mDisableRoundedCorner == 1) {
+            newRoundedDefault = 0;
+        }
         final int newRoundedDefaultTop = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.rounded_corner_radius_top);
         final int newRoundedDefaultBottom = mContext.getResources().getDimensionPixelSize(

@@ -231,6 +231,8 @@
     <string name="bluetooth_profile_headset">Phone calls</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the OPP profile. -->
     <string name="bluetooth_profile_opp">File transfer</string>
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Broadcast profile. -->
+    <string name="bluetooth_profile_broadcast">Broadcast</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the HID profile. -->
     <string name="bluetooth_profile_hid">Input device</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (accessing Internet through remote device). [CHAR LIMIT=40] -->
@@ -247,6 +249,9 @@
     <string name="bluetooth_profile_sap">SIM Access</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the dun profile. -->
     <string name="bluetooth_profile_dun">Dial-up Network Access</string>
+    <!-- Bluetooth settings. The user-visible string that is used
+         whenever referring to the vcp profile. -->
+    <string name="bluetooth_profile_vcp">Volume control</string>
 
     <!-- Bluetooth settings. The user-visible string for the setting controlling whether to use a high-quality codec if the device supports it, along with the name of the codec (eg AAC, LDAC, aptX) -->
     <string name="bluetooth_profile_a2dp_high_quality">HD audio: <xliff:g id="codec_name">%1$s</xliff:g></string>
