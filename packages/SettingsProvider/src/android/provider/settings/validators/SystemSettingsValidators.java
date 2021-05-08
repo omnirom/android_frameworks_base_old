@@ -89,7 +89,7 @@ public class SystemSettingsValidators {
                         return value == null || value.length() < MAX_LENGTH;
                     }
                 });
-        VALIDATORS.put(System.FONT_SCALE, new InclusiveFloatRangeValidator(0.85f, 1.3f));
+        VALIDATORS.put(System.FONT_SCALE, new InclusiveFloatRangeValidator(0.25f, 5.0f));
         VALIDATORS.put(System.DIM_SCREEN, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 System.DISPLAY_COLOR_MODE,
@@ -208,6 +208,5 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.WIFI_STATIC_DNS2, LENIENT_IP_ADDRESS_VALIDATOR);
         VALIDATORS.put(System.SHOW_BATTERY_PERCENT, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.NOTIFICATION_LIGHT_PULSE, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(System.CALL_CONNECTED_TONE_ENABLED, BOOLEAN_VALIDATOR);
     }
 }
