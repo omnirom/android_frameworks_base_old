@@ -182,6 +182,11 @@ public final class BluetoothUuid {
 
     /** @hide */
     @NonNull
+    public static ParcelUuid ADVANCE_MEDIA_W_UUID =
+            ParcelUuid.fromString("2587db3c-ce70-4fc9-935f-777ab4188fd7");
+
+    /** @hide */
+    @NonNull
     public static ParcelUuid ADVANCE_VOICE_P_UUID =
             ParcelUuid.fromString("00006AD4-0000-1000-8000-00805F9B34FB");
 
