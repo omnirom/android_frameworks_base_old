@@ -800,6 +800,16 @@ public final class CachedAppOptimizer {
         }
     }
 
+    // This will ensure app will be out of the freezer for at least FREEZE_TIMEOUT_MS
+    void unfreezeTemporarily(ProcessRecord app) {
+        synchronized (mAm) {
+            if (app.frozen) {
+                unfreezeAppLocked(app);
+                freezeAppAsync(app);
+            }
+        }
+    }
+
     @GuardedBy("mAm")
     void freezeAppAsync(ProcessRecord app) {
         mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
@@ -857,27 +867,27 @@ public final class CachedAppOptimizer {
         long freezeTime = app.freezeUnfreezeTime;
 
         try {
+            freezeBinder(app.pid, false);
+        } catch (RuntimeException e) {
+            Slog.e(TAG_AM, "Unable to unfreeze binder for " + app.pid + " " + app.processName
+                    + ". Killing it");
+            app.kill("Unable to unfreeze",
+                    ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+            return;
+        }
+
+        try {
             Process.setProcessFrozen(app.pid, app.uid, false);
 
             app.freezeUnfreezeTime = SystemClock.uptimeMillis();
             app.frozen = false;
         } catch (Exception e) {
             Slog.e(TAG_AM, "Unable to unfreeze " + app.pid + " " + app.processName
-                    + ". Any related user experience might be hanged.");
+                    + ". This might cause inconsistency or UI hangs.");
         }
 
         if (!app.frozen) {
-            try {
-                freezeBinder(app.pid, false);
-            } catch (RuntimeException e) {
-                Slog.e(TAG_AM, "Unable to unfreeze binder for " + app.pid + " " + app.processName
-                        + ". Killing it");
-                app.kill("Unable to unfreeze",
-                        ApplicationExitInfo.REASON_OTHER,
-                        ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
-                return;
-            }
-
             if (DEBUG_FREEZER) {
                 Slog.d(TAG_AM, "sync unfroze " + app.pid + " " + app.processName);
             }
@@ -1190,14 +1200,6 @@ public final class CachedAppOptimizer {
                     return;
                 }
 
-                try {
-                    freezeBinder(pid, true);
-                } catch (RuntimeException e) {
-                    // TODO: it might be preferable to kill the target pid in this case
-                    Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
-                    return;
-                }
-
                 if (pid == 0 || proc.frozen) {
                     // Already frozen or not a real process, either one being
                     // launched or one being killed
@@ -1225,6 +1227,15 @@ public final class CachedAppOptimizer {
                 }
 
                 EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
+
+                try {
+                    freezeBinder(pid, true);
+                } catch (RuntimeException e) {
+                    Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
+                    proc.kill("Unable to freeze binder interface",
+                            ApplicationExitInfo.REASON_OTHER,
+                            ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+                }
 
                 // See above for why we're not taking mPhenotypeFlagLock here
                 if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {
