@@ -4014,6 +4014,20 @@ public class CarrierConfigManager {
     public static final String KEY_REQUIRE_APN_FILTERING_WITH_RADIO_CAPABILITY =
             "require_apn_filtering_with_radio_capability_bool";
 
+    /**
+     * Indicates temporarily unmetered mobile data is supported by the carrier.
+     * @hide
+     */
+    public static final String KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL =
+            "network_temp_not_metered_supported_bool";
+
+    /**
+     * Indicates whether RTT is supported while roaming.
+     * @hide
+     */
+    public static final String KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL =
+            "rtt_supported_while_roaming_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -4374,6 +4388,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_TTY_HCO_VCO_WITH_RTT_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_CHARGE_INDICATION_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_NO_REPLY_TIMER_FOR_CFNRY_BOOL, true);
         sDefaults.putStringArray(KEY_FEATURE_ACCESS_CODES_STRING_ARRAY, null);
@@ -4560,6 +4575,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
+        sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_MULTIANCHOR_CONFERENCE, false);
         sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
         sDefaults.putStringArray(KEY_MULTI_APN_ARRAY_FOR_SAME_GID, new String[] {
