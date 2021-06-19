@@ -171,6 +171,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private IBluetoothGatt mBluetoothGatt;
     private final ReentrantReadWriteLock mBluetoothLock = new ReentrantReadWriteLock();
     private boolean mBinding;
+    private int mBindingUserID;
     private boolean mUnbinding;
     private int mWaitForEnableRetry;
     private int mWaitForDisableRetry;
@@ -1876,6 +1877,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                 mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
                             } else {
                                 mBinding = true;
+                                mBindingUserID = ActivityManager.getCurrentUser();
+                                Slog.d(TAG, "Binding BT service. Current user: " + mBindingUserID);
                             }
                         } else if (mBluetooth != null) {
                             try {
@@ -2372,6 +2375,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         mBluetoothLock.writeLock().unlock();
                     }
 
+                    // Make sure BT process exit completely
+                    int[] pids = Process.getPidsForCommands(
+                                     new String[]{ "com.android.bluetooth" });
+                    if (pids != null && pids.length > 0) {
+                        for(int pid : pids) {
+                            Slog.e(TAG, "Killing BT process with PID = " + pid);
+                            Process.killProcess(pid);
+                        }
+                    }
+
                     // log the unexpected crash
                     addCrashLog();
                     addActiveLog(BluetoothProtoEnums.ENABLE_DISABLE_REASON_CRASH,
@@ -2427,9 +2440,14 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     mBluetoothLock.writeLock().unlock();
                     // Ensure try BIND for one more time
                     if(!mTryBindOnBindTimeout) {
-                        Slog.e(TAG, " Trying to Bind again");
-                        mTryBindOnBindTimeout = true;
-                        handleEnable(mQuietEnable);
+                        int userID = ActivityManager.getCurrentUser();
+
+                        Slog.d(TAG, "Current user: " + userID);
+                        if (mBindingUserID == userID) {
+                            Slog.e(TAG, " Trying to Bind again");
+                            mTryBindOnBindTimeout = true;
+                            handleEnable(mQuietEnable);
+                        }
                     } else {
                         Slog.e(TAG, "Bind trails excedded");
                         mTryBindOnBindTimeout = false;
@@ -2597,6 +2615,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
                 } else {
                     mBinding = true;
+                    mBindingUserID = ActivityManager.getCurrentUser();
+                    Slog.d(TAG, "Binding BT service. Current user: " + mBindingUserID);
                 }
             } else if (mBluetooth != null) {
                 //Enable bluetooth

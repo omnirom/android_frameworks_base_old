@@ -4392,4 +4392,12 @@
 
     <!-- Component names of the services which will keep critical code path warm -->
     <string-array name="config_keep_warming_services" translatable="false" />
+
+    <!-- If true, will enable force landscape mode, it will default landscape and
+         ignore sensor rotation request.-->
+    <bool name="config_supportForceLandscapeMode">false</bool>
+
+    <!-- The number of degrees to rotate the display when the force landscape
+         mode enabled. A value of -1 means no change in orientation by default. -->
+    <integer name="config_forceLandscapeRotation">-1</integer>
 </resources>

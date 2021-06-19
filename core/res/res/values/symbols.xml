@@ -4077,4 +4077,7 @@
   <java-symbol type="array" name="config_notificationMsgPkgsAllowedAsConvos" />
 
   <java-symbol type="array" name="config_keep_warming_services" />
+
+  <java-symbol type="bool" name="config_supportForceLandscapeMode" />
+  <java-symbol type="integer" name="config_forceLandscapeRotation" />
 </resources>

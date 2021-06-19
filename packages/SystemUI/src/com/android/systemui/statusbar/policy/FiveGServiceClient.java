@@ -149,13 +149,24 @@ public class FiveGServiceClient {
 
     public void registerListener(int phoneId, IFiveGStateListener listener) {
         Log.d(TAG, "registerListener phoneId=" + phoneId);
-
+        resetState(phoneId);
         mStatesListeners.put(phoneId, listener);
         if ( !isServiceConnected() ) {
             binderService();
         }else{
             initFiveGServiceState(phoneId);
         }
+    }
+
+    private void resetState(int phoneId) {
+        Log.d(TAG, "resetState phoneId=" + phoneId);
+        FiveGServiceState currentState = getCurrentServiceState(phoneId);
+        currentState.mNrIconType = NrIconType.INVALID;
+        currentState.mIconGroup = TelephonyIcons.UNKNOWN;
+
+        FiveGServiceState lastState = getLastServiceState(phoneId);
+        lastState.mNrIconType = NrIconType.INVALID;
+        lastState.mIconGroup = TelephonyIcons.UNKNOWN;
     }
 
     public void unregisterListener(int phoneId) {
