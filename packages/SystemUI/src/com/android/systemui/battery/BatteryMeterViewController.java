@@ -63,7 +63,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
             if (StatusBarIconController.ICON_HIDE_LIST.equals(key)) {
                 ArraySet<String> icons = StatusBarIconController.getIconHideList(
                         getContext(), newValue);
-                mView.setVisibility(icons.contains(mSlotBattery) ? View.GONE : View.VISIBLE);
+                mView.setVisibility((icons.contains(mSlotBattery) || mView.isBatteryHidden()) ? View.GONE : View.GView.VISIBLE);
             }
         }
     };
