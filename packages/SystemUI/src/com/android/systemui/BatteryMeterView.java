@@ -99,6 +99,7 @@ public class BatteryMeterView extends LinearLayout implements
     private boolean mCharging;
     // Error state where we know nothing about the current battery state
     private boolean mBatteryStateUnknown;
+    private boolean mHideBatteryOnUnknown;
     // Lazily-loaded since this is expected to be a rare-if-ever state
     private Drawable mUnknownStateDrawable;
 
@@ -131,6 +132,8 @@ public class BatteryMeterView extends LinearLayout implements
         mSettingObserver = new SettingObserver(new Handler(context.getMainLooper()));
         mShowPercentAvailable = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
+        mHideBatteryOnUnknown = context.getResources().getBoolean(
+                R.bool.config_battery_hide_on_unknown);
 
         setupLayoutTransition();
 
@@ -256,7 +259,7 @@ public class BatteryMeterView extends LinearLayout implements
         if (StatusBarIconController.ICON_HIDE_LIST.equals(key)) {
             ArraySet<String> icons = StatusBarIconController.getIconHideList(
                     getContext(), newValue);
-            setVisibility(icons.contains(mSlotBattery) ? View.GONE : View.VISIBLE);
+            setVisibility(icons.contains(mSlotBattery) ? View.GONE : (mBatteryStateUnknown && mHideBatteryOnUnknown ? View.GONE : View.VISIBLE));
         }
     }
 
@@ -418,8 +421,12 @@ public class BatteryMeterView extends LinearLayout implements
 
         if (mBatteryStateUnknown) {
             mBatteryIconView.setImageDrawable(getUnknownStateDrawable());
+            if (mHideBatteryOnUnknown) {
+                setVisibility(View.GONE);
+            }
         } else {
             mBatteryIconView.setImageDrawable(mDrawable);
+            setVisibility(View.VISIBLE);
         }
 
         updateShowPercent();
