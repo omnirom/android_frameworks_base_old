@@ -80,6 +80,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     private boolean mCharging;
     // Error state where we know nothing about the current battery state
     private boolean mBatteryStateUnknown;
+    private boolean mHideBatteryOnUnknown;
     // Lazily-loaded since this is expected to be a rare-if-ever state
     private Drawable mUnknownStateDrawable;
 
@@ -111,6 +112,8 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
 
         mShowPercentAvailable = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
+        mHideBatteryOnUnknown = context.getResources().getBoolean(
+                R.bool.config_battery_hide_on_unknown);
 
         setupLayoutTransition();
 
@@ -332,11 +335,19 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
 
         if (mBatteryStateUnknown) {
             mBatteryIconView.setImageDrawable(getUnknownStateDrawable());
+            if (mHideBatteryOnUnknown) {
+                setVisibility(View.GONE);
+            }
         } else {
             mBatteryIconView.setImageDrawable(mDrawable);
+            setVisibility(View.VISIBLE);
         }
 
         updateShowPercent();
+    }
+
+    boolean isBatteryHidden() {
+        return mBatteryStateUnknown && mHideBatteryOnUnknown;
     }
 
     /**
