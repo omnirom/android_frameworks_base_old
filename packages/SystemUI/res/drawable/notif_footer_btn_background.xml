@@ -22,7 +22,7 @@
             android:insetBottom="4dp"
             android:insetTop="4dp">
             <shape android:shape="rectangle">
-                <corners android:radius="20dp" />
+                <corners android:radius="@dimen/notification_button_corner_radius" />
                 <padding
                     android:left="20dp"
                     android:right="20dp" />
