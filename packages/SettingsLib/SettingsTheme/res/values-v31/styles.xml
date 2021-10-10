@@ -17,7 +17,7 @@
 <resources>
     <style name="TextAppearance.PreferenceTitle.SettingsLib"
            parent="@*android:style/TextAppearance.DeviceDefault.ListItem">
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">@dimen/settingslib_preference_title_text_size</item>
     </style>
 
     <style name="TextAppearance.CategoryTitle.SettingsLib"
