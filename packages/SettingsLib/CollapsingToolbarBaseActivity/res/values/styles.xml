@@ -21,6 +21,6 @@
     </style>
 
     <style name="CollapsingToolbarTitle.Expanded" parent="CollapsingToolbarTitle.Collapsed">
-        <item name="android:textSize">36dp</item>
+        <item name="android:textSize">@dimen/expanded_title_text_size</item>
     </style>
 </resources>
