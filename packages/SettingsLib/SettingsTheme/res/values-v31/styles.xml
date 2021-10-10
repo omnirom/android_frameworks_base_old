@@ -18,7 +18,7 @@
     <style name="TextAppearance.PreferenceTitle.SettingsLib"
            parent="@android:style/TextAppearance.Material.Subhead">
         <item name="android:fontFamily">@string/settingslib_config_headlineFontFamily</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">@dimen/settingslib_preference_title_text_size</item>
     </style>
 
     <style name="TextAppearance.CategoryTitle.SettingsLib"
