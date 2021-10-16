@@ -137,7 +137,7 @@ public final class ChangeReporter {
      */
     @VisibleForTesting
     public boolean shouldWriteToDebug(int uid, long changeId, int state) {
-        return mDebugLogAll || !isAlreadyReported(uid, new ChangeReport(changeId, state));
+        return false; /*mDebugLogAll || !isAlreadyReported(uid, new ChangeReport(changeId, state));*/
     }
 
     private boolean isAlreadyReported(int uid, ChangeReport report) {
