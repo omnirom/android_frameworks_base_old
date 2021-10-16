@@ -54,7 +54,7 @@ import javax.inject.Inject;
 public class NavigationModeController implements Dumpable {
 
     private static final String TAG = NavigationModeController.class.getSimpleName();
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     public interface ModeChangedListener {
         void onNavigationModeChanged(int mode);
