@@ -6297,7 +6297,7 @@ public class NotificationManagerService extends SystemService {
                 ? mShortcutHelper.getValidShortcutInfo(notification.getShortcutId(), pkg, user)
                 : null;
         if (notification.getShortcutId() != null && info == null) {
-            Slog.w(TAG, "notification " + r.getKey() + " added an invalid shortcut");
+            if (DBG) Slog.d(TAG, "notification " + r.getKey() + " added an invalid shortcut");
         }
         r.setShortcutInfo(info);
         r.setHasSentValidMsg(mPreferencesHelper.hasSentValidMsg(pkg, notificationUid));
