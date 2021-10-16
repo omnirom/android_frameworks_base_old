@@ -463,7 +463,7 @@ public final class DropBoxManagerService extends SystemService {
     public void addEntry(String tag, EntrySource entry, int flags) {
         File temp = null;
         try {
-            Slog.i(TAG, "add tag=" + tag + " isTagEnabled=" + isTagEnabled(tag)
+            Slog.v(TAG, "add tag=" + tag + " isTagEnabled=" + isTagEnabled(tag)
                     + " flags=0x" + Integer.toHexString(flags));
             if ((flags & DropBoxManager.IS_EMPTY) != 0) throw new IllegalArgumentException();
 
