@@ -54,7 +54,6 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIAppComponentFactory;
-import com.android.systemui.omni.OmniJawsClient;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
@@ -64,6 +63,8 @@ import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
+
+import org.omnirom.omnilib.weather.OmniJawsClient;
 
 import java.util.Date;
 import java.util.Locale;
