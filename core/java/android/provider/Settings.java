@@ -5985,6 +5985,11 @@ public final class Settings {
                 "show_battery_image";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5999,6 +6004,7 @@ public final class Settings {
             OMNI_ADVANCED_REBOOT,
             OMNI_MONET_DISABLE,
             OMNI_SHOW_BATTERY_IMAGE,
+            OMNI_LOCKSCREEN_WEATHER_ENABLED
         };
 
         /**
@@ -6021,6 +6027,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_ADVANCED_REBOOT, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_MONET_DISABLE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
         }
     }
 
