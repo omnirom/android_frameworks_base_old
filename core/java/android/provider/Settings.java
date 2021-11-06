@@ -5643,6 +5643,11 @@ public final class Settings {
         public static final String OMNI_ADVANCED_REBOOT = "advanced_reboot";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5654,7 +5659,8 @@ public final class Settings {
             OMNI_BUTTON_EXTRA_KEY_MAPPING,
             OMNI_DEVICE_FEATURE_SETTINGS,
             OMNI_NAVIGATION_BAR_SHOW,
-            OMNI_ADVANCED_REBOOT
+            OMNI_ADVANCED_REBOOT,
+            OMNI_LOCKSCREEN_WEATHER_ENABLED
         };
 
         /**
@@ -5675,6 +5681,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_SHOW, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_ADVANCED_REBOOT, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
         }
     }
 
