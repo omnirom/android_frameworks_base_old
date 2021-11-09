@@ -85,7 +85,7 @@ public class QSFooterView extends FrameLayout {
 
     private void setBuildText() {
         if (mBuildText == null) return;
-        if (DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(mContext)) {
+        if (DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(mContext) && false) {
             mBuildText.setText(mContext.getString(
                     com.android.internal.R.string.bugreport_status,
                     Build.VERSION.RELEASE_OR_CODENAME,
