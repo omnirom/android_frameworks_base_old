@@ -17,4 +17,5 @@
 <resources>
     <dimen name="spinner_height">36dp</dimen>
     <dimen name="spinner_padding_top_or_bottom">8dp</dimen>
+    <dimen name="spinner_background_radius">28dp</dimen>
 </resources>
