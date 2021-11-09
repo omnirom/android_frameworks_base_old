@@ -27,7 +27,7 @@
                 android:bottom="8dp">
 
                 <shape>
-                    <corners android:radius="28dp"/>
+                    <corners android:radius="@dimen/spinner_background_radius"/>
                     <solid android:color="?priv-android:attr/colorAccentPrimary"/>
                     <size android:height="@dimen/spinner_height"/>
                 </shape>
