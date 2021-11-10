@@ -71,6 +71,7 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String POWER = "power";
     public static final String VOLUME_UP = "volup";
     public static final String VOLUME_DOWN = "voldown";
+    public static final String NOTIFICATIONS = "notifications";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
@@ -395,6 +396,8 @@ public class NavigationBarInflaterView extends FrameLayout
             v = inflater.inflate(R.layout.volume_plus, parent, false);
         } else if (VOLUME_DOWN.equals(button)) {
             v = inflater.inflate(R.layout.volume_minus, parent, false);
+        } else if (NOTIFICATIONS.equals(button)) {
+            v = inflater.inflate(R.layout.notifications_button, parent, false);
         } else if (button.startsWith(KEY)) {
             String uri = extractImage(button);
             int code = extractKeycode(button);
