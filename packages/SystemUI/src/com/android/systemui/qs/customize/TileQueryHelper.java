@@ -114,7 +114,9 @@ public class TileQueryHelper {
         }
         possibleTiles.addAll(Arrays.asList(possible.split(",")));
 
-        if (Build.IS_DEBUGGABLE && !current.contains(GarbageMonitor.MemoryTile.TILE_SPEC)) {
+        if (Build.IS_DEBUGGABLE
+                && GarbageMonitor.ADD_MEMORY_TILE_TO_DEFAULT_ON_DEBUGGABLE_BUILDS
+                && !current.contains(GarbageMonitor.MemoryTile.TILE_SPEC)) {
             possibleTiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
         }
 
