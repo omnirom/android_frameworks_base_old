@@ -56,6 +56,7 @@ import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarOverlayController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.PluginDependencyProvider;
@@ -364,6 +365,7 @@ public class Dependency {
     @Inject Lazy<UiEventLogger> mUiEventLogger;
     @Inject Lazy<FeatureFlags> mFeatureFlagsLazy;
     @Inject Lazy<StatusBarContentInsetsProvider> mContentInsetsProviderLazy;
+    @Inject Lazy<OmniSettingsService> mOmniSettingsService;
 
     @Inject
     public Dependency() {
@@ -581,6 +583,8 @@ public class Dependency {
         mProviders.put(UiEventLogger.class, mUiEventLogger::get);
         mProviders.put(FeatureFlags.class, mFeatureFlagsLazy::get);
         mProviders.put(StatusBarContentInsetsProvider.class, mContentInsetsProviderLazy::get);
+
+        mProviders.put(OmniSettingsService.class, mOmniSettingsService::get);
 
         Dependency.setInstance(this);
     }
