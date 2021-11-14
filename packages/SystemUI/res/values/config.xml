@@ -317,6 +317,7 @@
         <item>com.android.systemui.accessibility.SystemActions</item>
         <item>com.android.systemui.toast.ToastUI</item>
         <item>com.android.systemui.wmshell.WMShell</item>
+        <item>com.android.systemui.omni.CPUInfoManager</item>
     </string-array>
 
     <!-- QS tile shape store width. negative implies fill configuration instead of stroke-->

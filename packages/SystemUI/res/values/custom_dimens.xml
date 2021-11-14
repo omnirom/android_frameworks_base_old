@@ -23,5 +23,6 @@
 
     <dimen name="notification_button_corner_radius">20dp</dimen>
     <dimen name="navigation_extra_key_width">36dp</dimen>
+    <dimen name="cpu_info_text_height">12dp</dimen>
 
 </resources>
