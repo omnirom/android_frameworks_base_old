@@ -304,6 +304,7 @@
     <!-- SystemUI Services (per user): The classes of the stuff to start for each user. This is a subset of the config_systemUIServiceComponents -->
     <string-array name="config_systemUIServiceComponentsPerUser" translatable="false">
         <item>com.android.systemui.util.NotificationChannels</item>
+        <item>com.android.systemui.omni.CPUInfoManager</item>
     </string-array>
 
     <!-- Nav bar button default ordering/layout -->
