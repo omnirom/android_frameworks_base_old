@@ -44,6 +44,7 @@ import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.omni.dagger.OmniModule;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.Recents;
@@ -85,6 +86,7 @@ import com.android.systemui.wallet.dagger.WalletModule;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 
+
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -121,6 +123,7 @@ import dagger.Provides;
             UserModule.class,
             UtilModule.class,
             WalletModule.class
+            OmniModule.class
         },
         subcomponents = {
             StatusBarComponent.class,
