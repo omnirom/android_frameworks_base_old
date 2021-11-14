@@ -28,4 +28,5 @@
     <dimen name="volume_seekbar_progress_corner_radius">4dp</dimen>
 
     <dimen name="navigation_extra_key_width">36dp</dimen>
+    <dimen name="cpu_info_text_height">12dp</dimen>
 </resources>
