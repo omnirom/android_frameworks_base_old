@@ -1131,5 +1131,9 @@
             <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer"
                 tools:node="remove" />
         </provider>
+
+        <!-- omni additions start -->
+        <service android:name=".omni.CPUInfoService"
+                android:exported="false" />
     </application>
 </manifest>
