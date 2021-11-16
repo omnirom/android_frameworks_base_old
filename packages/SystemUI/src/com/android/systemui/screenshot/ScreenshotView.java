@@ -178,6 +178,8 @@ public class ScreenshotView extends FrameLayout implements
         QUICK_SHARE
     }
 
+    private boolean mForceShowDismiss = false;
+
     public ScreenshotView(Context context) {
         this(context, null);
     }
@@ -197,6 +199,8 @@ public class ScreenshotView extends FrameLayout implements
         mInteractionJankMonitor = getInteractionJankMonitorInstance();
 
         mFixedSize = mResources.getDimensionPixelSize(R.dimen.overlay_x_scale);
+
+        mForceShowDismiss = mResources.getBoolean(R.bool.always_show_screenshot_dismiss_botton);
 
         // standard material ease
         mFastOutSlowIn =
@@ -544,7 +548,7 @@ public class ScreenshotView extends FrameLayout implements
                 mScreenshotPreview.setScaleX(currentScale);
                 mScreenshotPreview.setScaleY(currentScale);
                 mScreenshotPreview.setVisibility(View.VISIBLE);
-                if (mAccessibilityManager.isEnabled()) {
+                if (mAccessibilityManager.isEnabled() || mForceShowDismiss) {
                     mDismissButton.setAlpha(0);
                     mDismissButton.setVisibility(View.VISIBLE);
                 }
@@ -970,7 +974,7 @@ public class ScreenshotView extends FrameLayout implements
         mScrollablePreview.setVisibility(View.GONE);
         mScrollingScrim.setVisibility(View.GONE);
 
-        if (mAccessibilityManager.isEnabled()) {
+        if (mAccessibilityManager.isEnabled() || mForceShowDismiss) {
             mDismissButton.setVisibility(View.VISIBLE);
         }
         mActionsContainer.setVisibility(View.VISIBLE);
