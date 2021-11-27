@@ -3333,7 +3333,8 @@ public final class PowerManagerService extends SystemService
                 || !mBootCompleted
                 || (mDisplayGroupPowerStateMapper.getUserActivitySummaryLocked(groupId)
                 & USER_ACTIVITY_SCREEN_BRIGHT) != 0
-                || mScreenBrightnessBoostInProgress) {
+                || mScreenBrightnessBoostInProgress
+                || (mStayOn && mMaximumScreenDimDurationConfig == 0)) {
             return DisplayPowerRequest.POLICY_BRIGHT;
         }
 
