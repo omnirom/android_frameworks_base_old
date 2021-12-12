@@ -39,7 +39,7 @@
     <!-- The CPUs to display in CPUInfoService view -->
     <string name="config_displayCpus" translatable="false"></string>
 
-    <bool name="always_show_screenshot_dismiss_botton">false</bool>
+    <bool name="always_show_screenshot_dismiss_button">false</bool>
 
     <!-- Navigation bar dpad -->
     <string name="config_navBarLayoutHandleArrows" translatable="false">back[1.7WC];home_handle;ime_switcher[1.7WC]</string>

@@ -198,7 +198,7 @@ public class ScreenshotView extends FrameLayout implements
         mCornerSizeX = mResources.getDimensionPixelSize(R.dimen.global_screenshot_x_scale);
         mDismissDeltaY = mResources.getDimensionPixelSize(
                 R.dimen.screenshot_dismissal_height_delta);
-        mForceShowDismiss = mResources.getBoolean(R.bool.always_show_screenshot_dismiss_botton);
+        mForceShowDismiss = mResources.getBoolean(R.bool.always_show_screenshot_dismiss_button);
 
         // standard material ease
         mFastOutSlowIn =
