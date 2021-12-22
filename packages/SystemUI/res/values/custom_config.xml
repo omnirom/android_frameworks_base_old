@@ -43,4 +43,7 @@
     <integer name="config_cpuTempDivider" translatable="false">1</integer>
     <!-- The CPUs to display in CPUInfoService view -->
     <string name="config_displayCpus" translatable="false"></string>
+
+    <!-- qs columns count settings -->
+    <bool name="qs_tile_vertical_layout">false</bool>
 </resources>

@@ -34,6 +34,8 @@ import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.util.leak.RotationUtils;
 
+import org.omnirom.omnilibcore.utils.OmniUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +49,7 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             newConfig -> {
                 int newMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_tiles);
+                newMaxTiles = OmniUtils.getQuickQSColumnsCount(getContext(), newMaxTiles);
                 if (newMaxTiles != mView.getNumQuickTiles()) {
                     setMaxTiles(newMaxTiles);
                 }
