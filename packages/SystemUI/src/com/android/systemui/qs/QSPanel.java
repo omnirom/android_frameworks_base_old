@@ -769,6 +769,8 @@ public class QSPanel extends LinearLayout implements Tunable {
         int getNumVisibleTiles();
 
         int getResourceColumns();
+
+        void updateSettings();
     }
 
     interface OnConfigurationChangedListener {
