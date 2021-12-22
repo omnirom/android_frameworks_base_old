@@ -35,7 +35,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.Dependency;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSEditEvent;
@@ -48,6 +50,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
+import org.omnirom.omnilib.utils.OmniSettings;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +59,8 @@ import javax.inject.Inject;
 
 /** {@link ViewController} for {@link QSCustomizer}. */
 @QSScope
-public class QSCustomizerController extends ViewController<QSCustomizer> {
+public class QSCustomizerController extends ViewController<QSCustomizer>
+        implements OmniSettingsService.OmniSettingsObserver {
     private final TileQueryHelper mTileQueryHelper;
     private final QSHost mQsHost;
     private final TileAdapter mTileAdapter;
@@ -93,12 +98,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
         public void onConfigChanged(Configuration newConfig) {
             mView.updateNavBackDrop(newConfig, mLightBarController);
             mView.updateResources();
-            if (mTileAdapter.updateNumColumns()) {
-                RecyclerView.LayoutManager lm = mView.getRecyclerView().getLayoutManager();
-                if (lm instanceof GridLayoutManager) {
-                    ((GridLayoutManager) lm).setSpanCount(mTileAdapter.getNumColumns());
-                }
-            }
+            updateColumns();
         }
     };
 
@@ -164,6 +164,11 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
 
         mToolbar.setOnMenuItemClickListener(mOnMenuItemClickListener);
         mToolbar.setNavigationOnClickListener(v -> hide());
+
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                OmniSettings.OMNI_QS_LAYOUT_COLUMNS);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                OmniSettings.OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE);
     }
 
     @Override
@@ -171,6 +176,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
         mTileQueryHelper.setListener(null);
         mToolbar.setOnMenuItemClickListener(null);
         mConfigurationController.removeCallback(mConfigurationListener);
+        Dependency.get(OmniSettingsService.class).removeObserver(this);
     }
 
 
@@ -268,5 +274,19 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
             specs.add(tile.getTileSpec());
         }
         mTileAdapter.setTileSpecs(specs);
+    }
+
+    private void updateColumns() {
+        if (mTileAdapter.updateNumColumns()) {
+            RecyclerView.LayoutManager lm = mView.getRecyclerView().getLayoutManager();
+            if (lm instanceof GridLayoutManager) {
+                ((GridLayoutManager) lm).setSpanCount(mTileAdapter.getNumColumns());
+            }
+        }
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        updateColumns();
     }
 }

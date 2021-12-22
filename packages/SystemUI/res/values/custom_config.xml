@@ -52,4 +52,13 @@
 
     <!-- Color of the UDFPS pressed view -->
      <color name="config_udfpsColor">#ffffffff</color>
+
+    <!-- qs columns count settings -->
+    <bool name="qs_tile_vertical_layout">false</bool>
+
+    <!-- hack - we want a way to access the landscape default resource config -->
+    <!-- obviously whenever the default is changed or anyone wants
+    to use a different default in his device tree he must be aware of that -->
+    <integer name="quick_settings_num_columns_landscape">4</integer>
+
 </resources>
