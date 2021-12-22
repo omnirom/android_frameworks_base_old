@@ -25,8 +25,10 @@ import android.content.res.Configuration
 import android.content.res.Resources.ID_NULL
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
+import android.provider.Settings
 import android.service.quicksettings.Tile
 import android.text.TextUtils
+import android.os.UserHandle
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -135,11 +137,24 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private var lastVisibility = View.VISIBLE
 
     private val locInScreen = IntArray(2)
+    private var vertical = false
+    private val forceHideCheveron = true;
 
     init {
         setId(generateViewId())
-        orientation = LinearLayout.HORIZONTAL
-        gravity = Gravity.CENTER_VERTICAL or Gravity.START
+
+        vertical = resources.getBoolean(R.bool.qs_tile_vertical_layout)
+        vertical = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.OMNI_QS_TILE_VERTICAL_LAYOUT,
+                if (vertical) 1 else 0, UserHandle.USER_CURRENT) != 0;
+
+        if (vertical) {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+        } else {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL or Gravity.START
+        }
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
         clipChildren = false
         clipToPadding = false
@@ -148,7 +163,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
         setColor(getBackgroundColorForState(QSTile.State.DEFAULT_STATE))
 
         val padding = resources.getDimensionPixelSize(R.dimen.qs_tile_padding)
-        val startPadding = resources.getDimensionPixelSize(R.dimen.qs_tile_start_padding)
+        val startPadding = if (vertical) padding else resources.getDimensionPixelSize(R.dimen.qs_tile_start_padding)
         setPaddingRelative(startPadding, padding, padding, padding)
 
         val iconSize = resources.getDimensionPixelSize(R.dimen.qs_icon_size)
@@ -178,11 +193,24 @@ open class QSTileViewImpl @JvmOverloads constructor(
             width = iconSize
         }
 
+        vertical = resources.getBoolean(R.bool.qs_tile_vertical_layout)
+        vertical = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.OMNI_QS_TILE_VERTICAL_LAYOUT,
+                if (vertical) 1 else 0, UserHandle.USER_CURRENT) != 0;
+
+        if (vertical) {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+        } else {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL or Gravity.START
+        }
+
         val padding = resources.getDimensionPixelSize(R.dimen.qs_tile_padding)
-        val startPadding = resources.getDimensionPixelSize(R.dimen.qs_tile_start_padding)
+        val startPadding = if (vertical) padding else resources.getDimensionPixelSize(R.dimen.qs_tile_start_padding)
         setPaddingRelative(startPadding, padding, padding, padding)
 
-        val labelMargin = resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
+        val labelMargin = if (vertical) 0 else resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
         (labelContainer.layoutParams as MarginLayoutParams).apply {
             marginStart = labelMargin
         }
@@ -204,7 +232,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     private fun createAndAddLabels() {
         labelContainer = LayoutInflater.from(context)
-                .inflate(R.layout.qs_tile_label, this, false) as IgnorableChildLinearLayout
+                .inflate(if (vertical) R.layout.qs_tile_label_vertical else R.layout.qs_tile_label,this, false) as IgnorableChildLinearLayout
         label = labelContainer.requireViewById(R.id.tile_label)
         secondaryLabel = labelContainer.requireViewById(R.id.app_label)
         if (collapsed) {
@@ -541,7 +569,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
             customDrawableView.setImageDrawable(state.sideViewCustomDrawable)
             customDrawableView.visibility = VISIBLE
             chevronView.visibility = GONE
-        } else if (state !is BooleanState || state.forceExpandIcon) {
+        } else if ((state !is BooleanState || state.forceExpandIcon) && !forceHideCheveron) {
             customDrawableView.setImageDrawable(null)
             customDrawableView.visibility = GONE
             chevronView.visibility = VISIBLE
