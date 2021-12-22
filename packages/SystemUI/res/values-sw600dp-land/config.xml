@@ -20,4 +20,6 @@
 
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">true</bool>
+
+    <integer name="quick_settings_max_rows">4</integer>
 </resources>
