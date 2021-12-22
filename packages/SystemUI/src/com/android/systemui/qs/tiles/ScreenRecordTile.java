@@ -104,7 +104,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         state.label = mContext.getString(R.string.quick_settings_screen_record_label);
         state.icon = ResourceIcon.get(R.drawable.ic_screenrecord);
         // Show expand icon when clicking will open a dialog
-        state.forceExpandIcon = state.state == Tile.STATE_INACTIVE;
+        state.forceExpandIcon = false; //state.state == Tile.STATE_INACTIVE;
 
         if (isRecording) {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_screen_record_stop);
