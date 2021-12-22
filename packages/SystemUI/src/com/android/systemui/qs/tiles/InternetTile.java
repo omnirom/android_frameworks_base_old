@@ -98,7 +98,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
     @Override
     public SignalState newTileState() {
         SignalState s = new SignalState();
-        s.forceExpandIcon = true;
+        //s.forceExpandIcon = true;
         return s;
     }
 
