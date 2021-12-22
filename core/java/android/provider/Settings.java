@@ -5811,6 +5811,21 @@ public final class Settings {
         public static final String OMNI_VIBRATE_ON_DISCONNECT = "vibrate_on_disconnect";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE = "qs_layout_columns_landscape";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_QS_LAYOUT_COLUMNS = "qs_layout_columns";
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_QS_TILE_VERTICAL_LAYOUT = "qs_tile_vertical_layout";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5840,6 +5855,9 @@ public final class Settings {
             OMNI_VIBRATE_ON_CONNECT,
             OMNI_VIBRATE_ON_CALLWAITING,
             OMNI_VIBRATE_ON_DISCONNECT,
+            OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE,
+            OMNI_QS_LAYOUT_COLUMNS,
+            OMNI_QS_TILE_VERTICAL_LAYOUT,
         };
 
         /**
@@ -5879,6 +5897,9 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_CONNECT, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_CALLWAITING, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_DISCONNECT, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE, 1);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS, 1);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_TILE_VERTICAL_LAYOUT, 0);
         }
     }
 
