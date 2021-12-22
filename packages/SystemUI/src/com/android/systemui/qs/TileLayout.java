@@ -15,6 +15,8 @@ import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
 
+import org.omnirom.omnilib.utils.OmniUtils;
+
 import java.util.ArrayList;
 
 public class TileLayout extends ViewGroup implements QSTileLayout {
@@ -41,7 +43,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private final boolean mLessRows;
     private int mMinRows = 1;
     private int mMaxColumns = NO_MAX_COLUMNS;
-    protected int mResourceColumns;
     private float mSquishinessFraction = 1f;
     private int mLastTileBottom;
 
@@ -118,8 +119,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     public boolean updateResources() {
         final Resources res = mContext.getResources();
-        mResourceColumns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
-        updateColumns();
         mMaxCellHeight = mContext.getResources().getDimensionPixelSize(mCellHeightResId);
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mSidePadding = useSidePadding() ? mCellMarginHorizontal / 2 : 0;
@@ -139,7 +138,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     private boolean updateColumns() {
         int oldColumns = mColumns;
-        mColumns = Math.min(mResourceColumns, mMaxColumns);
+        mColumns = Math.min(getResourceColumns(), mMaxColumns);
         return oldColumns != mColumns;
     }
 
@@ -293,5 +292,16 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
                 ((HeightOverrideable) record.tileView).setSquishinessFraction(mSquishinessFraction);
             }
         }
+    }
+
+    public int getResourceColumns() {
+        int resourceColumns = Math.max(2, getResources().getInteger(R.integer.quick_settings_num_columns));
+        return OmniUtils.getQSColumnsCount(mContext, resourceColumns);
+    }
+
+    @Override
+    public void updateSettings() {
+        setMaxColumns(getResourceColumns());
+        requestLayout();
     }
 }
