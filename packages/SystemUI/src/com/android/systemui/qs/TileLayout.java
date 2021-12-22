@@ -4,6 +4,7 @@ import static com.android.systemui.util.Utils.useQsMediaPlayer;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
@@ -20,6 +21,8 @@ import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
 import com.android.systemui.qs.tileimpl.QSTileViewImplKt;
+
+import org.omnirom.omnilib.utils.OmniUtils;
 
 import java.util.ArrayList;
 
@@ -48,7 +51,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private final boolean mLessRows;
     private int mMinRows = 1;
     private int mMaxColumns = NO_MAX_COLUMNS;
-    protected int mResourceColumns;
     private float mSquishinessFraction = 1f;
     protected int mLastTileBottom;
 
@@ -127,12 +129,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     public boolean updateResources() {
         Resources res = getResources();
-        mResourceColumns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
         mResourceCellHeight = res.getDimensionPixelSize(mResourceCellHeightResId);
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mSidePadding = useSidePadding() ? mCellMarginHorizontal / 2 : 0;
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
-        mMaxAllowedRows = Math.max(1, getResources().getInteger(R.integer.quick_settings_max_rows));
+        mMaxAllowedRows = Math.max(1, res.getInteger(R.integer.quick_settings_max_rows));
         if (mLessRows) {
             mMaxAllowedRows = Math.max(mMinRows, mMaxAllowedRows - 1);
         }
@@ -152,7 +153,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     private boolean updateColumns() {
         int oldColumns = mColumns;
-        mColumns = Math.min(mResourceColumns, mMaxColumns);
+        mColumns = Math.min(getResourceColumns(), mMaxColumns);
         return oldColumns != mColumns;
     }
 
@@ -232,6 +233,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     protected int getCellHeight() {
+        if (OmniUtils.getQSTileLabelHide(mContext)) {
+            return getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+        }
         // Compare estimated height with resource height and return the larger one.
         // If estimated height > resource height, it means the resource height is not enough
         // for the tile content under current font scaling. Therefore, we need to use the estimated
@@ -334,5 +338,16 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setCollectionInfo(
                 new AccessibilityNodeInfo.CollectionInfo(mRecords.size(), 1, false));
+    }
+
+    public int getResourceColumns() {
+        int resourceColumns = Math.max(2, getResources().getInteger(R.integer.quick_settings_num_columns));
+        return OmniUtils.getQSColumnsCount(mContext, resourceColumns);
+    }
+
+    @Override
+    public void updateSettings() {
+        setMaxColumns(getResourceColumns());
+        requestLayout();
     }
 }
