@@ -52,4 +52,7 @@
 
     <!-- Color of the UDFPS pressed view -->
      <color name="config_udfpsColor">#ffffffff</color>
+
+    <!-- qs columns count settings -->
+    <bool name="qs_tile_vertical_layout">false</bool>
 </resources>
