@@ -186,7 +186,7 @@ public class QuickQSPanel extends QSPanel {
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.WRAP_CONTENT);
             setLayoutParams(lp);
-            setMaxColumns(4);
+            setMaxColumns(getResourceColumns());
         }
 
         @Override
@@ -247,6 +247,12 @@ public class QuickQSPanel extends QSPanel {
             }
             setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
             mLastSelected = selected;
+        }
+
+        @Override
+        public int getResourceColumns() {
+            return Math.min(DEFAULT_MAX_TILES,
+                    getResources().getInteger(R.integer.quick_qs_panel_max_columns));
         }
     }
 }

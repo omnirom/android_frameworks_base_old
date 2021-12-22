@@ -264,4 +264,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         // up.
         return Math.max(mColumns * mRows, 1);
     }
+
+    @Override
+    public int getResourceColumns() {
+        return mResourceColumns;
+    }
 }
