@@ -163,6 +163,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mDumpManager.registerDumpable(mView.getDumpableTag(), this);
         Dependency.get(OmniSettingsService.class).addIntObserver(this,
                 "qs_vertical_layout");
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                "qs_layout_columns");
+        Dependency.get(OmniSettingsService.class).addIntObserver(this,
+                "qs_layout_columns_landscape");
     }
 
     @Override
@@ -413,7 +417,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Override
     public void onIntSettingChanged(String key, Integer newValue) {
-        if ("qs_vertical_layout".equals(key)) {
+        if (mView.getTileLayout() != null) {
+            mView.getTileLayout().updateSettings();
             setTiles();
         }
     }
