@@ -28,6 +28,8 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 
+import org.omnirom.omnilib.utils.OmniUtils;
+
 /**
  * Version of QSPanel that only shows N Quick Tiles in the QS Header.
  */
@@ -36,7 +38,7 @@ public class QuickQSPanel extends QSPanel {
     public static final String NUM_QUICK_TILES = "sysui_qqs_count";
     private static final String TAG = "QuickQSPanel";
     // A default value so that we never return 0.
-    public static final int DEFAULT_MAX_TILES = 6;
+    public static final int DEFAULT_MAX_TILES = 42;
 
     private boolean mDisabledByPolicy;
     private int mMaxTiles;
@@ -62,7 +64,7 @@ public class QuickQSPanel extends QSPanel {
 
     @Override
     public TileLayout getOrCreateTileLayout() {
-        return new QQSSideLabelTileLayout(mContext);
+        return new QQSSideLabelTileLayout(mContext, this);
     }
 
 
@@ -178,9 +180,11 @@ public class QuickQSPanel extends QSPanel {
     static class QQSSideLabelTileLayout extends SideLabelTileLayout {
 
         private boolean mLastSelected;
+        private QuickQSPanel mQSPanel;
 
-        QQSSideLabelTileLayout(Context context) {
+        QQSSideLabelTileLayout(Context context, QuickQSPanel qsPanel) {
             super(context, null);
+            mQSPanel = qsPanel;
             setClipChildren(false);
             setClipToPadding(false);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
@@ -251,8 +255,15 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public int getResourceColumns() {
-            return Math.min(DEFAULT_MAX_TILES,
+            int columns = Math.min(DEFAULT_MAX_TILES,
                     getResources().getInteger(R.integer.quick_qs_panel_max_columns));
+            return OmniUtils.getQuickQSColumnsCount(mContext, columns);
+        }
+
+        @Override
+        public void updateSettings() {
+            mQSPanel.setMaxTiles(getResourceColumns());
+            super.updateSettings();
         }
     }
 }
