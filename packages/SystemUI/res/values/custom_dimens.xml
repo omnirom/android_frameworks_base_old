@@ -27,4 +27,9 @@
     <dimen name="screenshot_preview_corner_radius">20dp</dimen>
     <dimen name="screenshot_button_corner_radius">20dp</dimen>
 
+    <dimen name="rounded_slider_progress_width">8dp</dimen>
+    <dimen name="rounded_slider_progress_corner_radius">4dp</dimen>
+    
+    <dimen name="volume_seekbar_progress_width">8dp</dimen>
+    <dimen name="volume_seekbar_progress_corner_radius">4dp</dimen>
 </resources>

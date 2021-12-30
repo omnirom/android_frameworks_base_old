@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2020 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,12 +17,21 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:priv-android="http://schemas.android.com/apk/prv/res/android"
     android:autoMirrored="true">
-    <item android:id="@+id/slider_foreground"
-        android:gravity="center_vertical|fill_horizontal">
+    <item
+        android:width="@dimen/rounded_slider_height"
+        android:height="@dimen/rounded_slider_height">
         <shape>
-            <size android:height="@dimen/rounded_slider_progress_width" />
+            <size android:height="@dimen/rounded_slider_height" />
             <solid android:color="?priv-android:attr/colorAccentPrimary" />
-            <corners android:radius="@dimen/rounded_slider_progress_corner_radius" />
+            <corners android:radius="@dimen/rounded_slider_corner_radius" />
         </shape>
+    </item>
+    <item
+        android:width="@dimen/rounded_slider_icon_size"
+        android:height="@dimen/rounded_slider_icon_size"
+        android:gravity="center">
+        <com.android.systemui.util.AlphaTintDrawableWrapper
+            android:drawable="@drawable/ic_brightness"
+            android:tint="?android:attr/textColorPrimaryInverse" />
     </item>
 </layer-list>
