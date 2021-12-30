@@ -194,6 +194,10 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         return mView.isVisibleToUser();
     }
 
+    public void updateThumb(int value) {
+        mView.updateThumb(value);
+    }
+
     private final SeekBar.OnSeekBarChangeListener mSeekListener =
             new SeekBar.OnSeekBarChangeListener() {
         @Override
@@ -201,6 +205,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             if (mListener != null) {
                 mListener.onChanged(mTracking, progress, false);
             }
+            mView.updateThumb(progress);
         }
 
         @Override
