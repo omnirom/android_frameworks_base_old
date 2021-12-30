@@ -35,4 +35,5 @@ public interface ToggleSlider {
     int getMax();
     void setValue(int value);
     int getValue();
+    void updateThumb(int value);
 }
