@@ -422,6 +422,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         if (!mControlValueInitialized) {
             // Don't animate the first value since its default state isn't meaningful to users.
             mControl.setValue(target);
+            mControl.updateThumb(target);
             mControlValueInitialized = true;
         }
         if (mSliderAnimator != null && mSliderAnimator.isStarted()) {

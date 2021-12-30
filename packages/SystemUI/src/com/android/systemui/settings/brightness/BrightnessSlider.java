@@ -180,6 +180,11 @@ public class BrightnessSlider extends ViewController<BrightnessSliderView> imple
         return mView.getValue();
     }
 
+    @Override
+    public void updateThumb(int value) {
+        mView.updateThumb(value);
+    }
+
     private final SeekBar.OnSeekBarChangeListener mSeekListener =
             new SeekBar.OnSeekBarChangeListener() {
         @Override
@@ -187,6 +192,7 @@ public class BrightnessSlider extends ViewController<BrightnessSliderView> imple
             if (mListener != null) {
                 mListener.onChanged(mTracking, progress, false);
             }
+            mView.updateThumb(progress);
         }
 
         @Override
