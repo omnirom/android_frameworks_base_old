@@ -20,11 +20,27 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:autoMirrored="true">
-    <item android:id="@+id/volume_seekbar_progress_solid">
+    <item
+        android:width="@dimen/volume_dialog_slider_width"
+        android:height="@dimen/volume_dialog_slider_width">
         <shape>
-            <size android:height="@dimen/volume_seekbar_progress_width" />
+            <size android:height="@dimen/volume_dialog_slider_width" />
             <solid android:color="?android:attr/colorAccent" />
-            <corners android:radius="@dimen/volume_seekbar_progress_corner_radius"/>
+            <corners android:radius="@dimen/volume_dialog_slider_corner_radius"/>
         </shape>
+    </item>
+    <item
+        android:id="@+id/volume_seekbar_progress_icon"
+        android:height="@dimen/rounded_slider_icon_size"
+        android:width="@dimen/rounded_slider_icon_size"
+        android:gravity="center">
+        <rotate
+            android:fromDegrees="-270"
+            android:toDegrees="-270">
+            <!-- A placeholder drawable is required here - it'll be replaced in code. -->
+            <com.android.systemui.util.AlphaTintDrawableWrapper
+                android:drawable="@drawable/ic_volume_media"
+                android:tint="?androidprv:attr/colorAccentPrimaryVariant" />
+        </rotate>
     </item>
 </layer-list>
