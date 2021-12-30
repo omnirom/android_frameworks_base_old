@@ -192,10 +192,11 @@ public class BrightnessSliderView extends FrameLayout {
 
     private void applySliderScale() {
         if (mProgressDrawable != null) {
-            final Rect r = mProgressDrawable.getBounds();
+            // TODO
+            /*final Rect r = mProgressDrawable.getBounds();
             int height = (int) (mProgressDrawable.getIntrinsicHeight() * mScale);
             int inset = (mProgressDrawable.getIntrinsicHeight() - height) / 2;
-            mProgressDrawable.setBounds(r.left, inset, r.right, inset + height);
+            mProgressDrawable.setBounds(r.left, inset, r.right, inset + height);*/
         }
     }
 
