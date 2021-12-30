@@ -418,6 +418,7 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
             // as this negatively affects transition between them and they share mirror slider -
             // animating it from two different sources causes janky motion
             mControl.setValue(target);
+            mControl.updateThumb(target);
             mControlValueInitialized = true;
         }
         if (mSliderAnimator != null && mSliderAnimator.isStarted()) {

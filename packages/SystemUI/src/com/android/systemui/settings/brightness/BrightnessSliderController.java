@@ -176,6 +176,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
     }
 
     @Override
+<<<<<<< HEAD:packages/SystemUI/src/com/android/systemui/settings/brightness/BrightnessSliderController.java
     public void hideView() {
         mView.setVisibility(View.GONE);
     }
@@ -194,6 +195,10 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         return mView.isVisibleToUser();
     }
 
+    public void updateThumb(int value) {
+        mView.updateThumb(value);
+    }
+
     private final SeekBar.OnSeekBarChangeListener mSeekListener =
             new SeekBar.OnSeekBarChangeListener() {
         @Override
@@ -201,6 +206,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             if (mListener != null) {
                 mListener.onChanged(mTracking, progress, false);
             }
+            mView.updateThumb(progress);
         }
 
         @Override
