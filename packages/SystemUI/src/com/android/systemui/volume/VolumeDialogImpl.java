@@ -831,18 +831,22 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         final LayerDrawable seekbarDrawable =
                 (LayerDrawable) mContext.getDrawable(R.drawable.volume_row_seekbar);
 
+        final LayerDrawable seekbarThumbDrawable =
+                (LayerDrawable) mContext.getDrawable(R.drawable.volume_row_seekbar_thumb);
+
         final LayerDrawable seekbarProgressDrawable = (LayerDrawable)
                 ((RoundedCornerProgressDrawable) seekbarDrawable.findDrawableByLayerId(
                         android.R.id.progress)).getDrawable();
 
         row.sliderProgressSolid = seekbarProgressDrawable.findDrawableByLayerId(
                 R.id.volume_seekbar_progress_solid);
-        final Drawable sliderProgressIcon = seekbarProgressDrawable.findDrawableByLayerId(
+        final Drawable sliderProgressIcon = seekbarThumbDrawable.findDrawableByLayerId(
                         R.id.volume_seekbar_progress_icon);
         row.sliderProgressIcon = sliderProgressIcon != null ? (AlphaTintDrawableWrapper)
                 ((RotateDrawable) sliderProgressIcon).getDrawable() : null;
 
         row.slider.setProgressDrawable(seekbarDrawable);
+        row.slider.setThumb(seekbarThumbDrawable);
 
         row.icon = row.view.findViewById(R.id.volume_row_icon);
 

@@ -20,4 +20,11 @@
      for different hardware and product builds. -->
 <resources>
     <dimen name="cpu_info_text_height">12dp</dimen>
+
+    <dimen name="rounded_slider_progress_width">8dp</dimen>
+    <dimen name="rounded_slider_progress_corner_radius">4dp</dimen>
+    <dimen name="brightness_progress_padding">24dp</dimen>
+
+    <dimen name="volume_seekbar_progress_width">8dp</dimen>
+    <dimen name="volume_seekbar_progress_corner_radius">4dp</dimen>
 </resources>
