@@ -149,6 +149,7 @@ public class BrightnessMirrorController
     }
 
     private void reinflate() {
+        updateResources();
         int index = mStatusBarWindow.indexOfChild(mBrightnessMirror);
         mStatusBarWindow.removeView(mBrightnessMirror);
         mBrightnessMirror = (FrameLayout) LayoutInflater.from(mStatusBarWindow.getContext())
