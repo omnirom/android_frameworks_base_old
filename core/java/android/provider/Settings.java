@@ -5780,6 +5780,11 @@ public final class Settings {
         public static final String OMNI_QS_TILE_VERTICAL_LAYOUT = "qs_tile_vertical_layout";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_SMALL_CLOCK = "lockscreen_small_clock";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5810,6 +5815,7 @@ public final class Settings {
             OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE,
             OMNI_QS_LAYOUT_COLUMNS,
             OMNI_QS_TILE_VERTICAL_LAYOUT,
+            OMNI_LOCKSCREEN_SMALL_CLOCK,
         };
 
         /**
@@ -5850,6 +5856,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_TILE_VERTICAL_LAYOUT, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_SMALL_CLOCK, 0);
         }
     }
 
