@@ -563,6 +563,13 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 && GarbageMonitor.ADD_MEMORY_TILE_TO_DEFAULT_ON_DEBUGGABLE_BUILDS) {
             tiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
         }
+
+        final String blacklistTileList = res.getString(R.string.quick_settings_tiles_blacklist);
+        if (!blacklistTileList.isEmpty()) {
+            if (DEBUG) Log.d(TAG, "remove blacklisted: " + blacklistTileList);
+            tiles.removeAll(Arrays.asList(blacklistTileList.split(",")));
+        }
+
         return tiles;
     }
 
