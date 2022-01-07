@@ -30,6 +30,10 @@
         aod,nfc,screenshot
     </string>
 
+    <!-- tiles that should NEVER end up in qs -->
+    <string name="quick_settings_tiles_blacklist" translatable="false">
+    </string>
+
     <!-- The CPU temperature sensor path, defaults to empty -->
     <string name="config_cpuTempSensor" translatable="false"></string>
     <!-- The battery temperature divider, if needed -->
