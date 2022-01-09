@@ -5782,6 +5782,11 @@ public final class Settings {
         /**
          * @hide
          */
+        public static final String OMNI_QS_TILE_LABEL_HIDE = "qs_tile_label_hide";
+
+        /**
+         * @hide
+         */
         public static final String OMNI_LOCKSCREEN_SMALL_CLOCK = "lockscreen_small_clock";
 
         /**
@@ -5815,6 +5820,7 @@ public final class Settings {
             OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE,
             OMNI_QS_LAYOUT_COLUMNS,
             OMNI_QS_TILE_VERTICAL_LAYOUT,
+            OMNI_QS_TILE_LABEL_HIDE,
             OMNI_LOCKSCREEN_SMALL_CLOCK,
         };
 
@@ -5856,6 +5862,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_TILE_VERTICAL_LAYOUT, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_TILE_LABEL_HIDE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_SMALL_CLOCK, 0);
         }
     }
