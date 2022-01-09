@@ -4,6 +4,7 @@ import static com.android.systemui.util.Utils.useQsMediaPlayer;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
@@ -118,12 +119,12 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     public boolean updateResources() {
-        final Resources res = mContext.getResources();
-        mMaxCellHeight = mContext.getResources().getDimensionPixelSize(mCellHeightResId);
+        final Resources res = getResources();
+        mMaxCellHeight = res.getDimensionPixelSize(mCellHeightResId);
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mSidePadding = useSidePadding() ? mCellMarginHorizontal / 2 : 0;
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
-        mMaxAllowedRows = Math.max(1, getResources().getInteger(R.integer.quick_settings_max_rows));
+        mMaxAllowedRows = Math.max(1, res.getInteger(R.integer.quick_settings_max_rows));
         if (mLessRows) mMaxAllowedRows = Math.max(mMinRows, mMaxAllowedRows - 1);
         if (updateColumns()) {
             requestLayout();
@@ -209,6 +210,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     protected int getCellHeight() {
+        if (OmniUtils.getQSTileLabelHide(mContext)) {
+            return getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+        }
         return mMaxCellHeight;
     }
 
