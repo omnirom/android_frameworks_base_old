@@ -625,8 +625,8 @@ public class NavigationBarView extends FrameLayout implements
         mArrowLeftIcon = getDrawable(R.drawable.ic_navbar_chevron_left);
         mArrowRightIcon = getDrawable(R.drawable.ic_navbar_chevron_right);
         mPowerButton = getDrawable(R.drawable.ic_sysbar_power);
-        mVolumePlusButton = getDrawable(R.drawable.ic_sysbar_volume_plus);
-        mVolumeMinusButton = getDrawable(R.drawable.ic_sysbar_volume_minus);
+        mVolumePlusButton = getDrawable(R.drawable.ic_sysbar_volume_high);
+        mVolumeMinusButton = getDrawable(R.drawable.ic_sysbar_volume_low);
         mNotificationsButton = getDrawable(R.drawable.ic_sysbar_notifications);
     }
 
