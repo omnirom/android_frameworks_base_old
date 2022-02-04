@@ -36,10 +36,10 @@
         <item name="android:itemTextAppearance">@style/Control.MenuItem</item>
     </style>
 
-    <style name="TextAppearance.QS.Status" parent="TextAppearance.QS.TileLabel.Secondary">
+    <!--<style name="TextAppearance.QS.Status" parent="TextAppearance.QS.TileLabel.Secondary">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-    </style>
+    </style>-->
 
     <!-- Screenshots -->
     <style name="LongScreenshotActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
