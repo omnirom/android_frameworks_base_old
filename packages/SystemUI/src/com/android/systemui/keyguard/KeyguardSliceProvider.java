@@ -589,7 +589,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     }
 
     private void enableWeatherUpdates() {
-        mWeatherClient = new OmniJawsClient(getContext(), false);
+        mWeatherClient = new OmniJawsClient(getContext());
         mWeatherClient.addObserver(this);
         queryAndUpdateWeather();
     }
@@ -597,7 +597,6 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private void disableWeatherUpdates() {
         if (mWeatherClient != null) {
             mWeatherClient.removeObserver(this);
-            mWeatherClient.cleanupObserver();
         }
     }
 
