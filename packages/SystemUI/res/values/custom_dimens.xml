@@ -22,5 +22,6 @@
 <resources>
 
     <dimen name="notification_button_corner_radius">20dp</dimen>
+    <dimen name="navigation_extra_key_width">36dp</dimen>
 
 </resources>
