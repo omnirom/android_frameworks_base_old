@@ -19,6 +19,7 @@ package com.android.systemui.flags;
 import android.content.Context;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
+import android.provider.Settings;
 import android.widget.Toast;
 
 import com.android.systemui.dagger.SysUISingleton;
@@ -83,7 +84,7 @@ public class FeatureFlags {
     }
 
     public boolean isMonetEnabled() {
-        return isEnabled(Flags.MONET);
+        return isEnabled(Flags.MONET) && Settings.System.getInt(mContext.getContentResolver(), "isMonetEnabled", 1) == 1;
     }
 
     public boolean isPMLiteEnabled() {
