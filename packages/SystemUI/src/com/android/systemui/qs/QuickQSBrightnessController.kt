@@ -21,6 +21,7 @@ import com.android.systemui.settings.brightness.BrightnessController
 import com.android.systemui.settings.brightness.BrightnessSliderController
 import com.android.systemui.settings.brightness.MirroredBrightnessController
 import com.android.systemui.statusbar.policy.BrightnessMirrorController
+import com.android.systemui.tuner.TunerService
 import javax.inject.Inject
 
 /**
@@ -34,7 +35,7 @@ class QuickQSBrightnessController @VisibleForTesting constructor(
     @Inject constructor(
         brightnessControllerFactory: BrightnessController.Factory,
         brightnessSliderControllerFactory: BrightnessSliderController.Factory,
-        quickQSPanel: QuickQSPanel
+        quickQSPanel: QuickQSPanel, tunerService: TunerService
     ) : this(brightnessControllerFactory = {
             val slider = brightnessSliderControllerFactory.create(quickQSPanel.context,
                     quickQSPanel)
@@ -91,6 +92,9 @@ class QuickQSBrightnessController @VisibleForTesting constructor(
     }
 
     private fun showBrightnessSlider() {
+        if (tunerService.getValue(QSPanel.QS_SHOW_BRIGHTNESS, 1) == 0) {
+            return
+        }
         if (brightnessController == null) {
             brightnessController = brightnessControllerFactory()
             mirrorController?.also { brightnessController?.setMirror(it) }
