@@ -285,6 +285,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     @Override
     public void setSquishinessFraction(float squishinessFraction) {
+        if (Float.isInfinite(squishinessFraction) || Float.isNaN(squishinessFraction)) {
+            return;
+        }
         if (Float.compare(mSquishinessFraction, squishinessFraction) == 0) {
             return;
         }
