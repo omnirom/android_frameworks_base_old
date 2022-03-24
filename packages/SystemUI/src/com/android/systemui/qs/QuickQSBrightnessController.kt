@@ -39,7 +39,7 @@ class QuickQSBrightnessController @VisibleForTesting constructor(
             val slider = brightnessSliderControllerFactory.create(quickQSPanel.context,
                     quickQSPanel)
             slider.init()
-            quickQSPanel.setBrightnessView(slider.rootView)
+            //quickQSPanel.setBrightnessView(slider.rootView)
             brightnessControllerFactory.create(slider)
         })
 
