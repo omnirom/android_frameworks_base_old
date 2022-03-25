@@ -190,6 +190,16 @@ public class ThemeOverlayApplier implements Dumpable {
             FabricatedOverlay[] pendingCreation,
             int currentUser,
             Set<UserHandle> managedProfiles) {
+        applyCurrentUserOverlays(categoryToPackage, pendingCreation, currentUser, managedProfiles, true);
+    }
+
+    /** @hide */
+    public void applyCurrentUserOverlays(
+            Map<String, OverlayIdentifier> categoryToPackage,
+            FabricatedOverlay[] pendingCreation,
+            int currentUser,
+            Set<UserHandle> managedProfiles,
+            boolean enable) {
         mBgExecutor.execute(() -> {
 
             // Disable all overlays that have not been specified in the user setting.
@@ -220,17 +230,20 @@ public class ThemeOverlayApplier implements Dumpable {
                 }
             }
 
-            for (Pair<String, String> packageToDisable : overlaysToDisable) {
-                OverlayIdentifier overlayInfo = new OverlayIdentifier(packageToDisable.second);
-                setEnabled(transaction, overlayInfo, packageToDisable.first, currentUser,
-                        managedProfiles, false, identifiersPending.contains(overlayInfo));
-            }
+            // if we disable monet we want everything but the final setEnabled call
+            if (enable) {
+                for (Pair<String, String> packageToDisable : overlaysToDisable) {
+                        OverlayIdentifier overlayInfo = new OverlayIdentifier(packageToDisable.second);
+                        setEnabled(transaction, overlayInfo, packageToDisable.first, currentUser,
+                                managedProfiles, false, identifiersPending.contains(overlayInfo));
+                }
 
-            for (String category : THEME_CATEGORIES) {
-                if (categoryToPackage.containsKey(category)) {
-                    OverlayIdentifier overlayInfo = categoryToPackage.get(category);
-                    setEnabled(transaction, overlayInfo, category, currentUser, managedProfiles,
-                            true, identifiersPending.contains(overlayInfo));
+                for (String category : THEME_CATEGORIES) {
+                        if (categoryToPackage.containsKey(category)) {
+                        OverlayIdentifier overlayInfo = categoryToPackage.get(category);
+                        setEnabled(transaction, overlayInfo, category, currentUser, managedProfiles,
+                                true, identifiersPending.contains(overlayInfo));
+                        }
                 }
             }
 
