@@ -27,6 +27,7 @@
     <dimen name="screenshot_border_corner_radius">24dp</dimen>
     <dimen name="screenshot_preview_corner_radius">20dp</dimen>
     <dimen name="screenshot_button_corner_radius">20dp</dimen>
+    <dimen name="buttonCornerRadius">28dp</dimen>
 
     <dimen name="rounded_slider_progress_width">8dp</dimen>
     <dimen name="rounded_slider_progress_corner_radius">4dp</dimen>
