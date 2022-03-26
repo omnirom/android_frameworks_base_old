@@ -22,6 +22,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGAT
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
+import static com.android.systemui.shared.recents.utilities.Utilities.isTaskbarDisable;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -122,14 +123,14 @@ public class NavigationBarController implements
         mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
                 dumpManager, autoHideController, lightBarController, pipOptional);
-        mIsTablet = isTablet(mContext);
+        mIsTablet = isTablet(mContext) && !isTaskbarDisable(mContext);
         dumpManager.registerDumpable(this);
     }
 
     @Override
     public void onConfigChanged(Configuration newConfig) {
         boolean isOldConfigTablet = mIsTablet;
-        mIsTablet = isTablet(mContext);
+        mIsTablet = isTablet(mContext) && !isTaskbarDisable(mContext);
         boolean largeScreenChanged = mIsTablet != isOldConfigTablet;
         // If we folded/unfolded while in 3 button, show navbar in folded state, hide in unfolded
         if (largeScreenChanged && updateNavbarForTaskbar()) {
@@ -229,7 +230,7 @@ public class NavigationBarController implements
     @Override
     public void onDisplayReady(int displayId) {
         Display display = mDisplayManager.getDisplay(displayId);
-        mIsTablet = isTablet(mContext);
+        mIsTablet = isTablet(mContext) && !isTaskbarDisable(mContext);
         createNavigationBar(display, null /* savedState */, null /* result */);
     }
 
