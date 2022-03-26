@@ -27,6 +27,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.Surface;
 import android.view.WindowManager;
@@ -127,7 +128,11 @@ public class Utilities {
 
         float smallestWidth = dpiFromPx(Math.min(bounds.width(), bounds.height()),
                 context.getResources().getConfiguration().densityDpi);
-        return smallestWidth >= TABLET_MIN_DPS;
+        return smallestWidth >= TABLET_MIN_DPS && !isTaskbarDisable(context);
+    }
+
+    private static boolean isTaskbarDisable(Context context) {
+        return Settings.System.getInt(context.getContentResolver(), Settings.System.OMNI_TASKBAR_DISABLE, 0) == 1;
     }
 
     public static float dpiFromPx(float size, int densityDpi) {
