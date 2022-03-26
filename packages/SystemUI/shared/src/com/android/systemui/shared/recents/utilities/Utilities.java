@@ -27,6 +27,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.Surface;
 import android.view.WindowManager;
@@ -127,7 +128,11 @@ public class Utilities {
 
         float smallestWidth = dpiFromPx(Math.min(bounds.width(), bounds.height()),
                 context.getResources().getConfiguration().densityDpi);
-        return smallestWidth >= TABLET_MIN_DPS;
+        return smallestWidth >= TABLET_MIN_DPS && !isTabletOverwritten(context);
+    }
+
+    private static boolean isTabletOverwritten(Context context) {
+        return Settings.System.getInt(context.getContentResolver(), "override_is_tablet", 0) == 1;
     }
 
     public static float dpiFromPx(float size, int densityDpi) {
