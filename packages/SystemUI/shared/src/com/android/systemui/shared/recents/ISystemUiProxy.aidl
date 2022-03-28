@@ -162,5 +162,15 @@ interface ISystemUiProxy {
      */
     void toggleNotificationPanel() = 50;
 
-    // Next id = 51
+    /**
+     * Notifies SystemUI to invoke provided keyCode.
+     */
+    void onKeyPressed(int keyCode) = 51;
+
+    /**
+     * Notifies SystemUI to invoke provided keyCode as long press.
+     */
+    void onKeyLongPressed(int keyCode) = 52;
+
+    // Next id = 53
 }
