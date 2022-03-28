@@ -245,6 +245,30 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
+        public void onKeyPressed(int keyCode) throws RemoteException {
+            Log.d(TAG_OPS, "onKeyPressed " + keyCode);
+            if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                verifyCallerAndClearCallingIdentityPostMain("onKeyPressed", () -> {
+                    sendEvent(KeyEvent.ACTION_DOWN, keyCode);
+                    sendEvent(KeyEvent.ACTION_UP, keyCode);
+                });
+            }
+        }
+
+        @Override
+        public void onKeyLongPressed(int keyCode) throws RemoteException {
+            Log.d(TAG_OPS, "onKeyLongPressed " + keyCode);
+            if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                verifyCallerAndClearCallingIdentityPostMain("onKeyLongPressed", () -> {
+                    sendEvent(KeyEvent.ACTION_DOWN, keyCode, KeyEvent.FLAG_LONG_PRESS);
+                    mHandler.postDelayed(() -> {
+                        sendEvent(KeyEvent.ACTION_UP, keyCode);
+                    }, 750);
+                });
+            }
+        }
+
+        @Override
         public void onImeSwitcherPressed() throws RemoteException {
             // TODO(b/204901476) We're intentionally using DEFAULT_DISPLAY for now since
             // Launcher/Taskbar isn't display aware.
@@ -273,10 +297,16 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         private boolean sendEvent(int action, int code) {
+            return sendEvent(action, code, 0);
+        }
+
+        private boolean sendEvent(int action, int code, int flags) {
             long when = SystemClock.uptimeMillis();
-            final KeyEvent ev = new KeyEvent(when, when, action, code, 0 /* repeat */,
+            final int repeatCount = (flags & KeyEvent.FLAG_LONG_PRESS) != 0 ? 1 : 0;
+
+            final KeyEvent ev = new KeyEvent(when, when, action, code, repeatCount /* repeat */,
                     0 /* metaState */, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
-                    KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
+                    flags | KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                     InputDevice.SOURCE_KEYBOARD);
 
             ev.setDisplayId(mContext.getDisplay().getDisplayId());

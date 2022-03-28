@@ -155,5 +155,15 @@ interface ISystemUiProxy {
      */
     void onImeSwitcherPressed() = 49;
 
-    // Next id = 50
+    /**
+     * Notifies SystemUI to invoke provided keyCode.
+     */
+    void onKeyPressed(int keyCode) = 50;
+
+    /**
+     * Notifies SystemUI to invoke provided keyCode as long press.
+     */
+    void onKeyLongPressed(int keyCode) = 51;
+
+    // Next id = 52
 }
