@@ -61,7 +61,7 @@ class AlarmTile @Inject constructor(
     }
 
     init {
-        nextAlarmController.observe(this, callback)
+        nextAlarmController.addCallback(callback)
     }
 
     override fun newTileState(): QSTile.State {
