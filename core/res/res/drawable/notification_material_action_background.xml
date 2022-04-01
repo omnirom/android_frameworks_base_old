@@ -20,4 +20,3 @@
     <item android:id="@id/mask"
           android:drawable="@drawable/btn_default_mtrl_shape" />
 </ripple>
-
