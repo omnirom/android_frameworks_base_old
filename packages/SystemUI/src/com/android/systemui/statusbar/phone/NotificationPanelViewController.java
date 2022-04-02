@@ -1918,11 +1918,10 @@ public class NotificationPanelViewController extends PanelViewController {
         if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
             mConflictingQsExpansionGesture = false;
         }
-        if (action == MotionEvent.ACTION_DOWN && isFullyCollapsed() && isQsExpansionEnabled() && isOpenQsEvent(event)) {
+        if (action == MotionEvent.ACTION_DOWN && isFullyCollapsed() && isQsExpansionEnabled()) {
             mTwoFingerQsExpandPossible = true;
         }
-
-        if ((mShouldUseSplitNotificationShade || mTwoFingerQsExpandPossible) && event.getY(event.getActionIndex())
+        if (mTwoFingerQsExpandPossible && isOpenQsEvent(event) && event.getY(event.getActionIndex())
                 < mStatusBarMinHeight) {
             mMetricsLogger.count(COUNTER_PANEL_OPEN_QS, 1);
             mQsExpandImmediate = true;
