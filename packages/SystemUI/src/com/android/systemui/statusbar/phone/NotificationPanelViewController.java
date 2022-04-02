@@ -1626,7 +1626,7 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     public void expandWithQs() {
-        if (isQsExpansionEnabled()) {
+        if (isQsExpansionEnabled() || mShouldUseSplitNotificationShade) {
             mQsExpandImmediate = true;
             mNotificationStackScrollLayoutController.setShouldShowShelfOnly(true);
         }
@@ -1651,6 +1651,10 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     public void expandWithoutQs() {
+        if (isQsExpansionEnabled() || mShouldUseSplitNotificationShade) {
+            mQsExpandImmediate = true;
+            mNotificationStackScrollLayoutController.setShouldShowShelfOnly(true);
+        }
         if (isQsExpanded()) {
             flingSettings(0 /* velocity */, FLING_COLLAPSE);
         } else {
@@ -1891,9 +1895,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
 
     private boolean handleQsTouch(MotionEvent event) {
-        if (mShouldUseSplitNotificationShade && touchXOutsideOfQs(event.getX())) {
-            return false;
-        }
         final int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN && getExpandedFraction() == 1f
                 && mBarState != KEYGUARD && !mQsExpanded && isQsExpansionEnabled()) {
@@ -1922,8 +1923,8 @@ public class NotificationPanelViewController extends PanelViewController {
             mTwoFingerQsExpandPossible = true;
         }
 
-        if ((mShouldUseSplitNotificationShade || mTwoFingerQsExpandPossible) && event.getY(event.getActionIndex())
-                < mStatusBarMinHeight) {
+        if (mShouldUseSplitNotificationShade || (mTwoFingerQsExpandPossible && event.getY(event.getActionIndex())
+                < mStatusBarMinHeight)) {
             mMetricsLogger.count(COUNTER_PANEL_OPEN_QS, 1);
             mQsExpandImmediate = true;
             mNotificationStackScrollLayoutController.setShouldShowShelfOnly(true);
