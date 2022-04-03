@@ -1159,7 +1159,7 @@ public class NavigationBarView extends FrameLayout implements
         if (getNotificationsButton() != null) {
             updateButtonLocation(getNotificationsButton(), inScreenSpace, useNearestRegion);
         }
-        if (getHomeHandle() != null) {
+       if (getHomeHandle() != null) {
             updateButtonLocation(getHomeHandle(), inScreenSpace, useNearestRegion);
         }
         return mTmpRegion;

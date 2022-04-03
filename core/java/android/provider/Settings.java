@@ -5841,6 +5841,11 @@ public final class Settings {
         public static final String OMNI_TASKBAR_DISABLE = "taskbar_disable";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_GESTURE_HANDLE_SMALL = "navbar_gesture_handle_small";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5876,6 +5881,7 @@ public final class Settings {
             OMNI_QS_TILE_LABEL_HIDE,
             OMNI_MONET_DISABLE,
             OMNI_TASKBAR_DISABLE,
+            OMNI_GESTURE_HANDLE_SMALL,
         };
 
         /**
@@ -5921,6 +5927,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_TILE_LABEL_HIDE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_MONET_DISABLE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_TASKBAR_DISABLE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_GESTURE_HANDLE_SMALL, 0);
         }
     }
 
