@@ -6069,6 +6069,11 @@ public final class Settings {
         public static final String OMNI_BACK_GESTURE_HEIGHT = "back_gesture_height";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_GESTURE_HANDLE_SMALL = "navbar_gesture_handle_small";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -6095,6 +6100,7 @@ public final class Settings {
             OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR,
             OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED,
             OMNI_BACK_GESTURE_HEIGHT,
+            OMNI_GESTURE_HANDLE_SMALL,
         };
 
         /**
@@ -6131,6 +6137,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_FAST_CHARGING_LED_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BACK_GESTURE_HEIGHT, 1);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_GESTURE_HANDLE_SMALL, 0);
         }
     }
 
