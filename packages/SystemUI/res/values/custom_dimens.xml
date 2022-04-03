@@ -20,4 +20,8 @@
      for different hardware and product builds. -->
 <resources>
     <dimen name="cpu_info_text_height">12dp</dimen>
+
+    <dimen name="navigation_home_handle_small_width">40dp</dimen>
+    <!-- 2 * navigation_handle_radius + 2 * navigation_handle_bottom-->
+    <dimen name="navigation_home_handle_height">14dp</dimen>
 </resources>
