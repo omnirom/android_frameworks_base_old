@@ -230,7 +230,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.ExtensionController;
-import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -438,6 +437,16 @@ public class StatusBar extends SystemUI implements
         mCommandQueueCallbacks.animateCollapsePanels(flags, force);
     }
 
+    /** */
+    public void toggleCameraFlash() {
+        mCommandQueueCallbacks.toggleCameraFlash();
+    }
+
+    /** */
+    public void toggleCameraFlashState(boolean enable) {
+        mCommandQueueCallbacks.toggleCameraFlashState(enable);
+    }
+
     /**
      * The {@link StatusBarState} of the status bar.
      */
@@ -513,9 +522,6 @@ public class StatusBar extends SystemUI implements
     private final StatusBarLocationPublisher mStatusBarLocationPublisher;
     private final StatusBarIconController mStatusBarIconController;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
-
-    /*omni add-on*/
-    private FlashlightController mFlashlightController;
 
     // expanded notifications
     // the sliding/resizing panel within the notification window
@@ -1343,9 +1349,6 @@ public class StatusBar extends SystemUI implements
 
         // Private API call to make the shadows look better for Recents
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
-
-        // omni
-        mFlashlightController = Dependency.get(FlashlightController.class);
     }
 
 
@@ -2005,30 +2008,6 @@ public class StatusBar extends SystemUI implements
         }
     }
 
-    public void toggleCameraFlash() {
-        if (DEBUG) {
-            Log.d(TAG, "Toggling camera flashlight");
-        }
-        if (mFlashlightController != null) {
-            mFlashlightController.initFlashLight();
-            if (mFlashlightController.hasFlashlight() && mFlashlightController.isAvailable()) {
-                mFlashlightController.setFlashlight(!mFlashlightController.isEnabled());
-            }
-        }
-    }
-
-    public void toggleCameraFlashState(boolean enable) {
-        if (DEBUG) {
-            Log.d(TAG, "Disabling camera flashlight");
-        }
-        if (mFlashlightController != null) {
-            mFlashlightController.initFlashLight();
-            if (mFlashlightController.hasFlashlight() && mFlashlightController.isAvailable()) {
-                mFlashlightController.setFlashlight(enable);
-            }
-        }
-    }
-
     void makeExpandedVisible(boolean force) {
         if (SPEW) Log.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
         if (!force && (mExpandedVisible || !mCommandQueue.panelsEnabled())) {
@@ -2428,10 +2407,6 @@ public class StatusBar extends SystemUI implements
         pw.println("SharedPreferences:");
         for (Map.Entry<String, ?> entry : Prefs.getAll(mContext).entrySet()) {
             pw.print("  "); pw.print(entry.getKey()); pw.print("="); pw.println(entry.getValue());
-        }
-
-        if (mFlashlightController != null) {
-            mFlashlightController.dump(fd, pw, args);
         }
 
         pw.println("Camera gesture intents:");
