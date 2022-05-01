@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 
@@ -327,6 +328,10 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         if (!keyguardStateController.isKeyguardScreenRotationAllowed &&
             context.display.rotation != Surface.ROTATION_0) {
             return false
+        }
+
+        if (LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)) {
+            return false;
         }
 
         // Otherwise, good to go.
