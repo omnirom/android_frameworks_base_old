@@ -3635,6 +3635,7 @@ public abstract class Context {
             WIFI_RTT_RANGING_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
+            AURALIGHT_SERVICE,
             AUTH_SERVICE,
             FINGERPRINT_SERVICE,
             //@hide: FACE_SERVICE,
@@ -3857,6 +3858,8 @@ public abstract class Context {
      * @see android.net.wifi.WifiManager
      * @see #AUDIO_SERVICE
      * @see android.media.AudioManager
+     * @see #AURALIGHT_SERVICE
+     * @see android.media.AuraLightManager
      * @see #MEDIA_ROUTER_SERVICE
      * @see android.media.MediaRouter
      * @see #TELEPHONY_SERVICE
@@ -4465,6 +4468,15 @@ public abstract class Context {
      * @see android.media.AudioManager
      */
     public static final String AUDIO_SERVICE = "audio";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.os.AuraLightManager}
+     * for accessing the device lights.
+     *
+     * @see #getSystemService(String)
+     * @see android.os.AuraLightManager
+     */
+    public static final String AURALIGHT_SERVICE = "auralight";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link

@@ -26,6 +26,17 @@
     <!-- ================================================ -->
     <eat-comment />
 
+     <!-- Asus Add-on -->
+    <protected-broadcast android:name="asus.rog.intent.action.BUMPER_STATE_CHANGED"/>
+    <protected-broadcast android:name="asus.rog.extra.CHARACTER_ID"/>
+    <protected-broadcast android:name="asus.intent.action.AURA_EDIT_LIGHT"/>
+    <protected-broadcast android:name="asus.intent.action.AURA_FRAME_CHANGED"/>
+    <protected-broadcast android:name="asus.intent.action.AURA_LIGHT_CHANGED"/>
+    <protected-broadcast android:name="asus.intent.action.MSG_AURA_INBOX_CHANGE"/>
+    <protected-broadcast android:name="asus.intent.action.MSG_AURA_LIGHT_CHANGE"/>
+    <protected-broadcast android:name="asus.intent.action.AURA_SETTING_CHANGED"/>
+    <!--  -->
+
     <protected-broadcast android:name="android.intent.action.SCREEN_OFF" />
     <protected-broadcast android:name="android.intent.action.SCREEN_ON" />
     <protected-broadcast android:name="android.intent.action.USER_PRESENT" />
@@ -5831,6 +5842,11 @@
            @hide -->
     <permission android:name="android.permission.READ_GLOBAL_APP_SEARCH_DATA"
                 android:protectionLevel="internal|role" />
+
+     <!-- Asus Add-on Permissions -->
+    <permission android:name="com.asus.permission.CUSTOMIZE_AURA_LIGHT" android:protectionLevel="normal"/>
+    <permission android:name="com.asus.permission.MANAGE_AURA_LIGHT" android:protectionLevel="privileged|signature"/>
+    <!--  -->
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

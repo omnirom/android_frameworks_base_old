@@ -1473,4 +1473,7 @@ public class Build {
                 .collect(Collectors.joining(","));
         return ret.isEmpty() ? defaultValue : ret;
     }
+
+    public static final boolean ENABLE_AURALIGHT = SystemProperties.getBoolean("persist.sys.auralight.enable", false);
+
 }

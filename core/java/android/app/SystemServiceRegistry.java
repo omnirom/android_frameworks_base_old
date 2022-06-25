@@ -147,6 +147,7 @@ import android.net.vcn.VcnManager;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.net.wifi.nl80211.WifiNl80211Manager;
 import android.nfc.NfcManager;
+import android.os.AuraLightManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStatsManager;
@@ -154,6 +155,7 @@ import android.os.BugreportManager;
 import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.HardwarePropertiesManager;
+import android.os.IAuraLightService;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
 import android.os.IDumpstate;
@@ -327,6 +329,17 @@ public final class SystemServiceRegistry {
             public AudioManager createService(ContextImpl ctx) {
                 return new AudioManager(ctx);
             }});
+
+        if (Build.ENABLE_AURALIGHT) {
+            registerService(Context.AURALIGHT_SERVICE, AuraLightManager.class,
+                new CachedServiceFetcher<AuraLightManager>() {
+            @Override
+            public AuraLightManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getService(Context.AURALIGHT_SERVICE);
+                IAuraLightService service = IAuraLightService.Stub.asInterface(b);
+                return new AuraLightManager(ctx, service);
+            }});
+        }
 
         registerService(Context.MEDIA_ROUTER_SERVICE, MediaRouter.class,
                 new CachedServiceFetcher<MediaRouter>() {

@@ -191,6 +191,8 @@ package android {
     field public static final String WRITE_SETTINGS = "android.permission.WRITE_SETTINGS";
     field public static final String WRITE_SYNC_SETTINGS = "android.permission.WRITE_SYNC_SETTINGS";
     field public static final String WRITE_VOICEMAIL = "com.android.voicemail.permission.WRITE_VOICEMAIL";
+    field public static final String CUSTOMIZE_AURA_LIGHT = "com.asus.permission.CUSTOMIZE_AURA_LIGHT";
+    field public static final String MANAGE_AURA_LIGHT = "com.asus.permission.MANAGE_AURA_LIGHT";
   }
 
   public static final class Manifest.permission_group {
