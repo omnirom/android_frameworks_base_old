@@ -39,6 +39,7 @@ import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DeviceControlsTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
+import com.android.systemui.qs.tiles.HeadsUpTile;
 import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.InternetTile;
 import com.android.systemui.qs.tiles.LocationTile;
@@ -97,6 +98,7 @@ public class QSFactoryImpl implements QSFactory {
     // Omni
     private final Provider<AODTile> mAODTileProvider;
     private final Provider<ScreenshotTile> mScreenshotTileProvider;
+    private final Provider<HeadsUpTile> mHeadsUpTileProvider;
     private final Provider<CaffeineTile> mCaffeineTileProvider;
 
     private final Lazy<QSHost> mQsHostLazy;
@@ -134,6 +136,7 @@ public class QSFactoryImpl implements QSFactory {
             Provider<AlarmTile> alarmTileProvider,
             Provider<QuickAccessWalletTile> quickAccessWalletTileProvider,
             Provider<AODTile> aodTileProvider,
+            Provider<HeadsUpTile> headsupTileProvider,
             Provider<ScreenshotTile> screenshotTileProvider,
             Provider<CaffeineTile> caffeineTileProvider) {
         mQsHostLazy = qsHostLazy;
@@ -169,6 +172,7 @@ public class QSFactoryImpl implements QSFactory {
 
         //Omni
         mAODTileProvider = aodTileProvider;
+        mHeadsUpTileProvider = headsupTileProvider;
         mScreenshotTileProvider = screenshotTileProvider;
         mCaffeineTileProvider = caffeineTileProvider;
     }
@@ -240,6 +244,8 @@ public class QSFactoryImpl implements QSFactory {
             // Omni tiles
             case "aod":
                 return mAODTileProvider.get();
+            case "heads_up":
+                return mHeadsUpTileProvider.get();
             case "screenshot":
                 return mScreenshotTileProvider.get();
             case "caffeine":
