@@ -40,4 +40,10 @@
     <integer name="config_cpuTempDivider" translatable="false">1</integer>
     <!-- The CPUs to display in CPUInfoService view -->
     <string name="config_displayCpus" translatable="false"></string>
+
+    <!-- HBM type of UDFPS overlay.
+            0 - GLOBAL HBM
+            1 - LOCAL HBM
+    -->
+    <integer name="config_udfps_hbm_type">1</integer>
 </resources>
