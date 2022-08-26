@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "893a9788_ed7cc5a7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2022-08-26T15:00:59Z",
+      "side": 1,
+      "message": "told you bout settings shizz :)",
+      "revId": "2eb94a871ef565da20de82d83182e81202729266",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "813040e3_2167f8a6",
