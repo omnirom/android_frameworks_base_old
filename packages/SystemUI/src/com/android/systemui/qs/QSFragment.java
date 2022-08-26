@@ -504,7 +504,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     private void updateQsPanelControllerListening() {
-        mQSPanelController.setListening(mListening && mQsVisible, mQsExpanded);
+        mQSPanelController.setListening(mListening && mQsVisible, mQsExpanded || mInSplitShade);
     }
 
     @Override
