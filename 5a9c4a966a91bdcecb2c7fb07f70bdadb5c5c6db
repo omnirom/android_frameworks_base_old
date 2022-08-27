@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d04fa102_6f039806",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002322
+      },
+      "writtenOn": "2022-08-27T17:55:06Z",
+      "side": 1,
+      "message": "working with https://gerrit.omnirom.org/c/android_packages_apps_Settings/+/42068",
+      "revId": "5a9c4a966a91bdcecb2c7fb07f70bdadb5c5c6db",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    }
+  ]
+}
