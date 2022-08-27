@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dc4caeaf_3b486011",
+        "filename": "services/core/java/com/android/server/power/ShutdownThread.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1002322
+      },
+      "writtenOn": "2022-08-27T07:44:49Z",
+      "side": 0,
+      "message": "need to test after this change \n\nhttps://github.com/omnirom/android_frameworks_base/commit/8c6ce78b96dab2b9eb9c97541f9695f2c304f853",
+      "revId": "a033fe4b482cd633b6b285dcd8d8a3f3a3e44080",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    }
+  ]
+}
