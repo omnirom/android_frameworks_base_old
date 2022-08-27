@@ -189,6 +189,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.autofill.AutofillManagerInternal;
 import org.omnirom.omnilib.utils.DeviceKeyHandler;
+import org.omnirom.omnilib.utils.OmniSettings;
 import org.omnirom.omnilib.utils.OmniUtils;
 
 import dalvik.system.PathClassLoader;
@@ -798,10 +799,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Global.POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED), false, this,
+                    OmniSettings.OMNI_SYSTEM_PROXI_CHECK_ENABLED), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.OMNI_LONG_PRESS_POWER_TORCH), false, this,
+                    OmniSettings.OMNI_LONG_PRESS_POWER_TORCH), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -2577,10 +2578,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mContext.getResources().getInteger(
                             com.android.internal.R.integer.config_keyChordPowerVolumeUp));
             mProxiWakeupCheckEnabled = Settings.System.getIntForUser(resolver,
-                    Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED, 0,
+                    OmniSettings.OMNI_SYSTEM_PROXI_CHECK_ENABLED, 0,
                     UserHandle.USER_CURRENT) != 0;
             mLongPressPowerTorch = Settings.System.getIntForUser(resolver,
-                    Settings.System.OMNI_LONG_PRESS_POWER_TORCH, 0,
+                    OmniSettings.OMNI_LONG_PRESS_POWER_TORCH, 0,
                     UserHandle.USER_CURRENT) != 0;
         }
         if (updateRotation) {

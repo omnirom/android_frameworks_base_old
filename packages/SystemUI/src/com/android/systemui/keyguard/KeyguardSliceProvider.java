@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
+import org.omnirom.omnilib.utils.OmniSettings;
 import org.omnirom.omnilib.weather.OmniJawsClient;
 
 import java.util.Date;
@@ -205,7 +206,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
         void observe() {
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.OMNI_LOCKSCREEN_WEATHER_ENABLED), false, this,
+                    OmniSettings.OMNI_LOCKSCREEN_WEATHER_ENABLED), false, this,
                     UserHandle.USER_ALL);
             updateShowWeatherSlice();
         }
@@ -216,7 +217,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
         void updateShowWeatherSlice() {
             mShowWeatherSlice = Settings.System.getIntForUser(mContentResolver,
-                    Settings.System.OMNI_LOCKSCREEN_WEATHER_ENABLED,
+                    OmniSettings.OMNI_LOCKSCREEN_WEATHER_ENABLED,
                     0, UserHandle.USER_CURRENT) != 0;
         }
 

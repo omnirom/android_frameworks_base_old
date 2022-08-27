@@ -32,6 +32,7 @@ android_app {
     ],
     static_libs: [
         "junit",
+        "OmniLib",
         "SettingsLibDisplayDensityUtils",
     ],
     platform_apis: true,
