@@ -16,6 +16,23 @@
       "message": "working for me ",
       "revId": "afd12545615a72f6347477996b60d7b395ea96ef",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c6d382f8_48f6fc98",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002322
+      },
+      "writtenOn": "2022-08-29T23:00:33Z",
+      "side": 1,
+      "message": "all settings after 13_rebase are include",
+      "revId": "afd12545615a72f6347477996b60d7b395ea96ef",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
     }
   ]
 }
