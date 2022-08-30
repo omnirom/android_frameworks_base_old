@@ -31,6 +31,7 @@ import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.media.RingtonePlayer
+import com.android.systemui.omni.CPUInfoManager
 import com.android.systemui.power.PowerUI
 import com.android.systemui.recents.Recents
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
@@ -205,4 +206,10 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(KeyguardLiftController::class)
     abstract fun bindKeyguardLiftController(sysui: KeyguardLiftController): CoreStartable
+
+    /** Inject into CPUInfoManager.  */
+    @Binds
+    @IntoMap
+    @ClassKey(CPUInfoManager::class)
+    abstract fun bindCPUInfoManager(sysui: CPUInfoManager): CoreStartable
 }
