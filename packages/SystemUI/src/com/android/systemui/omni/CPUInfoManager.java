@@ -22,13 +22,18 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
 
+import javax.inject.Inject;
+
+@SysUISingleton
 public class CPUInfoManager extends CoreStartable implements OmniSettingsService.OmniSettingsObserver {
     private final String TAG = "CPUInfoManager";
     private final String OMNI_SHOW_CPU_OVERLAY = "show_cpu_overlay";
 
+    @Inject
     public CPUInfoManager(Context context) {
         super(context);
     }
