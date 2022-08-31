@@ -197,6 +197,8 @@ android_library {
         "lottie",
         "LowLightDreamLib",
         "motion_tool_lib",
+        "OmniLib",
+        "OmniLibCore",
     ],
     manifest: "AndroidManifest.xml",
 
