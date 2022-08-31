@@ -191,9 +191,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.autofill.AutofillManagerInternal;
 import android.widget.Toast;
-import org.omnirom.omnilib.utils.DeviceKeyHandler;
-import org.omnirom.omnilib.utils.OmniUtils;
-
+import org.omnirom.omnilibcore.utils.DeviceKeyHandler;
+import org.omnirom.omnilibcore.utils.OmniUtils;
 import dalvik.system.PathClassLoader;
 
 import com.android.internal.R;
