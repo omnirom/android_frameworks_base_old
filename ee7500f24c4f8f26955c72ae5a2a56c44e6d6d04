@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d17dd7b7_b4de95c5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2022-08-31T22:37:05Z",
+      "side": 1,
+      "message": "I actually no longer need all of this - devices that where the reason to add this - SBCs like the pi all use now new launcher toolbar that has its own impl of those hw keys. Only reason for this to keep is to not break things that rely on those changes like eg. left right arrow keys - but this will be the last time we should add all of this",
+      "revId": "ee7500f24c4f8f26955c72ae5a2a56c44e6d6d04",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    }
+  ]
+}
