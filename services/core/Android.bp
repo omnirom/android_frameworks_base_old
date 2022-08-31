@@ -173,7 +173,7 @@ java_library_static {
         "overlayable_policy_aidl-java",
         "SurfaceFlingerProperties",
         "com.android.sysprop.watchdog",
-        "OmniLib",
+        "OmniLibCore",
     ],
     javac_shard_size: 50,
 }
