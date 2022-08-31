@@ -159,7 +159,7 @@ import com.android.systemui.util.ViewController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
-import org.omnirom.omnilib.utils.TaskUtils;
+import org.omnirom.omnilibcore.utils.TaskUtils;
 
 import java.io.PrintWriter;
 import java.util.Locale;

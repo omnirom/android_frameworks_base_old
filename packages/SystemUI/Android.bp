@@ -122,7 +122,8 @@ android_library {
         "dagger2",
         "jsr330",
         "lottie",
-        "OmniLib"
+        "OmniLib",
+        "OmniLibCore",
     ],
     manifest: "AndroidManifest.xml",
 
