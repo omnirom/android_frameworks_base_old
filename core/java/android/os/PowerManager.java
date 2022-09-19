@@ -1884,7 +1884,7 @@ public final class PowerManager {
                     "Attempted userspace reboot on a device that doesn't support it");
         }
         try {
-            mService.reboot(false, reason, true);
+            mService.rebootCustom(false, reason, true);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
