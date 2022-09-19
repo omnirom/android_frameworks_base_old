@@ -250,6 +250,8 @@ public class UpdateEngine {
                 ServiceManager.getService(UPDATE_ENGINE_SERVICE));
         if (mUpdateEngine == null) {
             throw new IllegalStateException("Failed to find update_engine");
+        } else {
+            setPerformanceMode(true);
         }
     }
 
