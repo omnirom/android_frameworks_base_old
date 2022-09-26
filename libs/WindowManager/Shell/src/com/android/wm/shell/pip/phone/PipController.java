@@ -32,6 +32,7 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -67,6 +68,7 @@ import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
@@ -631,6 +633,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mShellController.addConfigurationChangeListener(this);
         mShellController.addKeyguardChangeListener(this);
         mShellController.addUserChangeListener(this);
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_PIP,
+                this::createExternalInterface, this);
+    }
+
+    private ExternalInterfaceBinder createExternalInterface() {
+        return new IPipImpl(this);
     }
 
     @Override
@@ -1039,17 +1047,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      * The interface for calls from outside the Shell, within the host process.
      */
     private class PipImpl implements Pip {
-        private IPipImpl mIPip;
-
-        @Override
-        public IPip createExternalInterface() {
-            if (mIPip != null) {
-                mIPip.invalidate();
-            }
-            mIPip = new IPipImpl(PipController.this);
-            return mIPip;
-        }
-
         @Override
         public void expandPip() {
             mMainExecutor.execute(() -> {
@@ -1111,7 +1108,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      * The interface for calls from outside the host process.
      */
     @BinderThread
-    private static class IPipImpl extends IPip.Stub {
+    private static class IPipImpl extends IPip.Stub implements ExternalInterfaceBinder {
         private PipController mController;
         private final SingleInstanceRemoteListener<PipController,
                 IPipAnimationListener> mListener;
@@ -1142,7 +1139,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         /**
          * Invalidates this instance, preventing future calls from updating the controller.
          */
-        void invalidate() {
+        @Override
+        public void invalidate() {
             mController = null;
         }
 
