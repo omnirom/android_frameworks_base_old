@@ -117,8 +117,8 @@
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:shadowColor">@color/keyguard_shadow_color</item>
-        <item name="android:shadowRadius">?attr/shadowRadius</item>
+        <!--<item name="android:shadowColor">@color/keyguard_shadow_color</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>-->
     </style>
 
     <style name="TextAppearance.Keyguard.Secondary">
@@ -130,12 +130,12 @@
     </style>
 
     <style name="TextAppearance.Keyguard.BottomArea">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/widget_label_font_size</item>
         <item name="android:maxLines">1</item>
         <item name="android:gravity">center</item>
         <item name="android:textColor">?attr/wallpaperTextColor</item>
-        <item name="android:shadowColor">@color/keyguard_shadow_color</item>
-        <item name="android:shadowRadius">?attr/shadowRadius</item>
+        <!--<item name="android:shadowColor">@color/keyguard_shadow_color</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>-->
     </style>
 
     <style name="TextAppearance.Keyguard.BottomArea.Button">
