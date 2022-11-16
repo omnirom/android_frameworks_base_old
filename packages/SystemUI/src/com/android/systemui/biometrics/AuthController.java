@@ -62,6 +62,7 @@ import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.CoreStartable;
@@ -75,6 +76,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -143,6 +145,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     private boolean mAllFingerprintAuthenticatorsRegistered;
     @NonNull private final UserManager mUserManager;
     @NonNull private final LockPatternUtils mLockPatternUtils;
+    @NonNull private final InteractionJankMonitor mInteractionJankMonitor;
     private final @Background DelayableExecutor mBackgroundExecutor;
 
     @VisibleForTesting
@@ -489,6 +492,9 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         final float scaleFactor = android.util.DisplayUtils.getPhysicalPixelDisplaySizeRatio(
                 mStableDisplaySize.x, mStableDisplaySize.y, displayInfo.getNaturalWidth(),
                 displayInfo.getNaturalHeight());
+        if (scaleFactor == Float.POSITIVE_INFINITY) {
+            return new PointF(mFaceAuthSensorLocation.x, mFaceAuthSensorLocation.y);
+        }
         return new PointF(mFaceAuthSensorLocation.x * scaleFactor,
                 mFaceAuthSensorLocation.y * scaleFactor);
     }
@@ -549,6 +555,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull StatusBarStateController statusBarStateController,
+            @NonNull InteractionJankMonitor jankMonitor,
             @Main Handler handler,
             @Background DelayableExecutor bgExecutor) {
         super(context);
@@ -566,6 +573,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         mSidefpsControllerFactory = sidefpsControllerFactory;
         mDisplayManager = displayManager;
         mWindowManager = windowManager;
+        mInteractionJankMonitor = jankMonitor;
         mUdfpsEnrolledForUser = new SparseBooleanArray();
 
         mOrientationListener = new BiometricDisplayListener(
@@ -1037,8 +1045,36 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 .setOperationId(operationId)
                 .setRequestId(requestId)
                 .setMultiSensorConfig(multiSensorConfig)
+                .setScaleFactorProvider(() -> {
+                    return getScaleFactor();
+                })
                 .build(bgExecutor, sensorIds, mFpProps, mFaceProps, wakefulnessLifecycle,
-                        userManager, lockPatternUtils);
+                        userManager, lockPatternUtils, mInteractionJankMonitor);
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        final AuthDialog dialog = mCurrentDialog;
+        pw.println("  stableDisplaySize=" + mStableDisplaySize);
+        pw.println("  faceAuthSensorLocation=" + mFaceAuthSensorLocation);
+        pw.println("  fingerprintLocation=" + mFingerprintLocation);
+        pw.println("  udfpsBounds=" + mUdfpsBounds);
+        pw.println("  allFingerprintAuthenticatorsRegistered="
+                + mAllFingerprintAuthenticatorsRegistered);
+        pw.println("  currentDialog=" + dialog);
+        if (dialog != null) {
+            dialog.dump(pw, args);
+        }
+    }
+
+    /**
+     * Provides a float that represents the resolution scale(if the controller is for UDFPS).
+     */
+    public interface ScaleFactorProvider {
+        /**
+         * Returns a float representing the scaled resolution(if the controller if for UDFPS).
+         */
+        float provide();
     }
 
     /**
