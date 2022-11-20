@@ -6295,6 +6295,11 @@ public final class Settings {
         public static final String OMNI_BACK_GESTURE_HEIGHT = "back_gesture_height";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_ALARM = "status_bar_alarm";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -6311,6 +6316,7 @@ public final class Settings {
             OMNI_SHOW_BATTERY_IMAGE,
             OMNI_LOCKSCREEN_WEATHER_ENABLED,
             OMNI_BACK_GESTURE_HEIGHT,
+            OMNI_STATUS_BAR_ALARM,
         };
 
         /**
@@ -6335,6 +6341,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BACK_GESTURE_HEIGHT, 1);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_STATUS_BAR_ALARM, 0);
         }
     }
 

@@ -162,6 +162,7 @@ public class PhoneStatusBarPolicy
 
     private BluetoothController mBluetooth;
     private AlarmManager.AlarmClockInfo mNextAlarm;
+    private boolean mShowAlarm;
 
     @Inject
     public PhoneStatusBarPolicy(StatusBarIconController iconController,
@@ -342,6 +343,7 @@ public class PhoneStatusBarPolicy
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
         mRecordingController.addCallback(this);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, System.OMNI_STATUS_BAR_ALARM);
 
         mCommandQueue.addCallback(this);
     }
@@ -369,7 +371,7 @@ public class PhoneStatusBarPolicy
         final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
         mIconController.setIcon(mSlotAlarmClock, zenNone ? R.drawable.stat_sys_alarm_dim
                 : R.drawable.stat_sys_alarm, buildAlarmContentDescription());
-        mIconController.setIconVisibility(mSlotAlarmClock, mCurrentUserSetup && hasAlarm);
+        mIconController.setIconVisibility(mSlotAlarmClock, mCurrentUserSetup && hasAlarm && mShowAlarm);
     }
 
     private String buildAlarmContentDescription() {
@@ -799,5 +801,12 @@ public class PhoneStatusBarPolicy
         // Ensure this is on the main thread
         if (DEBUG) Log.d(TAG, "screenrecord: hiding icon");
         mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        mShowAlarm = System.getIntForUser(mContext.getContentResolver(),
+                System.OMNI_STATUS_BAR_ALARM, 0, UserHandle.USER_CURRENT) != 0;
+        updateAlarm();
     }
 }
