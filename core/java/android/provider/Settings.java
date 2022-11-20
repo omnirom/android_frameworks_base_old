@@ -6111,6 +6111,11 @@ public final class Settings {
         public static final String OMNI_DOZE_ON_CHARGE_NOW = "doze_on_charge_now";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_STATUS_BAR_ALARM = "status_bar_alarm";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -6144,6 +6149,7 @@ public final class Settings {
             OMNI_QS_TILE_LABEL_HIDE,
             OMNI_STATUS_BAR_BT_BATTERY,
             OMNI_DOZE_ON_CHARGE,
+            OMNI_STATUS_BAR_ALARM,
         };
 
         /**
@@ -6187,6 +6193,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_QS_TILE_LABEL_HIDE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_STATUS_BAR_BT_BATTERY, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DOZE_ON_CHARGE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_STATUS_BAR_ALARM, 0);
         }
     }
 
