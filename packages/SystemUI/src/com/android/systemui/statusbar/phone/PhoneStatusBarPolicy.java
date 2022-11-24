@@ -47,8 +47,8 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.provider.Settings.Global;
-import android.provider.Settings.System;
 import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
 import android.text.format.DateFormat;
@@ -102,6 +102,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -187,6 +188,8 @@ public class PhoneStatusBarPolicy
     private boolean mShowBtBattery;
     private boolean mShowAlarm;
 
+    static final int ALARM_VISIBILITY_HOURS = 12;
+    
     @Inject
     public PhoneStatusBarPolicy(StatusBarIconController iconController,
             CommandQueue commandQueue, BroadcastDispatcher broadcastDispatcher,
@@ -369,8 +372,8 @@ public class PhoneStatusBarPolicy
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
         mRecordingController.addCallback(this);
-        Dependency.get(OmniSettingsService.class).addIntObserver(this, System.OMNI_STATUS_BAR_BT_BATTERY);
-        Dependency.get(OmniSettingsService.class).addIntObserver(this, System.OMNI_STATUS_BAR_ALARM);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_STATUS_BAR_BT_BATTERY,
+                Settings.System.OMNI_STATUS_BAR_ALARM);
 
         mCommandQueue.addCallback(this);
     }
@@ -397,7 +400,8 @@ public class PhoneStatusBarPolicy
         final boolean zenNone = !zenAllowsAlarm();
         mIconController.setIcon(mSlotAlarmClock, zenNone ? R.drawable.stat_sys_alarm_dim
                 : R.drawable.stat_sys_alarm, buildAlarmContentDescription());
-        mIconController.setIconVisibility(mSlotAlarmClock, mCurrentUserSetup && hasAlarm && mShowAlarm);
+        mIconController.setIconVisibility(mSlotAlarmClock, mCurrentUserSetup && hasAlarm &&
+                mShowAlarm && withinNHours(alarm, ALARM_VISIBILITY_HOURS));
     }
 
     private String buildAlarmContentDescription() {
@@ -901,12 +905,12 @@ public class PhoneStatusBarPolicy
 
     @Override
     public void onIntSettingChanged(String key, Integer newValue) {
-        mShowBtBattery = System.getIntForUser(mContext.getContentResolver(),
-                System.OMNI_STATUS_BAR_BT_BATTERY, 0, UserHandle.USER_CURRENT) != 0;
+        mShowBtBattery = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_STATUS_BAR_BT_BATTERY, 0, UserHandle.USER_CURRENT) != 0;
         updateBluetooth();
 
-        mShowAlarm = System.getIntForUser(mContext.getContentResolver(),
-                System.OMNI_STATUS_BAR_ALARM, 0, UserHandle.USER_CURRENT) != 0;
+        mShowAlarm = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_STATUS_BAR_ALARM, 0, UserHandle.USER_CURRENT) != 0;
         updateAlarm();
     }
 
@@ -929,5 +933,14 @@ public class PhoneStatusBarPolicy
         boolean allowAlarms = (mZenController.getConsolidatedPolicy().priorityCategories & NotificationManager.Policy
                 .PRIORITY_CATEGORY_ALARMS) != 0;
         return allowAlarms;
+    }
+
+    private boolean withinNHours(AlarmManager.AlarmClockInfo alarmClockInfo, int hours) {
+        if (alarmClockInfo == null) {
+            return false;
+        }
+
+        long limit = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(hours);
+        return alarmClockInfo.getTriggerTime() <= limit;
     }
 }
