@@ -54,8 +54,10 @@ import androidx.slice.widget.SliceViewUtil;;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIAppComponentFactory;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
@@ -84,7 +86,8 @@ import javax.inject.Inject;
 public class KeyguardSliceProvider extends SliceProvider implements
         NextAlarmController.NextAlarmChangeCallback, ZenModeController.Callback,
         NotificationMediaManager.MediaListener, StatusBarStateController.StateListener,
-        SystemUIAppComponentFactory.ContextInitializer, OmniJawsClient.OmniJawsObserver {
+        SystemUIAppComponentFactory.ContextInitializer, OmniJawsClient.OmniJawsObserver,
+        OmniSettingsService.OmniSettingsObserver {
 
     private static final String TAG = "KgdSliceProvider";
 
@@ -158,8 +161,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
     protected final Uri mWeatherUri;
     private OmniJawsClient mWeatherClient;
     private OmniJawsClient.WeatherInfo mWeatherData;
-    private SettingsObserver mSettingsObserver;
     private boolean mShowWeatherSlice;
+    private boolean mShowAlarmSlice = true;
+    private boolean mShowDndSlice;
+    private boolean mAlarmSliceTimed;
 
     /**
      * Receiver responsible for time ticking and updating the date format.
@@ -198,35 +203,6 @@ public class KeyguardSliceProvider extends SliceProvider implements
                     }
                 }
             };
-
-    class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            mContentResolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.OMNI_LOCKSCREEN_WEATHER_ENABLED), false, this,
-                    UserHandle.USER_ALL);
-            updateShowWeatherSlice();
-        }
-
-        void unobserve() {
-            mContentResolver.unregisterContentObserver(this);
-        }
-
-        void updateShowWeatherSlice() {
-            mShowWeatherSlice = Settings.System.getIntForUser(mContentResolver,
-                    Settings.System.OMNI_LOCKSCREEN_WEATHER_ENABLED,
-                    0, UserHandle.USER_CURRENT) != 0;
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            updateShowWeatherSlice();
-            notifyChange();
-        }
-    }
 
     public static KeyguardSliceProvider getAttachedInstance() {
         return KeyguardSliceProvider.sInstance;
@@ -310,7 +286,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     }
 
     protected void addNextAlarmLocked(ListBuilder builder) {
-        if (TextUtils.isEmpty(mNextAlarm)) {
+        if (TextUtils.isEmpty(mNextAlarm) || !mShowAlarmSlice) {
             return;
         }
         final boolean zenNone = !zenAllowsAlarm();
@@ -338,12 +314,14 @@ public class KeyguardSliceProvider extends SliceProvider implements
      * @param builder The slice builder.
      */
     protected void addZenModeLocked(ListBuilder builder) {
-        if (!isDndOn()) {
+        if (!isDndOn() || !mShowDndSlice) {
             return;
         }
         RowBuilder dndBuilder = new RowBuilder(mDndUri)
                 .setContentDescription(getContext().getResources()
                         .getString(R.string.accessibility_quick_settings_dnd))
+                .setTitle(getContext().getResources()
+                        .getString(R.string.keyguard_slice_dnd))
                 .addEndItem(
                     IconCompat.createWithResource(getContext(), R.drawable.stat_sys_dnd),
                     ListBuilder.ICON_IMAGE);
@@ -378,8 +356,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
             KeyguardSliceProvider.sInstance = this;
             registerClockUpdate();
             updateClockLocked();
-            mSettingsObserver = new SettingsObserver(mHandler);
-            mSettingsObserver.observe();
+
+            Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_LOCKSCREEN_WEATHER_ENABLED,
+                    Settings.System.OMNI_LOCKSCREEN_ALARM_ENABLED, Settings.System.OMNI_LOCKSCREEN_DND_ENABLED);
+
             enableWeatherUpdates();
         }
         return true;
@@ -398,7 +378,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
                 getContext().unregisterReceiver(mIntentReceiver);
             }
             disableWeatherUpdates();
-            mSettingsObserver.unobserve();
+            Dependency.get(OmniSettingsService.class).removeObserver(this);
+
             KeyguardSliceProvider.sInstance = null;
         }
     }
@@ -416,10 +397,9 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private void updateNextAlarm() {
         synchronized (this) {
             if (withinNHoursLocked(mNextAlarmInfo, ALARM_VISIBILITY_HOURS)) {
-                String pattern = android.text.format.DateFormat.is24HourFormat(getContext(),
-                        ActivityManager.getCurrentUser()) ? "HH:mm" : "h:mm";
-                mNextAlarm = android.text.format.DateFormat.format(pattern,
-                        mNextAlarmInfo.getTriggerTime()).toString();
+                String skeleton = android.text.format.DateFormat.is24HourFormat(getContext(), ActivityManager.getCurrentUser()) ? "EHm" : "Ehma";
+                String pattern = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+                mNextAlarm = android.text.format.DateFormat.format(pattern, mNextAlarmInfo.getTriggerTime()).toString();
             } else {
                 mNextAlarm = "";
             }
@@ -431,7 +411,9 @@ public class KeyguardSliceProvider extends SliceProvider implements
         if (alarmClockInfo == null) {
             return false;
         }
-
+        if (!mAlarmSliceTimed) {
+            return true;
+        }
         long limit = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(hours);
         return mNextAlarmInfo.getTriggerTime() <= limit;
     }
@@ -492,13 +474,15 @@ public class KeyguardSliceProvider extends SliceProvider implements
     public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
         synchronized (this) {
             mNextAlarmInfo = nextAlarm;
-            mAlarmManager.cancel(mUpdateNextAlarm);
+            if (mAlarmSliceTimed) {
+                mAlarmManager.cancel(mUpdateNextAlarm);
 
-            long triggerAt = mNextAlarmInfo == null ? -1 : mNextAlarmInfo.getTriggerTime()
-                    - TimeUnit.HOURS.toMillis(ALARM_VISIBILITY_HOURS);
-            if (triggerAt > 0) {
-                mAlarmManager.setExact(AlarmManager.RTC, triggerAt, "lock_screen_next_alarm",
-                        mUpdateNextAlarm, mHandler);
+                long triggerAt = mNextAlarmInfo == null ? -1 : mNextAlarmInfo.getTriggerTime()
+                        - TimeUnit.HOURS.toMillis(ALARM_VISIBILITY_HOURS);
+                if (triggerAt > 0) {
+                    mAlarmManager.setExact(AlarmManager.RTC, triggerAt, "lock_screen_next_alarm",
+                            mUpdateNextAlarm, mHandler);
+                }
             }
         }
         updateNextAlarm();
@@ -652,5 +636,19 @@ public class KeyguardSliceProvider extends SliceProvider implements
         boolean allowAlarms = (mZenModeController.getConsolidatedPolicy().priorityCategories & NotificationManager.Policy
                 .PRIORITY_CATEGORY_ALARMS) != 0;
         return allowAlarms;
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        mShowWeatherSlice = Settings.System.getIntForUser(mContentResolver,
+                    Settings.System.OMNI_LOCKSCREEN_WEATHER_ENABLED,
+                    0, UserHandle.USER_CURRENT) != 0;
+        mShowAlarmSlice = Settings.System.getIntForUser(mContentResolver,
+                    Settings.System.OMNI_LOCKSCREEN_ALARM_ENABLED,
+                    1, UserHandle.USER_CURRENT) != 0;
+        mShowDndSlice = Settings.System.getIntForUser(mContentResolver,
+                    Settings.System.OMNI_LOCKSCREEN_DND_ENABLED,
+                    0, UserHandle.USER_CURRENT) != 0;
+        notifyChange();
     }
 }
