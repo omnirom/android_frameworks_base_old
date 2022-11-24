@@ -19,6 +19,7 @@ package com.android.systemui.keyguard;
 import android.annotation.AnyThread;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -312,8 +313,9 @@ public class KeyguardSliceProvider extends SliceProvider implements
         if (TextUtils.isEmpty(mNextAlarm)) {
             return;
         }
+        final boolean zenNone = !zenAllowsAlarm();
         IconCompat alarmIcon = IconCompat.createWithResource(getContext(),
-                R.drawable.ic_access_alarms_big);
+                zenNone ? R.drawable.ic_access_alarms_big_dim : R.drawable.ic_access_alarms_big);
         RowBuilder alarmRowBuilder = new RowBuilder(mAlarmUri)
                 .setTitle(mNextAlarm)
                 .addEndItem(alarmIcon, ListBuilder.ICON_IMAGE);
@@ -629,5 +631,26 @@ public class KeyguardSliceProvider extends SliceProvider implements
             mWeatherData = mWeatherClient.getWeatherInfo();
             notifyChange();
         }
+    }
+
+    @Override
+    public void onConsolidatedPolicyChanged(NotificationManager.Policy policy) {
+        notifyChange();
+    }
+
+    private boolean zenAllowsAlarm() {
+        int zen = mZenModeController.getZen();
+        if (zen == Settings.Global.ZEN_MODE_OFF) {
+            return true;
+        }
+        if (zen == Settings.Global.ZEN_MODE_NO_INTERRUPTIONS) {
+            return false;
+        }
+        if (zen == Settings.Global.ZEN_MODE_ALARMS) {
+            return true;
+        }
+        boolean allowAlarms = (mZenModeController.getConsolidatedPolicy().priorityCategories & NotificationManager.Policy
+                .PRIORITY_CATEGORY_ALARMS) != 0;
+        return allowAlarms;
     }
 }
