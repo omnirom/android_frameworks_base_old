@@ -42,6 +42,8 @@
     <string name="accessibility_quick_settings_caffeine_on">Caffeine on.</string>
 
     <!-- alarm tile -->
-    <string name="alarm_title_dnd_indicator">(Off by DnD)</string>
+    <string name="alarm_title_dnd_indicator">(Off by DND)</string>
+
+    <string name="keyguard_slice_dnd">Do Not Disturb</string>
 
 </resources>

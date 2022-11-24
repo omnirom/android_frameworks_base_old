@@ -369,8 +369,8 @@ public class PhoneStatusBarPolicy
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
         mRecordingController.addCallback(this);
-        Dependency.get(OmniSettingsService.class).addIntObserver(this, System.OMNI_STATUS_BAR_BT_BATTERY);
-        Dependency.get(OmniSettingsService.class).addIntObserver(this, System.OMNI_STATUS_BAR_ALARM);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, System.OMNI_STATUS_BAR_BT_BATTERY,
+                System.OMNI_STATUS_BAR_ALARM);
 
         mCommandQueue.addCallback(this);
     }
@@ -397,7 +397,8 @@ public class PhoneStatusBarPolicy
         final boolean zenNone = !zenAllowsAlarm();
         mIconController.setIcon(mSlotAlarmClock, zenNone ? R.drawable.stat_sys_alarm_dim
                 : R.drawable.stat_sys_alarm, buildAlarmContentDescription());
-        mIconController.setIconVisibility(mSlotAlarmClock, mCurrentUserSetup && hasAlarm && mShowAlarm);
+        mIconController.setIconVisibility(mSlotAlarmClock, mCurrentUserSetup && hasAlarm &&
+                mShowAlarm);
     }
 
     private String buildAlarmContentDescription() {
