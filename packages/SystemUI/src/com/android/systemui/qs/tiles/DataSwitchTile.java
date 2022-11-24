@@ -179,8 +179,12 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
             state.icon = ResourceIcon.get(activeSIMZero
                     ? R.drawable.ic_qs_data_switch_1
                     : R.drawable.ic_qs_data_switch_2);
+            state.secondaryLabel = mContext.getString(activeSIMZero
+                    ? R.string.qs_data_sim_1
+                    : R.string.qs_data_sim_2);
         } else {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_data_switch_1);
+            state.secondaryLabel = mContext.getString(R.string.qs_data_sim_1);
         }
         if (mSimCount < 2 || !mCanSwitch) {
             state.state = 0;
