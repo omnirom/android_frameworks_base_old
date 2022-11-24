@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
+import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,8 +34,10 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
+import android.provider.Settings.System;
 import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
 import android.text.format.DateFormat;
@@ -48,6 +51,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.privacy.PrivacyType;
@@ -162,6 +166,7 @@ public class PhoneStatusBarPolicy
 
     private BluetoothController mBluetooth;
     private AlarmManager.AlarmClockInfo mNextAlarm;
+    private Context mContext;
     private boolean mShowAlarm;
 
     @Inject
@@ -183,7 +188,7 @@ public class PhoneStatusBarPolicy
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
             RingerModeTracker ringerModeTracker,
             PrivacyItemController privacyItemController,
-            PrivacyLogger privacyLogger) {
+            PrivacyLogger privacyLogger, Context context) {
         mIconController = iconController;
         mCommandQueue = commandQueue;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -236,6 +241,7 @@ public class PhoneStatusBarPolicy
         mDisplayId = displayId;
         mSharedPreferences = sharedPreferences;
         mDateFormatUtil = dateFormatUtil;
+        mContext = context;
     }
 
     /** Initialize the object after construction. */
@@ -367,8 +373,7 @@ public class PhoneStatusBarPolicy
     private void updateAlarm() {
         final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(mUserTracker.getUserId());
         final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
-        int zen = mZenController.getZen();
-        final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        final boolean zenNone = !zenAllowsAlarm();
         mIconController.setIcon(mSlotAlarmClock, zenNone ? R.drawable.stat_sys_alarm_dim
                 : R.drawable.stat_sys_alarm, buildAlarmContentDescription());
         mIconController.setIconVisibility(mSlotAlarmClock, mCurrentUserSetup && hasAlarm && mShowAlarm);
@@ -808,5 +813,26 @@ public class PhoneStatusBarPolicy
         mShowAlarm = System.getIntForUser(mContext.getContentResolver(),
                 System.OMNI_STATUS_BAR_ALARM, 0, UserHandle.USER_CURRENT) != 0;
         updateAlarm();
+    }
+
+    @Override
+    public void onConsolidatedPolicyChanged(NotificationManager.Policy policy) {
+        updateVolumeZen();
+    }
+
+    private boolean zenAllowsAlarm() {
+        int zen = mZenController.getZen();
+        if (zen == Global.ZEN_MODE_OFF) {
+            return true;
+        }
+        if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+            return false;
+        }
+        if (zen == Global.ZEN_MODE_ALARMS) {
+            return true;
+        }
+        boolean allowAlarms = (mZenController.getConsolidatedPolicy().priorityCategories & NotificationManager.Policy
+                .PRIORITY_CATEGORY_ALARMS) != 0;
+        return allowAlarms;
     }
 }
