@@ -2,10 +2,12 @@ package com.android.systemui.qs.tiles
 
 import android.app.AlarmManager
 import android.app.AlarmManager.AlarmClockInfo
+import android.app.NotificationManager
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.provider.AlarmClock
+import android.provider.Settings
 import android.service.quicksettings.Tile
 import android.text.TextUtils
 import android.text.format.DateFormat
@@ -27,6 +29,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.NextAlarmController
+import com.android.systemui.statusbar.policy.ZenModeController
 import java.util.Locale
 import javax.inject.Inject
 
@@ -41,7 +44,8 @@ class AlarmTile @Inject constructor(
     activityStarter: ActivityStarter,
     qsLogger: QSLogger,
     private val userTracker: UserTracker,
-    nextAlarmController: NextAlarmController
+    nextAlarmController: NextAlarmController,
+    private val zenModeController: ZenModeController
 ) : QSTileImpl<QSTile.State>(
     host,
     uiEventLogger,
@@ -56,15 +60,21 @@ class AlarmTile @Inject constructor(
 
     private var lastAlarmInfo: AlarmManager.AlarmClockInfo? = null
     private val icon = ResourceIcon.get(R.drawable.ic_alarm)
+    private val iconDim = ResourceIcon.get(R.drawable.ic_alarm_dim)
     @VisibleForTesting
     internal val defaultIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
     private val callback = NextAlarmController.NextAlarmChangeCallback { nextAlarm ->
         lastAlarmInfo = nextAlarm
         refreshState()
     }
+    private val zenCallback = object : ZenModeController.Callback { 
+        override fun onZenChanged(zen: Int) { refreshState() }
+        override fun onConsolidatedPolicyChanged(policy: NotificationManager.Policy) { refreshState() }
+    }
 
     init {
         nextAlarmController.observe(this, callback)
+        zenModeController.observe(this, zenCallback)
     }
 
     override fun newTileState(): QSTile.State {
@@ -88,8 +98,8 @@ class AlarmTile @Inject constructor(
     }
 
     override fun handleUpdateState(state: QSTile.State, arg: Any?) {
-        state.icon = icon
-        state.label = tileLabel
+        state.icon = if (zenAllowsAlarm()) icon else iconDim
+        state.label = if (zenAllowsAlarm()) tileLabel else tileLabel.toString() + mContext.getString(R.string.alarm_title_dnd_indicator)
         lastAlarmInfo?.let {
             state.secondaryLabel = formatNextAlarm(it)
             state.state = Tile.STATE_ACTIVE
@@ -124,5 +134,19 @@ class AlarmTile @Inject constructor(
 
     companion object {
         const val TILE_SPEC = "alarm"
+    }
+
+    private fun zenAllowsAlarm() : Boolean {
+        val zen = zenModeController.getZen()
+        if (zen == Settings.Global.ZEN_MODE_OFF) {
+            return true
+        }
+        if (zen == Settings.Global.ZEN_MODE_NO_INTERRUPTIONS) {
+            return false
+        }
+        if (zen == Settings.Global.ZEN_MODE_ALARMS) {
+            return true
+        }
+        return (zenModeController.getConsolidatedPolicy().priorityCategories and NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS) != 0
     }
 }
