@@ -49,7 +49,9 @@
     <string name="qs_data_sim_2">SIM 2</string>
 
     <!-- alarm tile -->
-    <string name="alarm_title_dnd_indicator">(Off by DnD)</string>
+    <string name="alarm_title_dnd_indicator">(Off by DND)</string>
+
+    <string name="keyguard_slice_dnd">Do Not Disturb</string>
 
     <!-- Label for area where tiles can be added to the qs panel -->
     <string name="drag_or_tap_to_add_tiles">Hold &amp; drag or tap to add tiles</string>
