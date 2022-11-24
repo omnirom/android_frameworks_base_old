@@ -23,6 +23,7 @@ import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
 import android.app.IActivityManager;
+import android.app.NotificationManager;
 import android.app.SynchronousUserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothClass;
@@ -393,8 +394,7 @@ public class PhoneStatusBarPolicy
     private void updateAlarm() {
         final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
         final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
-        int zen = mZenController.getZen();
-        final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        final boolean zenNone = !zenAllowsAlarm();
         mIconController.setIcon(mSlotAlarmClock, zenNone ? R.drawable.stat_sys_alarm_dim
                 : R.drawable.stat_sys_alarm, buildAlarmContentDescription());
         mIconController.setIconVisibility(mSlotAlarmClock, mCurrentUserSetup && hasAlarm && mShowAlarm);
@@ -908,5 +908,26 @@ public class PhoneStatusBarPolicy
         mShowAlarm = System.getIntForUser(mContext.getContentResolver(),
                 System.OMNI_STATUS_BAR_ALARM, 0, UserHandle.USER_CURRENT) != 0;
         updateAlarm();
+    }
+
+    @Override
+    public void onConsolidatedPolicyChanged(NotificationManager.Policy policy) {
+        updateVolumeZen();
+    }
+
+    private boolean zenAllowsAlarm() {
+        int zen = mZenController.getZen();
+        if (zen == Global.ZEN_MODE_OFF) {
+            return true;
+        }
+        if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+            return false;
+        }
+        if (zen == Global.ZEN_MODE_ALARMS) {
+            return true;
+        }
+        boolean allowAlarms = (mZenController.getConsolidatedPolicy().priorityCategories & NotificationManager.Policy
+                .PRIORITY_CATEGORY_ALARMS) != 0;
+        return allowAlarms;
     }
 }
