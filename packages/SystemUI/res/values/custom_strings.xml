@@ -37,7 +37,6 @@
     <string name="accessibility_quick_settings_caffeine_off">Caffeine off.</string>
     <string name="accessibility_quick_settings_caffeine_on">Caffeine on.</string>
 
-
     <!-- DataSwitch Tile -->
     <string name="qs_data_switch_label">Switch data card</string>
     <string name="qs_data_switch_changed_1">Using SIM 1 for Mobile data</string>
@@ -45,4 +44,8 @@
     <string name="qs_data_no_sim">No SIM</string>
     <string name="qs_data_sim_1">SIM 1</string>
     <string name="qs_data_sim_2">SIM 2</string>
+
+    <!-- alarm tile -->
+    <string name="alarm_title_dnd_indicator">(Off by DnD)</string>
+
 </resources>
