@@ -6126,6 +6126,11 @@ public final class Settings {
         public static final String OMNI_LOCKSCREEN_DND_ENABLED = "lockscreen_dnd_enabled";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_CLOCK_COLORED = "lockscreen_clock_colored";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -6162,6 +6167,7 @@ public final class Settings {
             OMNI_STATUS_BAR_ALARM,
             OMNI_LOCKSCREEN_ALARM_ENABLED,
             OMNI_LOCKSCREEN_DND_ENABLED,
+            OMNI_LOCKSCREEN_CLOCK_COLORED,
         };
 
         /**
@@ -6208,6 +6214,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_STATUS_BAR_ALARM, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_ALARM_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_DND_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_CLOCK_COLORED, 0);
         }
     }
 
