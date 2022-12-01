@@ -26,7 +26,7 @@
     <color name="settingslib_thumb_disabled_color">@android:color/system_neutral2_100</color>
 
     <!-- Material next thumb off color-->
-    <color name="settingslib_thumb_off_color">@android:color/system_neutral2_300</color>
+    <color name="settingslib_thumb_off_color">@android:color/system_neutral2_100</color>
 
     <!-- Material next track on color-->
     <color name="settingslib_track_on_color">@android:color/system_accent1_600</color>
