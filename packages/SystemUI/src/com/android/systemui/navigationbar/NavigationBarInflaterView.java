@@ -25,6 +25,7 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -155,7 +156,13 @@ public class NavigationBarInflaterView extends FrameLayout
             final int defaultResource = mOverviewProxyService.shouldShowSwipeUpUI()
                             ? R.string.config_navBarLayoutQuickstep
                             : R.string.config_navBarLayout;
-            return getContext().getString(defaultResource);
+            String defaultLayout = getContext().getString(defaultResource);
+            String customLayout = Settings.System.getStringForUser(getContext().getContentResolver(),
+                    NAV_BAR_VIEWS, UserHandle.USER_CURRENT);
+            if (!TextUtils.isEmpty(customLayout)) {
+                return customLayout;
+            }
+            return defaultLayout;
         }
     }
 
@@ -180,6 +187,8 @@ public class NavigationBarInflaterView extends FrameLayout
             Settings.System.OMNI_GESTURE_HANDLE_HIDE);
         Dependency.get(OmniSettingsService.class).addIntObserver(this, 
             Settings.System.OMNI_GESTURE_HANDLE_SMALL);
+        Dependency.get(OmniSettingsService.class).addStringObserver(this,
+            NAV_BAR_VIEWS);
     }
 
     public void onLikelyDefaultLayoutChange() {
@@ -529,6 +538,11 @@ public class NavigationBarInflaterView extends FrameLayout
 
     @Override
     public void onIntSettingChanged(String key, Integer newValue) {
+        onForceDefaultLayoutChange();
+    }
+
+    @Override
+    public void onStringSettingChanged(String key, String newValue) {
         onForceDefaultLayoutChange();
     }
 
