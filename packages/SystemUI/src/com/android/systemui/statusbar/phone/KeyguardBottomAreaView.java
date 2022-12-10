@@ -1089,7 +1089,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private void updateQRCodeButtonVisibility() {
         if (mQuickAccessWalletController != null
-                && mQuickAccessWalletController.isWalletEnabled()) {
+                && mQuickAccessWalletController.isWalletEnabled()
+                && mHasCard) {
             // Don't enable if quick access wallet is enabled
             return;
         }
