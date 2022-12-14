@@ -128,7 +128,7 @@ class ControlsComponent @Inject constructor(
     }
 
     fun getLockedVisibility() : Boolean {
-        return canShowWhileLockedSetting
+        return canShowWhileLockedSetting.value
     }
 
     private fun updateShowWhileLocked() {
