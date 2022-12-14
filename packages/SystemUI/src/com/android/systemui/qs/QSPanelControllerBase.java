@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.metrics.LogMaker;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -63,6 +64,7 @@ import kotlin.jvm.functions.Function1;
  */
 public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewController<T>
         implements Dumpable, OmniSettingsService.OmniSettingsObserver {
+    private static final String TAG = "QSPanelControllerBase";
     protected final QSTileHost mHost;
     private final QSCustomizerController mQsCustomizerController;
     private final boolean mUsingMediaPlayer;
@@ -91,11 +93,20 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 public void onConfigurationChange(Configuration newConfig) {
                     mShouldUseSplitNotificationShade =
                             LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
-                    onConfigurationChanged();
+                    // Logging to aid the investigation of b/216244185.
+                    Log.d(TAG,
+                            "onConfigurationChange: "
+                                    + "mShouldUseSplitNotificationShade="
+                                    + mShouldUseSplitNotificationShade + ", "
+                                    + "newConfig.windowConfiguration="
+                                    + newConfig.windowConfiguration);
+                    mQSLogger.logOnConfigurationChanged(mLastOrientation, newConfig.orientation,
+                            mView.getDumpableTag());
                     if (newConfig.orientation != mLastOrientation) {
                         mLastOrientation = newConfig.orientation;
                         switchTileLayout(false);
                     }
+                    onConfigurationChanged();
                 }
             };
 
@@ -167,6 +178,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mHost.addCallback(mQSHostCallback);
         setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
+        mQSLogger.logOnViewAttached(mLastOrientation, mView.getDumpableTag());
         switchTileLayout(true);
 
         mDumpManager.registerDumpable(mView.getDumpableTag(), this);
@@ -182,6 +194,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Override
     protected void onViewDetached() {
+        mQSLogger.logOnViewDetached(mLastOrientation, mView.getDumpableTag());
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mHost.removeCallback(mQSHostCallback);
 
@@ -337,6 +350,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         /* Whether or not the panel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
         if (horizontal != mUsingHorizontalLayout || force) {
+            mQSLogger.logSwitchTileLayout(horizontal, mUsingHorizontalLayout, force,
+                    mView.getDumpableTag());
             mUsingHorizontalLayout = horizontal;
             mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force);
             updateMediaDisappearParameters();
@@ -414,6 +429,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         }
         if (mMediaHost != null) {
             pw.println("  media bounds: " + mMediaHost.getCurrentBounds());
+            pw.println("  horizontal layout: " + mUsingHorizontalLayout);
+            pw.println("  last orientation: " + mLastOrientation);
         }
     }
 

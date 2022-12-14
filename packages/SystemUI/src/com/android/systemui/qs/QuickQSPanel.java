@@ -57,7 +57,9 @@ public class QuickQSPanel extends QSPanel {
 
     @Override
     public TileLayout getOrCreateTileLayout() {
-        return new QQSSideLabelTileLayout(mContext, this);
+        QQSSideLabelTileLayout layout = new QQSSideLabelTileLayout(mContext, this);
+        layout.setId(R.id.qqs_tile_layout);
+        return layout;
     }
 
 
