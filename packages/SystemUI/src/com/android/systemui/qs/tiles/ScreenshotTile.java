@@ -26,6 +26,7 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.view.View;
 import android.view.WindowManager;
+import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_GLOBAL_ACTIONS;
 import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
 
@@ -88,7 +89,7 @@ public class ScreenshotTile extends QSTileImpl<BooleanState> {
         mHost.collapsePanels();
         final ScreenshotHelper screenshotHelper = new ScreenshotHelper(mContext);
         mHandler.postDelayed(() -> {
-            screenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN, true, true, mHandler, null);
+            screenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_GLOBAL_ACTIONS, mHandler, null);
         }, 1000);
     }
 
@@ -102,7 +103,7 @@ public class ScreenshotTile extends QSTileImpl<BooleanState> {
         mHost.collapsePanels();
         final ScreenshotHelper screenshotHelper = new ScreenshotHelper(mContext);
         mHandler.postDelayed(() -> {
-            screenshotHelper.takeScreenshot(TAKE_SCREENSHOT_SELECTED_REGION, true, true, mHandler, null);
+            screenshotHelper.takeScreenshot(TAKE_SCREENSHOT_SELECTED_REGION, SCREENSHOT_GLOBAL_ACTIONS, mHandler, null);
         }, 1000);
         refreshState();
     }
