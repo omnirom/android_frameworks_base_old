@@ -381,7 +381,10 @@ public class QRCodeScannerController implements
 
         // While registering the observers for the first time update the default values in the
         // background
-        mExecutor.execute(() -> updateQRCodeScannerActivityDetails());
+        mExecutor.execute(() -> {
+                updateQRCodeScannerActivityDetails();
+                updateQRCodeScannerPreferenceDetails(/* updateSettings = */true);
+                });
         mOnDefaultQRCodeScannerChangedListener =
                 properties -> {
                     if (DeviceConfig.NAMESPACE_SYSTEMUI.equals(properties.getNamespace())
