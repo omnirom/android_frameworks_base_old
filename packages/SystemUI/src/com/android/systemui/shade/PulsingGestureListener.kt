@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.hardware.display.AmbientDisplayConfiguration
+import android.content.Context
 import android.os.SystemClock
 import android.os.UserHandle
 import android.provider.Settings
@@ -52,11 +53,16 @@ class PulsingGestureListener @Inject constructor(
         private val centralSurfaces: CentralSurfaces,
         private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
         private val statusBarStateController: StatusBarStateController,
+        context: Context,
         tunerService: TunerService,
         dumpManager: DumpManager
 ) : GestureDetector.SimpleOnGestureListener(), Dumpable {
     private var doubleTapEnabled = false
     private var singleTapEnabled = false
+
+    // omni additions start
+    private val mContext: Context = context
+    private var mDoubleTapEnabledNative = false
 
     init {
         val tunable = Tunable { key: String?, _: String? ->
@@ -67,11 +73,15 @@ class PulsingGestureListener @Inject constructor(
                 Settings.Secure.DOZE_TAP_SCREEN_GESTURE ->
                     singleTapEnabled = ambientDisplayConfiguration.tapGestureEnabled(
                             UserHandle.USER_CURRENT)
+                Settings.Secure.DOUBLE_TAP_TO_WAKE ->
+                    mDoubleTapEnabledNative = Settings.Secure.getIntForUser(mContext.contentResolver,
+                            Settings.Secure.DOUBLE_TAP_TO_WAKE, 0, UserHandle.USER_CURRENT) == 1
             }
         }
         tunerService.addTunable(tunable,
                 Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
-                Settings.Secure.DOZE_TAP_SCREEN_GESTURE)
+                Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
+                Settings.Secure.DOUBLE_TAP_TO_WAKE)
 
         dumpManager.registerDumpable(this)
     }
@@ -101,7 +111,7 @@ class PulsingGestureListener @Inject constructor(
         // checks MUST be on the ACTION_UP event.
         if (e.actionMasked == MotionEvent.ACTION_UP &&
                 statusBarStateController.isDozing &&
-                (doubleTapEnabled || singleTapEnabled) &&
+                (doubleTapEnabled || singleTapEnabled || mDoubleTapEnabledNative) &&
                 !falsingManager.isProximityNear &&
                 !falsingManager.isFalseDoubleTap
         ) {
