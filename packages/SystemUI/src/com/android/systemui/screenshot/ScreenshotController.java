@@ -410,7 +410,6 @@ public class ScreenshotController {
 
         attachWindow();
         mWindow.setContentView(mScreenshotView);
-        mScreenshotView.requestApplyInsets();
 
         mScreenshotView.takePartialScreenshot(
                 rect -> takeScreenshotInternal(topComponent, finisher, rect));
