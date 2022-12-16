@@ -44,6 +44,7 @@ public class SessionMonitor {
     private final Context mContext;
     private final Map<Integer, Set<ISessionListener>> mSessionToListeners =
             new HashMap<>();
+    private final Map<Integer, Boolean> mSessionStatus = new HashMap<>();
 
     /** */
     public SessionMonitor(Context context) {
@@ -97,6 +98,8 @@ public class SessionMonitor {
             return;
         }
 
+        mSessionStatus.put(sessionType, true);
+
         synchronized (mSessionToListeners) {
             for (ISessionListener listener : mSessionToListeners.get(sessionType)) {
                 try {
@@ -122,6 +125,8 @@ public class SessionMonitor {
             return;
         }
 
+        mSessionStatus.put(sessionType, false);
+
         synchronized (mSessionToListeners) {
             for (ISessionListener listener : mSessionToListeners.get(sessionType)) {
                 try {
@@ -131,6 +136,13 @@ public class SessionMonitor {
                 }
             }
         }
+    }
+
+    public boolean getSessionStatus(@SessionFlags int sessionType) {
+        if (mSessionStatus.containsKey(sessionType)) {
+            return mSessionStatus.get(sessionType);
+        }
+        return false;
     }
 
     private boolean isValidSessionType(@SessionFlags int sessionType) {
