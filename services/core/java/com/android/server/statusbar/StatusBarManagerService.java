@@ -2109,6 +2109,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         mSessionMonitor.unregisterSessionListener(sessionFlags, listener);
     }
 
+    @Override
+    public boolean getSessionStatus(@SessionFlags int sessionType) {
+        return  mSessionMonitor.getSessionStatus(sessionType);
+    }
+
     public String[] getStatusBarIcons() {
         return mContext.getResources().getStringArray(R.array.config_statusBarIcons);
     }

@@ -236,4 +236,5 @@ interface IStatusBarService
      */
     void toggleCameraFlash();
     void toggleCameraFlashState(boolean enable);
+    boolean getSessionStatus(int sessionType);
 }
