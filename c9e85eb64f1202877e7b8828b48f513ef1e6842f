@@ -16,6 +16,23 @@
       "message": "needed for devices others than pixel",
       "revId": "c9e85eb64f1202877e7b8828b48f513ef1e6842f",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "37dba9c2_2107161f",
+        "filename": "packages/SystemUI/res/layout/udfps_view.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2022-12-23T19:19:15Z",
+      "side": 1,
+      "message": "gone!",
+      "revId": "c9e85eb64f1202877e7b8828b48f513ef1e6842f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
     }
   ]
 }
