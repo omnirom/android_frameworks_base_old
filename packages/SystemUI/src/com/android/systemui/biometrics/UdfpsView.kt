@@ -176,7 +176,7 @@ class UdfpsView(
         animationViewController?.onDisplayUnconfigured()
         ghbmView?.let { view ->
             view.setGhbmIlluminationListener(null)
-            view.visibility = INVISIBLE
+            view.visibility = GONE
         }
         mUdfpsDisplayMode?.disable(null /* onDisabled */)
     }
