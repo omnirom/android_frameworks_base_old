@@ -165,10 +165,7 @@ class UdfpsView(
             Log.e(TAG, "doIlluminate | surface must be non-null for GHBM")
         }
 
-        mUdfpsDisplayMode?.enable {
-            onDisplayConfigured?.run()
-            ghbmView?.drawIlluminationDot(sensorRect)
-        }
+        mUdfpsDisplayMode?.enable(onDisplayConfigured)
     }
 
     fun unconfigureDisplay() {
