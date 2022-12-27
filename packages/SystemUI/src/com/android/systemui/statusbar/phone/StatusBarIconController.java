@@ -553,6 +553,8 @@ public interface StatusBarIconController {
             mobileView.applyMobileState(state);
             mGroup.addView(mobileView, index, onCreateLayoutParams());
             Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_USE_OLD_MOBILETYPE);
+            Dependency.get(OmniSettingsService.class).addIntObserver(this, Settings.System.OMNI_HIDE_ROAMING_ICON);
+            
 
             if (mIsInDemoMode) {
                 Context mobileContext = mMobileContextProvider
@@ -762,7 +764,11 @@ public interface StatusBarIconController {
             for (int i = 0; i < mGroup.getChildCount(); i++) {
                 View child = mGroup.getChildAt(i);
                 if (child instanceof StatusBarMobileView) {
-                    ((StatusBarMobileView) child).updateDisplayType(newValue == 1);
+                    if (key.equals(Settings.System.OMNI_USE_OLD_MOBILETYPE)) {
+                        ((StatusBarMobileView) child).updateDisplayType(newValue == 1);
+                    } else if (key.equals(Settings.System.OMNI_HIDE_ROAMING_ICON)) {
+                        ((StatusBarMobileView) child).hideRoaming(newValue == 1);
+                    }
                 }
             }
         }

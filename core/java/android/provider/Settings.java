@@ -6164,6 +6164,11 @@ public final class Settings {
         public static final String OMNI_USE_OLD_MOBILETYPE = "use_old_mobiletype";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_HIDE_ROAMING_ICON = "hide_roaming_icon";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -6201,6 +6206,7 @@ public final class Settings {
             OMNI_LOCKSCREEN_ALARM_ENABLED,
             OMNI_LOCKSCREEN_DND_ENABLED,
             OMNI_USE_OLD_MOBILETYPE,
+            OMNI_HIDE_ROAMING_ICON,
         };
 
         /**
@@ -6248,6 +6254,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_ALARM_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_DND_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_HIDE_ROAMING_ICON, 0);
         }
     }
 
