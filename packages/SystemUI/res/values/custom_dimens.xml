@@ -34,9 +34,9 @@
     <!-- 2 * navigation_handle_radius + 2 * navigation_handle_bottom-->
     <dimen name="navigation_home_handle_height">14dp</dimen>
 
-    <dimen name="status_bar_mobile_signal_with_type_width">19dp</dimen>
+    <dimen name="status_bar_mobile_signal_with_type_height">18dp</dimen>
+    <dimen name="status_bar_mobile_signal_with_type_width">18dp</dimen>
     <dimen name="status_bar_mobile_signal_width">16dp</dimen>
-    <dimen name="status_bar_mobile_type_height">8dp</dimen>
-    <dimen name="status_bar_mobile_type_padding">2dp</dimen>
-    <dimen name="status_bar_mobile_type_padding_limit">10dp</dimen>
+    <dimen name="status_bar_mobile_type_height">9dp</dimen>
+    <dimen name="status_bar_mobile_type_width">12dp</dimen>
 </resources>
