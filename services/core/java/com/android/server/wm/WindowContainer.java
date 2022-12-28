@@ -540,7 +540,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         final WindowContainer oldParent = mParent;
         if (mParent == newParent) {
-            throw new IllegalArgumentException("WC=" + this + " already child of " + mParent);
+            Slog.w(TAG, "WC=" + this + " already child of " + mParent);
+            //throw new IllegalArgumentException("WC=" + this + " already child of " + mParent);
+            return;
         }
 
         // Collect before removing child from old parent, because the old parent may be removed if

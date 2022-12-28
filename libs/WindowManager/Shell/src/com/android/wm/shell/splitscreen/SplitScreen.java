@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.graphics.Rect;
 
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 
@@ -69,6 +70,13 @@ public interface SplitScreen {
 
     /** Unregisters listener that gets split screen callback. */
     void unregisterSplitScreenListener(@NonNull SplitScreenListener listener);
+
+    /**
+     * Returns a binder that can be passed to an external process to manipulate SplitScreen.
+     */
+    default ExternalInterfaceBinder createCustomExternalInterface() {
+        return null;
+    }
 
     /** Called when device waking up finished. */
     void onFinishedWakingUp();
