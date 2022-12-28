@@ -156,7 +156,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final Context mContext;
     private final RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     private final ShellExecutor mMainExecutor;
-    private final SplitScreenImpl mImpl = new SplitScreenImpl();
+    private final SplitScreenImpl mImpl;
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
     private final DisplayInsetsController mDisplayInsetsController;
@@ -204,6 +204,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mTransactionPool = transactionPool;
         mIconProvider = iconProvider;
         mRecentTasksOptional = recentTasks;
+        mImpl = new SplitScreenImpl(this);
         mSplitScreenShellCommandHandler = new SplitScreenShellCommandHandler(this);
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
@@ -666,7 +667,23 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     @ExternalThread
     private class SplitScreenImpl implements SplitScreen {
+        private ExternalInterfaceBinder mISplitScreen;
+        private SplitScreenController mController;
         private final ArrayMap<SplitScreenListener, Executor> mExecutors = new ArrayMap<>();
+
+        public SplitScreenImpl(SplitScreenController controller) {
+            mController = controller;
+        }
+
+        @Override
+        public ExternalInterfaceBinder createCustomExternalInterface() {
+            if (mISplitScreen != null) {
+                mISplitScreen.invalidate();
+            }
+            mISplitScreen = mController.createExternalInterface();
+            return mISplitScreen;
+        }
+
         private final SplitScreen.SplitScreenListener mListener = new SplitScreenListener() {
             @Override
             public void onStagePositionChanged(int stage, int position) {

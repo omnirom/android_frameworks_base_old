@@ -21,13 +21,13 @@ import android.app.Service;
 import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.omni.OmniSettingsServiceImpl;
 import com.android.systemui.omni.OmniSystemUIService;
+import com.android.systemui.omni.SplitScreenService;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
-/** Dagger Module for code in the systemui package. */
 @Module
 public interface OmniModule {
     /** */
@@ -39,4 +39,10 @@ public interface OmniModule {
     @IntoMap
     @ClassKey(OmniSystemUIService.class)
     public abstract Service bindOmniSystemUIService(OmniSystemUIService service);
+
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(SplitScreenService.class)
+    public abstract Service bindSplitScreenService(SplitScreenService service);
 }
