@@ -81,6 +81,7 @@ import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
@@ -433,6 +434,9 @@ public class ComputerEngine implements Computer {
         return mLocalAndroidApplication;
     }
 
+    private static final String AURORA_STORE = "com.aurora.store";
+    private static final String PLAY_STORE = "com.android.vending";
+
     /**
      * The Google signature faked by microG.
      */
@@ -440,7 +444,7 @@ public class ComputerEngine implements Computer {
     /**
      * List of packages which require signature spoofing.
      */
-    private static final List<String> MICROG_FAKE_SIGNATURE_PACKAGES = List.of("com.google.android.gms", "com.android.vending");
+    private static final List<String> MICROG_FAKE_SIGNATURE_PACKAGES = List.of("com.google.android.gms", PLAY_STORE);
 
     ComputerEngine(PackageManagerService.Snapshot args, int version) {
         mVersion = version;
@@ -5039,6 +5043,14 @@ public class ComputerEngine implements Computer {
 
         if (ps == null || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
             return null;
+        }
+
+        if (AURORA_STORE.equals(packageName)) {
+            return InstallSource.create(PLAY_STORE, PLAY_STORE, PLAY_STORE, null,
+                            PackageInstaller.PACKAGE_SOURCE_STORE,
+                            ps.getInstallSource().isOrphaned, false)
+                    .setInitiatingPackageSignatures(new PackageSignatures(
+                            mSettings.getPackage(PLAY_STORE).getSigningDetails()));
         }
 
         return ps.getInstallSource();
