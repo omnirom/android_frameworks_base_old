@@ -24,8 +24,15 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.view.View;
@@ -39,11 +46,14 @@ import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.Dependency;
+import com.android.systemui.omni.OmniSettingsService;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.airbnb.lottie.LottieProperty;
 import com.airbnb.lottie.model.KeyPath;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -51,7 +61,8 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * View corresponding with udfps_keyguard_view.xml
  */
-public class UdfpsKeyguardView extends UdfpsAnimationView {
+public class UdfpsKeyguardView extends UdfpsAnimationView implements 
+        OmniSettingsService.OmniSettingsObserver {
     private UdfpsDrawable mFingerprintDrawable; // placeholder
     private LottieAnimationView mAodFp;
     private LottieAnimationView mLockScreenFp;
@@ -75,6 +86,11 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     private int mAnimationType = ANIMATION_NONE;
     private boolean mFullyInflated;
 
+    //omni-addon
+    private String mCustomUdfpsIcon;
+    private boolean mUseUdfpsIcon;
+    private BitmapDrawable mCustomImage;
+
     public UdfpsKeyguardView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mFingerprintDrawable = new UdfpsFpDrawable(context);
@@ -83,6 +99,9 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_x);
         mMaxBurnInOffsetY = context.getResources()
             .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
+        mCustomUdfpsIcon = Settings.System.getString(getContext().getContentResolver(),
+                Settings.System.OMNI_CUSTOM_FP_ICON);
+        mUseUdfpsIcon = !TextUtils.isEmpty(mCustomUdfpsIcon);
     }
 
     @Override
@@ -93,6 +112,8 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         AsyncLayoutInflater inflater = new AsyncLayoutInflater(mContext);
         inflater.inflate(R.layout.udfps_keyguard_view_internal, this,
                 mLayoutInflaterFinishListener);
+        Dependency.get(OmniSettingsService.class).addStringObserver(this,
+                Settings.System.OMNI_CUSTOM_FP_ICON);
     }
 
     @Override
@@ -106,6 +127,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
     @Override
     void onDisplayUnconfigured() {
+        Dependency.get(OmniSettingsService.class).removeObserver(this);
     }
 
     @Override
@@ -135,12 +157,12 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             mLockScreenFp.setTranslationX(mBurnInOffsetX);
             mLockScreenFp.setTranslationY(mBurnInOffsetY);
             mBgProtection.setAlpha(1f - mInterpolatedDarkAmount);
-            mLockScreenFp.setAlpha(1f - mInterpolatedDarkAmount);
+            mLockScreenFp.setAlpha(mUseUdfpsIcon ? 0.0f : (1f - mInterpolatedDarkAmount));
         } else if (darkAmountForAnimation == 0f) {
             mLockScreenFp.setTranslationX(0);
             mLockScreenFp.setTranslationY(0);
             mBgProtection.setAlpha(mAlpha / 255f);
-            mLockScreenFp.setAlpha(mAlpha / 255f);
+            mLockScreenFp.setAlpha(mUseUdfpsIcon ? 0.0f : mAlpha / 255f);
         } else {
             mBgProtection.setAlpha(0f);
             mLockScreenFp.setAlpha(0f);
@@ -175,7 +197,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
         mTextColorPrimary = Utils.getColorAttrDefaultColor(mContext,
             android.R.attr.textColorPrimary);
-        mBgProtection.setImageDrawable(getContext().getDrawable(R.drawable.fingerprint_bg));
+        setCustomIcon();
         mLockScreenFp.invalidate(); // updated with a valueCallback
     }
 
@@ -301,4 +323,35 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             );
         }
     };
+
+    private void setCustomIcon(){
+        if (mCustomImage != null) {
+            mBgProtection.setImageDrawable(mCustomImage);
+        } else {
+            mBgProtection.setImageDrawable(getContext().getDrawable(R.drawable.fingerprint_bg));
+        }
+    }
+
+    @Override
+    public void onStringSettingChanged(String key, String customIconURI) {
+        if (!TextUtils.isEmpty(customIconURI)) {
+            loadCustomImage(customIconURI);
+        } else {
+            mCustomImage = null;
+        }
+    }
+
+    private void loadCustomImage(String customIconURI) {
+        try {
+            ParcelFileDescriptor parcelFileDescriptor =
+                    getContext().getContentResolver().openFileDescriptor(Uri.parse(customIconURI), "r");
+            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+            Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+            parcelFileDescriptor.close();
+            mCustomImage = new BitmapDrawable(getResources(), image);
+        }
+        catch (Exception e) {
+            mCustomImage = null;
+        }
+    }
 }
