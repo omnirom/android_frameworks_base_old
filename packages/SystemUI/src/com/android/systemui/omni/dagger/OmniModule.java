@@ -16,8 +16,11 @@
 
 package com.android.systemui.omni.dagger;
 
+import android.app.Service;
+
 import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.omni.OmniSettingsServiceImpl;
+import com.android.systemui.omni.OmniSystemUIService;
 
 import com.android.systemui.qs.tiles.AODTile;
 import com.android.systemui.qs.tiles.CaffeineTile;
@@ -60,4 +63,10 @@ public interface OmniModule {
     @IntoMap
     @StringKey(ScreenshotTile.TILE_SPEC)
     public abstract QSTileImpl<?> bindScreenshotTile(ScreenshotTile screenshotTile);
+
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(OmniSystemUIService.class)
+    public abstract Service bindOmniSystemUIService(OmniSystemUIService service);
 }
