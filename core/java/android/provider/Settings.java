@@ -6168,6 +6168,18 @@ public final class Settings {
         public static final String OMNI_HIDE_ROAMING_ICON = "hide_roaming_icon";
 
         /**
+         * only used in OmniControl
+         * @hide
+         */
+        public static final String OMNI_CUSTOM_FP_ICON = "custom_fingerprint_icon";
+
+        /**
+         * just for triggering an update - DOES NOT need a backup
+         * @hide
+         */
+        public static final String OMNI_CUSTOM_FP_ICON_UPDATE = "custom_fingerprint_icon_update";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -6207,6 +6219,7 @@ public final class Settings {
             OMNI_LOCKSCREEN_CLOCK_COLORED,
             OMNI_USE_OLD_MOBILETYPE,
             OMNI_HIDE_ROAMING_ICON,
+            OMNI_CUSTOM_FP_ICON,
         };
 
         /**
@@ -6256,6 +6269,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_CLOCK_COLORED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_HIDE_ROAMING_ICON, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_CUSTOM_FP_ICON, 2);
         }
     }
 
