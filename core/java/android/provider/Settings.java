@@ -6168,6 +6168,12 @@ public final class Settings {
         public static final String OMNI_HIDE_ROAMING_ICON = "hide_roaming_icon";
 
         /**
+         * just for triggering an update - DOES NOT need a backup
+         * @hide
+         */
+        public static final String OMNI_CUSTOM_FP_ICON_UPDATE = "custom_fingerprint_icon_update";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
