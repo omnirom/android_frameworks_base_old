@@ -19,6 +19,7 @@ package com.android.internal.util;
 import android.app.Application;
 import android.content.res.Resources;
 import android.os.Build;
+import android.os.Build.VERSION;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -56,7 +57,10 @@ public class PropImitationHooks {
         sIsGms = packageName.equals(PACKAGE_GMS) && processName.equals(PROCESS_GMS_UNSTABLE);
         sIsFinsky = packageName.equals(PACKAGE_FINSKY);
 
-        if (!sCertifiedFp.isEmpty() && (sIsGms || sIsFinsky)) {
+        if (sIsGms) {
+            dlog("Setting Pixel XL fingerprint for: " + packageName);
+            spoofBuildGms();
+        } else if (!sCertifiedFp.isEmpty() && sIsFinsky) {
             dlog("Setting certified fingerprint for: " + packageName);
             setPropValue("FINGERPRINT", sCertifiedFp);
         } else if (!sStockFp.isEmpty() && packageName.equals(PACKAGE_ARCORE)) {
@@ -75,6 +79,29 @@ public class PropImitationHooks {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             Log.e(TAG, "Failed to set prop " + key, e);
         }
+    }
+
+    private static void setVersionField(String key, Integer value) {
+        try {
+            // Unlock
+            Field field = Build.VERSION.class.getDeclaredField(key);
+            field.setAccessible(true);
+            // Edit
+            field.set(null, value);
+            // Lock
+            field.setAccessible(false);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            Log.e(TAG, "Failed to spoof Build." + key, e);
+        }
+    }
+
+    private static void spoofBuildGms() {
+        // Alter model name and fingerprint to avoid hardware attestation enforcement
+        setPropValue("FINGERPRINT", "google/marlin/marlin:7.1.2/NJH47F/4146041:user/release-keys");
+        setPropValue("PRODUCT", "marlin");
+        setPropValue("DEVICE", "marlin");
+        setPropValue("MODEL", "Pixel XL");
+        setVersionField("DEVICE_INITIAL_SDK_INT", Build.VERSION_CODES.N_MR1);
     }
 
     private static boolean isCallerSafetyNet() {
