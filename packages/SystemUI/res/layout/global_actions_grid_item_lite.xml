@@ -29,7 +29,7 @@
             android:layout_marginBottom="@dimen/global_actions_grid_container_bottom_margin"
             android:padding="@dimen/global_actions_button_padding"
             android:scaleType="centerInside"
-            android:tint="@color/global_actions_lite_text"
+            android:tint="@color/global_actions_lite_icon"
             android:background="@drawable/global_actions_lite_button"/>
         <TextView
             android:id="@*android:id/message"
