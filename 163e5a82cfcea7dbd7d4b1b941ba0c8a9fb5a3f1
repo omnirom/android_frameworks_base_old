@@ -16,6 +16,41 @@
       "message": "this is still a thing???",
       "revId": "163e5a82cfcea7dbd7d4b1b941ba0c8a9fb5a3f1",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e82a7da8_e44506f2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002322
+      },
+      "writtenOn": "2023-03-06T17:59:10Z",
+      "side": 1,
+      "message": "But it seem it\u0027s on Microg Version (MicroG apps have an big black box at the bottom of the screen on cn version)",
+      "revId": "163e5a82cfcea7dbd7d4b1b941ba0c8a9fb5a3f1",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f3625255_65672d23",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002322
+      },
+      "writtenOn": "2023-03-06T17:59:10Z",
+      "side": 1,
+      "message": "yep, some guys have apps screen size pb... especially with cn apps",
+      "parentUuid": "e8e9aa24_eea8f62c",
+      "revId": "163e5a82cfcea7dbd7d4b1b941ba0c8a9fb5a3f1",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
     }
   ]
 }
