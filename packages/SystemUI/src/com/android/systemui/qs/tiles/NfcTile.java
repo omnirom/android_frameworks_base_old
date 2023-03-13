@@ -101,9 +101,10 @@ public class NfcTile extends QSTileImpl<BooleanState> {
     @Override
     public boolean isAvailable() {
         String stockTiles = mContext.getString(R.string.quick_settings_tiles_stock);
+        String extraStockTiles = mContext.getString(R.string.quick_settings_tiles_extra);
         // For the restore from backup case
         // Return false when "nfc" is not listed in quick_settings_tiles_stock.
-        if (stockTiles.contains(NFC)) {
+        if (stockTiles.contains(NFC) || extraStockTiles.contains(NFC)) {
             return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC);
         }
         return false;
