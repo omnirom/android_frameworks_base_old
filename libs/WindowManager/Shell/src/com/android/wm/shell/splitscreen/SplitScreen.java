@@ -71,14 +71,6 @@ public interface SplitScreen {
     void unregisterSplitScreenListener(@NonNull SplitScreenListener listener);
 
     /**
-     * Returns a binder that is passed to launcher in OverviewProxyService
-     * to manipulate SplitScreen.
-     */
-    default ISplitScreen createOverviewInterface() {
-        return null;
-    }
-
-    /**
      * Returns a binder that can be passed to an external process to manipulate SplitScreen.
      */
     default ISplitScreen createExternalInterface() {

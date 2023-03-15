@@ -538,9 +538,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         final WindowContainer oldParent = mParent;
         if (mParent == newParent) {
-            Slog.w(TAG, "WC=" + this + " already child of " + mParent);
-            //throw new IllegalArgumentException("WC=" + this + " already child of " + mParent);
-            return;
+            throw new IllegalArgumentException("WC=" + this + " already child of " + mParent);
         }
 
         // The display object before reparenting as that might lead to old parent getting removed

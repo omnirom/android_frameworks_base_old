@@ -6008,9 +6008,7 @@ class Task extends TaskFragment {
         }
 
         if (getParent() == newParent) {
-            Slog.w(TAG, "Task=" + this + " already child of " + newParent);
-            //throw new IllegalArgumentException("Task=" + this + " already child of " + newParent);
-            return;
+            throw new IllegalArgumentException("Task=" + this + " already child of " + newParent);
         }
 
         if (canBeLaunchedOnDisplay(newParent.getDisplayId())) {

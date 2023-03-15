@@ -977,13 +977,6 @@
         <!-- omni additions start -->
         <service android:name=".omni.CPUInfoService"
                 android:exported="false" />
-
-        <service android:name=".omni.SplitScreenService"
-             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.OMNI_SPLITSCREEN_SERVICE"/>
-            </intent-filter>
-        </service>
         
         <service android:name=".omni.OmniSystemUIService"
              android:exported="true">
