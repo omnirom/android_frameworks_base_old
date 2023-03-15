@@ -658,8 +658,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     @ExternalThread
     private class SplitScreenImpl implements SplitScreen {
-        private ISplitScreenImpl mISplitScreenExternal;
-        private ISplitScreenImpl mISplitScreenOverview;
+        private ISplitScreenImpl mISplitScreen;
         private final ArrayMap<SplitScreenListener, Executor> mExecutors = new ArrayMap<>();
         private final SplitScreen.SplitScreenListener mListener = new SplitScreenListener() {
             @Override
@@ -705,21 +704,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         };
 
         @Override
-        public ISplitScreen createOverviewInterface() {
-            if (mISplitScreenOverview != null) {
-                mISplitScreenOverview.invalidate();
-            }
-            mISplitScreenOverview = new ISplitScreenImpl(SplitScreenController.this);
-            return mISplitScreenOverview;
-        }
-
-        @Override
         public ISplitScreen createExternalInterface() {
-            if (mISplitScreenExternal != null) {
-                mISplitScreenExternal.invalidate();
+            if (mISplitScreen != null) {
+                mISplitScreen.invalidate();
             }
-            mISplitScreenExternal = new ISplitScreenImpl(SplitScreenController.this);
-            return mISplitScreenExternal;
+            mISplitScreen = new ISplitScreenImpl(SplitScreenController.this);
+            return mISplitScreen;
         }
 
         @Override

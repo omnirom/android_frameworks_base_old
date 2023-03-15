@@ -500,7 +500,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     pip.createExternalInterface().asBinder()));
             mSplitScreenOptional.ifPresent((splitscreen) -> params.putBinder(
                     KEY_EXTRA_SHELL_SPLIT_SCREEN,
-                    splitscreen.createOverviewInterface().asBinder()));
+                    splitscreen.createExternalInterface().asBinder()));
             mFloatingTasksOptional.ifPresent(floatingTasks -> params.putBinder(
                     KEY_EXTRA_SHELL_FLOATING_TASKS,
                     floatingTasks.createExternalInterface().asBinder()));
