@@ -6158,11 +6158,6 @@ public final class Settings {
         public static final String OMNI_LOCKSCREEN_CLOCK_COLORED = "lockscreen_clock_colored";
 
         /**
-         * @hide
-         */
-        public static final String OMNI_USE_OLD_MOBILETYPE = "use_old_mobiletype";
-
-        /**
          * just for triggering an update - DOES NOT need a backup
          * @hide
          */
@@ -6206,7 +6201,6 @@ public final class Settings {
             OMNI_LOCKSCREEN_ALARM_ENABLED,
             OMNI_LOCKSCREEN_DND_ENABLED,
             OMNI_LOCKSCREEN_CLOCK_COLORED,
-            OMNI_USE_OLD_MOBILETYPE,
         };
 
         /**
@@ -6254,7 +6248,6 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_ALARM_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_DND_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_CLOCK_COLORED, 0);
-            OMNI_SETTINGS_VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, 0);
         }
     }
 
