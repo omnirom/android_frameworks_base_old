@@ -24,16 +24,12 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.icu.text.NumberFormat;
-import android.os.UserHandle;
-import android.provider.Settings.System;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
-import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -59,8 +55,7 @@ import javax.inject.Inject;
  * Controller for an AnimatableClockView on the keyguard. Instantiated by
  * {@link KeyguardClockSwitchController}.
  */
-public class AnimatableClockController extends ViewController<AnimatableClockView> 
-        implements OmniSettingsService.OmniSettingsObserver {
+public class AnimatableClockController extends ViewController<AnimatableClockView> {
     private static final String TAG = "AnimatableClockCtrl";
     private static final int FORMAT_NUMBER = 1234567890;
 
@@ -84,7 +79,6 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     private final String mBurmeseNumerals;
     private final float mBurmeseLineSpacing;
     private final float mDefaultLineSpacing;
-    private boolean mClockColored = true;
 
     @Inject
     public AnimatableClockController(
@@ -231,7 +225,6 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         });
 
         mView.onTimeZoneChanged(TimeZone.getDefault());
-        Dependency.get(OmniSettingsService.class).addIntObserver(this, System.OMNI_LOCKSCREEN_CLOCK_COLORED);
 
         initColors();
         mView.animateDoze(mIsDozing, false);
@@ -246,7 +239,6 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mRegionSamplingHelper.ifPresent((regionSamplingHelper) -> {
             regionSamplingHelper.stop();
         });
-        Dependency.get(OmniSettingsService.class).removeObserver(this);
     }
 
     /** Animate the clock appearance */
@@ -291,9 +283,8 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
 
     private void initColors() {
         if (!mRegionSamplingEnabled) {
-            mLockScreenColor = Utils.getColorAttrDefaultColor(getContext(), mClockColored ?
-                com.android.systemui.R.attr.wallpaperTextColorAccent :
-                com.android.systemui.R.attr.wallpaperTextColor);
+            mLockScreenColor = Utils.getColorAttrDefaultColor(getContext(),
+                com.android.systemui.R.attr.wallpaperTextColorAccent);
         }
         mView.setColors(mDozingColor, mLockScreenColor);
         mView.animateDoze(mIsDozing, false);
@@ -308,12 +299,5 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mRegionSamplingHelper.ifPresent((regionSamplingHelper) -> {
             regionSamplingHelper.dump(pw);
         });
-    }
-
-    @Override
-    public void onIntSettingChanged(String key, Integer newValue) {
-        mClockColored = System.getIntForUser(getContext().getContentResolver(),
-                System.OMNI_LOCKSCREEN_CLOCK_COLORED, 1, UserHandle.USER_CURRENT) != 0;
-        initColors();
     }
 }
