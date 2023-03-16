@@ -18,8 +18,6 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.icu.text.NumberFormat
-import android.os.UserHandle
-import android.provider.Settings.System
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
@@ -74,7 +72,7 @@ class DefaultClockProvider @Inject constructor(
  * AnimatableClockView used by the existing lockscreen clock.
  */
 class DefaultClock(
-        val ctx: Context,
+        ctx: Context,
         private val layoutInflater: LayoutInflater,
         private val resources: Resources
 ) : Clock {
@@ -155,13 +153,12 @@ class DefaultClock(
         ) {
             if (smallRegionDarkness != smallClockIsDark) {
                 smallRegionDarkness = smallClockIsDark
+                updateClockColor(smallClock, smallClockIsDark)
             }
-            updateClockColor(smallClock, smallRegionDarkness)
-
             if (largeRegionDarkness != largeClockIsDark) {
                 largeRegionDarkness = largeClockIsDark
+                updateClockColor(largeClock, largeClockIsDark)
             }
-            updateClockColor(largeClock, largeRegionDarkness)
         }
 
         override fun onLocaleChanged(locale: Locale) {
@@ -232,18 +229,10 @@ class DefaultClock(
     }
 
     private fun updateClockColor(clock: AnimatableClockView, isRegionDark: Boolean) {
-        val coloredClock = System.getIntForUser(ctx.getContentResolver(),
-                System.OMNI_LOCKSCREEN_CLOCK_COLORED, 1, UserHandle.USER_CURRENT) != 0
         val color = if (isRegionDark) {
-            if (coloredClock)
-                resources.getColor(android.R.color.system_accent1_100)
-            else
-                resources.getColor(com.android.internal.R.color.primary_text_material_dark)
+            resources.getColor(android.R.color.system_accent1_100)
         } else {
-            if (coloredClock)
-                resources.getColor(android.R.color.system_accent2_600)
-            else
-                resources.getColor(com.android.internal.R.color.primary_text_material_light)
+            resources.getColor(android.R.color.system_accent2_600)
         }
         clock.setColors(DOZE_COLOR, color)
         clock.animateAppearOnLockscreen()

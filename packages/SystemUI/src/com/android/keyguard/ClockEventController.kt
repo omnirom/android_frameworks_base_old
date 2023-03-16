@@ -20,16 +20,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
-import android.provider.Settings.System
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.View
-import com.android.systemui.Dependency
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.Clock
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shared.regionsampling.RegionSamplingInstance
@@ -191,12 +188,6 @@ open class ClockEventController @Inject constructor(
         }
     }
 
-    private val settingsListener = object : OmniSettingsService.OmniSettingsObserver {
-        override fun onIntSettingChanged(key: String, newValue: Int) {
-            updateFun.updateColors()
-        }
-    }
-
     init {
         isDozing = statusBarStateController.isDozing
     }
@@ -215,7 +206,6 @@ open class ClockEventController @Inject constructor(
         statusBarStateController.addCallback(statusBarStateListener)
         smallRegionSamplingInstance.startRegionSampler()
         largeRegionSamplingInstance.startRegionSampler()
-        Dependency.get(OmniSettingsService::class.java).addIntObserver(settingsListener, System.OMNI_LOCKSCREEN_CLOCK_COLORED)
     }
 
     fun unregisterListeners() {
@@ -226,7 +216,6 @@ open class ClockEventController @Inject constructor(
         statusBarStateController.removeCallback(statusBarStateListener)
         smallRegionSamplingInstance.stopRegionSampler()
         largeRegionSamplingInstance.stopRegionSampler()
-        Dependency.get(OmniSettingsService::class.java).removeObserver(settingsListener)
     }
 
     /**
