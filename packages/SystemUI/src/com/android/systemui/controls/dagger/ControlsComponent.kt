@@ -127,10 +127,6 @@ class ControlsComponent @Inject constructor(
         return Visibility.AVAILABLE
     }
 
-    fun getLockedVisibility() : Boolean {
-        return canShowWhileLockedSetting
-    }
-
     private fun updateShowWhileLocked() {
         _canShowWhileLockedSetting.value = secureSettings.getIntForUser(
             Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 0, UserHandle.USER_CURRENT) != 0
