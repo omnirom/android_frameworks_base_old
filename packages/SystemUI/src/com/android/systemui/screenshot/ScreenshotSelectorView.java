@@ -51,6 +51,28 @@ public class ScreenshotSelectorView extends View {
         mPaintBackground.setAlpha(160);
         mPaintSelection = new Paint(Color.TRANSPARENT);
         mPaintSelection.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+
+        setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    startSelection((int) event.getX(), (int) event.getY());
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    updateSelection((int) event.getX(), (int) event.getY());
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    setVisibility(View.GONE);
+                    final Rect rect = getSelectionRect();
+                    if (mOnScreenshotSelected != null
+                            && rect != null
+                            && rect.width() != 0 && rect.height() != 0) {
+                        mOnScreenshotSelected.accept(rect);
+                    }
+                    stopSelection();
+                    return true;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -93,26 +115,5 @@ public class ScreenshotSelectorView extends View {
     private void stopSelection() {
         mStartPoint = null;
         mSelectionRect = null;
-    }
-    
-    public void onTouch(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                startSelection((int) event.getX(), (int) event.getY());
-                break;
-            case MotionEvent.ACTION_MOVE:
-                updateSelection((int) event.getX(), (int) event.getY());
-                break;
-            case MotionEvent.ACTION_UP:
-                final Rect rect = getSelectionRect();
-                if (mOnScreenshotSelected != null
-                        && rect != null
-                        && rect.width() != 0 && rect.height() != 0) {
-                    mOnScreenshotSelected.accept(rect);
-                }
-                stopSelection();
-                setVisibility(View.GONE);
-                break;
-        }
     }
 }
