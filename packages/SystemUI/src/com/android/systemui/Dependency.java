@@ -63,6 +63,7 @@ import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.PluginDependencyProvider;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
@@ -72,8 +73,8 @@ import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
@@ -361,6 +362,7 @@ public class Dependency {
     @Inject Lazy<DialogLaunchAnimator> mDialogLaunchAnimatorLazy;
     @Inject Lazy<OmniSettingsService> mOmniSettingsService;
     @Inject Lazy<AuthController> mAuthController;
+    @Inject Lazy<UserTracker> mUserTrackerLazy;
 
     @Inject
     public Dependency() {
@@ -568,6 +570,7 @@ public class Dependency {
         mProviders.put(GroupExpansionManager.class, mGroupExpansionManagerLazy::get);
         mProviders.put(SystemUIDialogManager.class, mSystemUIDialogManagerLazy::get);
         mProviders.put(DialogLaunchAnimator.class, mDialogLaunchAnimatorLazy::get);
+        mProviders.put(UserTracker.class, mUserTrackerLazy::get);
 
         mProviders.put(OmniSettingsService.class, mOmniSettingsService::get);
         mProviders.put(AuthController.class, mAuthController::get);

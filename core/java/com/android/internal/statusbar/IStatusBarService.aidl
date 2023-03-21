@@ -227,6 +227,9 @@ interface IStatusBarService
     /** Unregisters a nearby media devices provider. */
     void unregisterNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
 
+    /** Shows rear display educational dialog */
+    void showRearDisplayDialog(int currentBaseState);
+
     /**
      * Omni
      */

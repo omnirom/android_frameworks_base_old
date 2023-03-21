@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard;
 
 import android.annotation.AnyThread;
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -59,6 +58,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -151,6 +151,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     public KeyguardBypassController mKeyguardBypassController;
     @Inject
     public KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Inject
+    UserTracker mUserTracker;
     private CharSequence mMediaTitle;
     private CharSequence mMediaArtist;
     protected boolean mDozing;
@@ -398,8 +400,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
         synchronized (this) {
             if (withinNHoursLocked(mNextAlarmInfo, ALARM_VISIBILITY_HOURS)) {
                 String skeleton = android.text.format.DateFormat.is24HourFormat(getContext(), ActivityManager.getCurrentUser()) ? "EHm" : "Ehma";
-                String pattern = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
-                mNextAlarm = android.text.format.DateFormat.format(pattern, mNextAlarmInfo.getTriggerTime()).toString();
+                String pattern = android.text.format.DateFormat.is24HourFormat(getContext(),
+                        mUserTracker.getUserId()) ? "HH:mm" : "h:mm";
+                mNextAlarm = android.text.format.DateFormat.format(pattern,
+                        mNextAlarmInfo.getTriggerTime()).toString();
             } else {
                 mNextAlarm = "";
             }
