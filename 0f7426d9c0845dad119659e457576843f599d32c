@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4ad20c97_570068a2",
+        "filename": "libs/WindowManager/Shell/src/com/android/wm/shell/splitscreen/SplitScreenController.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002322
+      },
+      "writtenOn": "2023-03-22T21:37:11Z",
+      "side": 1,
+      "message": "out/soong/.intermediates/frameworks/base/libs/WindowManager/Shell/WindowManager-Shell/android_common/javac/srcjars/frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/splitscreen/SplitScreenController.java:267: error: variable mImpl might not have been initialized\n    }\n    ^\n1 error",
+      "revId": "0f7426d9c0845dad119659e457576843f599d32c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    }
+  ]
+}
