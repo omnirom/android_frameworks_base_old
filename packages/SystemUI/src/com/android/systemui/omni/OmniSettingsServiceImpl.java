@@ -35,7 +35,6 @@ import android.util.Log;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.settings.UserTracker;
 
 import java.util.HashMap;
