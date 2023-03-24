@@ -29,13 +29,15 @@ import com.android.systemui.Dependency;
 import javax.inject.Inject;
 
 @SysUISingleton
-public class CPUInfoManager extends CoreStartable implements OmniSettingsService.OmniSettingsObserver {
+public class CPUInfoManager implements CoreStartable, OmniSettingsService.OmniSettingsObserver {
     private final String TAG = "CPUInfoManager";
     private final String OMNI_SHOW_CPU_OVERLAY = "show_cpu_overlay";
 
+    private final Context mContext;
+
     @Inject
     public CPUInfoManager(Context context) {
-        super(context);
+        mContext = context;
     }
 
     @Override
@@ -43,7 +45,7 @@ public class CPUInfoManager extends CoreStartable implements OmniSettingsService
     }
 
     @Override
-    protected void onBootCompleted() {
+    public void onBootCompleted() {
         Log.d(TAG, "CPUInfoManager onBootCompleted");
         Dependency.get(OmniSettingsService.class).addIntObserver(this, OMNI_SHOW_CPU_OVERLAY);
     }
