@@ -399,7 +399,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private void updateNextAlarm() {
         synchronized (this) {
             if (withinNHoursLocked(mNextAlarmInfo, ALARM_VISIBILITY_HOURS)) {
-                String skeleton = android.text.format.DateFormat.is24HourFormat(getContext(), ActivityManager.getCurrentUser()) ? "EHm" : "Ehma";
+                String skeleton = android.text.format.DateFormat.is24HourFormat(getContext(), mUserTracker.getUserId()) ? "EHm" : "Ehma";
                 String pattern = android.text.format.DateFormat.is24HourFormat(getContext(),
                         mUserTracker.getUserId()) ? "HH:mm" : "h:mm";
                 mNextAlarm = android.text.format.DateFormat.format(pattern,
