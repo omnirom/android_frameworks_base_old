@@ -2661,7 +2661,7 @@ public class DisplayPolicy {
      *
      * @param screenshotType The type of screenshot, for example either
      *                       {@link WindowManager#TAKE_SCREENSHOT_FULLSCREEN} or
-     *                       {@link WindowManager#TAKE_SCREENSHOT_PROVIDED_IMAGE}
+     *                       {@link WindowManager#TAKE_SCREENSHOT_SELECTED_REGION}
      * @param source Where the screenshot originated from (see WindowManager.ScreenshotSource)
      */
     public void takeScreenshot(int screenshotType, int source) {
