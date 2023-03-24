@@ -16,7 +16,6 @@
 package com.android.systemui.battery;
 
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
-import static android.provider.Settings.System.OMNI_SHOW_BATTERY_IMAGE;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
@@ -131,7 +130,6 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         addView(mBatteryIconView, mlp);
 
         updateShowPercent();
-
         mDualToneHandler = new DualToneHandler(context);
         // Init to not dark at all.
         onDarkChanged(new ArrayList<Rect>(), 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
@@ -357,16 +355,6 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 mBatteryPercentView = null;
             }
         }
-    }
-
-    void updateShowImage() {
-        final boolean hideImage = Settings.System.getIntForUser(getContext().getContentResolver(),
-                OMNI_SHOW_BATTERY_IMAGE, 1, UserHandle.USER_CURRENT) == 0;
-        mBatteryIconView.setVisibility(hideImage ? View.GONE : View.VISIBLE);
-        int padding = getResources().getDimensionPixelSize(R.dimen.signal_cluster_battery_padding);
-        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) getLayoutParams();
-        lp.setMargins(hideImage ? -padding : 0, 0, 0, 0);
-        setLayoutParams(lp);
     }
 
     private Drawable getUnknownStateDrawable() {
