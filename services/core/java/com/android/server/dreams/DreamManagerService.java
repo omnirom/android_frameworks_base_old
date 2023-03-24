@@ -363,12 +363,6 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
-    private boolean isDozingInternal() {
-        synchronized (mLock) {
-            return mCurrentDreamIsDozing;
-        }
-    }
-
     /** Whether a real dream, or a dream preview is occurring. */
     private boolean isDreamingOrInPreviewInternal() {
         synchronized (mLock) {
