@@ -6008,12 +6008,6 @@ public final class Settings {
         /**
          * @hide
          */
-        public static final String OMNI_SHOW_BATTERY_IMAGE =
-                "show_battery_image";
-
-        /**
-         * @hide
-         */
         public static final String OMNI_LOCKSCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
 
         /**
@@ -6182,7 +6176,6 @@ public final class Settings {
             OMNI_LONG_PRESS_POWER_TORCH,
             OMNI_ADVANCED_REBOOT,
             OMNI_MONET_DISABLE,
-            OMNI_SHOW_BATTERY_IMAGE,
             OMNI_LOCKSCREEN_WEATHER_ENABLED,
             OMNI_NAVIGATION_BAR_ARROW_KEYS,
             OMNI_GESTURE_HANDLE_HIDE,
@@ -6228,7 +6221,6 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LONG_PRESS_POWER_TORCH, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_ADVANCED_REBOOT, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_MONET_DISABLE, 0);
-            OMNI_SETTINGS_VALIDATORS.put(OMNI_SHOW_BATTERY_IMAGE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_ARROW_KEYS, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_GESTURE_HANDLE_HIDE, 0);
