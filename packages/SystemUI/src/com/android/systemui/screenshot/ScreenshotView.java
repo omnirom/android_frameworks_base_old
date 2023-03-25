@@ -181,6 +181,8 @@ public class ScreenshotView extends FrameLayout implements
 
     private boolean mForceShowDismiss = false;
 
+    private boolean mPartialSelect;
+
     public ScreenshotView(Context context) {
         this(context, null);
     }
@@ -332,10 +334,17 @@ public class ScreenshotView extends FrameLayout implements
                 Looper.getMainLooper(), Choreographer.getInstance(), ev -> {
                     if (ev instanceof MotionEvent) {
                         MotionEvent event = (MotionEvent) ev;
-                        if (event.getActionMasked() == MotionEvent.ACTION_DOWN
-                                && !getTouchRegion(false).contains(
-                                (int) event.getRawX(), (int) event.getRawY())) {
-                            mCallbacks.onTouchOutside();
+                        if (mPartialSelect) {
+                            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                                mInputMonitor.pilferPointers();
+                            }
+                            mScreenshotSelectorView.onTouch(event);
+                        } else {
+                            if (event.getActionMasked() == MotionEvent.ACTION_DOWN
+                                    && !getTouchRegion(false).contains(
+                                    (int) event.getRawX(), (int) event.getRawY())) {
+                                mCallbacks.onTouchOutside();
+                            }
                         }
                     }
                 });
@@ -467,6 +476,7 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotSelectorView.setOnScreenshotSelected(onPartialScreenshotSelected);
         mScreenshotSelectorView.setVisibility(View.VISIBLE);
         mScreenshotSelectorView.requestFocus();
+        mPartialSelect = true;
     }
 
     void setScreenshot(Bitmap bitmap, Insets screenInsets) {
@@ -1116,6 +1126,7 @@ public class ScreenshotView extends FrameLayout implements
         setAlpha(1);
         mScreenshotStatic.setAlpha(1);
         mScreenshotSelectorView.stop();
+        mPartialSelect = false;
     }
 
     private void startSharedTransition(ActionTransition transition) {
