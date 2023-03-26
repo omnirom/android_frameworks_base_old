@@ -16,6 +16,23 @@
       "message": "Working.\nIs it possible to add colored for the date too ?",
       "revId": "7cce21cc131a991821bcc4195a290f2dda481ccd",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "241246a4_74a5066d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2023-03-26T17:46:01Z",
+      "side": 1,
+      "message": "Date is a slice so complete different location. ",
+      "revId": "7cce21cc131a991821bcc4195a290f2dda481ccd",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
     }
   ]
 }
