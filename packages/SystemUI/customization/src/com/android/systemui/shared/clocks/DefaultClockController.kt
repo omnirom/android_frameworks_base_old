@@ -18,6 +18,8 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Rect
 import android.icu.text.NumberFormat
+import android.os.UserHandle
+import android.provider.Settings.System
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -43,7 +45,7 @@ private val TAG = DefaultClockController::class.simpleName
  * existing lockscreen clock.
  */
 class DefaultClockController(
-    ctx: Context,
+    val ctx: Context,
     private val layoutInflater: LayoutInflater,
     private val resources: Resources,
 ) : ClockController {
@@ -129,13 +131,19 @@ class DefaultClockController(
         open fun recomputePadding(targetRegion: Rect?) {}
 
         fun updateColor() {
-            val color =
-                if (isRegionDark) {
+            val coloredClock = System.getIntForUser(ctx.getContentResolver(),
+                    System.OMNI_LOCKSCREEN_CLOCK_COLORED, 1, UserHandle.USER_CURRENT) != 0
+            val color = if (isRegionDark) {
+                if (coloredClock)
                     resources.getColor(android.R.color.system_accent1_100)
-                } else {
+                else
+                    resources.getColor(com.android.internal.R.color.primary_text_material_dark)
+            } else {
+                if (coloredClock)
                     resources.getColor(android.R.color.system_accent2_600)
-                }
-
+                else
+                    resources.getColor(com.android.internal.R.color.primary_text_material_light)
+            }
             if (currentColor == color) {
                 return
             }

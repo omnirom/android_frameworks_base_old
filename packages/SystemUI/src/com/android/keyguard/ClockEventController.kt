@@ -21,12 +21,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
+import android.provider.Settings.System
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.Dependency
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
@@ -39,6 +41,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.dagger.KeyguardClockLog
+import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.shared.regionsampling.RegionSampler
@@ -215,6 +218,13 @@ open class ClockEventController @Inject constructor(
         }
     }
 
+    private val settingsListener = object : OmniSettingsService.OmniSettingsObserver {
+        override fun onIntSettingChanged(key: String, newValue: Int) {
+            clock?.events?.onColorPaletteChanged(resources)
+            updateColors()
+        }
+    }
+
     fun registerListeners(parent: View) {
         if (isRegistered) {
             return
@@ -241,6 +251,7 @@ open class ClockEventController @Inject constructor(
                 }
             }
         }
+        Dependency.get(OmniSettingsService::class.java).addIntObserver(settingsListener, System.OMNI_LOCKSCREEN_CLOCK_COLORED)
     }
 
     fun unregisterListeners() {
@@ -256,6 +267,7 @@ open class ClockEventController @Inject constructor(
         keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
         smallRegionSampler?.stopRegionSampler()
         largeRegionSampler?.stopRegionSampler()
+        Dependency.get(OmniSettingsService::class.java).removeObserver(settingsListener)
     }
 
     private fun updateFontSizes() {

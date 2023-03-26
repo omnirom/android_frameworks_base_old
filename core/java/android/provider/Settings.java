@@ -6153,6 +6153,11 @@ public final class Settings {
         public static final String OMNI_LOCKSCREEN_DND_ENABLED = "lockscreen_dnd_enabled";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_CLOCK_COLORED = "lockscreen_clock_colored";
+
+        /**
          * just for triggering an update - DOES NOT need a backup
          * @hide
          */
@@ -6205,6 +6210,7 @@ public final class Settings {
             OMNI_STATUS_BAR_ALARM,
             OMNI_LOCKSCREEN_ALARM_ENABLED,
             OMNI_LOCKSCREEN_DND_ENABLED,
+            OMNI_LOCKSCREEN_CLOCK_COLORED,
             OMNI_USE_OLD_MOBILETYPE,
             OMNI_HIDE_ROAMING_ICON,
         };
@@ -6253,6 +6259,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_STATUS_BAR_ALARM, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_ALARM_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_DND_ENABLED, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_CLOCK_COLORED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_HIDE_ROAMING_ICON, 0);
         }
