@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fb3ecf50_77db6017",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002322
+      },
+      "writtenOn": "2023-03-26T12:32:48Z",
+      "side": 1,
+      "message": "working perfectly now. We have this NFC ile for all devices",
+      "revId": "0e6a8e3be7b1150aa19d318981c822c179f627f9",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    }
+  ]
+}
