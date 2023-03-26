@@ -16,6 +16,23 @@
       "message": "build fine now but not tested ",
       "revId": "534790f3ac40227c1e2bbcf10467c42ad47b4819",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "78397ad5_21c20d2a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2023-03-26T12:20:09Z",
+      "side": 1,
+      "message": "just tested",
+      "revId": "534790f3ac40227c1e2bbcf10467c42ad47b4819",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
     }
   ]
 }
