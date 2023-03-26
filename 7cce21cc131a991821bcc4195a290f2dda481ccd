@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fca49a74_fb06e7e9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002322
+      },
+      "writtenOn": "2023-03-26T17:28:56Z",
+      "side": 1,
+      "message": "Working.\nIs it possible to add colored for the date too ?",
+      "revId": "7cce21cc131a991821bcc4195a290f2dda481ccd",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    }
+  ]
+}
