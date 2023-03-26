@@ -1,0 +1,4 @@
+<resources>
+    <java-symbol type="color" name="primary_text_material_light" />
+    <java-symbol type="color" name="primary_text_material_dark" />
+</resources>
