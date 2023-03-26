@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "372a05ae_d08df5dc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2023-03-26T12:21:16Z",
+      "side": 1,
+      "message": "TODO - remove space between radio and percent if image hidden",
+      "revId": "0068d50ea3954f501e41d1ec2f557954cb2bdb95",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55"
+    }
+  ]
+}
