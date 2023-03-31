@@ -1009,6 +1009,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             Slog.d(TAG, "No behavior defined for power press count " + count);
         } else if (count == 1 && interactive) {
             if (beganFromNonInteractive) {
+                if (mLongPressPowerTorch) {
+                    wakeUpFromPowerKey(eventTime);
+                }
                 // The screen off case, where we might want to start dreaming on power button press.
                 attemptToDreamFromShortPowerButtonPress(false, () -> {});
                 return;
