@@ -4411,9 +4411,9 @@ public final class NotificationPanelViewController implements Dumpable {
         if (DEBUG_PULSE_LIGHT) {
             Log.d(TAG, "showAodContent show = " + show);
         }
-        mKeyguardStatusView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
-        mKeyguardStatusBar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
-        mKeyguardBottomArea.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+        mView.setVisibility(show ? VISIBLE : INVISIBLE);
+        mKeyguardStatusBar.setVisibility(show ? VISIBLE : INVISIBLE);
+        mKeyguardBottomArea.setVisibility(show ? VISIBLE : INVISIBLE);
     }
 
     public void setAmbientIndicationTop(int ambientIndicationTop, boolean ambientTextVisible) {
