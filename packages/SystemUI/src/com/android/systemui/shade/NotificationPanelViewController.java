@@ -4380,14 +4380,14 @@ public final class NotificationPanelViewController implements Dumpable {
                         }
                     }
                 } else {
-                    showAodContent(true);
+                    showAodContent(mBarState, true);
                 }
             } else {
                 // continue to pulse - if not screen was turned on in the meantime
                 if (activeNotif && ambientLights && mDozing && !mPulseLightHandled) {
                     // no-op if pulseLights is also enabled
                     if (ambientLightsHideAod) {
-                        showAodContent(false);
+                        showAodContent(mBarState, false);
                     }
                     mPulseLightsView.animateNotificationWithColor(pulseColor);
                     mPulseLightsView.setVisibility(View.VISIBLE);
@@ -4407,13 +4407,17 @@ public final class NotificationPanelViewController implements Dumpable {
         updateKeyguardStatusViewAlignment(/* animate= */ true);
     }
 
-    private void showAodContent(boolean show) {
+    private void showAodContent(int currentBarState, boolean show) {
         if (DEBUG_PULSE_LIGHT) {
-            Log.d(TAG, "showAodContent show = " + show);
+            Log.d(TAG, "currentBarState = " + currentBarState +
+                       "showAodContent show = " + show);
         }
-        mKeyguardStatusView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
-        mKeyguardStatusBar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
-        mKeyguardBottomArea.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+        mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
+            currentBarState,
+            show ? true : false,
+            show ? true : false,
+            currentBarState);
+        setKeyguardBottomAreaVisibility(currentBarState, show ? true : false);
     }
 
     public void setAmbientIndicationTop(int ambientIndicationTop, boolean ambientTextVisible) {
@@ -6582,7 +6586,7 @@ public final class NotificationPanelViewController implements Dumpable {
         if (doShowAodContent) {
             if (mBarState == StatusBarState.KEYGUARD
                     || mBarState == StatusBarState.SHADE_LOCKED) {
-                showAodContent(true);
+                showAodContent(mBarState, true);
             }
         }
     }
