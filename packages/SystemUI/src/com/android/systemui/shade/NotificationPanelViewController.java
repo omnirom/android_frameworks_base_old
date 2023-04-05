@@ -732,7 +732,7 @@ public final class NotificationPanelViewController implements Dumpable {
             };
 
     // Omni additions
-    private static final boolean DEBUG_PULSE_LIGHT = false;
+    private static final boolean DEBUG_PULSE_LIGHT = true;
     private NotificationLightsView mPulseLightsView;
     private boolean mPulseLightHandled;
     private boolean mAmbientPulseLightRunning;
@@ -4380,7 +4380,11 @@ public final class NotificationPanelViewController implements Dumpable {
                         }
                     }
                 } else {
-                    showAodContent(true);
+                    if (mBarState == StatusBarState.KEYGUARD
+                            || mBarState == StatusBarState.SHADE_LOCKED) {
+                        showAodContent(true);
+                        mStatusBarStateListener.onStateChanged(mBarState);
+                    }
                 }
             } else {
                 // continue to pulse - if not screen was turned on in the meantime
@@ -4411,8 +4415,6 @@ public final class NotificationPanelViewController implements Dumpable {
         if (DEBUG_PULSE_LIGHT) {
             Log.d(TAG, "showAodContent show = " + show);
         }
-        mKeyguardStatusView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
-        mKeyguardStatusBar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
         mKeyguardBottomArea.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
 
@@ -6583,6 +6585,7 @@ public final class NotificationPanelViewController implements Dumpable {
             if (mBarState == StatusBarState.KEYGUARD
                     || mBarState == StatusBarState.SHADE_LOCKED) {
                 showAodContent(true);
+                mStatusBarStateListener.onStateChanged(mBarState);
             }
         }
     }
