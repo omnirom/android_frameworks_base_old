@@ -732,7 +732,7 @@ public final class NotificationPanelViewController implements Dumpable {
             };
 
     // Omni additions
-    private static final boolean DEBUG_PULSE_LIGHT = false;
+    private static final boolean DEBUG_PULSE_LIGHT = true;
     private NotificationLightsView mPulseLightsView;
     private boolean mPulseLightHandled;
     private boolean mAmbientPulseLightRunning;
@@ -4411,7 +4411,9 @@ public final class NotificationPanelViewController implements Dumpable {
         if (DEBUG_PULSE_LIGHT) {
             Log.d(TAG, "showAodContent show = " + show);
         }
-        mKeyguardStatusView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+        mKeyguardStatusBarViewController.updateViewState(
+            /* alpha= */ 1f,
+            show ? View.VISIBLE : View.INVISIBLE);
         mKeyguardStatusBar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
         mKeyguardBottomArea.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
