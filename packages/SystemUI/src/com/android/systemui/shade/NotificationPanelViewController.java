@@ -4346,9 +4346,6 @@ public final class NotificationPanelViewController implements Dumpable {
             }
             int pulseColor = mPulseLightsView.getNotificationLightsColor();
             if (row != null) {
-                if (DEBUG_PULSE_LIGHT) {
-                    Log.d(TAG, "setPulsing notification = " + row.getNotificationColor());
-                }
                 if (pulseColorAutomatic) {
                     int notificationColor = row.getNotificationColor();
                     if (notificationColor != Notification.COLOR_DEFAULT) {
@@ -4356,6 +4353,9 @@ public final class NotificationPanelViewController implements Dumpable {
                     }
                 } else {
                     pulseColor = mPulseLightsView.getNotificationLightsColor();
+                }
+                if (DEBUG_PULSE_LIGHT) {
+                    Log.d(TAG, "setPulsing notification = " + row.getNotificationColor());
                 }
             }
             if (mPulsing) {
@@ -4411,7 +4411,7 @@ public final class NotificationPanelViewController implements Dumpable {
         if (DEBUG_PULSE_LIGHT) {
             Log.d(TAG, "showAodContent show = " + show);
         }
-        mKeyguardStatusView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+        mView.setVisibility(show ? VISIBLE : INVISIBLE);
         mKeyguardStatusBar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
         mKeyguardBottomArea.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
