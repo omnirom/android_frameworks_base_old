@@ -4346,9 +4346,6 @@ public final class NotificationPanelViewController implements Dumpable {
             }
             int pulseColor = mPulseLightsView.getNotificationLightsColor();
             if (row != null) {
-                if (DEBUG_PULSE_LIGHT) {
-                    Log.d(TAG, "setPulsing notification = " + row.getNotificationColor());
-                }
                 if (pulseColorAutomatic) {
                     int notificationColor = row.getNotificationColor();
                     if (notificationColor != Notification.COLOR_DEFAULT) {
@@ -4356,6 +4353,9 @@ public final class NotificationPanelViewController implements Dumpable {
                     }
                 } else {
                     pulseColor = mPulseLightsView.getNotificationLightsColor();
+                }
+                if (DEBUG_PULSE_LIGHT) {
+                    Log.d(TAG, "setPulsing notification = " + row.getNotificationColor());
                 }
             }
             if (mPulsing) {
