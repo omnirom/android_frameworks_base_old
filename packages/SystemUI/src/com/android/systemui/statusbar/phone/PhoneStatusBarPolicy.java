@@ -26,7 +26,6 @@ import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.SynchronousUserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
@@ -494,9 +493,7 @@ public class PhoneStatusBarPolicy
                     || !mBluetooth.isBluetoothAudioProfileOnly())) {
                 contentDescription = mResources.getString(
                         R.string.accessibility_bluetooth_connected);
-                }
 
-            if (mBluetooth.isBluetoothConnected()) {
                 final Collection<CachedBluetoothDevice> devices = mBluetooth.getDevices();
                 if (mShowBtBattery && devices != null) {
                     // get battery level for the first device with battery level support
@@ -506,11 +503,8 @@ public class PhoneStatusBarPolicy
                         int state = device.getMaxConnectionState();
                         if (state == BluetoothProfile.STATE_CONNECTED) {
                             int batteryLevel = device.getBatteryLevel();
-                            BluetoothClass type = device.getBtClass();
-                            contentDescription = mResources.getString(R.string.accessibility_bluetooth_connected);
-                            if (DEBUG) Log.d(TAG, "batteryLevel = " + batteryLevel + " type = " + type
-                                    + " showBatteryForThis = " + showBatteryForThis(type));
-                            if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN && showBatteryForThis(type)) {
+                            if (DEBUG) Log.d(TAG, "batteryLevel = " + batteryLevel);
+                            if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
                                 final int padding = mResources.getDimensionPixelSize(R.dimen.bt_battery_padding);
                                 Drawable d = BluetoothDeviceLayerDrawable.createLayerDrawable(mContext,
                                         R.drawable.ic_bluetooth_connected, batteryLevel, 1, -padding, padding, 0);
@@ -533,27 +527,6 @@ public class PhoneStatusBarPolicy
             mIconController.setIcon(mSlotBluetooth, iconId, contentDescription);
         }
         mIconController.setIconVisibility(mSlotBluetooth, bluetoothVisible);
-    }
-
-    private boolean showBatteryForThis(BluetoothClass type) {
-        boolean show = false;
-        if (type != null) {
-            switch (type.getDeviceClass()) {
-            case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
-            case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
-            case BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO:
-            case BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER:
-            case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
-                show = true;
-                break;
-            default:
-                show = false;
-                break;
-            }
-        } else {
-            show = false;
-        }
-        return show;
     }
 
     private final void updateTTY() {
