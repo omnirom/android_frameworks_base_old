@@ -522,7 +522,7 @@ public class PhoneStatusBarPolicy
         }
 
         if (icon != null) {
-            mIconController.setIcon(mSlotBluetooth, icon);
+            mIconController.setCustomIcon(mSlotBluetooth, icon);
         } else {
             mIconController.setIcon(mSlotBluetooth, iconId, contentDescription);
         }

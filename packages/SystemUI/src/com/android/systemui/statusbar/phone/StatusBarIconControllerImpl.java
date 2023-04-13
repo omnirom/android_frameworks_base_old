@@ -385,6 +385,16 @@ public class StatusBarIconControllerImpl implements Tunable,
         }
     }
 
+    public void setCustomIcon(String slot, StatusBarIcon icon) {
+        if (icon == null) {
+            removeAllIconsForSlot(slot);
+            return;
+        }
+
+        StatusBarIconHolder holder = StatusBarIconHolder.fromIcon(icon);
+        setIcon(slot, holder);
+    }
+
     /** */
     public void setIconVisibility(String slot, boolean visibility) {
         setIconVisibility(slot, visibility, 0);
