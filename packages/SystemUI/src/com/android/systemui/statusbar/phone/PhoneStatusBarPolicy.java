@@ -536,24 +536,17 @@ public class PhoneStatusBarPolicy
     }
 
     private boolean showBatteryForThis(BluetoothClass type) {
-        boolean show = false;
-        if (type != null) {
-            switch (type.getDeviceClass()) {
-            case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
-            case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
-            case BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO:
-            case BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER:
-            case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
-                show = true;
-                break;
-            default:
-                show = false;
-                break;
-            }
-        } else {
-            show = false;
+        if (type == null) {
+            return false;
         }
-        return show;
+        final int devClass = type.getDeviceClass();
+        if (DEBUG) Log.d(TAG, "device Class = " + devClass);
+        return (devClass == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET ||
+                devClass == BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES ||
+                devClass == BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER ||
+                devClass == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE ||
+                devClass == BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO ||
+                devClass == BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO);
     }
 
     private final void updateTTY() {
