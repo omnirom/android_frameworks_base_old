@@ -884,10 +884,10 @@ public class PhoneStatusBarPolicy
     @Override
     public void onIntSettingChanged(String key, Integer newValue) {
         mShowAlarm = System.getIntForUser(mContext.getContentResolver(),
-                OmniSettings.OMNI_STATUS_BAR_ALARM, 0, UserHandle.USER_CURRENT) != 0;
+                OmniSettings.OMNI_STATUS_BAR_ALARM, 0, mUserTracker.getUserId()) != 0;
         updateAlarm();
         mShowBtBattery = System.getIntForUser(mContext.getContentResolver(),
-                OmniSettings.OMNI_STATUS_BAR_BT_BATTERY, 0, UserHandle.USER_CURRENT) != 0;
+                OmniSettings.OMNI_STATUS_BAR_BT_BATTERY, 0, mUserTracker.getUserId()) != 0;
         updateBluetooth();
     }
 
