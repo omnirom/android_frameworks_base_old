@@ -20,7 +20,6 @@ import android.hardware.display.AmbientDisplayConfiguration
 import android.content.Context
 import android.os.PowerManager
 import android.os.SystemClock
-import android.os.UserHandle
 import android.provider.Settings
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -30,6 +29,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
 import com.android.systemui.tuner.TunerService
@@ -55,8 +55,8 @@ class PulsingGestureListener @Inject constructor(
         private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
         private val statusBarStateController: StatusBarStateController,
         private val shadeLogger: ShadeLogger,
-
         context: Context,
+        userTracker: UserTracker,
         tunerService: TunerService,
         dumpManager: DumpManager
 ) : GestureDetector.SimpleOnGestureListener(), Dumpable {
@@ -72,13 +72,13 @@ class PulsingGestureListener @Inject constructor(
             when (key) {
                 Settings.Secure.DOZE_DOUBLE_TAP_GESTURE ->
                     doubleTapEnabled = ambientDisplayConfiguration.doubleTapGestureEnabled(
-                            UserHandle.USER_CURRENT)
+                            userTracker.userId)
                 Settings.Secure.DOZE_TAP_SCREEN_GESTURE ->
                     singleTapEnabled = ambientDisplayConfiguration.tapGestureEnabled(
-                            UserHandle.USER_CURRENT)
+                            userTracker.userId)
                 Settings.Secure.DOUBLE_TAP_TO_WAKE ->
                     mDoubleTapEnabledNative = Settings.Secure.getIntForUser(mContext.contentResolver,
-                            Settings.Secure.DOUBLE_TAP_TO_WAKE, 0, UserHandle.USER_CURRENT) == 1
+                            Settings.Secure.DOUBLE_TAP_TO_WAKE, 0, userTracker.userId) == 1
             }
         }
         tunerService.addTunable(tunable,

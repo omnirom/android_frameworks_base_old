@@ -26,11 +26,16 @@ import com.android.systemui.accessibility.SystemActions
 import com.android.systemui.accessibility.WindowMagnification
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.clipboardoverlay.ClipboardListener
+import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
+import com.android.systemui.dreams.DreamMonitor
 import com.android.systemui.globalactions.GlobalActionsComponent
+import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyguard.KeyguardViewMediator
+import com.android.systemui.keyguard.data.quickaffordance.MuteQuickAffordanceCoreStartable
 import com.android.systemui.log.SessionTracker
+import com.android.systemui.media.dialog.MediaOutputSwitcherDialogUI
 import com.android.systemui.media.RingtonePlayer
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
@@ -52,7 +57,6 @@ import com.android.systemui.theme.ThemeOverlayController
 import com.android.systemui.toast.ToastUI
 import com.android.systemui.usb.StorageNotification
 import com.android.systemui.util.NotificationChannels
-import com.android.systemui.util.leak.GarbageMonitor
 import com.android.systemui.volume.VolumeUI
 import com.android.systemui.wmshell.WMShell
 import dagger.Binds
@@ -63,7 +67,10 @@ import dagger.multibindings.IntoMap
 /**
  * Collection of {@link CoreStartable}s that should be run on AOSP.
  */
-@Module(includes = [MultiUserUtilsModule::class])
+@Module(includes = [
+    MultiUserUtilsModule::class,
+    StartControlsStartableModule::class
+])
 abstract class SystemUICoreStartableModule {
     /** Inject into AuthController.  */
     @Binds
@@ -100,12 +107,6 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(FsiChromeViewBinder::class)
     abstract fun bindFsiChromeWindowBinder(sysui: FsiChromeViewBinder): CoreStartable
-
-    /** Inject into GarbageMonitor.Service.  */
-    @Binds
-    @IntoMap
-    @ClassKey(GarbageMonitor::class)
-    abstract fun bindGarbageMonitorService(sysui: GarbageMonitor.Service): CoreStartable
 
     /** Inject into GlobalActionsComponent.  */
     @Binds
@@ -218,6 +219,12 @@ abstract class SystemUICoreStartableModule {
     @ClassKey(ToastUI::class)
     abstract fun bindToastUI(service: ToastUI): CoreStartable
 
+    /** Inject into MediaOutputSwitcherDialogUI.  */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaOutputSwitcherDialogUI::class)
+    abstract fun MediaOutputSwitcherDialogUI(sysui: MediaOutputSwitcherDialogUI): CoreStartable
+
     /** Inject into VolumeUI.  */
     @Binds
     @IntoMap
@@ -268,6 +275,11 @@ abstract class SystemUICoreStartableModule {
     @ClassKey(ChipbarCoordinator::class)
     abstract fun bindChipbarController(sysui: ChipbarCoordinator): CoreStartable
 
+    /** Inject into CPUInfoManager.  */
+    @Binds
+    @IntoMap
+    @ClassKey(CPUInfoManager::class)
+    abstract fun bindCPUInfoManager(sysui: CPUInfoManager): CoreStartable
 
     /** Inject into RearDisplayDialogController) */
     @Binds
@@ -281,9 +293,22 @@ abstract class SystemUICoreStartableModule {
     @ClassKey(StylusUsiPowerStartable::class)
     abstract fun bindStylusUsiPowerStartable(sysui: StylusUsiPowerStartable): CoreStartable
 
-    /** Inject into CPUInfoManager.  */
     @Binds
     @IntoMap
-    @ClassKey(CPUInfoManager::class)
-    abstract fun bindCPUInfoManager(sysui: CPUInfoManager): CoreStartable
+    @ClassKey(PhysicalKeyboardCoreStartable::class)
+    abstract fun bindKeyboardCoreStartable(listener: PhysicalKeyboardCoreStartable): CoreStartable
+
+    /** Inject into MuteQuickAffordanceCoreStartable*/
+    @Binds
+    @IntoMap
+    @ClassKey(MuteQuickAffordanceCoreStartable::class)
+    abstract fun bindMuteQuickAffordanceCoreStartable(
+            sysui: MuteQuickAffordanceCoreStartable
+    ): CoreStartable
+
+    /**Inject into DreamMonitor */
+    @Binds
+    @IntoMap
+    @ClassKey(DreamMonitor::class)
+    abstract fun bindDreamMonitor(sysui: DreamMonitor): CoreStartable
 }

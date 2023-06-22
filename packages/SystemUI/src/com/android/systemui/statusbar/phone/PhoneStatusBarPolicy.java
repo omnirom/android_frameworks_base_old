@@ -22,9 +22,7 @@ import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
-import android.app.IActivityManager;
 import android.app.NotificationManager;
-import android.app.SynchronousUserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -77,6 +75,7 @@ import com.android.systemui.privacy.logging.PrivacyLogger;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -155,8 +154,8 @@ public class PhoneStatusBarPolicy
     private final NextAlarmController mNextAlarmController;
     private final AlarmManager mAlarmManager;
     private final UserInfoController mUserInfoController;
-    private final IActivityManager mIActivityManager;
     private final UserManager mUserManager;
+    private final UserTracker mUserTracker;
     private final DevicePolicyManager mDevicePolicyManager;
     private final StatusBarIconController mIconController;
     private final CommandQueue mCommandQueue;
@@ -169,6 +168,7 @@ public class PhoneStatusBarPolicy
     private final KeyguardStateController mKeyguardStateController;
     private final LocationController mLocationController;
     private final PrivacyItemController mPrivacyItemController;
+    private final Executor mMainExecutor;
     private final Executor mUiBgExecutor;
     private final SensorPrivacyController mSensorPrivacyController;
     private final RecordingController mRecordingController;
@@ -191,16 +191,17 @@ public class PhoneStatusBarPolicy
     @Inject
     public PhoneStatusBarPolicy(StatusBarIconController iconController,
             CommandQueue commandQueue, BroadcastDispatcher broadcastDispatcher,
-            @UiBackground Executor uiBgExecutor, @Main Looper looper, @Main Resources resources,
-            CastController castController, HotspotController hotspotController,
-            BluetoothController bluetoothController, NextAlarmController nextAlarmController,
-            UserInfoController userInfoController, RotationLockController rotationLockController,
-            DataSaverController dataSaverController, ZenModeController zenModeController,
+            @Main Executor mainExecutor, @UiBackground Executor uiBgExecutor, @Main Looper looper,
+            @Main Resources resources, CastController castController,
+            HotspotController hotspotController, BluetoothController bluetoothController,
+            NextAlarmController nextAlarmController, UserInfoController userInfoController,
+            RotationLockController rotationLockController, DataSaverController dataSaverController,
+            ZenModeController zenModeController,
             DeviceProvisionedController deviceProvisionedController,
             KeyguardStateController keyguardStateController,
             LocationController locationController,
-            SensorPrivacyController sensorPrivacyController, IActivityManager iActivityManager,
-            AlarmManager alarmManager, UserManager userManager,
+            SensorPrivacyController sensorPrivacyController, AlarmManager alarmManager,
+            UserManager userManager, UserTracker userTracker,
             DevicePolicyManager devicePolicyManager, RecordingController recordingController,
             @Nullable TelecomManager telecomManager, @DisplayId int displayId,
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
@@ -218,8 +219,8 @@ public class PhoneStatusBarPolicy
         mNextAlarmController = nextAlarmController;
         mAlarmManager = alarmManager;
         mUserInfoController = userInfoController;
-        mIActivityManager = iActivityManager;
         mUserManager = userManager;
+        mUserTracker = userTracker;
         mDevicePolicyManager = devicePolicyManager;
         mRotationLockController = rotationLockController;
         mDataSaver = dataSaverController;
@@ -230,6 +231,7 @@ public class PhoneStatusBarPolicy
         mPrivacyItemController = privacyItemController;
         mSensorPrivacyController = sensorPrivacyController;
         mRecordingController = recordingController;
+        mMainExecutor = mainExecutor;
         mUiBgExecutor = uiBgExecutor;
         mTelecomManager = telecomManager;
         mRingerModeTracker = ringerModeTracker;
@@ -281,11 +283,7 @@ public class PhoneStatusBarPolicy
         mRingerModeTracker.getRingerModeInternal().observeForever(observer);
 
         // listen for user / profile change.
-        try {
-            mIActivityManager.registerUserSwitchObserver(mUserSwitchListener, TAG);
-        } catch (RemoteException e) {
-            // Ignore
-        }
+        mUserTracker.addCallback(mUserSwitchListener, mMainExecutor);
 
         // TTY status
         updateTTY();
@@ -395,7 +393,7 @@ public class PhoneStatusBarPolicy
     }
 
     private void updateAlarm() {
-        final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
+        final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(mUserTracker.getUserId());
         final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
         final boolean zenNone = !zenAllowsAlarm();
         mIconController.setIcon(mSlotAlarmClock, zenNone ? R.drawable.stat_sys_alarm_dim
@@ -629,15 +627,15 @@ public class PhoneStatusBarPolicy
         });
     }
 
-    private final SynchronousUserSwitchObserver mUserSwitchListener =
-            new SynchronousUserSwitchObserver() {
+    private final UserTracker.Callback mUserSwitchListener =
+            new UserTracker.Callback() {
                 @Override
-                public void onUserSwitching(int newUserId) throws RemoteException {
+                public void onUserChanging(int newUser, Context userContext) {
                     mHandler.post(() -> mUserInfoController.reloadUserInfo());
                 }
 
                 @Override
-                public void onUserSwitchComplete(int newUserId) throws RemoteException {
+                public void onUserChanged(int newUser, Context userContext) {
                     mHandler.post(() -> {
                         updateAlarm();
                         updateManagedProfile();

@@ -340,6 +340,13 @@ oneway interface IStatusBar
     void enterStageSplitFromRunningApp(boolean leftOrTop);
 
     /**
+     * Shows the media output switcher dialog.
+     *
+     * @param packageName of the session for which the output switcher is shown.
+     */
+    void showMediaOutputSwitcher(String packageName);
+
+    /**
      *Omni
      */
     void toggleCameraFlash();

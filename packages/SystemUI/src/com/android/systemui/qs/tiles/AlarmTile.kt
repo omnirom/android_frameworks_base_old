@@ -142,4 +142,8 @@ class AlarmTile @Inject constructor(
         }
         return (zenModeController.getConsolidatedPolicy().priorityCategories and NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS) != 0
     }
+
+    companion object {
+        const val TILE_SPEC = "alarm"
+    }
 }
