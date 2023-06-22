@@ -23,10 +23,18 @@ import com.android.systemui.omni.OmniSettingsServiceImpl;
 import com.android.systemui.omni.OmniSystemUIService;
 import com.android.systemui.omni.SplitScreenService;
 
+import com.android.systemui.qs.tiles.AODTile;
+import com.android.systemui.qs.tiles.CaffeineTile;
+import com.android.systemui.qs.tiles.DataSwitchTile;
+import com.android.systemui.qs.tiles.ScreenshotTile;
+
+import com.android.systemui.qs.tileimpl.QSTileImpl;
+
 import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+import dagger.multibindings.StringKey;
 
 @Module
 public interface OmniModule {
@@ -45,4 +53,25 @@ public interface OmniModule {
     @IntoMap
     @ClassKey(SplitScreenService.class)
     public abstract Service bindSplitScreenService(SplitScreenService service);
+
+    /** Inject Tiles */
+    @Binds
+    @IntoMap
+    @StringKey(AODTile.TILE_SPEC)
+    public abstract QSTileImpl<?> bindAODTile(AODTile aodTile);
+
+    @Binds
+    @IntoMap
+    @StringKey(CaffeineTile.TILE_SPEC)
+    public abstract QSTileImpl<?> bindCaffeineTile(CaffeineTile caffeineTile);
+
+    @Binds
+    @IntoMap
+    @StringKey(DataSwitchTile.TILE_SPEC)
+    public abstract QSTileImpl<?> bindDataSwitchTile(DataSwitchTile dataSwitchTile);
+
+    @Binds
+    @IntoMap
+    @StringKey(ScreenshotTile.TILE_SPEC)
+    public abstract QSTileImpl<?> bindScreenshotTile(ScreenshotTile screenshotTile);
 }

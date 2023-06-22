@@ -49,6 +49,7 @@ import javax.inject.Inject;
 
 /** Quick settings tile: Caffeine **/
 public class CaffeineTile extends QSTileImpl<BooleanState> {
+    public static final String TILE_SPEC = "caffeine";
 
     private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_caffeine);
 
