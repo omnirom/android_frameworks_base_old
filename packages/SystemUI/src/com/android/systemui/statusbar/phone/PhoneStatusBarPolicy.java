@@ -505,11 +505,10 @@ public class PhoneStatusBarPolicy
                         if (state == BluetoothProfile.STATE_CONNECTED) {
                             int batteryLevel = device.getBatteryLevel();
                             BluetoothClass type = device.getBtClass();
-                            int devClass = type.getDeviceClass();
                             contentDescription = mResources.getString(R.string.accessibility_bluetooth_connected);
-                            if (DEBUG) Log.d(TAG, "batteryLevel = " + batteryLevel + " device Class = " + devClass
-                                    + " showBatteryForThis = " + showBatteryForThis(devClass));
-                            if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN && showBatteryForThis(devClass)) {
+                            if (DEBUG) Log.d(TAG, "batteryLevel = " + batteryLevel + " type = " + type
+                                    + " showBatteryForThis = " + showBatteryForThis(type));
+                            if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN && showBatteryForThis(type)) {
                                 final int padding = mResources.getDimensionPixelSize(R.dimen.bt_battery_padding);
                                 Drawable d = BluetoothDeviceLayerDrawable.createLayerDrawable(mContext,
                                         R.drawable.ic_bluetooth_connected, batteryLevel, 1, -padding, padding, 0);
@@ -527,23 +526,32 @@ public class PhoneStatusBarPolicy
         }
 
         if (icon != null) {
-            mIconController.setCustomIcon(mSlotBluetooth, icon);
+            mIconController.setIcon(mSlotBluetooth, icon);
         } else {
             mIconController.setIcon(mSlotBluetooth, iconId, contentDescription);
         }
         mIconController.setIconVisibility(mSlotBluetooth, bluetoothVisible);
     }
 
-    private boolean showBatteryForThis(int devClass) {
-        if (devClass == 0) {
-            return false;
+    private boolean showBatteryForThis(BluetoothClass type) {
+        boolean show = false;
+        if (type != null) {
+            switch (type.getDeviceClass()) {
+            case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+            case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
+            case BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO:
+            case BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER:
+            case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
+                show = true;
+                break;
+            default:
+                show = false;
+                break;
+            }
+        } else {
+            show = false;
         }
-        return (devClass == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET ||
-                devClass == BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES ||
-                devClass == BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER ||
-                devClass == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE ||
-                devClass == BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO ||
-                devClass == BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO);
+        return show;
     }
 
     private final void updateTTY() {
@@ -884,10 +892,10 @@ public class PhoneStatusBarPolicy
     @Override
     public void onIntSettingChanged(String key, Integer newValue) {
         mShowAlarm = System.getIntForUser(mContext.getContentResolver(),
-                OmniSettings.OMNI_STATUS_BAR_ALARM, 0, UserHandle.USER_CURRENT) != 0;
+                OmniSettings.OMNI_STATUS_BAR_ALARM, 0, mUserTracker.getUserId()) != 0;
         updateAlarm();
         mShowBtBattery = System.getIntForUser(mContext.getContentResolver(),
-                OmniSettings.OMNI_STATUS_BAR_BT_BATTERY, 0, UserHandle.USER_CURRENT) != 0;
+                OmniSettings.OMNI_STATUS_BAR_BT_BATTERY, 0, mUserTracker.getUserId()) != 0;
         updateBluetooth();
     }
 
