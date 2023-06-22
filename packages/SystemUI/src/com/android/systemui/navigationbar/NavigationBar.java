@@ -1956,7 +1956,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     };
 
     private boolean onHomeHandleLongClick(View v) {
-        TaskUtils.toggleLastApp(mContext, UserHandle.myUserId());
+        TaskUtils.toggleLastApp(mContext, mUserTracker.getUserId());
         return true;
     }
 }

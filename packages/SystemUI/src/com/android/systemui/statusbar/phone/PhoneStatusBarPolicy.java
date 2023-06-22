@@ -897,11 +897,11 @@ public class PhoneStatusBarPolicy
     @Override
     public void onIntSettingChanged(String key, Integer newValue) {
         mShowBtBattery = System.getIntForUser(mContext.getContentResolver(),
-                System.OMNI_STATUS_BAR_BT_BATTERY, 0, UserHandle.USER_CURRENT) != 0;
+                System.OMNI_STATUS_BAR_BT_BATTERY, 0, mUserTracker.getUserId()) != 0;
         updateBluetooth();
 
         mShowAlarm = System.getIntForUser(mContext.getContentResolver(),
-                System.OMNI_STATUS_BAR_ALARM, 0, UserHandle.USER_CURRENT) != 0;
+                System.OMNI_STATUS_BAR_ALARM, 0, mUserTracker.getUserId()) != 0;
         updateAlarm();
     }
 
