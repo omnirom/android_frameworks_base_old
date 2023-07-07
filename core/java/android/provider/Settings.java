@@ -6201,6 +6201,25 @@ public final class Settings {
         public static final String OMNI_HIDE_ROAMING_ICON = "hide_roaming_icon";
 
         /**
+         * @hide
+         * Whether the phone vibrates on call connect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CONNECT = "vibrate_on_connect";
+
+         /**
+         * Whether the phone vibrates on call waiting
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CALLWAITING = "vibrate_on_callwaiting";
+
+         /**
+         * Whether the phone vibrates on disconnect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_DISCONNECT = "vibrate_on_disconnect";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -6240,6 +6259,9 @@ public final class Settings {
             OMNI_LOCKSCREEN_CLOCK_COLORED,
             OMNI_USE_OLD_MOBILETYPE,
             OMNI_HIDE_ROAMING_ICON,
+            OMNI_VIBRATE_ON_CONNECT,
+            OMNI_VIBRATE_ON_CALLWAITING,
+            OMNI_VIBRATE_ON_DISCONNECT,
         };
 
         /**
@@ -6289,6 +6311,9 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_CLOCK_COLORED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_HIDE_ROAMING_ICON, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_CONNECT, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_CALLWAITING, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_DISCONNECT, 0);
         }
     }
 
