@@ -43,6 +43,8 @@ class ConvertCommand : public Command {
             " '%s' output format", kOutputFormatBinary),
         &xml_flattener_options_.keep_raw_values);
     AddOptionalSwitch("-v", "Enables verbose logging", &verbose_);
+    AddOptionalSwitch("--for-adevtool", "This flag exists to prevent using adevtool with "
+            "upstream aapt2 which lacks the Configuration.proto customization.", &for_adevtool_);
   }
 
   int Action(const std::vector<std::string>& args) override;
@@ -56,6 +58,7 @@ class ConvertCommand : public Command {
   std::string output_path_;
   std::optional<std::string> output_format_;
   bool verbose_ = false;
+  bool for_adevtool_ = false;
 };
 
 int Convert(IAaptContext* context, LoadedApk* input, IArchiveWriter* output_writer,
