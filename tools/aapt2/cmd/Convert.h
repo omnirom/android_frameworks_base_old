@@ -70,6 +70,8 @@ class ConvertCommand : public Command {
         "Has no effect on APKs where resource names are kept.",
         &table_flattener_options_.deduplicate_entry_values);
     AddOptionalSwitch("-v", "Enables verbose logging", &verbose_);
+    AddOptionalSwitch("--for-adevtool", "This flag exists to prevent using adevtool with "
+            "upstream aapt2 which lacks the Configuration.proto customization.", &for_adevtool_);
   }
 
   int Action(const std::vector<std::string>& args) override;
@@ -86,6 +88,7 @@ class ConvertCommand : public Command {
   bool enable_sparse_encoding_ = false;
   bool force_sparse_encoding_ = false;
   std::optional<std::string> resources_config_path_;
+  bool for_adevtool_ = false;
 };
 
 int Convert(IAaptContext* context, LoadedApk* input, IArchiveWriter* output_writer,

@@ -213,4 +213,6 @@ message Configuration {
   //
 
   string product = 25;
+
+  string stringified = 100;
 }
