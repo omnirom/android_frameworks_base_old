@@ -63,6 +63,7 @@ static pb::Visibility::Level SerializeVisibilityToPb(Visibility::Level state) {
 }
 
 void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_config) {
+  out_pb_config->set_stringified(config.to_string());
   out_pb_config->set_mcc(config.mcc);
   out_pb_config->set_mnc(config.mnc);
   out_pb_config->set_locale(config.GetBcp47LanguageTag());
