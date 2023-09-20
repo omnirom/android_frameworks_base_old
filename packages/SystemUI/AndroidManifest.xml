@@ -1018,6 +1018,17 @@
             android:permission="android.permission.CUSTOMIZE_SYSTEM_UI"
             />
 
+        <!-- TODO(b/278897602): Disable EmojiCompatInitializer until threading issues are fixed.
+             https://developer.android.com/reference/androidx/emoji2/text/EmojiCompatInitializer -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer"
+                tools:node="remove" />
+        </provider>
+
         <!-- omni additions start -->
         <service android:name=".omni.CPUInfoService"
                 android:exported="false" />
@@ -1035,5 +1046,6 @@
                 <action android:name="android.intent.action.OMNI_SPLITSCREEN_SERVICE"/>
             </intent-filter>
         </service>
+
     </application>
 </manifest>
