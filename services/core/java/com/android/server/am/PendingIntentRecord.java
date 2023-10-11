@@ -397,7 +397,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 UserHandle.getUserHandleForUid(callingUid)) : CompatChanges.isChangeEnabled(
                 DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER, callingUid);
         if (isChangeEnabledForApp) {
-            return BackgroundStartPrivileges.ALLOW_FGS;
+            return BackgroundStartPrivileges.ALLOW_BAL;
         } else {
             return BackgroundStartPrivileges.ALLOW_BAL;
         }
