@@ -405,6 +405,14 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         updateShowPercent();
     }
 
+    @Override
+    public void setVisibility(@Visibility int visibility) {
+        if (visibility == View.VISIBLE && isBatteryHidden()) {
+            return;
+        }
+        super.setVisibility(visibility);
+    }
+
     boolean isBatteryHidden() {
         return mBatteryStateUnknown && mHideBatteryOnUnknown;
     }
