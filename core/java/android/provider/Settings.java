@@ -6300,6 +6300,11 @@ public final class Settings {
         public static final String OMNI_STATUS_BAR_ALARM = "status_bar_alarm";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_ENABLE_TASKBAR = "enable_taskbar";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -6317,6 +6322,7 @@ public final class Settings {
             OMNI_LOCKSCREEN_WEATHER_ENABLED,
             OMNI_BACK_GESTURE_HEIGHT,
             OMNI_STATUS_BAR_ALARM,
+            OMNI_ENABLE_TASKBAR,
         };
 
         /**
@@ -6342,6 +6348,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LOCKSCREEN_WEATHER_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BACK_GESTURE_HEIGHT, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_STATUS_BAR_ALARM, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_ENABLE_TASKBAR, 0);
         }
     }
 
