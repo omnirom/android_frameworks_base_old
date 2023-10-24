@@ -32,6 +32,7 @@ android_app {
     ],
     static_libs: [
         "junit",
+        "OmniLib",
         "SettingsLibDeviceStateRotationLock",
         "SettingsLibDisplayUtils",
     ],

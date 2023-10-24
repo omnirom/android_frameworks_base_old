@@ -81,6 +81,8 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.time.DateFormatUtil;
 
+import org.omnirom.omnilib.utils.OmniSettings;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -351,7 +353,7 @@ public class PhoneStatusBarPolicy
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
         mRecordingController.addCallback(this);
-        Dependency.get(OmniSettingsService.class).addIntObserver(this, System.OMNI_STATUS_BAR_ALARM);
+        Dependency.get(OmniSettingsService.class).addIntObserver(this, OmniSettings.OMNI_STATUS_BAR_ALARM);
 
         mCommandQueue.addCallback(this);
     }
@@ -813,7 +815,7 @@ public class PhoneStatusBarPolicy
     @Override
     public void onIntSettingChanged(String key, Integer newValue) {
         mShowAlarm = System.getIntForUser(mContext.getContentResolver(),
-                System.OMNI_STATUS_BAR_ALARM, 0, UserHandle.USER_CURRENT) != 0;
+                OmniSettings.OMNI_STATUS_BAR_ALARM, 0, UserHandle.USER_CURRENT) != 0;
         updateAlarm();
     }
 

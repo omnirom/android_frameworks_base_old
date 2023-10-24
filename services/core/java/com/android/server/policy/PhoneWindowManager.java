@@ -238,6 +238,8 @@ import com.android.server.wm.DisplayRotation;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
+import org.omnirom.omnilib.utils.OmniSettings;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -840,10 +842,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.STYLUS_BUTTONS_ENABLED), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED), false, this,
+                    OmniSettings.OMNI_SYSTEM_PROXI_CHECK_ENABLED), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.OMNI_LONG_PRESS_POWER_TORCH), false, this,
+                    OmniSettings.OMNI_LONG_PRESS_POWER_TORCH), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -2762,10 +2764,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mInputManagerInternal.setStylusButtonMotionEventsEnabled(mStylusButtonsEnabled);
 
             mProxiWakeupCheckEnabled = Settings.System.getIntForUser(resolver,
-                    Settings.System.OMNI_SYSTEM_PROXI_CHECK_ENABLED, 0,
+                    OmniSettings.OMNI_SYSTEM_PROXI_CHECK_ENABLED, 0,
                     UserHandle.USER_CURRENT) != 0;
             mLongPressPowerTorch = Settings.System.getIntForUser(resolver,
-                    Settings.System.OMNI_LONG_PRESS_POWER_TORCH, 0,
+                    OmniSettings.OMNI_LONG_PRESS_POWER_TORCH, 0,
                     UserHandle.USER_CURRENT) != 0;
         }
         if (updateRotation) {

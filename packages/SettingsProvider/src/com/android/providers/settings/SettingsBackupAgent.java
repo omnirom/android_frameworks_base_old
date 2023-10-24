@@ -59,6 +59,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.display.DisplayDensityConfiguration;
 
+import org.omnirom.omnilib.utils.OmniSettings;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -622,7 +624,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 null, null);
         try {
             String[] settings = ArrayUtils.concat(String.class, SystemSettings.SETTINGS_TO_BACKUP,
-                    Settings.System.OMNI_SETTINGS_TO_BACKUP);
+                    OmniSettings.OMNI_SETTINGS_TO_BACKUP);
             return extractRelevantValues(cursor, settings);
         } finally {
             cursor.close();
@@ -897,10 +899,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             validators = SecureSettingsValidators.VALIDATORS;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
             whitelist = ArrayUtils.concat(String.class, SystemSettings.SETTINGS_TO_BACKUP,
-                    Settings.System.LEGACY_RESTORE_SETTINGS, Settings.System.OMNI_SETTINGS_TO_BACKUP);
+                    Settings.System.LEGACY_RESTORE_SETTINGS, OmniSettings.OMNI_SETTINGS_TO_BACKUP);
             validators = SystemSettingsValidators.VALIDATORS;
 
-            final Map<String, Integer> omniValidators = Settings.System.OMNI_SETTINGS_VALIDATORS;
+            final Map<String, Integer> omniValidators = OmniSettings.OMNI_SETTINGS_VALIDATORS;
             // BOOLEAN_VALIDATOR == 0
             // ANY_INTEGER_VALIDATOR == 1
             // ANY_STRING_VALIDATOR == 2
