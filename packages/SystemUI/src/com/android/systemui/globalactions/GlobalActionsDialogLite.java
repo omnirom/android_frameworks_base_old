@@ -439,7 +439,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mRootMenuActions = mContext.getResources().getStringArray(
                 R.array.config_globalActionsList);
         mRebootMenuActions = mContext.getResources().getStringArray(
-                R.array.config_rebootActionsList);
+                org.omnirom.omnilib.R.array.config_rebootActionsList);
     }
 
     /**

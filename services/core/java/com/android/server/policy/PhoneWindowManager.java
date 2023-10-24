@@ -2318,10 +2318,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mSideFpsEventHandler = new SideFpsEventHandler(mContext, mHandler, mPowerManager);
 
         String deviceKeyHandlerLib = mContext.getResources().getString(
-                com.android.internal.R.string.config_deviceKeyHandlerLib);
+                org.omnirom.omnilib.R.string.config_deviceKeyHandlerLib);
 
         String deviceKeyHandlerClass = mContext.getResources().getString(
-                com.android.internal.R.string.config_deviceKeyHandlerClass);
+                org.omnirom.omnilib.R.string.config_deviceKeyHandlerClass);
 
         if (!deviceKeyHandlerLib.isEmpty() && !deviceKeyHandlerClass.isEmpty()) {
             try {
@@ -2339,7 +2339,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         + deviceKeyHandlerLib, e);
             }
         }
-        boolean supportPowerButtonProxyCheck = mContext.getResources().getBoolean(R.bool.config_proxiSensorWakupCheck);
+        boolean supportPowerButtonProxyCheck = mContext.getResources().getBoolean(
+                org.omnirom.omnilib.R.bool.config_proxiSensorWakupCheck);
         if (supportPowerButtonProxyCheck) {
             mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
             if (mDeviceKeyHandler != null && mDeviceKeyHandler.getCustomProxiSensor() != null) {

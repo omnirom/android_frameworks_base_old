@@ -363,33 +363,33 @@ public final class ShutdownThread extends Thread {
                 if (showSysuiReboot()) {
                     return null;
                 }
-                pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_bootloader_title));
+                pd.setTitle(context.getText(org.omnirom.omnilib.R.string.reboot_to_bootloader_title));
                 pd.setMessage(context.getText(
-                        com.android.internal.R.string.reboot_to_bootloader_message));
+                        org.omnirom.omnilib.R.string.reboot_to_bootloader_message));
                 pd.setIndeterminate(true);
             } else if (mReason != null && PowerManager.REBOOT_FASTBOOT.equals(mReason) && mRebootCustom) {
                 if (showSysuiReboot()) {
                     return null;
                 }
-                pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_fastboot_title));
+                pd.setTitle(context.getText(org.omnirom.omnilib.R.string.reboot_to_fastboot_title));
                 pd.setMessage(context.getText(
-                        com.android.internal.R.string.reboot_to_fastboot_message));
+                        org.omnirom.omnilib.R.string.reboot_to_fastboot_message));
                 pd.setIndeterminate(true);
             } else if (mReason == null && mRebootCustom) {
                 if (showSysuiReboot()) {
                     return null;
                 }
-                pd.setTitle(context.getText(com.android.internal.R.string.reboot_system_title));
+                pd.setTitle(context.getText(org.omnirom.omnilib.R.string.reboot_system_title));
                 pd.setMessage(context.getText(
-                        com.android.internal.R.string.reboot_system_message));
+                        org.omnirom.omnilib.R.string.reboot_system_message));
                 pd.setIndeterminate(true);
             } else {
                 if (showSysuiReboot()) {
                     return null;
                 }
-                pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_recovery_title));
+                pd.setTitle(context.getText(org.omnirom.omnilib.R.string.reboot_to_recovery_title));
                 pd.setMessage(context.getText(
-                            com.android.internal.R.string.reboot_to_recovery_message));
+                            org.omnirom.omnilib.R.string.reboot_to_recovery_message));
                 pd.setIndeterminate(true);
             }
         } else {
