@@ -139,6 +139,8 @@ import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
+import org.omnirom.omnilib.OmniSettings;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -748,7 +750,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
     private boolean advancedRebootEnabled(Context context) {
         boolean advancedRebootEnabled = Settings.System.getIntForUser(context.getContentResolver(),
-                Settings.System.OMNI_ADVANCED_REBOOT, 0, UserHandle.USER_CURRENT) == 1;
+                OmniSettings.OMNI_ADVANCED_REBOOT, 0, UserHandle.USER_CURRENT) == 1;
         return advancedRebootEnabled;
     }
 

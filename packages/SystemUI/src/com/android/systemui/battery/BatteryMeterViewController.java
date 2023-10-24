@@ -16,7 +16,7 @@
 package com.android.systemui.battery;
 
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
-import static android.provider.Settings.System.OMNI_SHOW_BATTERY_IMAGE;
+import static org.omnirom.omnilib.OmniSettings.OMNI_SHOW_BATTERY_IMAGE;
 
 import android.content.ContentResolver;
 import android.content.Context;

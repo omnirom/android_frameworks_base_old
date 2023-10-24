@@ -89,6 +89,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.util.settings.SecureSettings;
 
+import org.omnirom.omnilib.OmniSettings;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -771,7 +773,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                     .map(key -> key + " -> " + categoryToPackage.get(key)).collect(
                             Collectors.joining(", ")));
         }
-        final boolean enableOverlays = Settings.System.getIntForUser(mContext.getContentResolver(), Settings.System.OMNI_MONET_DISABLE, 0, currentUser) == 0;
+        final boolean enableOverlays = Settings.System.getIntForUser(mContext.getContentResolver(), OmniSettings.OMNI_MONET_DISABLE, 0, currentUser) == 0;
         if (mNeedsOverlayCreation) {
             mNeedsOverlayCreation = false;
             mThemeManager.applyCurrentUserOverlays(categoryToPackage, new FabricatedOverlay[]{
