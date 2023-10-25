@@ -1469,7 +1469,7 @@ public final class PowerManagerService extends SystemService
         mDecoupleHalInteractiveModeFromDisplayConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_powerDecoupleInteractiveModeFromDisplay);
         mEnableAutoSuspendConfig = resources.getBoolean(
-                com.android.internal.R.bool.config_enableAutoSuspend);
+                org.omnirom.omnilib.R.bool.config_enableAutoSuspend);
         mWakeUpWhenPluggedOrUnpluggedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
         mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig = resources.getBoolean(
