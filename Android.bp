@@ -140,6 +140,7 @@ filegroup {
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
         ":audio_policy_configuration_V7_0",
+        "//packages/apps/OmniLib:omnirom-internal",
     ],
 }
 
@@ -274,6 +275,7 @@ java_defaults {
         ":framework-non-updatable-sources",
         "core/java/**/*.logtags",
         ":apex-info-list",
+        "//packages/apps/OmniLib:omnirom-internal",
     ],
     aidl: {
         generate_get_transaction_name: true,
