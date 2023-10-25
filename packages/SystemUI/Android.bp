@@ -198,7 +198,6 @@ android_library {
         "LowLightDreamLib",
         "motion_tool_lib",
         "OmniLib",
-        "OmniLibCore",
     ],
     manifest: "AndroidManifest.xml",
 
