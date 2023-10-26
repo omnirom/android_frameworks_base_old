@@ -43,4 +43,10 @@
 
     <!-- Navigation bar dpad -->
     <string name="config_navBarLayoutHandleArrows" translatable="false">back[1.7WC];home_handle;ime_switcher[1.7WC]</string>
+
+    <!-- HBM type of UDFPS overlay.
+            0 - GLOBAL HBM
+            1 - LOCAL HBM
+    -->
+    <integer name="config_udfps_hbm_type">1</integer>
 </resources>
