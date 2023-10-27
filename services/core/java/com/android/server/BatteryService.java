@@ -217,7 +217,6 @@ public final class BatteryService extends SystemService {
     private boolean mLightEnabled = false;
     private boolean mAllowBatteryLightOnDnd;
     private boolean mIsDndActive;
-    private boolean mLowBatteryBlinking;
     private boolean mMultiColorLed;
     private boolean mLightOnlyFullyCharged;
     private boolean mFastChargingLedSupported;
@@ -227,6 +226,8 @@ public final class BatteryService extends SystemService {
     private int mBatteryFullARGB;
     private int mBatteryReallyFullARGB;
     private int mFastBatteryARGB;
+    private int mBatteryLowBehavior;
+    private int mBatteryLowBehaviorCustom;
 
     // TODO - thats a resource constant in SystemUI - maybe better
     // move those into core context
@@ -335,10 +336,10 @@ public final class BatteryService extends SystemService {
                     Settings.Global.getUriFor(Settings.Global.ZEN_MODE),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    OmniSettings.OMNI_BATTERY_LIGHT_LOW_BLINKING),
+                    OmniSettings.OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    OmniSettings.OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED),
+                    OmniSettings.OMNI_LOW_BATTERY_BEHAVIOR),
                     false, this, UserHandle.USER_ALL);
             if (mMultiColorLed) {
                 resolver.registerContentObserver(Settings.System.getUriFor(
@@ -386,9 +387,6 @@ public final class BatteryService extends SystemService {
             mIsDndActive = Settings.Global.getInt(resolver,
                     Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF)
                     != Settings.Global.ZEN_MODE_OFF;
-            mLowBatteryBlinking = Settings.System.getIntForUser(resolver,
-                    OmniSettings.OMNI_BATTERY_LIGHT_LOW_BLINKING, 0,
-                    UserHandle.USER_CURRENT) == 1;
             mBatteryLowARGB = Settings.System.getIntForUser(resolver,
                     OmniSettings.OMNI_BATTERY_LIGHT_LOW_COLOR, 0xFFFF0000,
                     UserHandle.USER_CURRENT);
@@ -412,6 +410,9 @@ public final class BatteryService extends SystemService {
             mLightOnlyFullyCharged = Settings.System.getIntForUser(resolver,
                     OmniSettings.OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED, 0,
                     UserHandle.USER_CURRENT) != 0;
+            mBatteryLowBehaviorCustom = Settings.System.getIntForUser(resolver,
+                    OmniSettings.OMNI_LOW_BATTERY_BEHAVIOR, 0,
+                    UserHandle.USER_CURRENT);
 
             updateLed();
         }
@@ -1375,7 +1376,6 @@ public final class BatteryService extends SystemService {
 
         private final int mBatteryLedOn;
         private final int mBatteryLedOff;
-        private final int mBatteryLowBehavior;
         private boolean mIsFastCharging;
 
         protected void fastCharge(int maxChargingMicroWatt) {
@@ -1420,6 +1420,10 @@ public final class BatteryService extends SystemService {
             if (!mLightEnabled || (mIsDndActive && !mAllowBatteryLightOnDnd)) {
                 mBatteryLight.turnOff();
             } else if (level < mLowBatteryWarningLevel) {
+                if (mContext.getResources().getBoolean(
+                            org.omnirom.omnilib.R.bool.config_intrusiveBatteryLed)) {
+                    mBatteryLowBehavior = mBatteryLowBehaviorCustom;
+                }
                 switch (mBatteryLowBehavior) {
                     case LOW_BATTERY_BEHAVIOR_SOLID:
                         // Solid color when low battery
