@@ -28,6 +28,8 @@ import android.util.SparseArray;
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 
+import org.omnirom.omnilib.utils.OmniSettings;
+
 import java.util.Map;
 
 /**
@@ -51,7 +53,8 @@ public class AmbientDisplayConfiguration {
             Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
             Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
             Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
-            Settings.Secure.DOZE_TAP_SCREEN_GESTURE
+            Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
+            OmniSettings.OMNI_DOZE_ON_CHARGE
     };
 
     /** Non-user configurable doze settings */
@@ -223,8 +226,7 @@ public class AmbientDisplayConfiguration {
      */
     @TestApi
     public boolean alwaysOnEnabled(int user) {
-        return boolSetting(Settings.Secure.DOZE_ALWAYS_ON, user, mAlwaysOnByDefault ? 1 : 0)
-                && alwaysOnAvailable() && !accessibilityInversionEnabled(user);
+        return alwaysOnEnabledSetting(user) || alwaysOnChargingEnabled(user);
     }
 
     /**
@@ -334,5 +336,26 @@ public class AmbientDisplayConfiguration {
 
     private void putDozeSetting(String name, String value, int userId) {
         Settings.Secure.putStringForUser(mContext.getContentResolver(), name, value, userId);
+    }
+
+    // omni additions start
+    private boolean boolSettingSystem(String name, int user, int def) {
+        return Settings.System.getIntForUser(mContext.getContentResolver(), name, def, user) != 0;
+    }
+
+    /** @hide */
+    public boolean alwaysOnEnabledSetting(int user) {
+        boolean alwaysOnEnabled = boolSetting(Settings.Secure.DOZE_ALWAYS_ON, user, mAlwaysOnByDefault ? 1 : 0);
+        return alwaysOnEnabled && alwaysOnAvailable() && !accessibilityInversionEnabled(user);
+    }
+
+    /** @hide */
+    public boolean alwaysOnChargingEnabled(int user) {
+        final boolean dozeOnChargeEnabled = boolSettingSystem(OmniSettings.OMNI_DOZE_ON_CHARGE, user, 0);
+        if (dozeOnChargeEnabled) {
+            final boolean dozeOnChargeEnabledNow = boolSettingSystem(OmniSettings.OMNI_DOZE_ON_CHARGE_NOW, user, 0);
+            return dozeOnChargeEnabledNow && alwaysOnAvailable() && !accessibilityInversionEnabled(user);
+        }
+        return false;
     }
 }
