@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f2793c03_aed7df35",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2023-12-04T10:15:08Z",
+      "side": 1,
+      "message": "https://github.com/GrapheneOS/platform_frameworks_base/commit/45a809a67a0a1751c484e995c25202435d60240f",
+      "revId": "4fa413208660f8582c53f83c66ef996c3d1f7b40",
+      "serverId": "ed425d63-8d31-4f40-b4e0-dc35cc52d350"
+    }
+  ]
+}
