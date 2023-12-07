@@ -16,12 +16,11 @@
 
 package com.android.systemui.shade;
 
+import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.app.StatusBarManager;
-import android.media.AudioManager;
-import android.media.session.MediaSessionLegacyHelper;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -30,30 +29,31 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStub;
-
-import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
+import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.back.domain.interactor.BackActionInteractor;
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
+import com.android.systemui.bouncer.ui.binder.KeyguardBouncerViewBinder;
+import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.classifier.FalsingCollector;
-import com.android.systemui.compose.ComposeFacade;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
-import com.android.systemui.keyguard.ui.binder.KeyguardBouncerViewBinder;
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
-import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
-import com.android.systemui.multishade.domain.interactor.MultiShadeMotionEventInteractor;
-import com.android.systemui.multishade.ui.view.MultiShadeView;
+import com.android.systemui.log.BouncerLogger;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -61,13 +61,13 @@ import com.android.systemui.statusbar.NotificationInsetsController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.util.time.SystemClock;
@@ -77,12 +77,11 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  * Controller for {@link NotificationShadeWindowView}.
  */
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 public class NotificationShadeWindowViewController {
     private static final String TAG = "NotifShadeWindowVC";
     private final FalsingCollector mFalsingCollector;
@@ -98,9 +97,13 @@ public class NotificationShadeWindowViewController {
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final AmbientState mAmbientState;
     private final PulsingGestureListener mPulsingGestureListener;
+    private final LockscreenHostedDreamGestureListener mLockscreenHostedDreamGestureListener;
     private final NotificationInsetsController mNotificationInsetsController;
     private final boolean mIsTrackpadCommonEnabled;
+    private final FeatureFlags mFeatureFlags;
+    private final KeyEventInteractor mKeyEventInteractor;
     private GestureDetector mPulsingWakeupGestureHandler;
+    private GestureDetector mDreamingWakeupGestureHandler;
     private View mBrightnessMirror;
     private boolean mTouchActive;
     private boolean mTouchCancelled;
@@ -116,6 +119,8 @@ public class NotificationShadeWindowViewController {
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarViewController mStatusBarViewController;
     private final CentralSurfaces mService;
+    private final BackActionInteractor mBackActionInteractor;
+    private final PowerInteractor mPowerInteractor;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
     private boolean mExpandingBelowNotch;
@@ -132,7 +137,6 @@ public class NotificationShadeWindowViewController {
                     step.getTransitionState() == TransitionState.RUNNING;
             };
     private final SystemClock mClock;
-    private final @Nullable MultiShadeMotionEventInteractor mMultiShadeMotionEventInteractor;
 
     @Inject
     public NotificationShadeWindowViewController(
@@ -149,6 +153,8 @@ public class NotificationShadeWindowViewController {
             StatusBarWindowStateController statusBarWindowStateController,
             LockIconViewController lockIconViewController,
             CentralSurfaces centralSurfaces,
+            BackActionInteractor backActionInteractor,
+            PowerInteractor powerInteractor,
             NotificationShadeWindowController controller,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -156,14 +162,18 @@ public class NotificationShadeWindowViewController {
             AmbientState ambientState,
             ShadeLogger shadeLogger,
             PulsingGestureListener pulsingGestureListener,
+            LockscreenHostedDreamGestureListener lockscreenHostedDreamGestureListener,
             KeyguardBouncerViewModel keyguardBouncerViewModel,
             KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory,
+            KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
+            NotificationExpansionRepository notificationExpansionRepository,
             FeatureFlags featureFlags,
-            Provider<MultiShadeInteractor> multiShadeInteractorProvider,
             SystemClock clock,
-            Provider<MultiShadeMotionEventInteractor> multiShadeMotionEventInteractorProvider) {
+            BouncerMessageInteractor bouncerMessageInteractor,
+            BouncerLogger bouncerLogger,
+            KeyEventInteractor keyEventInteractor) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -176,15 +186,20 @@ public class NotificationShadeWindowViewController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
-        mLockIconViewController.init();
+        mBackActionInteractor = backActionInteractor;
         mShadeLogger = shadeLogger;
+        mLockIconViewController.init();
         mService = centralSurfaces;
+        mPowerInteractor = powerInteractor;
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mAmbientState = ambientState;
         mPulsingGestureListener = pulsingGestureListener;
+        mLockscreenHostedDreamGestureListener = lockscreenHostedDreamGestureListener;
         mNotificationInsetsController = notificationInsetsController;
         mIsTrackpadCommonEnabled = featureFlags.isEnabled(TRACKPAD_GESTURE_COMMON);
+        mFeatureFlags = featureFlags;
+        mKeyEventInteractor = keyEventInteractor;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -193,27 +208,24 @@ public class NotificationShadeWindowViewController {
                 mView.findViewById(R.id.keyguard_bouncer_container),
                 keyguardBouncerViewModel,
                 primaryBouncerToGoneTransitionViewModel,
-                keyguardBouncerComponentFactory);
+                keyguardBouncerComponentFactory,
+                messageAreaControllerFactory,
+                bouncerMessageInteractor,
+                bouncerLogger,
+                featureFlags);
 
         collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
                 mLockscreenToDreamingTransition);
+        collectFlow(
+                mView,
+                notificationExpansionRepository.isExpandAnimationRunning(),
+                this::setExpandAnimationRunning);
 
         mClock = clock;
         if (featureFlags.isEnabled(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION)) {
             unfoldTransitionProgressProvider.ifPresent(
                     progressProvider -> progressProvider.addCallback(
                             mDisableSubpixelTextTransitionListener));
-        }
-        if (ComposeFacade.INSTANCE.isComposeAvailable()
-                && featureFlags.isEnabled(Flags.DUAL_SHADE)) {
-            mMultiShadeMotionEventInteractor = multiShadeMotionEventInteractorProvider.get();
-            final ViewStub multiShadeViewStub = mView.findViewById(R.id.multi_shade_stub);
-            if (multiShadeViewStub != null) {
-                final MultiShadeView multiShadeView = (MultiShadeView) multiShadeViewStub.inflate();
-                multiShadeView.init(multiShadeInteractorProvider.get(), clock);
-            }
-        } else {
-            mMultiShadeMotionEventInteractor = null;
         }
     }
 
@@ -236,7 +248,10 @@ public class NotificationShadeWindowViewController {
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
         mPulsingWakeupGestureHandler = new GestureDetector(mView.getContext(),
                 mPulsingGestureListener);
-
+        if (mFeatureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
+            mDreamingWakeupGestureHandler = new GestureDetector(mView.getContext(),
+                    mLockscreenHostedDreamGestureListener);
+        }
         mView.setLayoutInsetsController(mNotificationInsetsController);
         mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
             @Override
@@ -274,7 +289,7 @@ public class NotificationShadeWindowViewController {
                 }
                 if (mExpandAnimationRunning) {
                     if (isDown && mClock.uptimeMillis() > mLaunchAnimationTimeout) {
-                        mShadeLogger.d("NSWVC: launch animation timed out");
+                        Log.wtf(TAG, "NSWVC: launch animation timed out");
                         setExpandAnimationRunning(false);
                     } else {
                         return logDownDispatch(ev, "expand animation running", false);
@@ -297,6 +312,10 @@ public class NotificationShadeWindowViewController {
 
                 mFalsingCollector.onTouchEvent(ev);
                 mPulsingWakeupGestureHandler.onTouchEvent(ev);
+                if (mDreamingWakeupGestureHandler != null
+                        && mDreamingWakeupGestureHandler.onTouchEvent(ev)) {
+                    return logDownDispatch(ev, "dream wakeup gesture handled", true);
+                }
                 if (mStatusBarKeyguardViewManager.dispatchTouchEvent(ev)) {
                     return logDownDispatch(ev, "dispatched to Keyguard", true);
                 }
@@ -321,8 +340,7 @@ public class NotificationShadeWindowViewController {
                         /* onGestureDetectedRunnable */
                         () -> {
                             mService.userActivity();
-                            mService.wakeUpIfDozing(
-                                    mClock.uptimeMillis(),
+                            mPowerInteractor.wakeUpIfDozing(
                                     "LOCK_ICON_TOUCH",
                                     PowerManager.WAKE_REASON_GESTURE);
                         }
@@ -399,10 +417,7 @@ public class NotificationShadeWindowViewController {
                     return true;
                 }
 
-                if (mMultiShadeMotionEventInteractor != null) {
-                    // This interactor is not null only if the dual shade feature is enabled.
-                    return mMultiShadeMotionEventInteractor.shouldIntercept(ev);
-                } else if (mNotificationPanelViewController.isFullyExpanded()
+                if (mNotificationPanelViewController.isFullyExpanded()
                         && mDragDownHelper.isDragDownEnabled()
                         && !mService.isBouncerShowing()
                         && !mStatusBarStateController.isDozing()) {
@@ -438,10 +453,7 @@ public class NotificationShadeWindowViewController {
                     return true;
                 }
 
-                if (mMultiShadeMotionEventInteractor != null) {
-                    // This interactor is not null only if the dual shade feature is enabled.
-                    return mMultiShadeMotionEventInteractor.onTouchEvent(ev, mView.getWidth());
-                } else if (mDragDownHelper.isDragDownEnabled()
+                if (mDragDownHelper.isDragDownEnabled()
                         || mDragDownHelper.isDraggingDown()) {
                     // we still want to finish our drag down gesture when locking the screen
                     return mDragDownHelper.onTouchEvent(ev) || handled;
@@ -460,44 +472,17 @@ public class NotificationShadeWindowViewController {
 
             @Override
             public boolean interceptMediaKey(KeyEvent event) {
-                return mService.interceptMediaKey(event);
+                return mKeyEventInteractor.interceptMediaKey(event);
             }
 
             @Override
             public boolean dispatchKeyEventPreIme(KeyEvent event) {
-                return mService.dispatchKeyEventPreIme(event);
+                return mKeyEventInteractor.dispatchKeyEventPreIme(event);
             }
 
             @Override
             public boolean dispatchKeyEvent(KeyEvent event) {
-                boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
-                switch (event.getKeyCode()) {
-                    case KeyEvent.KEYCODE_BACK:
-                        if (!down) {
-                            mService.onBackPressed();
-                        }
-                        return true;
-                    case KeyEvent.KEYCODE_MENU:
-                        if (!down) {
-                            return mService.onMenuPressed();
-                        }
-                        break;
-                    case KeyEvent.KEYCODE_SPACE:
-                        if (!down) {
-                            return mService.onSpacePressed();
-                        }
-                        break;
-                    case KeyEvent.KEYCODE_VOLUME_DOWN:
-                    case KeyEvent.KEYCODE_VOLUME_UP:
-                        if (mStatusBarStateController.isDozing()) {
-                            MediaSessionLegacyHelper.getHelper(mView.getContext())
-                                    .sendVolumeKeyEvent(
-                                            event, AudioManager.USE_DEFAULT_STREAM_TYPE, true);
-                            return true;
-                        }
-                        break;
-                }
-                return false;
+                return mKeyEventInteractor.dispatchKeyEvent(event);
             }
         });
 
@@ -558,8 +543,13 @@ public class NotificationShadeWindowViewController {
         pw.println(mTouchActive);
     }
 
-    public void setExpandAnimationRunning(boolean running) {
+    @VisibleForTesting
+    void setExpandAnimationRunning(boolean running) {
         if (mExpandAnimationRunning != running) {
+            // TODO(b/288507023): Remove this log.
+            if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
+                Log.d(TAG, "Setting mExpandAnimationRunning=" + running);
+            }
             if (running) {
                 mLaunchAnimationTimeout = mClock.uptimeMillis() + 5000;
             }

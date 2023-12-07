@@ -33,7 +33,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.Preconditions;
 import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.clock.ClockManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
@@ -125,7 +124,6 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.telephony.TelephonyListenerManager;
-import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -134,13 +132,13 @@ import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
-import dagger.Lazy;
-
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import dagger.Lazy;
 
 /**
  * Class to handle ugly dependencies throughout sysui until we determine the
@@ -283,7 +281,6 @@ public class Dependency {
     @Inject Lazy<AccessibilityManagerWrapper> mAccessibilityManagerWrapper;
     @Inject Lazy<SysuiColorExtractor> mSysuiColorExtractor;
     @Inject Lazy<TunablePaddingService> mTunablePaddingService;
-    @Inject Lazy<ForegroundServiceController> mForegroundServiceController;
     @Inject Lazy<UiOffloadThread> mUiOffloadThread;
     @Inject Lazy<PowerUI.WarningsUI> mWarningsUI;
     @Inject Lazy<LightBarController> mLightBarController;
@@ -324,7 +321,6 @@ public class Dependency {
     @Inject @Named(LEAK_REPORT_EMAIL_NAME) Lazy<String> mLeakReportEmail;
     @Inject @Main Lazy<Executor> mMainExecutor;
     @Inject @Background Lazy<Executor> mBackgroundExecutor;
-    @Inject Lazy<ClockManager> mClockManager;
     @Inject Lazy<ActivityManagerWrapper> mActivityManagerWrapper;
     @Inject Lazy<DevicePolicyManagerWrapper> mDevicePolicyManagerWrapper;
     @Inject Lazy<PackageManagerWrapper> mPackageManagerWrapper;
@@ -338,7 +334,6 @@ public class Dependency {
     @Inject Lazy<IWallpaperManager> mWallpaperManager;
     @Inject Lazy<CommandQueue> mCommandQueue;
     @Inject Lazy<RecordingController> mRecordingController;
-    @Inject Lazy<ProtoTracer> mProtoTracer;
     @Inject Lazy<MediaOutputDialogFactory> mMediaOutputDialogFactory;
     @Inject Lazy<DeviceConfigProxy> mDeviceConfigProxy;
     @Inject Lazy<TelephonyListenerManager> mTelephonyListenerManager;
@@ -464,8 +459,6 @@ public class Dependency {
 
         mProviders.put(TunablePaddingService.class, mTunablePaddingService::get);
 
-        mProviders.put(ForegroundServiceController.class, mForegroundServiceController::get);
-
         mProviders.put(UiOffloadThread.class, mUiOffloadThread::get);
 
         mProviders.put(PowerUI.WarningsUI.class, mWarningsUI::get);
@@ -519,7 +512,6 @@ public class Dependency {
         mProviders.put(SmartReplyController.class, mSmartReplyController::get);
         mProviders.put(RemoteInputQuickSettingsDisabler.class,
                 mRemoteInputQuickSettingsDisabler::get);
-        mProviders.put(ClockManager.class, mClockManager::get);
         mProviders.put(PrivacyItemController.class, mPrivacyItemController::get);
         mProviders.put(ActivityManagerWrapper.class, mActivityManagerWrapper::get);
         mProviders.put(DevicePolicyManagerWrapper.class, mDevicePolicyManagerWrapper::get);
@@ -533,7 +525,6 @@ public class Dependency {
         mProviders.put(DozeParameters.class, mDozeParameters::get);
         mProviders.put(IWallpaperManager.class, mWallpaperManager::get);
         mProviders.put(CommandQueue.class, mCommandQueue::get);
-        mProviders.put(ProtoTracer.class, mProtoTracer::get);
         mProviders.put(DeviceConfigProxy.class, mDeviceConfigProxy::get);
         mProviders.put(TelephonyListenerManager.class, mTelephonyListenerManager::get);
 

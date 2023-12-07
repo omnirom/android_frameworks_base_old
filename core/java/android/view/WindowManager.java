@@ -913,7 +913,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION =
             "android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION";
 
@@ -983,7 +982,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Make this public API.
     String PROPERTY_COMPAT_ALLOW_SANDBOXING_VIEW_BOUNDS_APIS =
             "android.window.PROPERTY_COMPAT_ALLOW_SANDBOXING_VIEW_BOUNDS_APIS";
 
@@ -1018,7 +1016,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ENABLE_FAKE_FOCUS = "android.window.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS";
 
     /**
@@ -1056,7 +1053,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION =
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION";
 
@@ -1102,7 +1098,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH =
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH";
 
@@ -1151,7 +1146,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE =
             "android.window.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE";
 
@@ -1189,7 +1183,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE";
 
@@ -1233,7 +1226,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE";
 
@@ -1298,6 +1290,102 @@ public interface WindowManager extends ViewManager {
     // TODO(b/280052089): Make this public API.
     String PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES =
             "android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES";
+
+    /**
+     * Application level
+     * {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * tag that (when set to false) informs the system the app has opted out of the
+     * user-facing aspect ratio compatibility override.
+     *
+     * <p>The compatibility override enables device users to set the app's aspect
+     * ratio or force the app to fill the display regardless of the aspect
+     * ratio or orientation specified in the app manifest.
+     *
+     * <p>The aspect ratio compatibility override is exposed to users in device
+     * settings. A menu in device settings lists all apps that have not opted out of
+     * the compatibility override. Users select apps from the menu and set the
+     * app aspect ratio on a per-app basis. Typically, the menu is available
+     * only on large screen devices.
+     *
+     * <p>When users apply the aspect ratio override, the minimum aspect ratio
+     * specified in the app manifest is overridden. If users choose a
+     * full-screen aspect ratio, the orientation of the activity is forced to
+     * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER};
+     * see {@link #PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE} to
+     * disable the full-screen option only.
+     *
+     * <p>The user override is intended to improve the app experience on devices
+     * that have the ignore orientation request display setting enabled by OEMs
+     * (enables compatibility mode for fixed orientation on Android 12 (API
+     * level 31) or higher; see
+     * <a href="https://developer.android.com/guide/topics/large-screens/large-screen-compatibility-mode">
+     * Large screen compatibility mode</a>
+     * for more details).
+     *
+     * <p>To opt out of the user aspect ratio compatibility override, add this property
+     * to your app manifest and set the value to {@code false}. Your app will be excluded
+     * from the list of apps in device settings, and users will not be able to override
+     * the app's aspect ratio.
+     *
+     * <p>Not setting this property at all, or setting this property to {@code true} has no effect.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE"
+     *     android:value="false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     * @hide
+     */
+    // TODO(b/294227289): Make this public API
+    String PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE =
+            "android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE";
+
+    /**
+     * Application level
+     * {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * tag that (when set to false) informs the system the app has opted out of the
+     * full-screen option of the user aspect ratio compatibility override settings. (For
+     * background information about the user aspect ratio compatibility override, see
+     * {@link #PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE}.)
+     *
+     * <p>When users apply the full-screen compatibility override, the orientation
+     * of the activity is forced to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER}.
+     *
+     * <p>The user override is intended to improve the app experience on devices
+     * that have the ignore orientation request display setting enabled by OEMs
+     * (enables compatibility mode for fixed orientation on Android 12 (API
+     * level 31) or higher; see
+     * <a href="https://developer.android.com/guide/topics/large-screens/large-screen-compatibility-mode">
+     * Large screen compatibility mode</a>
+     * for more details).
+     *
+     * <p>To opt out of the full-screen option of the user aspect ratio compatibility
+     * override, add this property to your app manifest and set the value to {@code false}.
+     * Your app will have full-screen option removed from the list of user aspect ratio
+     * override options in device settings, and users will not be able to apply
+     * full-screen override to your app.
+     *
+     * <p><b>Note:</b> If {@link #PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE} is
+     * {@code false}, this property has no effect.
+     *
+     * <p>Not setting this property at all, or setting this property to {@code true} has no effect.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE"
+     *     android:value="false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     * @hide
+     */
+    // TODO(b/294227289): Make this public API
+    String PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE =
+            "android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE";
 
     /**
      * @hide
@@ -1385,13 +1473,26 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED";
 
     /**
-     * Request for keyboard shortcuts to be retrieved asynchronously.
+     * Request for app's keyboard shortcuts to be retrieved asynchronously.
      *
      * @param receiver The callback to be triggered when the result is ready.
+     * @param deviceId The deviceId of KeyEvent by which this request is triggered, or -1 if it's
+     *                 not triggered by a KeyEvent.
      *
      * @hide
      */
     public void requestAppKeyboardShortcuts(final KeyboardShortcutsReceiver receiver, int deviceId);
+
+    /**
+     * Request for ime's keyboard shortcuts to be retrieved asynchronously.
+     *
+     * @param receiver The callback to be triggered when the result is ready.
+     * @param deviceId The deviceId of KeyEvent by which this request is triggered, or -1 if it's
+     *                 not triggered by a KeyEvent.
+     *
+     * @hide
+     */
+    default void requestImeKeyboardShortcuts(KeyboardShortcutsReceiver receiver, int deviceId) {};
 
     /**
      * Return the touch region for the current IME window, or an empty region if there is none.
@@ -3038,15 +3139,6 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS = 1 << 10;
 
         /**
-         * Flag to force the status bar window to be visible all the time. If the bar is hidden when
-         * this flag is set it will be shown again.
-         * This can only be set by {@link LayoutParams#TYPE_STATUS_BAR}.
-         *
-         * {@hide}
-         */
-        public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 1 << 11;
-
-        /**
          * Flag to indicate that the window frame should be the requested frame adding the display
          * cutout frame. This will only be applied if a specific size smaller than the parent frame
          * is given, and the window is covering the display cutout. The extended frame will not be
@@ -3084,6 +3176,16 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE = 1 << 16;
+
+        /**
+         * Flag to indicate that this window is a immersive mode confirmation window. The window
+         * should be ignored when calculating insets control. This is used for prompt window
+         * triggered by insets visibility changes. If it can take over the insets control, the
+         * visibility will change unexpectedly and the window may dismiss itself. Power button panic
+         * handling will be disabled when this window exists.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW = 1 << 17;
 
         /**
          * Flag to indicate that any window added by an application process that is of type
@@ -3125,15 +3227,6 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_NOT_MAGNIFIABLE = 1 << 22;
-
-        /**
-         * Flag to indicate that the status bar window is in a state such that it forces showing
-         * the navigation bar unless the navigation bar window is explicitly set to
-         * {@link View#GONE}.
-         * It only takes effects if this is set by {@link LayoutParams#TYPE_STATUS_BAR}.
-         * @hide
-         */
-        public static final int PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION = 1 << 23;
 
         /**
          * Flag to indicate that the window is color space agnostic, and the color can be
@@ -3223,17 +3316,16 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_SYSTEM_ERROR,
                 PRIVATE_FLAG_OPTIMIZE_MEASURE,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
-                PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                 PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                 PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                 PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
                 PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS,
                 PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
+                PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW,
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                 PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
                 PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
-                PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                 PRIVATE_FLAG_USE_BLAST,
                 PRIVATE_FLAG_APPEARANCE_CONTROLLED,
@@ -3289,10 +3381,6 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                         name = "DISABLE_WALLPAPER_TOUCH_EVENTS"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
-                        equals = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
-                        name = "FORCE_STATUS_BAR_VISIBLE"),
-                @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                         equals = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                         name = "LAYOUT_SIZE_EXTENDED_BY_CUTOUT"),
@@ -3313,6 +3401,10 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
                         name = "SUSTAINED_PERFORMANCE_MODE"),
                 @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW,
+                        equals = PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW,
+                        name = "IMMERSIVE_CONFIRMATION_WINDOW"),
+                @ViewDebug.FlagToString(
                         mask = SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                         equals = SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                         name = "HIDE_NON_SYSTEM_OVERLAY_WINDOWS"),
@@ -3328,10 +3420,6 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_NOT_MAGNIFIABLE,
                         equals = PRIVATE_FLAG_NOT_MAGNIFIABLE,
                         name = "NOT_MAGNIFIABLE"),
-                @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
-                        equals = PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
-                        name = "STATUS_FORCE_SHOW_NAVIGATION"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
@@ -3723,6 +3811,7 @@ public interface WindowManager extends ViewManager {
          * @see #ROTATION_ANIMATION_ROTATE
          * @see #ROTATION_ANIMATION_CROSSFADE
          * @see #ROTATION_ANIMATION_JUMPCUT
+         * @see #ROTATION_ANIMATION_SEAMLESS
          */
         public int rotationAnimation = ROTATION_ANIMATION_ROTATE;
 
@@ -4295,15 +4384,14 @@ public interface WindowManager extends ViewManager {
         public InsetsFrameProvider[] providedInsets;
 
         /**
-         * If specified, the frame that used to calculate relative {@link RoundedCorner} will be
-         * the window frame of this window minus the insets that this window provides.
-         *
-         * Task bar will draw fake rounded corners above itself, so we need this insets to calculate
-         * correct rounded corners for this window.
+         * Specifies which {@link InsetsType}s should be forcibly shown. The types shown by this
+         * method won't affect the app's layout. This field only takes effects if the caller has
+         * {@link android.Manifest.permission#STATUS_BAR_SERVICE} or the caller has the same uid as
+         * the recents component.
          *
          * @hide
          */
-        public boolean insetsRoundedCornerFrame = false;
+        public @InsetsType int forciblyShownTypes;
 
         /**
          * {@link LayoutParams} to be applied to the window when layout with a assigned rotation.
@@ -4761,9 +4849,9 @@ public interface WindowManager extends ViewManager {
             out.writeBoolean(mFitInsetsIgnoringVisibility);
             out.writeBoolean(preferMinimalPostProcessing);
             out.writeInt(mBlurBehindRadius);
-            out.writeBoolean(insetsRoundedCornerFrame);
             out.writeBoolean(mWallpaperTouchEventsEnabled);
             out.writeTypedArray(providedInsets, 0 /* parcelableFlags */);
+            out.writeInt(forciblyShownTypes);
             checkNonRecursiveParams();
             out.writeTypedArray(paramsForRotation, 0 /* parcelableFlags */);
             out.writeInt(mDisplayFlags);
@@ -4833,9 +4921,9 @@ public interface WindowManager extends ViewManager {
             mFitInsetsIgnoringVisibility = in.readBoolean();
             preferMinimalPostProcessing = in.readBoolean();
             mBlurBehindRadius = in.readInt();
-            insetsRoundedCornerFrame = in.readBoolean();
             mWallpaperTouchEventsEnabled = in.readBoolean();
             providedInsets = in.createTypedArray(InsetsFrameProvider.CREATOR);
+            forciblyShownTypes = in.readInt();
             paramsForRotation = in.createTypedArray(LayoutParams.CREATOR);
             mDisplayFlags = in.readInt();
         }
@@ -5141,9 +5229,9 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
-            if (insetsRoundedCornerFrame != o.insetsRoundedCornerFrame) {
-                insetsRoundedCornerFrame = o.insetsRoundedCornerFrame;
-                changes |= LAYOUT_CHANGED;
+            if (forciblyShownTypes != o.forciblyShownTypes) {
+                forciblyShownTypes = o.forciblyShownTypes;
+                changes |= PRIVATE_FLAGS_CHANGED;
             }
 
             if (paramsForRotation != o.paramsForRotation) {
@@ -5383,9 +5471,10 @@ public interface WindowManager extends ViewManager {
                     sb.append(prefix).append("    ").append(providedInsets[i]);
                 }
             }
-            if (insetsRoundedCornerFrame) {
-                sb.append(" insetsRoundedCornerFrame=");
-                sb.append(insetsRoundedCornerFrame);
+            if (forciblyShownTypes != 0) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  forciblyShownTypes=").append(
+                        WindowInsets.Type.toString(forciblyShownTypes));
             }
             if (paramsForRotation != null && paramsForRotation.length != 0) {
                 sb.append(System.lineSeparator());

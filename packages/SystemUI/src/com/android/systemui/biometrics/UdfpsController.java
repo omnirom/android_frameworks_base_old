@@ -26,6 +26,7 @@ import static android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROL
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
+import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -50,6 +51,7 @@ import android.os.Trace;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -75,6 +77,8 @@ import com.android.systemui.biometrics.udfps.NormalizedTouchData;
 import com.android.systemui.biometrics.udfps.SinglePointerTouchProcessor;
 import com.android.systemui.biometrics.udfps.TouchProcessor;
 import com.android.systemui.biometrics.udfps.TouchProcessorResult;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
@@ -82,9 +86,9 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter;
+import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -153,6 +157,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final SystemUIDialogManager mDialogManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
+    @NonNull private final Provider<UdfpsKeyguardViewModels> mUdfpsKeyguardViewModels;
     @NonNull private final VibratorHelper mVibrator;
     @NonNull private final FeatureFlags mFeatureFlags;
     @NonNull private final FalsingManager mFalsingManager;
@@ -173,6 +178,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final SecureSettings mSecureSettings;
     @NonNull private final UdfpsUtils mUdfpsUtils;
     @NonNull private final InputManager mInputManager;
+    @NonNull private final UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     private final boolean mIgnoreRefreshRate;
 
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
@@ -230,6 +236,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     public static final VibrationEffect EFFECT_CLICK =
             VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
 
+    public static final int LONG_PRESS = HapticFeedbackConstants.LONG_PRESS;
+
     private final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
         @Override
         public void onScreenTurnedOn() {
@@ -259,10 +267,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         @Override
         public void showUdfpsOverlay(long requestId, int sensorId, int reason,
                 @NonNull IUdfpsOverlayControllerCallback callback) {
-            if (mFeatureFlags.isEnabled(Flags.NEW_UDFPS_OVERLAY)) {
-                return;
-            }
-
             mFgExecutor.execute(() -> UdfpsController.this.showUdfpsOverlay(
                     new UdfpsControllerOverlay(mContext, mFingerprintManager, mInflater,
                             mWindowManager, mAccessibilityManager, mStatusBarStateController,
@@ -274,15 +278,13 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                             mUdfpsDisplayMode, mSecureSettings, requestId, reason, callback,
                             (view, event, fromUdfpsView) -> onTouch(requestId, event,
                                     fromUdfpsView), mActivityLaunchAnimator, mFeatureFlags,
-                            mPrimaryBouncerInteractor, mAlternateBouncerInteractor, mUdfpsUtils)));
+                            mPrimaryBouncerInteractor, mAlternateBouncerInteractor, mUdfpsUtils,
+                            mUdfpsKeyguardAccessibilityDelegate,
+                            mUdfpsKeyguardViewModels)));
         }
 
         @Override
         public void hideUdfpsOverlay(int sensorId) {
-            if (mFeatureFlags.isEnabled(Flags.NEW_UDFPS_OVERLAY)) {
-                return;
-            }
-
             mFgExecutor.execute(() -> {
                 if (mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
                     // if we get here, we expect keyguardUpdateMonitor's fingerprintRunningState
@@ -547,8 +549,12 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             Log.e(TAG, "ignoring the touch injected from outside of UdfpsView");
             return false;
         }
-        if (mOverlay == null) {
-            Log.w(TAG, "ignoring onTouch with null overlay");
+        if (mOverlay == null || mOverlay.getAnimationViewController() == null) {
+            Log.w(TAG, "ignoring onTouch with null overlay or animation view controller");
+            return false;
+        }
+        if (mOverlay.getAnimationViewController().shouldPauseAuth()) {
+            Log.w(TAG, "ignoring onTouch with shouldPauseAuth = true");
             return false;
         }
         if (!mOverlay.matchesRequestId(requestId)) {
@@ -556,7 +562,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     + mOverlay.getRequestId());
             return false;
         }
-        if (mLockscreenShadeTransitionController.getQSDragProgress() != 0f
+
+        if ((mLockscreenShadeTransitionController.getQSDragProgress() != 0f
+                && !mAlternateBouncerInteractor.isVisibleState())
                 || mPrimaryBouncerInteractor.isInTransit()) {
             return false;
         }
@@ -584,16 +592,18 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 if (shouldTryToDismissKeyguard()) {
                     tryDismissingKeyguard();
                 }
-                onFingerDown(requestId,
-                        data.getPointerId(),
-                        data.getX(),
-                        data.getY(),
-                        data.getMinor(),
-                        data.getMajor(),
-                        data.getOrientation(),
-                        data.getTime(),
-                        data.getGestureStart(),
-                        mStatusBarStateController.isDozing());
+                if (!mOnFingerDown) {
+                    onFingerDown(requestId,
+                            data.getPointerId(),
+                            data.getX(),
+                            data.getY(),
+                            data.getMinor(),
+                            data.getMajor(),
+                            data.getOrientation(),
+                            data.getTime(),
+                            data.getGestureStart(),
+                            mStatusBarStateController.isDozing());
+                }
 
                 // Pilfer if valid overlap, don't allow following events to reach keyguard
                 shouldPilfer = true;
@@ -797,7 +807,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     private boolean shouldTryToDismissKeyguard() {
         return mOverlay != null
                 && mOverlay.getAnimationViewController()
-                instanceof UdfpsKeyguardViewControllerLegacy
+                instanceof UdfpsKeyguardViewControllerAdapter
                 && mKeyguardStateController.canDismissLockScreen()
                 && !mAttemptedToDismissKeyguard;
     }
@@ -841,7 +851,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull SecureSettings secureSettings,
             @NonNull InputManager inputManager,
             @NonNull UdfpsUtils udfpsUtils,
-            @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor) {
+            @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
+            @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate,
+            @NonNull Provider<UdfpsKeyguardViewModels> udfpsKeyguardViewModelsProvider) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -887,6 +899,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mSecureSettings = secureSettings;
         mUdfpsUtils = udfpsUtils;
         mInputManager = inputManager;
+        mUdfpsKeyguardAccessibilityDelegate = udfpsKeyguardAccessibilityDelegate;
 
         mTouchProcessor = mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
                 ? singlePointerTouchProcessor : null;
@@ -906,6 +919,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     return Unit.INSTANCE;
                 });
         mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
+        mUdfpsKeyguardViewModels = udfpsKeyguardViewModelsProvider;
 
         final UdfpsOverlayController mUdfpsOverlayController = new UdfpsOverlayController();
         mFingerprintManager.setUdfpsOverlayController(mUdfpsOverlayController);
@@ -925,12 +939,24 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @VisibleForTesting
     public void playStartHaptic() {
         if (mAccessibilityManager.isTouchExplorationEnabled()) {
-            mVibrator.vibrate(
-                    Process.myUid(),
-                    mContext.getOpPackageName(),
-                    EFFECT_CLICK,
-                    "udfps-onStart-click",
-                    UDFPS_VIBRATION_ATTRIBUTES);
+            if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+                if (mOverlay != null && mOverlay.getOverlayView() != null) {
+                    mVibrator.performHapticFeedback(
+                            mOverlay.getOverlayView(),
+                            HapticFeedbackConstants.CONTEXT_CLICK
+                    );
+                } else {
+                    Log.e(TAG, "No haptics played. Could not obtain overlay view to perform"
+                            + "vibration. Either the controller overlay is null or has no view");
+                }
+            } else {
+                mVibrator.vibrate(
+                        Process.myUid(),
+                        mContext.getOpPackageName(),
+                        EFFECT_CLICK,
+                        "udfps-onStart-click",
+                        UDFPS_VIBRATION_ATTRIBUTES);
+            }
         }
     }
 
@@ -1023,12 +1049,24 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             mKeyguardViewManager.showPrimaryBouncer(true);
 
             // play the same haptic as the LockIconViewController longpress
-            mVibrator.vibrate(
-                    Process.myUid(),
-                    mContext.getOpPackageName(),
-                    UdfpsController.EFFECT_CLICK,
-                    "aod-lock-icon-longpress",
-                    LOCK_ICON_VIBRATION_ATTRIBUTES);
+            if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+                if (mOverlay != null && mOverlay.getOverlayView() != null) {
+                    mVibrator.performHapticFeedback(
+                            mOverlay.getOverlayView(),
+                            UdfpsController.LONG_PRESS
+                    );
+                } else {
+                    Log.e(TAG, "No haptics played. Could not obtain overlay view to perform"
+                            + "vibration. Either the controller overlay is null or has no view");
+                }
+            } else {
+                mVibrator.vibrate(
+                        Process.myUid(),
+                        mContext.getOpPackageName(),
+                        UdfpsController.EFFECT_CLICK,
+                        "aod-lock-icon-longpress",
+                        LOCK_ICON_VIBRATION_ATTRIBUTES);
+            }
             return;
         }
 

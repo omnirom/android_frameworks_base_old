@@ -16,6 +16,9 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.utils.DeviceConfigParsingUtils.ambientBrightnessThresholdsIntToFloat;
+import static com.android.server.display.utils.DeviceConfigParsingUtils.displayBrightnessThresholdsIntToFloat;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -181,6 +184,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *        <defaultRefreshRateInHbmSunlight>75</defaultRefreshRateInHbmSunlight>
  *        <lowerBlockingZoneConfigs>
  *          <defaultRefreshRate>75</defaultRefreshRate>
+ *          <refreshRateThermalThrottlingId>id_of_a_throttling_map</refreshRateThermalThrottlingId>
  *          <blockingZoneThreshold>
  *            <displayBrightnessPoint>
  *              <lux>50</lux>
@@ -458,7 +462,7 @@ public class DisplayDeviceConfig {
 
     public static final String QUIRK_CAN_SET_BRIGHTNESS_VIA_HWC = "canSetBrightnessViaHwc";
 
-    static final String DEFAULT_ID = "default";
+    public static final String DEFAULT_ID = "default";
 
     private static final float BRIGHTNESS_DEFAULT = 0.5f;
     private static final String ETC_DIR = "etc";
@@ -475,7 +479,7 @@ public class DisplayDeviceConfig {
     private static final int DEFAULT_REFRESH_RATE_IN_HBM = 0;
     private static final int DEFAULT_LOW_REFRESH_RATE = 60;
     private static final int DEFAULT_HIGH_REFRESH_RATE = 0;
-    private static final int[] DEFAULT_BRIGHTNESS_THRESHOLDS = new int[]{};
+    private static final float[] DEFAULT_BRIGHTNESS_THRESHOLDS = new float[]{};
 
     private static final float[] DEFAULT_AMBIENT_THRESHOLD_LEVELS = new float[]{0f};
     private static final float[] DEFAULT_AMBIENT_BRIGHTENING_THRESHOLDS = new float[]{100f};
@@ -515,7 +519,9 @@ public class DisplayDeviceConfig {
     private final SensorData mScreenOffBrightnessSensor = new SensorData();
 
     // The details of the proximity sensor associated with this display.
-    private final SensorData mProximitySensor = new SensorData();
+    // Is null when no sensor should be used for that display
+    @Nullable
+    private SensorData mProximitySensor = new SensorData();
 
     private final List<RefreshRateLimitation> mRefreshRateLimitations =
             new ArrayList<>(2 /*initialCapacity*/);
@@ -689,9 +695,14 @@ public class DisplayDeviceConfig {
      * prevent flicker, we only support higher refresh rates if the display brightness is above a
      * threshold. For example, no higher refresh rate if display brightness <= disp0 && ambient
      * brightness <= amb0 || display brightness <= disp1 && ambient brightness <= amb1
+     *
+     * Brightness thresholds are paired with lux thresholds - they both have to be met.
+     *
+     * A negative brightness or lux value means that only one threshold should be used - e.g. if
+     * the brightness value is negative, only the lux threshold is applied.
      */
-    private int[] mLowDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
-    private int[] mLowAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
+    private float[] mLowDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
+    private float[] mLowAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
 
     /**
      * The display uses different gamma curves for different refresh rates. It's hard for panel
@@ -703,9 +714,20 @@ public class DisplayDeviceConfig {
      * have lower display brightness requirements for the flickering is visible. For example, fixed
      * refresh rate if display brightness >= disp0 && ambient brightness >= amb0 || display
      * brightness >= disp1 && ambient brightness >= amb1
+     *
+     * Brightness thresholds are paired with lux thresholds - they both have to be met.
+     *
+     * A negative brightness or lux value means that only one threshold should be used - e.g. if
+     * the brightness value is negative, only the lux threshold is applied.
      */
-    private int[] mHighDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
-    private int[] mHighAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
+    private float[] mHighDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
+    private float[] mHighAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
+
+    /**
+     * Thermal throttling maps for the low and high blocking zones.
+     */
+    private String mLowBlockingZoneThermalMapId = null;
+    private String mHighBlockingZoneThermalMapId = null;
 
     private final HashMap<String, ThermalBrightnessThrottlingData>
             mThermalBrightnessThrottlingDataMapByThrottlingId = new HashMap<>();
@@ -1337,7 +1359,8 @@ public class DisplayDeviceConfig {
         return mScreenOffBrightnessSensor;
     }
 
-    SensorData getProximitySensor() {
+    @Nullable
+    public SensorData getProximitySensor() {
         return mProximitySensor;
     }
 
@@ -1490,37 +1513,59 @@ public class DisplayDeviceConfig {
     /**
      * @return An array of lower display brightness thresholds. This, in combination with lower
      * ambient brightness thresholds help define buckets in which the refresh rate switching is not
-     * allowed
+     * allowed.
+     *
+     * A negative threshold value means that only the lux threshold is applied.
      */
-    public int[] getLowDisplayBrightnessThresholds() {
+    public float[] getLowDisplayBrightnessThresholds() {
         return mLowDisplayBrightnessThresholds;
     }
 
     /**
      * @return An array of lower ambient brightness thresholds. This, in combination with lower
      * display brightness thresholds help define buckets in which the refresh rate switching is not
-     * allowed
+     * allowed.
+     *
+     * A negative threshold value means that only the display brightness threshold is applied.
      */
-    public int[] getLowAmbientBrightnessThresholds() {
+    public float[] getLowAmbientBrightnessThresholds() {
         return mLowAmbientBrightnessThresholds;
+    }
+
+    /**
+     * @return The refresh rate thermal map for low blocking zone.
+     */
+    public SparseArray<SurfaceControl.RefreshRateRange> getLowBlockingZoneThermalMap() {
+        return getThermalRefreshRateThrottlingData(mLowBlockingZoneThermalMapId);
     }
 
     /**
      * @return An array of high display brightness thresholds. This, in combination with high
      * ambient brightness thresholds help define buckets in which the refresh rate switching is not
-     * allowed
+     * allowed.
+     *
+     * A negative threshold value means that only the lux threshold is applied.
      */
-    public int[] getHighDisplayBrightnessThresholds() {
+    public float[] getHighDisplayBrightnessThresholds() {
         return mHighDisplayBrightnessThresholds;
     }
 
     /**
      * @return An array of high ambient brightness thresholds. This, in combination with high
      * display brightness thresholds help define buckets in which the refresh rate switching is not
-     * allowed
+     * allowed.
+     *
+     * A negative threshold value means that only the display brightness threshold is applied.
      */
-    public int[] getHighAmbientBrightnessThresholds() {
+    public float[] getHighAmbientBrightnessThresholds() {
         return mHighAmbientBrightnessThresholds;
+    }
+
+    /**
+     * @return The refresh rate thermal map for high blocking zone.
+     */
+    public SparseArray<SurfaceControl.RefreshRateRange> getHighBlockingZoneThermalMap() {
+        return getThermalRefreshRateThrottlingData(mHighBlockingZoneThermalMapId);
     }
 
     /**
@@ -1640,6 +1685,8 @@ public class DisplayDeviceConfig {
                 + ", mDefaultRefreshRateInHbmHdr= " + mDefaultRefreshRateInHbmHdr
                 + ", mDefaultRefreshRateInHbmSunlight= " + mDefaultRefreshRateInHbmSunlight
                 + ", mRefreshRateThrottlingMap= " + mRefreshRateThrottlingMap
+                + ", mLowBlockingZoneThermalMapId= " + mLowBlockingZoneThermalMapId
+                + ", mHighBlockingZoneThermalMapId= " + mHighBlockingZoneThermalMapId
                 + "\n"
                 + ", mLowDisplayBrightnessThresholds= "
                 + Arrays.toString(mLowDisplayBrightnessThresholds)
@@ -2090,9 +2137,13 @@ public class DisplayDeviceConfig {
     }
 
     /**
-     * Loads the refresh rate configurations pertaining to the upper blocking zones.
+     * Loads the refresh rate configurations pertaining to the lower blocking zones.
      */
     private void loadLowerRefreshRateBlockingZones(BlockingZoneConfig lowerBlockingZoneConfig) {
+        if (lowerBlockingZoneConfig != null) {
+            mLowBlockingZoneThermalMapId =
+                    lowerBlockingZoneConfig.getRefreshRateThermalThrottlingId();
+        }
         loadLowerBlockingZoneDefaultRefreshRate(lowerBlockingZoneConfig);
         loadLowerBrightnessThresholds(lowerBlockingZoneConfig);
     }
@@ -2101,6 +2152,10 @@ public class DisplayDeviceConfig {
      * Loads the refresh rate configurations pertaining to the upper blocking zones.
      */
     private void loadHigherRefreshRateBlockingZones(BlockingZoneConfig upperBlockingZoneConfig) {
+        if (upperBlockingZoneConfig != null) {
+            mHighBlockingZoneThermalMapId =
+                    upperBlockingZoneConfig.getRefreshRateThermalThrottlingId();
+        }
         loadHigherBlockingZoneDefaultRefreshRate(upperBlockingZoneConfig);
         loadHigherBrightnessThresholds(upperBlockingZoneConfig);
     }
@@ -2141,34 +2196,46 @@ public class DisplayDeviceConfig {
      */
     private void loadLowerBrightnessThresholds(BlockingZoneConfig lowerBlockingZoneConfig) {
         if (lowerBlockingZoneConfig == null) {
-            mLowDisplayBrightnessThresholds = mContext.getResources().getIntArray(
+            int[] lowDisplayBrightnessThresholdsInt = mContext.getResources().getIntArray(
                 R.array.config_brightnessThresholdsOfPeakRefreshRate);
-            mLowAmbientBrightnessThresholds = mContext.getResources().getIntArray(
+            int[] lowAmbientBrightnessThresholdsInt = mContext.getResources().getIntArray(
                 R.array.config_ambientThresholdsOfPeakRefreshRate);
-            if (mLowDisplayBrightnessThresholds == null || mLowAmbientBrightnessThresholds == null
-                    || mLowDisplayBrightnessThresholds.length
-                    != mLowAmbientBrightnessThresholds.length) {
+            if (lowDisplayBrightnessThresholdsInt == null
+                    || lowAmbientBrightnessThresholdsInt == null
+                    || lowDisplayBrightnessThresholdsInt.length
+                    != lowAmbientBrightnessThresholdsInt.length) {
                 throw new RuntimeException("display low brightness threshold array and ambient "
                     + "brightness threshold array have different length: "
-                    + "mLowDisplayBrightnessThresholds="
-                    + Arrays.toString(mLowDisplayBrightnessThresholds)
-                    + ", mLowAmbientBrightnessThresholds="
-                    + Arrays.toString(mLowAmbientBrightnessThresholds));
+                    + "lowDisplayBrightnessThresholdsInt="
+                    + Arrays.toString(lowDisplayBrightnessThresholdsInt)
+                    + ", lowAmbientBrightnessThresholdsInt="
+                    + Arrays.toString(lowAmbientBrightnessThresholdsInt));
             }
+
+            mLowDisplayBrightnessThresholds =
+                    displayBrightnessThresholdsIntToFloat(lowDisplayBrightnessThresholdsInt);
+            mLowAmbientBrightnessThresholds =
+                    ambientBrightnessThresholdsIntToFloat(lowAmbientBrightnessThresholdsInt);
         } else {
             List<DisplayBrightnessPoint> lowerThresholdDisplayBrightnessPoints =
                     lowerBlockingZoneConfig.getBlockingZoneThreshold().getDisplayBrightnessPoint();
             int size = lowerThresholdDisplayBrightnessPoints.size();
-            mLowDisplayBrightnessThresholds = new int[size];
-            mLowAmbientBrightnessThresholds = new int[size];
+            mLowDisplayBrightnessThresholds = new float[size];
+            mLowAmbientBrightnessThresholds = new float[size];
             for (int i = 0; i < size; i++) {
-                // We are explicitly casting this value to an integer to be able to reuse the
-                // existing DisplayBrightnessPoint type. It is fine to do this because the round off
-                // will have the negligible and unnoticeable impact on the loaded thresholds.
-                mLowDisplayBrightnessThresholds[i] = (int) lowerThresholdDisplayBrightnessPoints
-                    .get(i).getNits().floatValue();
+                float thresholdNits = lowerThresholdDisplayBrightnessPoints
+                        .get(i).getNits().floatValue();
+                if (thresholdNits < 0) {
+                    // A negative value means that there's no threshold
+                    mLowDisplayBrightnessThresholds[i] = thresholdNits;
+                } else {
+                    float thresholdBacklight = mNitsToBacklightSpline.interpolate(thresholdNits);
+                    mLowDisplayBrightnessThresholds[i] =
+                            mBacklightToBrightnessSpline.interpolate(thresholdBacklight);
+                }
+
                 mLowAmbientBrightnessThresholds[i] = lowerThresholdDisplayBrightnessPoints
-                    .get(i).getLux().intValue();
+                    .get(i).getLux().floatValue();
             }
         }
     }
@@ -2180,34 +2247,46 @@ public class DisplayDeviceConfig {
      */
     private void loadHigherBrightnessThresholds(BlockingZoneConfig blockingZoneConfig) {
         if (blockingZoneConfig == null) {
-            mHighDisplayBrightnessThresholds = mContext.getResources().getIntArray(
+            int[] highDisplayBrightnessThresholdsInt = mContext.getResources().getIntArray(
                 R.array.config_highDisplayBrightnessThresholdsOfFixedRefreshRate);
-            mHighAmbientBrightnessThresholds = mContext.getResources().getIntArray(
+            int[] highAmbientBrightnessThresholdsInt = mContext.getResources().getIntArray(
                 R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate);
-            if (mHighAmbientBrightnessThresholds == null || mHighDisplayBrightnessThresholds == null
-                    || mHighAmbientBrightnessThresholds.length
-                    != mHighDisplayBrightnessThresholds.length) {
+            if (highDisplayBrightnessThresholdsInt == null
+                    || highAmbientBrightnessThresholdsInt == null
+                    || highDisplayBrightnessThresholdsInt.length
+                    != highAmbientBrightnessThresholdsInt.length) {
                 throw new RuntimeException("display high brightness threshold array and ambient "
                     + "brightness threshold array have different length: "
-                    + "mHighDisplayBrightnessThresholds="
-                    + Arrays.toString(mHighDisplayBrightnessThresholds)
-                    + ", mHighAmbientBrightnessThresholds="
-                    + Arrays.toString(mHighAmbientBrightnessThresholds));
+                    + "highDisplayBrightnessThresholdsInt="
+                    + Arrays.toString(highDisplayBrightnessThresholdsInt)
+                    + ", highAmbientBrightnessThresholdsInt="
+                    + Arrays.toString(highAmbientBrightnessThresholdsInt));
             }
+
+            mHighDisplayBrightnessThresholds =
+                    displayBrightnessThresholdsIntToFloat(highDisplayBrightnessThresholdsInt);
+            mHighAmbientBrightnessThresholds =
+                    ambientBrightnessThresholdsIntToFloat(highAmbientBrightnessThresholdsInt);
         } else {
             List<DisplayBrightnessPoint> higherThresholdDisplayBrightnessPoints =
                     blockingZoneConfig.getBlockingZoneThreshold().getDisplayBrightnessPoint();
             int size = higherThresholdDisplayBrightnessPoints.size();
-            mHighDisplayBrightnessThresholds = new int[size];
-            mHighAmbientBrightnessThresholds = new int[size];
+            mHighDisplayBrightnessThresholds = new float[size];
+            mHighAmbientBrightnessThresholds = new float[size];
             for (int i = 0; i < size; i++) {
-                // We are explicitly casting this value to an integer to be able to reuse the
-                // existing DisplayBrightnessPoint type. It is fine to do this because the round off
-                // will have the negligible and unnoticeable impact on the loaded thresholds.
-                mHighDisplayBrightnessThresholds[i] = (int) higherThresholdDisplayBrightnessPoints
-                    .get(i).getNits().floatValue();
+                float thresholdNits = higherThresholdDisplayBrightnessPoints
+                        .get(i).getNits().floatValue();
+                if (thresholdNits < 0) {
+                    // A negative value means that there's no threshold
+                    mHighDisplayBrightnessThresholds[i] = thresholdNits;
+                } else {
+                    float thresholdBacklight = mNitsToBacklightSpline.interpolate(thresholdNits);
+                    mHighDisplayBrightnessThresholds[i] =
+                            mBacklightToBrightnessSpline.interpolate(thresholdBacklight);
+                }
+
                 mHighAmbientBrightnessThresholds[i] = higherThresholdDisplayBrightnessPoints
-                    .get(i).getLux().intValue();
+                    .get(i).getLux().floatValue();
             }
         }
     }
@@ -2563,43 +2642,48 @@ public class DisplayDeviceConfig {
     private void loadAmbientLightSensorFromDdc(DisplayConfiguration config) {
         final SensorDetails sensorDetails = config.getLightSensor();
         if (sensorDetails != null) {
-            mAmbientLightSensor.type = sensorDetails.getType();
-            mAmbientLightSensor.name = sensorDetails.getName();
-            final RefreshRateRange rr = sensorDetails.getRefreshRate();
-            if (rr != null) {
-                mAmbientLightSensor.minRefreshRate = rr.getMinimum().floatValue();
-                mAmbientLightSensor.maxRefreshRate = rr.getMaximum().floatValue();
-            }
+            loadSensorData(sensorDetails, mAmbientLightSensor);
         } else {
             loadAmbientLightSensorFromConfigXml();
         }
     }
 
     private void setProxSensorUnspecified() {
-        mProximitySensor.name = null;
-        mProximitySensor.type = null;
+        mProximitySensor = new SensorData();
     }
 
     private void loadScreenOffBrightnessSensorFromDdc(DisplayConfiguration config) {
         final SensorDetails sensorDetails = config.getScreenOffBrightnessSensor();
         if (sensorDetails != null) {
-            mScreenOffBrightnessSensor.type = sensorDetails.getType();
-            mScreenOffBrightnessSensor.name = sensorDetails.getName();
+            loadSensorData(sensorDetails, mScreenOffBrightnessSensor);
         }
     }
 
     private void loadProxSensorFromDdc(DisplayConfiguration config) {
         SensorDetails sensorDetails = config.getProxSensor();
         if (sensorDetails != null) {
-            mProximitySensor.name = sensorDetails.getName();
-            mProximitySensor.type = sensorDetails.getType();
-            final RefreshRateRange rr = sensorDetails.getRefreshRate();
-            if (rr != null) {
-                mProximitySensor.minRefreshRate = rr.getMinimum().floatValue();
-                mProximitySensor.maxRefreshRate = rr.getMaximum().floatValue();
+            String name = sensorDetails.getName();
+            String type = sensorDetails.getType();
+            if ("".equals(name) && "".equals(type)) {
+                // <proxSensor> with empty values to the config means no sensor should be used
+                mProximitySensor = null;
+            } else {
+                mProximitySensor = new SensorData();
+                loadSensorData(sensorDetails, mProximitySensor);
             }
         } else {
             setProxSensorUnspecified();
+        }
+    }
+
+    private void loadSensorData(@NonNull SensorDetails sensorDetails,
+            @NonNull SensorData sensorData) {
+        sensorData.name = sensorDetails.getName();
+        sensorData.type = sensorDetails.getType();
+        final RefreshRateRange rr = sensorDetails.getRefreshRate();
+        if (rr != null) {
+            sensorData.minRefreshRate = rr.getMinimum().floatValue();
+            sensorData.maxRefreshRate = rr.getMaximum().floatValue();
         }
     }
 
@@ -3119,11 +3203,15 @@ public class DisplayDeviceConfig {
     public static class ThermalBrightnessThrottlingData {
         public List<ThrottlingLevel> throttlingLevels;
 
-        static class ThrottlingLevel {
+        /**
+         * thermal status to brightness cap holder
+         */
+        public static class ThrottlingLevel {
             public @PowerManager.ThermalStatus int thermalStatus;
             public float brightness;
 
-            ThrottlingLevel(@PowerManager.ThermalStatus int thermalStatus, float brightness) {
+            public ThrottlingLevel(
+                    @PowerManager.ThermalStatus int thermalStatus, float brightness) {
                 this.thermalStatus = thermalStatus;
                 this.brightness = brightness;
             }

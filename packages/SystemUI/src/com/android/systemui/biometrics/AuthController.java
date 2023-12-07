@@ -73,7 +73,6 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
-import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
 import com.android.systemui.dagger.SysUISingleton;
@@ -85,6 +84,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.data.repository.BiometricType;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
@@ -133,8 +133,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     private final CoroutineScope mApplicationCoroutineScope;
 
     // TODO: these should be migrated out once ready
-    @NonNull private final Provider<AuthBiometricFingerprintViewModel>
-            mAuthBiometricFingerprintViewModelProvider;
     @NonNull private final Provider<PromptCredentialInteractor> mPromptCredentialInteractor;
     @NonNull private final Provider<PromptSelectorInteractor> mPromptSelectorInteractor;
     @NonNull private final Provider<CredentialViewModel> mCredentialViewModelProvider;
@@ -184,12 +182,15 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     @NonNull private final UdfpsUtils mUdfpsUtils;
     private final @Background DelayableExecutor mBackgroundExecutor;
     private final DisplayInfo mCachedDisplayInfo = new DisplayInfo();
+    @NonNull private final VibratorHelper mVibratorHelper;
 
     @VisibleForTesting
     final TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onTaskStackChanged() {
-            mHandler.post(AuthController.this::cancelIfOwnerIsNotInForeground);
+            if (!isOwnerInForeground()) {
+                mHandler.post(AuthController.this::cancelIfOwnerIsNotInForeground);
+            }
         }
     };
 
@@ -227,33 +228,39 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         }
     }
 
+    private boolean isOwnerInForeground() {
+        if (mCurrentDialog != null) {
+            final String clientPackage = mCurrentDialog.getOpPackageName();
+            final List<ActivityManager.RunningTaskInfo> runningTasks =
+                    mActivityTaskManager.getTasks(1);
+            if (!runningTasks.isEmpty()) {
+                final String topPackage = runningTasks.get(0).topActivity.getPackageName();
+                if (!topPackage.contentEquals(clientPackage)
+                        && !Utils.isSystem(mContext, clientPackage)) {
+                    Log.w(TAG, "Evicting client due to: " + topPackage);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private void cancelIfOwnerIsNotInForeground() {
         mExecution.assertIsMainThread();
         if (mCurrentDialog != null) {
             try {
-                final String clientPackage = mCurrentDialog.getOpPackageName();
-                Log.w(TAG, "Task stack changed, current client: " + clientPackage);
-                final List<ActivityManager.RunningTaskInfo> runningTasks =
-                        mActivityTaskManager.getTasks(1);
-                if (!runningTasks.isEmpty()) {
-                    final String topPackage = runningTasks.get(0).topActivity.getPackageName();
-                    if (!topPackage.contentEquals(clientPackage)
-                            && !Utils.isSystem(mContext, clientPackage)) {
-                        Log.e(TAG, "Evicting client due to: " + topPackage);
-                        mCurrentDialog.dismissWithoutCallback(true /* animate */);
-                        mCurrentDialog = null;
+                mCurrentDialog.dismissWithoutCallback(true /* animate */);
+                mCurrentDialog = null;
 
-                        for (Callback cb : mCallbacks) {
-                            cb.onBiometricPromptDismissed();
-                        }
+                for (Callback cb : mCallbacks) {
+                    cb.onBiometricPromptDismissed();
+                }
 
-                        if (mReceiver != null) {
-                            mReceiver.onDialogDismissed(
-                                    BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
-                                    null /* credentialAttestation */);
-                            mReceiver = null;
-                        }
-                    }
+                if (mReceiver != null) {
+                    mReceiver.onDialogDismissed(
+                            BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
+                            null /* credentialAttestation */);
+                    mReceiver = null;
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote exception", e);
@@ -755,8 +762,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull UdfpsLogger udfpsLogger,
             @NonNull LogContextInteractor logContextInteractor,
-            @NonNull Provider<AuthBiometricFingerprintViewModel>
-                    authBiometricFingerprintViewModelProvider,
             @NonNull Provider<PromptCredentialInteractor> promptCredentialInteractorProvider,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
@@ -764,7 +769,8 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             @NonNull InteractionJankMonitor jankMonitor,
             @Main Handler handler,
             @Background DelayableExecutor bgExecutor,
-            @NonNull UdfpsUtils udfpsUtils) {
+            @NonNull UdfpsUtils udfpsUtils,
+            @NonNull VibratorHelper vibratorHelper) {
         mContext = context;
         mFeatureFlags = featureFlags;
         mExecution = execution;
@@ -787,9 +793,9 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         mFaceEnrolledForUser = new SparseBooleanArray();
         mUdfpsUtils = udfpsUtils;
         mApplicationCoroutineScope = applicationCoroutineScope;
+        mVibratorHelper = vibratorHelper;
 
         mLogContextInteractor = logContextInteractor;
-        mAuthBiometricFingerprintViewModelProvider = authBiometricFingerprintViewModelProvider;
         mPromptSelectorInteractor = promptSelectorInteractorProvider;
         mPromptCredentialInteractor = promptCredentialInteractorProvider;
         mPromptViewModelProvider = promptViewModelProvider;
@@ -1251,10 +1257,11 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             cb.onBiometricPromptShown();
         }
         mCurrentDialog = newDialog;
-        mCurrentDialog.show(mWindowManager, savedState);
 
-        if (!promptInfo.isAllowBackgroundAuthentication()) {
-            mHandler.post(this::cancelIfOwnerIsNotInForeground);
+        if (!promptInfo.isAllowBackgroundAuthentication() && !isOwnerInForeground()) {
+            cancelIfOwnerIsNotInForeground();
+        } else {
+            mCurrentDialog.show(mWindowManager, savedState);
         }
     }
 
@@ -1331,9 +1338,8 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         config.mScaleProvider = this::getScaleFactor;
         return new AuthContainerView(config, mFeatureFlags, mApplicationCoroutineScope, mFpProps, mFaceProps,
                 wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
-                mInteractionJankMonitor, mAuthBiometricFingerprintViewModelProvider,
-                mPromptCredentialInteractor, mPromptSelectorInteractor, viewModel,
-                mCredentialViewModelProvider, bgExecutor);
+                mInteractionJankMonitor, mPromptCredentialInteractor, mPromptSelectorInteractor,
+                viewModel, mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
     }
 
     @Override

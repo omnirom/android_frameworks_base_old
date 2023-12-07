@@ -52,8 +52,8 @@ import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepositor
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.settings.SecureSettings;
@@ -66,7 +66,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
@@ -108,7 +107,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     private AutoTileManager mAutoTiles;
     private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
     private int mCurrentUser;
-    private final Optional<CentralSurfaces> mCentralSurfacesOptional;
+    private final ShadeController mShadeController;
     private Context mUserContext;
     private UserTracker mUserTracker;
     private SecureSettings mSecureSettings;
@@ -129,7 +128,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             PluginManager pluginManager,
             TunerService tunerService,
             Provider<AutoTileManager> autoTiles,
-            Optional<CentralSurfaces> centralSurfacesOptional,
+            ShadeController shadeController,
             QSLogger qsLogger,
             UserTracker userTracker,
             SecureSettings secureSettings,
@@ -148,11 +147,12 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         mUserFileManager = userFileManager;
         mFeatureFlags = featureFlags;
 
-        mCentralSurfacesOptional = centralSurfacesOptional;
+        mShadeController = shadeController;
 
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
         mUserTracker = userTracker;
+        mCurrentUser = userTracker.getUserId();
         mSecureSettings = secureSettings;
         mCustomTileStatePersister = customTileStatePersister;
 
@@ -162,7 +162,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             // finishes before creating any tiles.
             tunerService.addTunable(this, TILES_SETTING);
             // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
-            mAutoTiles = autoTiles.get();
+            if (!mFeatureFlags.isEnabled(Flags.QS_PIPELINE_AUTO_ADD)) {
+                mAutoTiles = autoTiles.get();
+            }
         });
     }
 
@@ -209,17 +211,17 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
 
     @Override
     public void collapsePanels() {
-        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateCollapsePanels);
+        mShadeController.postAnimateCollapseShade();
     }
 
     @Override
     public void forceCollapsePanels() {
-        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateForceCollapsePanels);
+        mShadeController.postAnimateForceCollapseShade();
     }
 
     @Override
     public void openPanels() {
-        mCentralSurfacesOptional.ifPresent(CentralSurfaces::postAnimateOpenPanels);
+        mShadeController.postAnimateExpandQs();
     }
 
     @Override
@@ -273,6 +275,13 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         if (!TILES_SETTING.equals(key)) {
             return;
         }
+        int currentUser = mUserTracker.getUserId();
+        if (currentUser != mCurrentUser) {
+            mUserContext = mUserTracker.getUserContext();
+            if (mAutoTiles != null) {
+                mAutoTiles.changeUser(UserHandle.of(currentUser));
+            }
+        }
         // Do not process tiles if the flag is enabled.
         if (mFeatureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {
             return;
@@ -281,13 +290,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }
         final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
-        int currentUser = mUserTracker.getUserId();
-        if (currentUser != mCurrentUser) {
-            mUserContext = mUserTracker.getUserContext();
-            if (mAutoTiles != null) {
-                mAutoTiles.changeUser(UserHandle.of(currentUser));
-            }
-        }
         if (tileSpecs.equals(mTileSpecs) && currentUser == mCurrentUser) return;
         Log.d(TAG, "Recreating tiles: " + tileSpecs);
         mTiles.entrySet().stream().filter(tile -> !tileSpecs.contains(tile.getKey())).forEach(

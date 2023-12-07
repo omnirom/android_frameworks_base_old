@@ -31,6 +31,7 @@ import android.provider.Settings
 import android.service.quicksettings.Tile
 import android.text.TextUtils
 import android.util.Log
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -96,24 +97,21 @@ open class QSTileViewImpl @JvmOverloads constructor(
             updateHeight()
         }
 
-    private val colorActive = Utils.getColorAttrDefaultColor(context,
-            com.android.internal.R.attr.colorAccentPrimary)
-    private val colorInactive = Utils.getColorAttrDefaultColor(context, R.attr.offStateColor)
-    private val colorUnavailable = Utils.applyAlpha(UNAVAILABLE_ALPHA, colorInactive)
+    private val colorActive = Utils.getColorAttrDefaultColor(context, R.attr.shadeActive)
+    private val colorInactive = Utils.getColorAttrDefaultColor(context, R.attr.shadeInactive)
+    private val colorUnavailable = Utils.getColorAttrDefaultColor(context, R.attr.shadeDisabled)
 
-    private val colorLabelActive =
-            Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorOnAccent)
-    private val colorLabelInactive =
-            Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
+    private val colorLabelActive = Utils.getColorAttrDefaultColor(context, R.attr.onShadeActive)
+    private val colorLabelInactive = Utils.getColorAttrDefaultColor(context, R.attr.onShadeInactive)
     private val colorLabelUnavailable =
-        Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorTertiary)
+        Utils.getColorAttrDefaultColor(context, R.attr.outline)
 
     private val colorSecondaryLabelActive =
-            Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondaryInverse)
+        Utils.getColorAttrDefaultColor(context, R.attr.onShadeActiveVariant)
     private val colorSecondaryLabelInactive =
-            Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary)
+            Utils.getColorAttrDefaultColor(context, R.attr.onShadeInactiveVariant)
     private val colorSecondaryLabelUnavailable =
-        Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorTertiary)
+        Utils.getColorAttrDefaultColor(context, R.attr.outline)
 
     private lateinit var label: TextView
     protected lateinit var secondaryLabel: TextView
@@ -122,6 +120,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private lateinit var customDrawableView: ImageView
     private lateinit var chevronView: ImageView
     private var mQsLogger: QSLogger? = null
+
+    /**
+     * Controls if tile background is set to a [RippleDrawable] see [setClickable]
+     */
     protected var showRippleEffect = true
 
     private lateinit var ripple: RippleDrawable
@@ -158,6 +160,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private var labelHide = false
 
     init {
+        val typedValue = TypedValue()
+        if (!getContext().theme.resolveAttribute(R.attr.isQsTheme, typedValue, true)) {
+            throw IllegalStateException("QSViewImpl must be inflated with a theme that contains " +
+                    "Theme.SystemUI.QuickSettings")
+        }
         setId(generateViewId())
 
         vertical = resources.getBoolean(R.bool.qs_tile_vertical_layout)
@@ -473,7 +480,6 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     protected open fun handleStateChanged(state: QSTile.State) {
         val allowAnimations = animationsEnabled()
-        showRippleEffect = state.showRippleEffect
         isClickable = state.state != Tile.STATE_UNAVAILABLE
         isLongClickable = state.handlesLongClick
         icon.setIcon(state, allowAnimations)

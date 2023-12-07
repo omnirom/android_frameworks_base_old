@@ -67,6 +67,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor;
 import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
@@ -94,6 +95,7 @@ import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.RingerModeTracker;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.DateFormatUtil;
 
 import org.omnirom.omnilib.utils.OmniSettings;
@@ -144,9 +146,12 @@ public class PhoneStatusBarPolicy
     private final String mSlotCamera;
     private final String mSlotSensorsOff;
     private final String mSlotScreenRecord;
+    private final String mSlotConnectedDisplay;
     private final int mDisplayId;
     private final SharedPreferences mSharedPreferences;
     private final DateFormatUtil mDateFormatUtil;
+    private final JavaAdapter mJavaAdapter;
+    private final ConnectedDisplayInteractor mConnectedDisplayInteractor;
     private final TelecomManager mTelecomManager;
 
     private final Handler mHandler;
@@ -208,9 +213,14 @@ public class PhoneStatusBarPolicy
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
             RingerModeTracker ringerModeTracker,
             PrivacyItemController privacyItemController,
-            PrivacyLogger privacyLogger, Context context) {
+            PrivacyLogger privacyLogger,
+            ConnectedDisplayInteractor connectedDisplayInteractor,
+            JavaAdapter javaAdapter,
+            Context context
+    ) {
         mIconController = iconController;
         mCommandQueue = commandQueue;
+        mConnectedDisplayInteractor = connectedDisplayInteractor;
         mBroadcastDispatcher = broadcastDispatcher;
         mHandler = new Handler(looper);
         mResources = resources;
@@ -237,8 +247,11 @@ public class PhoneStatusBarPolicy
         mTelecomManager = telecomManager;
         mRingerModeTracker = ringerModeTracker;
         mPrivacyLogger = privacyLogger;
+        mJavaAdapter = javaAdapter;
 
         mSlotCast = resources.getString(com.android.internal.R.string.status_bar_cast);
+        mSlotConnectedDisplay = resources.getString(
+                com.android.internal.R.string.status_bar_connected_display);
         mSlotHotspot = resources.getString(com.android.internal.R.string.status_bar_hotspot);
         mSlotBluetooth = resources.getString(com.android.internal.R.string.status_bar_bluetooth);
         mSlotTty = resources.getString(com.android.internal.R.string.status_bar_tty);
@@ -313,6 +326,10 @@ public class PhoneStatusBarPolicy
         mIconController.setIcon(mSlotCast, R.drawable.stat_sys_cast, null);
         mIconController.setIconVisibility(mSlotCast, false);
 
+        // connected display
+        mIconController.setIcon(mSlotConnectedDisplay, R.drawable.stat_sys_connected_display, null);
+        mIconController.setIconVisibility(mSlotConnectedDisplay, false);
+
         // hotspot
         mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_hotspot,
                 mResources.getString(R.string.accessibility_status_bar_hotspot));
@@ -372,6 +389,8 @@ public class PhoneStatusBarPolicy
         mRecordingController.addCallback(this);
         Dependency.get(OmniSettingsService.class).addIntObserver(this, OmniSettings.OMNI_STATUS_BAR_ALARM);
         Dependency.get(OmniSettingsService.class).addIntObserver(this, OmniSettings.OMNI_STATUS_BAR_BT_BATTERY);
+        mJavaAdapter.alwaysCollectFlow(mConnectedDisplayInteractor.getConnectedDisplayState(),
+                this::onConnectedDisplayAvailabilityChanged);
 
         mCommandQueue.addCallback(this);
     }
@@ -587,7 +606,7 @@ public class PhoneStatusBarPolicy
                 userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
                 boolean isManagedProfile = mUserManager.isManagedProfile(userId);
                 String accessibilityString = getManagedProfileAccessibilityString();
-                mHandler.post(() -> {
+                mMainExecutor.execute(() -> {
                     final boolean showIcon;
                     if (isManagedProfile && (!mKeyguardStateController.isShowing()
                             || mKeyguardStateController.isOccluded())) {
@@ -662,6 +681,13 @@ public class PhoneStatusBarPolicy
     @Override
     public void appTransitionStarting(int displayId, long startTime, long duration,
             boolean forced) {
+        if (mDisplayId == displayId) {
+            updateManagedProfile();
+        }
+    }
+
+    @Override
+    public void appTransitionFinished(int displayId) {
         if (mDisplayId == displayId) {
             updateManagedProfile();
         }
@@ -905,5 +931,15 @@ public class PhoneStatusBarPolicy
         image.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         image.draw(canvas);
         return bmResult;
+    }
+
+    private void onConnectedDisplayAvailabilityChanged(ConnectedDisplayInteractor.State state) {
+        boolean visible = state != ConnectedDisplayInteractor.State.DISCONNECTED;
+
+        if (DEBUG) {
+            Log.d(TAG, "connected_display: " + (visible ? "showing" : "hiding") + " icon");
+        }
+
+        mIconController.setIconVisibility(mSlotConnectedDisplay, visible);
     }
 }

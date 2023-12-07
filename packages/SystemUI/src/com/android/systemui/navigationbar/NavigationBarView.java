@@ -370,6 +370,7 @@ public class NavigationBarView extends FrameLayout implements
 
     public void setBackgroundExecutor(Executor bgExecutor) {
         mBgExecutor = bgExecutor;
+        mRotationButtonController.setBgExecutor(bgExecutor);
     }
 
     public void setDisplayTracker(DisplayTracker displayTracker) {

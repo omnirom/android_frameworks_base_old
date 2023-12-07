@@ -18,7 +18,7 @@ package com.android.systemui.shade
 
 import android.view.MotionEvent
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 
 private const val TAG = "systemui.shade.touch"
 

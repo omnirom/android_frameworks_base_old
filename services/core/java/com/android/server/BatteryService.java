@@ -169,6 +169,8 @@ public final class BatteryService extends SystemService {
     private int mBatteryNearlyFullLevel;
     private int mShutdownBatteryTemperature;
 
+    private static String sSystemUiPackage;
+
     private int mPlugType;
     private int mLastPlugType = -1; // Extra state so we can detect first run
 
@@ -253,6 +255,8 @@ public final class BatteryService extends SystemService {
                 com.android.internal.R.integer.config_shutdownBatteryTemperature);
         mFastChargingLedSupported = context.getResources().getBoolean(
                 org.omnirom.omnilib.R.bool.config_FastChargingLedSupported);
+        sSystemUiPackage = mContext.getResources().getString(
+                com.android.internal.R.string.config_systemUi);
 
         mBatteryLevelsEventQueue = new ArrayDeque<>();
         mMetricsLogger = new MetricsLogger();
@@ -906,8 +910,21 @@ public final class BatteryService extends SystemService {
                     + ", info:" + mHealthInfo.toString());
         }
 
-        mHandler.post(() -> ActivityManager.broadcastStickyIntent(intent, AppOpsManager.OP_NONE,
-                mBatteryChangedOptions, UserHandle.USER_ALL));
+        mHandler.post(() -> broadcastBatteryChangedIntent(intent, mBatteryChangedOptions));
+    }
+
+    private static void broadcastBatteryChangedIntent(Intent intent, Bundle options) {
+        // TODO (293959093): It is important that SystemUI receives this broadcast as soon as
+        // possible. Ideally, it should be using binder callbacks but until then, dispatch this
+        // as a foreground broadcast to SystemUI.
+        final Intent fgIntent = new Intent(intent);
+        fgIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        fgIntent.setPackage(sSystemUiPackage);
+        ActivityManager.broadcastStickyIntent(fgIntent, AppOpsManager.OP_NONE,
+                options, UserHandle.USER_ALL);
+
+        ActivityManager.broadcastStickyIntent(intent, new String[] {sSystemUiPackage},
+                AppOpsManager.OP_NONE, options, UserHandle.USER_ALL);
     }
 
     private void sendBatteryLevelChangedIntentLocked() {

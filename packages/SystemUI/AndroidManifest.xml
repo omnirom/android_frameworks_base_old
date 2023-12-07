@@ -176,6 +176,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
 
     <!-- Assist -->
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
@@ -372,7 +373,7 @@
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true"
         tools:replace="android:appComponentFactory"
-        android:appComponentFactory=".SystemUIAppComponentFactory">
+        android:appComponentFactory=".PhoneSystemUIAppComponentFactory">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
              Setting the theme on the application does not affect views inflated by services.
              The application theme is set again from onCreate to take effect for those views. -->
@@ -454,12 +455,14 @@
             android:noHistory="true" />
 
         <service android:name=".screenshot.appclips.AppClipsScreenshotHelperService"
-            android:permission="com.android.systemui.permission.SELF"
-            android:exported="false" />
+            android:exported="false"
+            android:singleUser="true"
+            android:permission="com.android.systemui.permission.SELF" />
 
         <service android:name=".screenshot.appclips.AppClipsService"
-            android:permission="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE"
-            android:exported="true" />
+            android:exported="true"
+            android:singleUser="true"
+            android:permission="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE" />
 
         <service android:name=".screenrecord.RecordingService"
                  android:foregroundServiceType="systemExempted"/>
@@ -817,7 +820,8 @@
         <service
             android:name=".dreams.DreamOverlayService"
             android:enabled="false"
-            android:exported="true" />
+            android:exported="true"
+            android:singleUser="true" />
 
         <activity android:name=".keyguard.WorkLockActivity"
                   android:label="@string/accessibility_desc_work_lock"
@@ -864,7 +868,7 @@
         <activity
             android:name=".settings.brightness.BrightnessDialog"
             android:label="@string/quick_settings_brightness_dialog_title"
-            android:theme="@style/Theme.SystemUI.QuickSettings.BrightnessDialog"
+            android:theme="@style/BrightnessDialog"
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleInstance"
             android:excludeFromRecents="true"
@@ -995,6 +999,11 @@
 
         <service android:name=".notetask.NoteTaskControllerUpdateService" />
 
+        <service android:name=".notetask.NoteTaskBubblesController$NoteTaskBubblesService"
+            android:exported="false"
+            android:singleUser="true"
+            android:permission="com.android.systemui.permission.SELF" />
+
         <activity
             android:name=".notetask.shortcut.LaunchNoteTaskActivity"
             android:exported="true"
@@ -1007,20 +1016,10 @@
             </intent-filter>
         </activity>
 
-        <!-- LaunchNoteTaskManagedProfileProxyActivity MUST NOT be exported because it allows caller
-             to specify an Android user when launching the default notes app. -->
-        <activity
-            android:name=".notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity"
-            android:exported="false"
-            android:enabled="true"
-            android:excludeFromRecents="true"
-            android:theme="@android:style/Theme.NoDisplay" />
-
         <activity
             android:name=".notetask.LaunchNotesRoleSettingsTrampolineActivity"
             android:exported="true"
             android:excludeFromRecents="true"
-            android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" >
             <intent-filter>
                 <action android:name="com.android.systemui.action.MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE" />
@@ -1070,15 +1069,6 @@
                   android:authorities="com.android.systemui.keyguard"
                   android:grantUriPermissions="true"
                   android:exported="true">
-        </provider>
-
-        <!-- Provides list and realistic previews of clock faces for the picker app. -->
-        <provider
-            android:name="com.android.keyguard.clock.ClockOptionsProvider"
-            android:authorities="com.android.keyguard.clock"
-            android:enabled="false"
-            android:exported="false"
-            android:grantUriPermissions="true">
         </provider>
 
         <receiver

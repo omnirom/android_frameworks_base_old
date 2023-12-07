@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.WindowInsets;
 
 import androidx.annotation.Nullable;
@@ -57,6 +58,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private QS mQs;
     private View mQSContainer;
     private int mLastQSPaddingBottom;
+    private boolean mIsMigratingNSSL;
 
     /**
      *  These are used to compute the bounding box containing the shade and the notification scrim,
@@ -76,8 +78,11 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
         mQsFrame = findViewById(R.id.qs_frame);
-        mStackScroller = findViewById(R.id.notification_stack_scroller);
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
+    }
+
+    void setStackScroller(View stackScroller) {
+        mStackScroller = stackScroller;
     }
 
     @Override
@@ -109,7 +114,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     }
 
     public void setNotificationsMarginBottom(int margin) {
-        LayoutParams params = (LayoutParams) mStackScroller.getLayoutParams();
+        MarginLayoutParams params = (MarginLayoutParams) mStackScroller.getLayoutParams();
         params.bottomMargin = margin;
         mStackScroller.setLayoutParams(params);
     }
@@ -174,6 +179,10 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         super.dispatchDraw(canvas);
     }
 
+    void setMigratingNSSL(boolean isMigrating) {
+        mIsMigratingNSSL = isMigrating;
+    }
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         return TouchLogger.logDispatchTouch("NotificationsQuickSettingsContainer", ev,
@@ -182,6 +191,9 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+        if (mIsMigratingNSSL) {
+            return super.drawChild(canvas, child, drawingTime);
+        }
         int layoutIndex = mLayoutDrawingOrder.indexOf(child);
         if (layoutIndex >= 0) {
             return super.drawChild(canvas, mDrawingOrderedChildren.get(layoutIndex), drawingTime);

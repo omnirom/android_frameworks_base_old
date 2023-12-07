@@ -26,6 +26,7 @@ import android.hardware.face.FaceManager
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
@@ -56,9 +57,13 @@ import com.android.systemui.biometrics.ui.viewmodel.FingerprintStartMode
 import com.android.systemui.biometrics.ui.viewmodel.PromptMessage
 import com.android.systemui.biometrics.ui.viewmodel.PromptSize
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.statusbar.VibratorHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -80,6 +85,8 @@ object BiometricViewBinder {
         backgroundView: View,
         legacyCallback: Callback,
         applicationScope: CoroutineScope,
+        vibratorHelper: VibratorHelper,
+        featureFlags: FeatureFlags,
     ): AuthBiometricViewAdapter {
         val accessibilityManager = view.context.getSystemService(AccessibilityManager::class.java)!!
 
@@ -88,9 +95,9 @@ object BiometricViewBinder {
         val textColorHint =
             view.resources.getColor(R.color.biometric_dialog_gray, view.context.theme)
 
-        val titleView = view.findViewById<TextView>(R.id.title)
-        val subtitleView = view.findViewById<TextView>(R.id.subtitle)
-        val descriptionView = view.findViewById<TextView>(R.id.description)
+        val titleView = view.requireViewById<TextView>(R.id.title)
+        val subtitleView = view.requireViewById<TextView>(R.id.subtitle)
+        val descriptionView = view.requireViewById<TextView>(R.id.description)
 
         // set selected to enable marquee unless a screen reader is enabled
         titleView.isSelected =
@@ -99,18 +106,21 @@ object BiometricViewBinder {
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         descriptionView.movementMethod = ScrollingMovementMethod()
 
-        val iconViewOverlay = view.findViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
-        val iconView = view.findViewById<LottieAnimationView>(R.id.biometric_icon)
-        val indicatorMessageView = view.findViewById<TextView>(R.id.indicator)
+        val iconViewOverlay = view.requireViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
+        val iconView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon)
+
+        PromptFingerprintIconViewBinder.bind(iconView, viewModel.fingerprintIconViewModel)
+
+        val indicatorMessageView = view.requireViewById<TextView>(R.id.indicator)
 
         // Negative-side (left) buttons
-        val negativeButton = view.findViewById<Button>(R.id.button_negative)
-        val cancelButton = view.findViewById<Button>(R.id.button_cancel)
-        val credentialFallbackButton = view.findViewById<Button>(R.id.button_use_credential)
+        val negativeButton = view.requireViewById<Button>(R.id.button_negative)
+        val cancelButton = view.requireViewById<Button>(R.id.button_cancel)
+        val credentialFallbackButton = view.requireViewById<Button>(R.id.button_use_credential)
 
         // Positive-side (right) buttons
-        val confirmationButton = view.findViewById<Button>(R.id.button_confirm)
-        val retryButton = view.findViewById<Button>(R.id.button_try_again)
+        val confirmationButton = view.requireViewById<Button>(R.id.button_confirm)
+        val retryButton = view.requireViewById<Button>(R.id.button_try_again)
 
         // TODO(b/251476085): temporary workaround for the unsafe callbacks & legacy controllers
         val adapter =
@@ -248,6 +258,18 @@ object BiometricViewBinder {
                 launch {
                     viewModel.isIndicatorMessageVisible.collect { show ->
                         indicatorMessageView.visibility = show.asVisibleOrHidden()
+                    }
+                }
+
+                // set padding
+                launch {
+                    viewModel.promptPadding.collect { promptPadding ->
+                        view.setPadding(
+                            promptPadding.left,
+                            promptPadding.top,
+                            promptPadding.right,
+                            promptPadding.bottom
+                        )
                     }
                 }
 
@@ -392,6 +414,18 @@ object BiometricViewBinder {
                         }
                     }
                 }
+
+                // Play haptics
+                if (featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+                    launch {
+                        viewModel.hapticsToPlay.collect { hapticFeedbackConstant ->
+                            if (hapticFeedbackConstant != HapticFeedbackConstants.NO_HAPTICS) {
+                                vibratorHelper.performHapticFeedback(view, hapticFeedbackConstant)
+                                viewModel.clearHaptics()
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -501,10 +535,10 @@ private class Spaghetti(
                 failureReason,
                 messageAfterError = modalities.asDefaultHelpMessage(applicationContext),
                 authenticateAfterError = modalities.hasFingerprint,
-                suppressIf = { currentMessage ->
+                suppressIf = { currentMessage, history ->
                     modalities.hasFaceAndFingerprint &&
                         failedModality == BiometricModality.Face &&
-                        currentMessage.isError
+                        (currentMessage.isError || history.faceFailed)
                 },
                 failedModality = failedModality,
             )
