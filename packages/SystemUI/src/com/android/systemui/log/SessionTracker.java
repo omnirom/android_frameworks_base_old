@@ -158,6 +158,20 @@ public class SessionTracker implements CoreStartable {
             mKeyguardSessionStarted = true;
             startSession(SESSION_KEYGUARD);
         }
+
+        @Override
+        public void onStartedWakingUp() {
+            boolean wasSessionStarted = mKeyguardSessionStarted;
+            boolean keyguardShowing = mKeyguardStateController.isShowing();
+
+            // pressed power button BEFORE onKeyguardShowingChanged came
+            // left us with a dangling session start that wont go away
+            // until the next sleep cycle
+            if (wasSessionStarted && !keyguardShowing) {
+                endSession(SESSION_KEYGUARD, SessionUiEvent.KEYGUARD_SESSION_END_GOING_TO_SLEEP);
+                mKeyguardSessionStarted = false;
+            }
+        }
     };
 
 
