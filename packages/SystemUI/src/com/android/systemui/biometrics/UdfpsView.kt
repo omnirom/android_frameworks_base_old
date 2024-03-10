@@ -30,6 +30,7 @@ import android.widget.FrameLayout
 import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.R
 import com.android.systemui.doze.DozeReceiver
+import com.android.systemui.res.R
 
 private const val TAG = "UdfpsView"
 
