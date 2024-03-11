@@ -50,9 +50,9 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.app.animation.Interpolators;
 import com.android.systemui.DualToneHandler;
-import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.io.PrintWriter;
@@ -91,10 +91,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     private Drawable mUnknownStateDrawable;
 
     private DualToneHandler mDualToneHandler;
-
-    private int mNonAdaptedSingleToneColor;
-    private int mNonAdaptedForegroundColor;
-    private int mNonAdaptedBackgroundColor;
+    private boolean mIsStaticColor = false;
 
     private BatteryEstimateFetcher mBatteryEstimateFetcher;
 
@@ -111,7 +108,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         TypedArray atts = context.obtainStyledAttributes(attrs, R.styleable.BatteryMeterView,
                 defStyle, 0);
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
-                context.getColor(R.color.meter_background_color));
+                context.getColor(com.android.settingslib.R.color.meter_background_color));
         mPercentageStyleId = atts.getResourceId(R.styleable.BatteryMeterView_textAppearance, 0);
         mDrawable = new AccessorizedBatteryDrawable(context, frameColor);
         atts.recycle();
@@ -348,7 +345,9 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         // TODO(b/140051051)
         final boolean systemSetting = 0 != whitelistIpcs(() -> Settings.System
                 .getIntForUser(getContext().getContentResolver(),
-                SHOW_BATTERY_PERCENT, 0, UserHandle.USER_CURRENT));
+                SHOW_BATTERY_PERCENT, getContext().getResources().getBoolean(
+                com.android.internal.R.bool.config_defaultBatteryPercentageSetting)
+                ? 1 : 0, UserHandle.USER_CURRENT));
         boolean shouldShow =
                 (mShowPercentAvailable && systemSetting && mShowPercentMode != MODE_OFF)
                 || mShowPercentMode == MODE_ON
@@ -478,13 +477,18 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
 
     @Override
     public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        if (mIsStaticColor) return;
         float intensity = DarkIconDispatcher.isInAreas(areas, this) ? darkIntensity : 0;
-        mNonAdaptedSingleToneColor = mDualToneHandler.getSingleColor(intensity);
-        mNonAdaptedForegroundColor = mDualToneHandler.getFillColor(intensity);
-        mNonAdaptedBackgroundColor = mDualToneHandler.getBackgroundColor(intensity);
+        int nonAdaptedSingleToneColor = mDualToneHandler.getSingleColor(intensity);
+        int nonAdaptedForegroundColor = mDualToneHandler.getFillColor(intensity);
+        int nonAdaptedBackgroundColor = mDualToneHandler.getBackgroundColor(intensity);
 
-        updateColors(mNonAdaptedForegroundColor, mNonAdaptedBackgroundColor,
-                mNonAdaptedSingleToneColor);
+        updateColors(nonAdaptedForegroundColor, nonAdaptedBackgroundColor,
+                nonAdaptedSingleToneColor);
+    }
+
+    public void setStaticColor(boolean isStaticColor) {
+        mIsStaticColor = isStaticColor;
     }
 
     /**

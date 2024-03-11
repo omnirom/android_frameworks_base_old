@@ -16,11 +16,13 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
 import com.android.systemui.qs.tileimpl.QSTileViewImplKt;
+import com.android.systemui.res.R;
 
 import org.omnirom.omnilib.utils.OmniUtils;
 
@@ -53,8 +55,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private int mMaxColumns = NO_MAX_COLUMNS;
     private float mSquishinessFraction = 1f;
     protected int mLastTileBottom;
-
     protected TextView mTempTextView;
+    private final Boolean mIsSmallLandscapeLockscreenEnabled =
+            RefactorFlag.forView(Flags.LOCKSCREEN_ENABLE_LANDSCAPE).isEnabled();
 
     public TileLayout(Context context) {
         this(context, null);
@@ -145,6 +148,17 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             return true;
         }
         return false;
+    }
+
+    // TODO (b/293252410) remove condition here when flag is launched
+    //  Instead update quick_settings_num_columns and quick_settings_max_rows to be the same as
+    //  the small_land_lockscreen_quick_settings_num_columns or
+    //  small_land_lockscreen_quick_settings_max_rows respectively whenever
+    //  is_small_screen_landscape is true.
+    //  Then, only use quick_settings_num_columns and quick_settings_max_rows.
+    private boolean useSmallLandscapeLockscreenResources() {
+        return mIsSmallLandscapeLockscreenEnabled
+                && mContext.getResources().getBoolean(R.bool.is_small_screen_landscape);
     }
 
     protected boolean useSidePadding() {
