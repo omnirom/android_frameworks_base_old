@@ -17,7 +17,6 @@
 package com.android.systemui.qs;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -42,7 +41,7 @@ import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
-import com.android.systemui.util.LargeScreenUtils;
+import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
 
@@ -54,8 +53,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import javax.inject.Named;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
@@ -90,6 +87,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     private final QSHost.Callback mQSHostCallback = this::setTiles;
 
+    private SplitShadeStateController mSplitShadeStateController;
+
     @VisibleForTesting
     protected final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             new QSPanel.OnConfigurationChangedListener() {
@@ -97,8 +96,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 public void onConfigurationChange(Configuration newConfig) {
                     final boolean previousSplitShadeState = mShouldUseSplitNotificationShade;
                     final int previousOrientation = mLastOrientation;
-                    mShouldUseSplitNotificationShade =
-                            LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                    mShouldUseSplitNotificationShade = mSplitShadeStateController
+                            .shouldUseSplitNotificationShade(getResources());
                     mLastOrientation = newConfig.orientation;
 
                     mQSLogger.logOnConfigurationChanged(
@@ -137,12 +136,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             T view,
             QSHost host,
             QSCustomizerController qsCustomizerController,
-            @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
+            boolean usingMediaPlayer,
             MediaHost mediaHost,
             MetricsLogger metricsLogger,
             UiEventLogger uiEventLogger,
             QSLogger qsLogger,
-            DumpManager dumpManager
+            DumpManager dumpManager,
+            SplitShadeStateController splitShadeStateController
     ) {
         super(view);
         mHost = host;
@@ -153,14 +153,16 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mUiEventLogger = uiEventLogger;
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
+        mSplitShadeStateController = splitShadeStateController;
         mShouldUseSplitNotificationShade =
-                LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                mSplitShadeStateController.shouldUseSplitNotificationShade(getResources());
     }
 
     @Override
     protected void onInit() {
         mView.initialize(mQSLogger);
         mQSLogger.logAllTilesChangeListening(mView.isListening(), mView.getDumpableTag(), "");
+        mHost.addCallback(mQSHostCallback);
     }
 
     /**
@@ -175,6 +177,20 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     @Override
+    public void destroy() {
+        // Don't call super as this may be called before the view is dettached and calling super
+        // will remove the attach listener. We don't need to do that, because once this object is
+        // detached from the graph, it will be gc.
+        mHost.removeCallback(mQSHostCallback);
+
+        for (TileRecord record : mRecords) {
+            record.tile.removeCallback(record.callback);
+            mView.removeTile(record);
+        }
+        mRecords.clear();
+    }
+
+    @Override
     protected void onViewAttached() {
         mQsTileRevealController = createTileRevealController();
         if (mQsTileRevealController != null) {
@@ -183,7 +199,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
         mMediaHost.addVisibilityChangeListener(mMediaHostVisibilityListener);
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        mHost.addCallback(mQSHostCallback);
         setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
         mQSLogger.logOnViewAttached(mLastOrientation, mView.getDumpableTag());
@@ -204,16 +219,11 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected void onViewDetached() {
         mQSLogger.logOnViewDetached(mLastOrientation, mView.getDumpableTag());
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        mHost.removeCallback(mQSHostCallback);
 
         mView.getTileLayout().setListening(false, mUiEventLogger);
 
         mMediaHost.removeVisibilityChangeListener(mMediaHostVisibilityListener);
 
-        for (TileRecord record : mRecords) {
-            record.tile.removeCallback(record.callback);
-        }
-        mRecords.clear();
         mDumpManager.unregisterDumpable(mView.getDumpableTag());
         Dependency.get(OmniSettingsService.class).removeObserver(this);
     }
@@ -234,15 +244,34 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         if (!collapsedView && mQsTileRevealController != null) {
             mQsTileRevealController.updateRevealedTiles(tiles);
         }
-
-        for (QSPanelControllerBase.TileRecord record : mRecords) {
-            mView.removeTile(record);
-            record.tile.removeCallback(record.callback);
+        boolean shouldChange = false;
+        if (tiles.size() == mRecords.size()) {
+            int i = 0;
+            for (QSTile tile : tiles) {
+                if (tile != mRecords.get(i).tile) {
+                    shouldChange = true;
+                    break;
+                }
+                i++;
+            }
+        } else {
+            shouldChange = true;
         }
-        mRecords.clear();
-        mCachedSpecs = "";
-        for (QSTile tile : tiles) {
-            addTile(tile, collapsedView);
+
+        if (shouldChange) {
+            for (QSPanelControllerBase.TileRecord record : mRecords) {
+                mView.removeTile(record);
+                record.tile.removeCallback(record.callback);
+            }
+            mRecords.clear();
+            mCachedSpecs = "";
+            for (QSTile tile : tiles) {
+                addTile(tile, collapsedView);
+            }
+        } else {
+            for (QSPanelControllerBase.TileRecord record : mRecords) {
+                record.tile.addCallback(record.callback);
+            }
         }
     }
 
@@ -259,8 +288,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     private void addTile(final QSTile tile, boolean collapsedView) {
-        final TileRecord r =
-                new TileRecord(tile, mHost.createTileView(getContext(), tile, collapsedView));
+        final QSTileViewImpl tileView = new QSTileViewImpl(getContext(), collapsedView);
+        final TileRecord r = new TileRecord(tile, tileView);
         // TODO(b/250618218): Remove the QSLogger in QSTileViewImpl once we know the root cause of
         // b/250618218.
         try {
@@ -507,7 +536,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
         public QSTile tile;
         public com.android.systemui.plugins.qs.QSTileView tileView;
-        public boolean scanState;
         @Nullable
         public QSTile.Callback callback;
     }

@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.icu.lang.UCharacter;
 import android.icu.text.DateTimePatternGenerator;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,7 +48,7 @@ import android.widget.TextView;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -472,7 +473,7 @@ public class Clock extends TextView implements
                 if (a >= 0) {
                     // Move a back so any whitespace before AM/PM is also in the alternate size.
                     final int b = a;
-                    while (a > 0 && Character.isWhitespace(format.charAt(a-1))) {
+                    while (a > 0 && UCharacter.isUWhiteSpace(format.charAt(a - 1))) {
                         a--;
                     }
                     format = format.substring(0, a) + MAGIC1 + format.substring(a, b)

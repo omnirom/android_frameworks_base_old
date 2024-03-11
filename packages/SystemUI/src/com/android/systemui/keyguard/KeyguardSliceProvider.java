@@ -54,7 +54,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SystemUIAppComponentFactoryBase;
 import com.android.systemui.omni.OmniSettingsService;
 import com.android.systemui.dagger.qualifiers.Background;
