@@ -1121,7 +1121,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 }
             }
-        } else if (mLongPressPowerTorch && beganFromNonInteractive) {
+        } else if (mLongPressPowerTorch && mSingleKeyGestureDetector.beganFromNonInteractive()) {
             wakeUpFromPowerKey(eventTime);
         }
     }
