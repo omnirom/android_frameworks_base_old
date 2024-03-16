@@ -336,7 +336,7 @@ public class StatusBarIconControllerImpl implements Tunable,
     @Override
     public void setCustomIcon(String slot, StatusBarIcon icon) {
         if (icon == null) {
-            removeAllIconsForSlot(slot);
+            removeAllIconsForSlot(slot, /* fromNewPipeline */ false);
             return;
         }
 
