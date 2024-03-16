@@ -526,7 +526,7 @@ public class PhoneStatusBarPolicy
                             int batteryLevel = device.getBatteryLevel();
                             contentDescription = mResources.getString(R.string.accessibility_bluetooth_connected);
                             if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-                                final int padding = mResources.getDimensionPixelSize(R.dimen.bt_battery_padding);
+                                final int padding = mResources.getDimensionPixelSize(com.android.settingslib.R.dimen.bt_battery_padding);
                                 Drawable d = BluetoothDeviceLayerDrawable.createLayerDrawable(mContext,
                                         R.drawable.ic_bluetooth_connected, batteryLevel, 1, -padding, padding, 0);
                                 icon = new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
