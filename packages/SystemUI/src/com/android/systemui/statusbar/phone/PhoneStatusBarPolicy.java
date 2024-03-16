@@ -61,6 +61,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;
+import com.android.settingslib.R;
 import com.android.systemui.Dependency;
 import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
