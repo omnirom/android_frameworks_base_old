@@ -85,12 +85,4 @@ public class RotationContextButton extends ContextualButton implements RotationB
         }
         return super.show();
     }
-
-    @Override
-    public void setCanShowRotationButton(boolean canShow) {
-        mCanShow = canShow;
-        if (!mCanShow) {
-            hide();
-        }
-    }
 }
