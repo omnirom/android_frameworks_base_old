@@ -23,11 +23,15 @@
     <!-- The groove used for indicating max volume !-->
     <item android:id="@android:id/background"
         android:gravity="center_vertical|fill_horizontal">
-        <shape>
-            <size android:height="@dimen/volume_dialog_track_width" />
-            <corners android:radius="@dimen/volume_dialog_panel_width_half" />
-            <solid android:color="?androidprv:attr/materialColorOutlineVariant" />
-        </shape>
+        <inset
+            android:insetLeft="@dimen/rounded_slider_track_negative_inset"
+            android:insetRight="@dimen/rounded_slider_track_negative_inset" >
+            <shape>
+                <size android:height="@dimen/volume_dialog_track_width" />
+                <corners android:radius="@dimen/volume_dialog_panel_width_half" />
+                <solid android:color="?androidprv:attr/materialColorOutlineVariant" />
+            </shape>
+        </inset>
     </item>
     <item android:id="@android:id/progress"
         android:gravity="center_vertical|fill_horizontal">
