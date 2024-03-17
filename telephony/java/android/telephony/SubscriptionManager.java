@@ -1399,6 +1399,13 @@ public class SubscriptionManager {
         }
 
         /**
+         * @hide
+         */
+        public Looper getHandlerExecutor() {
+            return mCreatorLooper;
+        }
+
+        /**
          * Create an OnSubscriptionsChangedListener.
          *
          * For callers targeting {@link Build.VERSION_CODES#P} or earlier, this can only be called
