@@ -1398,6 +1398,15 @@ public class SubscriptionManager {
             return mCreatorLooper;
         }
 
+        private final HandlerExecutor mExecutor;
+
+        /**
+         * @hide
+         */
+        public Looper getHandlerExecutor() {
+            return mExecutor;
+        }
+
         /**
          * Create an OnSubscriptionsChangedListener.
          *
