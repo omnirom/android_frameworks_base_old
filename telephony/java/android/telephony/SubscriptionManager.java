@@ -1375,6 +1375,15 @@ public class SubscriptionManager {
      * for #onSubscriptionsChanged to be invoked.
      */
     public static class OnSubscriptionsChangedListener {
+        private class OnSubscriptionsChangedListenerHandler extends Handler {
+            OnSubscriptionsChangedListenerHandler() {
+                super();
+            }
+
+            OnSubscriptionsChangedListenerHandler(Looper looper) {
+                super(looper);
+            }
+        }
 
         /**
          * After {@link Build.VERSION_CODES#Q}, it is no longer necessary to instantiate a
@@ -1398,6 +1407,15 @@ public class SubscriptionManager {
             return mCreatorLooper;
         }
 
+        private final HandlerExecutor mExecutor;
+
+        /**
+         * @hide
+         */
+        public HandlerExecutor getHandlerExecutor() {
+            return mExecutor;
+        }
+
         /**
          * Create an OnSubscriptionsChangedListener.
          *
@@ -1412,6 +1430,7 @@ public class SubscriptionManager {
          */
         public OnSubscriptionsChangedListener() {
             mCreatorLooper = Looper.myLooper();
+            mExecutor = new HandlerExecutor(new OnSubscriptionsChangedListenerHandler());
             if (mCreatorLooper == null
                     && !Compatibility.isChangeEnabled(
                             LAZY_INITIALIZE_SUBSCRIPTIONS_CHANGED_HANDLER)) {
@@ -1431,6 +1450,7 @@ public class SubscriptionManager {
         public OnSubscriptionsChangedListener(@NonNull Looper looper) {
             Objects.requireNonNull(looper);
             mCreatorLooper = looper;
+            mExecutor = new HandlerExecutor(new OnSubscriptionsChangedListenerHandler(looper));
         }
 
         /**
