@@ -87,7 +87,7 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
     }
 
     @Composable
-    fun FooterAppVersion(showPackageName: Boolean = rememberIsDevelopmentSettingsEnabled()) {
+    fun FooterAppVersion(showPackageName: Boolean = true /*rememberIsDevelopmentSettingsEnabled()*/) {
         val context = LocalContext.current
         val footer = remember(packageInfo, showPackageName) {
             val list = mutableListOf<String>()
