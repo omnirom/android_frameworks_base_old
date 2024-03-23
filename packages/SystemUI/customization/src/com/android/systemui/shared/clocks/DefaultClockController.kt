@@ -168,8 +168,8 @@ class DefaultClockController(
         open fun recomputePadding(targetRegion: Rect?) {}
 
         fun updateColor() {
-            val coloredClock = System.getIntForUser(ctx.getContentResolver(),
-                    OmniSettings.OMNI_LOCKSCREEN_CLOCK_COLORED, 1, UserHandle.USER_CURRENT) != 0
+            val coloredClock = System.getInt(ctx.getContentResolver(),
+                    OmniSettings.OMNI_LOCKSCREEN_CLOCK_COLORED, 1) != 0
             val color =
                 if (seedColor != null) {
                     seedColor!!
