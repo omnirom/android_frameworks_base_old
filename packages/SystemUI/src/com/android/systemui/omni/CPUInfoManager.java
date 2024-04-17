@@ -21,10 +21,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
+import com.android.systemui.res.R;
 
 import javax.inject.Inject;
 

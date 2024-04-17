@@ -39,7 +39,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.util.Log;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -26,7 +26,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.logging.QSLogger;
@@ -34,6 +33,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon;
+import com.android.systemui.res.R;
 
 import java.util.concurrent.Executors;
 import java.util.List;
