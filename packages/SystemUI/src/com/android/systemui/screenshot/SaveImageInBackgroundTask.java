@@ -164,6 +164,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mImageData.quickShareAction = createQuickShareAction(
                     mQuickShareData.quickShareAction, mScreenshotId, uri, mImageTime, image,
                     mParams.owner);
+            mImageData.deleteAction = createDeleteAction(uri, smartActionsEnabled);
             mImageData.subject = getSubjectString(mImageTime);
 
             mParams.mActionsReadyListener.onActionsReady(mImageData);
@@ -283,6 +284,29 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 .setContextual(true)
                 .addExtras(extras)
                 .build();
+    }
+
+    @VisibleForTesting
+    Notification.Action createDeleteAction(Uri uri, boolean smartActionsEnabled) {
+        // Make sure pending intents for the system user are still unique across users
+        // by setting the (otherwise unused) request code to the current user id.
+        int requestCode = mContext.getUserId();
+
+        // Create a delete action for the notification
+        Intent wrappedIntent = new Intent(context, DeleteScreenshotReceiver.class)
+                       .putExtra(ScreenshotController.SCREENSHOT_URI_ID, uri.toString())
+                       .putExtra(ScreenshotController.EXTRA_ID, mScreenshotId)
+                       .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED,
+                               smartActionsEnabled)
+                       .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        PendingIntent deleteAction = PendingIntent.getBroadcast(context, requestCode, wrappedIntent,
+               PendingIntent.FLAG_CANCEL_CURRENT
+                       | PendingIntent.FLAG_ONE_SHOT
+                       | PendingIntent.FLAG_IMMUTABLE);
+        Notification.Action.Builder deleteActionBuilder = new Notification.Action.Builder(
+               Icon.createWithResource(mContext.getResources(), R.drawable.ic_screenshot_delete),
+               mContext.getResources().getString(com.android.internal.R.string.delete), deleteAction);
+        return deleteActionBuilder.build();
     }
 
     private Intent createFillInIntent(Uri uri, long imageTime) {
