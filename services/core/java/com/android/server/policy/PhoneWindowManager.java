@@ -1097,7 +1097,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mPowerKeyHandled) {
             if (!interactive) {
                 if (!mLongPressPowerTorch) {
-                    wakeUpFromWakeKey(event.getDownTime());
+                    wakeUpFromWakeKey(event);
                 }
             }
         } else {
@@ -1210,7 +1210,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         } else if (mLongPressPowerTorch && mSingleKeyGestureDetector.beganFromNonInteractive()) {
-            wakeUpFromPowerKey(eventTime);
+            wakeUpFromWakeKey(eventTime, KEYCODE_POWER, /* isDown= */ false);
         }
     }
 
@@ -4858,8 +4858,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (DEBUG_INPUT) {
                         Slog.i(TAG, "isWakeEvent from DeviceKeyHandler");
                     }
-                    wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey,
-                            PowerManager.WAKE_REASON_WAKE_KEY, "android.policy:KEY");
+                    wakeUpFromWakeKey(event);
                     result &= ~ACTION_PASS_TO_USER;
                     return result;
                 }
@@ -4868,8 +4867,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (DEBUG_INPUT) {
                         Slog.i(TAG, "isActivityLaunchEvent from DeviceKeyHandler " + eventLaunchActivity);
                     }
-                    wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey,
-                            PowerManager.WAKE_REASON_WAKE_KEY, "android.policy:KEY");
+                    wakeUpFromWakeKey(event);
                     OmniUtils.launchKeyguardDismissIntent(mContext, UserHandle.CURRENT, eventLaunchActivity);
                     result &= ~ACTION_PASS_TO_USER;
                     return result;
