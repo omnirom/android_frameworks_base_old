@@ -54,7 +54,7 @@ import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
 import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.plugins.qs.QSTile.BooleanState
+import com.android.systemui.plugins.qs.QSTile.AdapterState
 import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSIconViewImpl.QS_ANIM_LENGTH
@@ -283,6 +283,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
             height = iconSize
             marginEnd = endMargin
         }
+
+        background = createTileBackground()
+        setColor(backgroundColor)
+        setOverlayColor(backgroundOverlayColor)
     }
 
     private fun createAndAddLabels() {
@@ -538,13 +542,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
             state.expandedAccessibilityClassName
         }
 
-        if (state is BooleanState) {
+        if (state is AdapterState) {
             val newState = state.value
             if (tileState != newState) {
                 tileState = newState
             }
         }
-        //
 
         // Labels
         if (!Objects.equals(label.text, state.label)) {
@@ -657,7 +660,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
             customDrawableView.setImageDrawable(state.sideViewCustomDrawable)
             customDrawableView.visibility = VISIBLE
             chevronView.visibility = GONE
-        } else if ((state !is BooleanState || state.forceExpandIcon) && !forceHideCheveron) {
+        } else if ((state !is AdapterState || state.forceExpandIcon) && !forceHideCheveron) {
             customDrawableView.setImageDrawable(null)
             customDrawableView.visibility = GONE
             chevronView.visibility = VISIBLE

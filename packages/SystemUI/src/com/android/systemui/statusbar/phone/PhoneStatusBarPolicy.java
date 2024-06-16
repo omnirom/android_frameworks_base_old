@@ -410,7 +410,7 @@ public class PhoneStatusBarPolicy
     }
 
     @Override
-    public void onConfigChanged(ZenModeConfig config) {
+    public void onConsolidatedPolicyChanged(NotificationManager.Policy policy) {
         updateVolumeZen();
     }
 
@@ -902,11 +902,6 @@ public class PhoneStatusBarPolicy
         mShowBtBattery = System.getIntForUser(mContext.getContentResolver(),
                 OmniSettings.OMNI_STATUS_BAR_BT_BATTERY, 0, mUserTracker.getUserId()) != 0;
         updateBluetooth();
-    }
-
-    @Override
-    public void onConsolidatedPolicyChanged(NotificationManager.Policy policy) {
-        updateVolumeZen();
     }
 
     private boolean zenAllowsAlarm() {
