@@ -109,6 +109,9 @@ public class TileQueryHelper {
         if (current != null) {
             possibleTiles.addAll(Arrays.asList(current.split(",")));
         }
+        if (possible != null) {
+            possibleTiles.addAll(Arrays.asList(possible.split(",")));
+        }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
         possibleTiles.remove("cell");
