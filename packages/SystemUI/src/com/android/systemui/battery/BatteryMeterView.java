@@ -565,10 +565,13 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         final boolean hideImage = Settings.System.getIntForUser(getContext().getContentResolver(),
                 OMNI_SHOW_BATTERY_IMAGE, 1, UserHandle.USER_CURRENT) == 0;
         mBatteryIconView.setVisibility(hideImage ? View.GONE : View.VISIBLE);
-        //int padding = getResources().getDimensionPixelSize(R.dimen.signal_cluster_battery_padding);
-        //LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) getLayoutParams();
-        //lp.setMargins(hideImage ? -padding : 0, 0, 0, 0);
-        //setLayoutParams(lp);
+        if (hideImage) {
+            updateShowPercentLegacy();
+            updatePercentTextLegacy();
+        } else {
+            removeView(mBatteryPercentView);
+            mBatteryPercentView = null;
+        }
     }
 
     private Drawable getUnknownStateDrawable() {
