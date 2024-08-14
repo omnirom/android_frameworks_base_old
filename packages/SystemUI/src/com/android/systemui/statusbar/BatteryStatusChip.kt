@@ -18,6 +18,8 @@ import android.annotation.IntRange
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
+import android.os.UserHandle
+import android.provider.Settings
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
@@ -28,11 +30,15 @@ import com.android.systemui.battery.unified.BatteryColors
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.events.BackgroundAnimatableView
 
+import org.omnirom.omnilib.utils.OmniSettings
+
 class BatteryStatusChip @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     FrameLayout(context, attrs), BackgroundAnimatableView {
 
     private val roundedContainer: LinearLayout
     private val batteryMeterView: BatteryMeterView
+    private val hideImage = Settings.System.getIntForUser(context.getContentResolver(),
+                OmniSettings.OMNI_SHOW_BATTERY_IMAGE, 1, UserHandle.USER_CURRENT) == 0
     override val contentView: View
         get() = batteryMeterView
 
@@ -42,7 +48,10 @@ class BatteryStatusChip @JvmOverloads constructor(context: Context, attrs: Attri
         batteryMeterView = requireViewById(R.id.battery_meter_view)
         batteryMeterView.setStaticColor(true)
         if (newStatusBarIcons()) {
-            batteryMeterView.setUnifiedBatteryColors(BatteryColors.LightThemeColors)
+                batteryMeterView.setUnifiedBatteryColors(BatteryColors.LightThemeColors)
+        } else if (newStatusBarIcons() && hideImage) {
+                val primaryColor = context.resources.getColor(android.R.color.black, context.theme)
+                batteryMeterView.updateColors(primaryColor, primaryColor, primaryColor)
         } else {
             val primaryColor = context.resources.getColor(android.R.color.black, context.theme)
             batteryMeterView.updateColors(primaryColor, primaryColor, primaryColor)
