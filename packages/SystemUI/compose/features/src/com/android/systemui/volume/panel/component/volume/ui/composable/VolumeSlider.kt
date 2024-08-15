@@ -52,9 +52,9 @@ fun VolumeSlider(
         enabled = state.isEnabled,
         icon = { isDragging ->
             if (isDragging) {
-                Text(text = value.toInt().toString())
+                Text(text = value.toInt().toString(), color = sliderColors.labelColor)
             } else {
-                state.icon?.let { Icon(icon = it) }
+                state.icon?.let { Icon(icon = it, tint = sliderColors.iconColor) }
             }
         },
         colors = sliderColors,
@@ -65,6 +65,7 @@ fun VolumeSlider(
                     text = state.label,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
+                    color = sliderColors.labelColor
                 )
 
                 state.disabledMessage?.let { message ->
@@ -78,6 +79,7 @@ fun VolumeSlider(
                             text = message,
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 1,
+                            color = sliderColors.labelColor
                         )
                     }
                 }
