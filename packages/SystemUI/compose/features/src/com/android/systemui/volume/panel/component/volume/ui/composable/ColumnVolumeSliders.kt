@@ -136,7 +136,7 @@ private fun ExpandButton(
     modifier: Modifier = Modifier,
 ) {
     IconButton(
-        modifier = modifier.size(64.dp),
+        modifier = modifier.size(48.dp),
         onClick = { onExpandedChanged(!isExpanded) },
         colors =
             IconButtonDefaults.filledIconButtonColors(
