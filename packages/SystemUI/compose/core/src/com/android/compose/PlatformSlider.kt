@@ -85,7 +85,7 @@ fun PlatformSlider(
     icon: (@Composable (isDragging: Boolean) -> Unit)? = null,
     label: (@Composable (isDragging: Boolean) -> Unit)? = null,
 ) {
-    val sliderHeight: Dp = 64.dp
+    val sliderHeight: Dp = 48.dp
     val iconWidth: Dp = sliderHeight
     var isDragging by remember { mutableStateOf(false) }
     LaunchedEffect(interactionSource) {
