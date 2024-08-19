@@ -5995,7 +5995,7 @@ public class Notification implements Parcelable
                     final RemoteViews button = generateActionButton(action, emphasizedMode, p);
                     if (actionHasValidInput && !emphasizedMode) {
                         // Clear the drawable
-                        button.setInt(R.id.action0, "setBackgroundResource", 0);
+                        //button.setInt(R.id.action0, "setBackgroundResource", 0);
                     }
                     if (emphasizedMode && i > 0) {
                         // Clear start margin from non-first buttons to reduce the gap between them.
